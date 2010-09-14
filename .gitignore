@@ -1,0 +1,11 @@
+.gradle/
+build/
+dist/
+.DS_Store
+bootstrap/
+.metadata/
+.hg
+app/.classpath
+app/.project
+scenegraph/.classpath
+scenegraph/.project

@@ -1,0 +1,229 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="corelyzer.ui.CRToolPalette">
+  <grid id="cbd77" binding="contentPane" layout-manager="GridLayoutManager" row-count="1" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+    <margin top="10" left="10" bottom="10" right="10"/>
+    <constraints>
+      <xy x="48" y="54" width="506" height="289"/>
+    </constraints>
+    <properties/>
+    <border type="none"/>
+    <children>
+      <grid id="e3588" binding="toolPane" layout-manager="GridLayoutManager" row-count="4" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+        <margin top="0" left="0" bottom="0" right="0"/>
+        <constraints>
+          <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties/>
+        <border type="none"/>
+        <children>
+          <toolbar id="f6288">
+            <constraints>
+              <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false">
+                <preferred-size width="-1" height="20"/>
+              </grid>
+            </constraints>
+            <properties/>
+            <border type="none"/>
+            <children>
+              <component id="6d8a2" class="javax.swing.JToggleButton" binding="normalToggleButton" default-binding="true">
+                <constraints/>
+                <properties>
+                  <icon value="corelyzer/ui/resources/normal.gif"/>
+                  <selected value="true"/>
+                  <text value=""/>
+                </properties>
+              </component>
+              <component id="3d9d2" class="javax.swing.JToggleButton" binding="clastToggleButton" default-binding="true">
+                <constraints/>
+                <properties>
+                  <icon value="corelyzer/ui/resources/copyright.gif"/>
+                  <text value=""/>
+                </properties>
+              </component>
+              <component id="f1edd" class="javax.swing.JToggleButton" binding="markerToggleButton">
+                <constraints/>
+                <properties>
+                  <icon value="corelyzer/ui/resources/marker.gif"/>
+                  <text value=""/>
+                </properties>
+              </component>
+              <component id="16b96" class="javax.swing.JToggleButton" binding="measureToggleButton">
+                <constraints/>
+                <properties>
+                  <icon value="corelyzer/ui/resources/ruler.gif"/>
+                  <text value=""/>
+                </properties>
+              </component>
+              <component id="4c596" class="javax.swing.JToggleButton" binding="cutToggleButton">
+                <constraints/>
+                <properties>
+                  <icon value="corelyzer/ui/resources/cut.gif"/>
+                </properties>
+              </component>
+              <component id="215cd" class="javax.swing.JToolBar$Separator">
+                <constraints/>
+                <properties/>
+              </component>
+              <component id="aa6a0" class="javax.swing.JToggleButton" binding="navigationToggleButton" default-binding="true">
+                <constraints/>
+                <properties>
+                  <icon value="corelyzer/ui/resources/navigation.gif"/>
+                  <selected value="false"/>
+                  <text value=""/>
+                </properties>
+              </component>
+              <component id="e2389" class="javax.swing.JToggleButton" binding="crossHairToggleButton" default-binding="true">
+                <constraints/>
+                <properties>
+                  <icon value="corelyzer/ui/resources/crosshairs.gif"/>
+                  <selected value="true"/>
+                  <text value=""/>
+                </properties>
+              </component>
+              <component id="d2fec" class="javax.swing.JToolBar$Separator">
+                <constraints/>
+                <properties/>
+              </component>
+              <grid id="3473a" binding="framePane" layout-manager="FlowLayout" hgap="5" vgap="5" flow-align="1">
+                <constraints/>
+                <properties/>
+                <border type="none"/>
+                <children>
+                  <component id="85c82" class="javax.swing.JToggleButton" binding="mainUIToggleButton" default-binding="true">
+                    <constraints/>
+                    <properties>
+                      <icon value="corelyzer/ui/resources/mainframe.gif"/>
+                      <selected value="true"/>
+                      <text value=""/>
+                    </properties>
+                  </component>
+                </children>
+              </grid>
+              <component id="12cc1" class="javax.swing.JToolBar$Separator">
+                <constraints/>
+                <properties/>
+              </component>
+              <component id="8cae6" class="javax.swing.JButton" binding="minimizeButton">
+                <constraints/>
+                <properties>
+                  <icon value="corelyzer/ui/resources/minimize.gif"/>
+                  <text value=""/>
+                </properties>
+              </component>
+              <component id="24788" class="javax.swing.JButton" binding="quitButton" default-binding="true">
+                <constraints/>
+                <properties>
+                  <icon value="corelyzer/ui/resources/close.gif"/>
+                  <text value=""/>
+                </properties>
+              </component>
+            </children>
+          </toolbar>
+          <vspacer id="8088f">
+            <constraints>
+              <grid row="3" column="0" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
+            </constraints>
+          </vspacer>
+          <grid id="ca23f" layout-manager="GridLayoutManager" row-count="1" column-count="3" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+            <margin top="0" left="0" bottom="0" right="0"/>
+            <constraints>
+              <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties/>
+            <border type="none"/>
+            <children>
+              <component id="5d245" class="javax.swing.JLabel" binding="usageLabel">
+                <constraints>
+                  <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <text value=""/>
+                </properties>
+              </component>
+              <hspacer id="ea53f">
+                <constraints>
+                  <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                </constraints>
+              </hspacer>
+              <component id="3177a" class="javax.swing.JButton" binding="helpButton">
+                <constraints>
+                  <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <borderPainted value="false"/>
+                  <enabled value="false"/>
+                  <iconTextGap value="4"/>
+                  <opaque value="false"/>
+                  <text value=""/>
+                </properties>
+                <clientProperties>
+                  <html.disable class="java.lang.Boolean" value="false"/>
+                </clientProperties>
+              </component>
+            </children>
+          </grid>
+          <grid id="cecdc" binding="measurePane" layout-manager="GridLayoutManager" row-count="3" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+            <margin top="0" left="0" bottom="0" right="0"/>
+            <constraints>
+              <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties/>
+            <border type="none"/>
+            <children>
+              <grid id="e2d9a" layout-manager="GridLayoutManager" row-count="2" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+                <margin top="0" left="0" bottom="0" right="0"/>
+                <constraints>
+                  <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties/>
+                <border type="none" title="Measure History"/>
+                <children>
+                  <component id="5d3a5" class="javax.swing.JComboBox" binding="measurefield">
+                    <constraints>
+                      <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="2" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                    <properties>
+                      <model/>
+                    </properties>
+                  </component>
+                </children>
+              </grid>
+              <vspacer id="f4c12">
+                <constraints>
+                  <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
+                </constraints>
+              </vspacer>
+              <component id="d095d" class="javax.swing.JTextArea" binding="measureText">
+                <constraints>
+                  <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="6" hsize-policy="6" anchor="0" fill="3" indent="0" use-parent-layout="false">
+                    <preferred-size width="150" height="50"/>
+                  </grid>
+                </constraints>
+                <properties>
+                  <editable value="false"/>
+                </properties>
+              </component>
+            </children>
+          </grid>
+        </children>
+      </grid>
+    </children>
+  </grid>
+  <buttonGroups>
+    <group name="CursorGroup">
+      <member id="5e790"/>
+      <member id="64312"/>
+    </group>
+    <group name="CursorGroup">
+      <member id="aa6a0"/>
+      <member id="e2389"/>
+    </group>
+    <group name="InteractGroup">
+      <member id="6d8a2"/>
+      <member id="16b96"/>
+      <member id="f1edd"/>
+      <member id="3d9d2"/>
+      <member id="4c596"/>
+    </group>
+  </buttonGroups>
+</form>

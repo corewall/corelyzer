@@ -1,0 +1,222 @@
+apply plugin: 'java'
+apply plugin: 'eclipse'
+
+manifest.mainAttributes(
+	'Implementation-Title': 'Corelyzer Scenegraph Library',
+	'Implementation-Version': version
+)
+
+task 'clean-dist'() << {
+	ant.delete(dir: file('dist'), failonerror: false)
+}
+
+task 'generate-jni-headers'(dependsOn: 'build') << {
+	// copy our jar into dist/
+	copy {
+		into file('dist')
+		from configurations.default.allArtifactFiles
+	}
+
+	// create build/cpp
+	def build = new File(project.buildDir, 'cpp')
+	mkdir(build)
+
+	// generate the JNI header
+	ant.exec(executable: 'javah', dir: file('dist'), failonerror: true) {
+		arg(value: '-classpath')
+		arg(value: "scenegraph-${version}.jar")
+		arg(value: '-d')
+		arg(path: build)
+		arg(value: 'corelyzer.graphics.SceneGraph')
+	}
+}
+
+task 'build-jni-mac'(dependsOn: 'generate-jni-headers') << {
+	def build = new File(project.buildDir, 'cpp')
+	def dist = file('dist')
+	def src = file('src/main/cpp')
+	def deps = file('deps/mac')
+	def includes = [
+		src.absolutePath,
+		dist.absolutePath,
+		build.absolutePath,
+		'/Developer/SDKs/MacOSX10.5.sdk/System/Library/Frameworks/JavaVM.framework/Versions/Current/Headers',
+		file('deps/mac/include').absolutePath,
+		file('deps/mac/include/freetype2').absolutePath]
+
+	// compile
+	mkdir(build)
+	src.eachFileMatch({ it.endsWith('.c') || it.endsWith('.cpp')} ) { file ->
+		compileMac(file, 'i386', includes, build)
+		compileMac(file, 'x86_64', includes, build)
+		if (!file.name.contains('intrinsic') && !file.name.contains('dxt')) {
+			compileMac(file, 'ppc', includes, build)
+		}
+	}
+
+	// link
+	def libs = file('deps/mac/lib').listFiles().findAll { it.name.endsWith('.a') }
+	def rfile = file('src/main/cpp/mac.r')
+	linkMac('i386',	  libs, rfile, build)
+	linkMac('x86_64', libs, rfile, build)
+	linkMac('ppc',	  libs, rfile, build)
+
+	// lipo
+	ant.exec(executable: 'lipo', dir: build, failonerror: true) {
+		arg(value: '-create')
+		arg(value: '-arch')
+		arg(value: 'i386')
+		arg(value: 'i386.jnilib')
+		arg(value: '-arch')
+		arg(value: 'ppc')
+		arg(value: 'ppc.jnilib')
+		arg(value: '-arch')
+		arg(value: 'x86_64')
+		arg(value: 'x86_64.jnilib')
+		arg(value: '-output')
+		arg(path: new File(dist, 'libscenegraph.jnilib'))
+	}
+}
+
+def linkMac(arch, libs, rfile, dir) {
+	ant {
+		echo("Linking ${arch}.jnilib")
+		exec(executable: 'c++', dir: dir, failonerror: true) {
+			arg(value: '-mmacosx-version-min=10.3')
+			arg(value: '-g')
+			arg(value: '-bundle')
+			arg(value: '-isysroot')
+			arg(value: '/Developer/SDKs/MacOSX10.5.sdk')
+			arg(value: '-O')
+			arg(value: '-arch')
+			arg(value: arch)
+			arg(value: '-framework')
+			arg(value: 'JavaVM')
+			arg(value: '-framework')
+			arg(value: 'OpenGL')
+			arg(value: '-lstdc++')
+			arg(value: '-lpthread')
+			arg(value: '-o')
+			arg(value: "${arch}.jnilib")
+			dir.listFiles().findAll { it.name.endsWith(arch) }.each { arg(path: it) }
+			libs.each { arg(path: it) }
+		}
+		exec(executable: 'Rez', dir: dir, failonerror: true) {
+			arg(value: '-t')
+			arg(value: 'APPL')
+			arg(value: '-o')
+			arg(value: "${arch}.jnilib")
+			arg(path: rfile)
+		}
+	}
+}
+
+def compileMac(src, arch, includes, dir) {
+	def out = src.name.substring(0, src.name.lastIndexOf('.') + 1) + "${arch}"
+	ant {
+		echo("Compiling ${src.name} for Mac ${arch}")
+		exec(executable: 'c++', dir: dir, failonerror: true) {
+			arg(value: '-mmacosx-version-min=10.3')
+			arg(value: '-c')
+			arg(value: '-isysroot')
+			arg(value: '/Developer/SDKs/MacOSX10.5.sdk')
+			arg(value: '-O')
+			arg(value: '-arch')
+			arg(value: arch)
+			arg(value: '-fPIC')
+			if (arch != 'ppc') {
+				arg(value: '-DUSE_FASTDXT')
+			}
+			arg(value: '-FOpenGL')
+			includes.each { arg(value: "-I${it}") }
+			arg(value: '-o')
+			arg(value: out)
+			arg(path: src)
+		}
+	}
+}
+
+task 'build-jni-win'(dependsOn: 'generate-jni-headers') << {
+	def build = new File(project.buildDir, 'cpp')
+	def dist = file('dist')
+	def src = file('src/main/cpp')
+	def deps = file('deps/win32')
+	def includes = [
+		src.absolutePath,
+		dist.absolutePath,
+		build.absolutePath,
+		deps.absolutePath,
+		file('deps/win32/bootstrap/usr/i686-pc-mingw32/include/freetype2').absolutePath]
+
+	// expand our cross-compile tarball
+	def bootstrap = file('deps/win32/bootstrap')
+	if (!bootstrap.exists()) {
+		ant {
+			echo("Expanding cross-compile environment")
+			exec(executable: 'tar', dir: deps) {
+				arg(value: 'xzvf')
+				arg(value: 'bootstrap.tar.gz')
+			}
+		}
+	}
+
+	// compile
+	mkdir(build)
+	def path = file('deps/win32/bootstrap/usr/bin/').absolutePath
+	src.eachFileMatch({ it.endsWith('.c') || it.endsWith('.cpp')} ) { file ->
+		compileWin(file, includes, build, path)
+	}
+
+	// link
+	linkWin(deps.listFiles().findAll { it.name.endsWith('.lib')}, build, path)
+
+	copy {
+		into dist
+		from new File(build, 'scenegraph.dll')
+		from new File(deps, 'OpenJPEG.dll')
+	}
+}
+
+def compileWin(src, includes, dir, path) {
+	def out = src.name.substring(0, src.name.lastIndexOf('.') + 1) + "win32"
+	ant {
+		echo("Compiling ${src.name} for Win32")
+		exec(executable: path + '/i686-pc-mingw32-c++', dir: dir, failonerror: true) {
+			arg(value: '-c')
+			arg(value: '-DUSE_FASTDXT')
+			arg(value: '-msse2')
+			arg(value: '-O')
+			includes.each { arg(value: "-I${it}") }
+			arg(value: '-o')
+			arg(value: out)
+			arg(path: src)
+		}
+	}
+}
+
+def linkWin(libs, dir, path) {
+	ant {
+		echo("Linking scenegraph.dll")
+		exec(executable: path + '/i686-pc-mingw32-c++', dir: dir, failonerror: true) {
+			arg(value: '-Wall')
+			arg(value: '-shared')
+			arg(value: '-o')
+			arg(value: 'scenegraph.dll')
+			dir.listFiles().findAll { it.name.endsWith('.win32') }.each { arg(path: it) }
+			arg(value: '-lpng')
+			arg(value: '-lstdc++')
+			arg(value: '-lpthread')
+			arg(value: '-ltiff')
+			arg(value: '-ljpeg')
+			arg(value: '-lz')
+			arg(value: '-lopengl32')
+			arg(value: '-lglu32')
+			arg(value: '-lfreetype')
+			arg(value: '-lws2_32')
+			libs.each { arg(path: it) }
+			arg(value: '-mwindows')
+		}
+	}
+}
+
+task 'build-jni'(dependsOn: ['build-jni-mac', 'build-jni-win']) << {}

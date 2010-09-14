@@ -1,0 +1,39 @@
+# clean up the build directory
+mkdir -p ../../../build/cpp
+mkdir ../../../dist
+
+# compile
+for i in `ls *.c*`
+do
+	NAME=`echo $i | sed "s/\.cpp//" | sed "s/\.c//"`
+
+	echo "Compiling $i for i386"
+	MACOSX_DEPLOYMENT_TARGET=10.3 c++ -c -isysroot /Developer/SDKs/MacOSX10.5.sdk -O -arch i386 -fPIC -DUSE_FASTDXT -I/Developer/SDKs/MacOSX10.5.sdk/System/Library/Frameworks/JavaVM.framework/Versions/Current/Headers -FOpenGL -I../../../deps/mac/include -I../../../deps/mac/include/freetype2 -I../../../build -I../../../dist -I. -o ../../../build/cpp/$NAME.io $i
+	
+	if [ $NAME != 'intrinsic' -a $NAME != 'dxt' -a $NAME != 'libdxt' ]; then
+		echo "Compiling $i for ppc"
+		MACOSX_DEPLOYMENT_TARGET=10.3 c++ -c -isysroot /Developer/SDKs/MacOSX10.5.sdk -O -arch ppc -fPIC -I/Developer/SDKs/MacOSX10.5.sdk/System/Library/Frameworks/JavaVM.framework/Versions/Current/Headers -FOpenGL -I../../../deps/mac/include -I../../../deps/mac/include/freetype2 -I../../../build -I../../../dist -I. -o ../../../build/cpp/$NAME.po $i
+	fi
+	
+	echo "Compiling $i for x86_64"
+	MACOSX_DEPLOYMENT_TARGET=10.3 c++ -c -isysroot /Developer/SDKs/MacOSX10.5.sdk -O -arch x86_64 -fPIC -DUSE_FASTDXT -I/Developer/SDKs/MacOSX10.5.sdk/System/Library/Frameworks/JavaVM.framework/Versions/Current/Headers -FOpenGL -I../../../deps/mac/include -I../../../deps/mac/include/freetype2 -I../../../build -I../../../dist -I. -o ../../../build/cpp/$NAME.64o $i
+done
+
+# link
+cd ../../../build/cpp
+
+LIBS=`find ../../deps/mac/lib/*.a`
+
+echo "Linking ppc.jnilib"
+MACOSX_DEPLOYMENT_TARGET=10.3 c++ -g -bundle -isysroot /Developer/SDKs/MacOSX10.5.sdk -O -arch ppc -framework JavaVM -framework OpenGL -lstdc++ -lpthread -o ppc.jnilib *.po $LIBS
+Rez -t APPL -o ppc.jnilib ../../src/main/cpp/mac.r
+
+echo "Linking i386.jnilib"
+MACOSX_DEPLOYMENT_TARGET=10.3 c++ -g -bundle -isysroot /Developer/SDKs/MacOSX10.5.sdk -O -arch i386 -framework JavaVM -framework OpenGL -lstdc++ -lpthread -o i386.jnilib *.io $LIBS
+Rez -t APPL -o i386.jnilib ../../src/main/cpp/mac.r
+
+echo "Linking x84_64.jnilib"
+MACOSX_DEPLOYMENT_TARGET=10.3 c++ -g -bundle -isysroot /Developer/SDKs/MacOSX10.5.sdk -O -arch x86_64 -framework JavaVM -framework OpenGL -lstdc++ -lpthread -o x86_64.jnilib *.64o $LIBS
+Rez -t APPL -o x86_64.jnilib ../../src/main/cpp/mac.r
+
+lipo -create -arch i386 i386.jnilib -arch ppc ppc.jnilib -arch x86_64 x86_64.jnilib -output ../../dist/libscenegraph.jnilib

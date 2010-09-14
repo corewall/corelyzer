@@ -1,0 +1,19 @@
+# clean up the build directory
+mkdir -p ../build/cpp
+mkdir ../dist
+
+CC=`which i686-pc-mingw32-c++`
+FT2=`dirname $CC | sed "s/bin/i686-pc-mingw32\/include\/freetype2/"`
+
+# compile
+for i in `ls *.c*`
+do
+	NAME=`echo $i | sed "s/\.cpp//" | sed "s/\.c//"`
+
+	echo "Compiling $i for win32"
+	i686-pc-mingw32-c++ -c -DUSE_FASTDXT -msse2 -O -I../deps/win32 -I../build -I. -I$FT2 -o ../build/cpp/$NAME.wo $i
+done
+
+# link
+cd ../build/cpp
+i686-pc-mingw32-c++ -Wall -shared -o ../../dist/scenegraph.dll *.wo -lpng -lstdc++ -lpthread -ltiff -ljpeg -lz -lopengl32 -lglu32 -lfreetype -lws2_32 ../../deps/win32/OpenJPEG.lib ../../deps/win32/squish.lib -mwindows

@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleAllowMixedLocalizations</key>
+	<string>true</string>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>English</string>
+	<key>CFBundleDocumentTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeExtensions</key>
+			<array>
+				<string>cml</string>
+			</array>
+			<key>CFBundleTypeIconFile</key>
+			<string>cml.icns</string>
+			<key>CFBundleTypeName</key>
+			<string>Corelyzer Session File</string>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+		</dict>
+	</array>
+	<key>CFBundleExecutable</key>
+	<string>JavaApplicationStub</string>
+	<key>CFBundleGetInfoString</key>
+	<string>:version, CoreWall Project (http://corewall.org)</string>
+	<key>CFBundleIconFile</key>
+	<string>corelyzer.icns</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleName</key>
+	<string>Corelyzer</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleShortVersionString</key>
+	<string>:version</string>
+	<key>CFBundleSignature</key>
+	<string>????</string>
+	<key>CFBundleVersion</key>
+	<string>:version</string>
+	<key>Java</key>
+	<dict>
+		<key>ClassPath</key>
+		<array>
+:classpath
+		</array>
+		<key>JVMVersion</key>
+		<string>1.5+</string>
+		<key>MainClass</key>
+		<string>corelyzer.ui.splashscreen.SplashScreenMain</string>
+		<key>Properties</key>
+		<dict>
+			<key>apple.awt.brushMetalLook</key>
+			<string>false</string>
+			<key>apple.awt.showGrowBox</key>
+			<string>true</string>
+			<key>apple.laf.useScreenMenuBar</key>
+			<string>false</string>
+			<key>com.apple.mrj.application.apple.menu.about.name</key>
+			<string>Corelyzer</string>
+			<key>com.apple.mrj.application.live-resize</key>
+			<string>true</string>
+			<key>corelyzer.cache.path</key>
+			<string>~/.corelyzer/Caches</string>
+			<key>corelyzer.config.path</key>
+			<string>~/Library/corelyzer.data.CRPreferences/Corelyzer</string>
+			<key>corelyzer.data.path</key>
+			<string>~/Documents/Corelyzer</string>
+			<key>corelyzer.downloads.path</key>
+			<string>/tmp</string>
+			<key>corelyzer.helpurl</key>
+			<string>http://sqlcore.geo.umn.edu/CoreWallDatabase/cwWiki/index.php/Corelyzer</string>
+			<key>corelyzer.imgblocks.path</key>
+			<string>/tmp</string>
+			<key>corelyzer.plugin.iCores.localAtomSrc</key>
+			<string>http://iweb/corecast.xml</string>
+			<key>corelyzer.plugins.path</key>
+			<string>~/Library/Application Support/Corelyzer</string>
+			<key>corelyzer.projecturl</key>
+			<string>http://www.corewall.org/</string>
+			<key>corelyzer.version</key>
+			<string>:version</string>
+			<key>java.library.path</key>
+			<string>$JAVAROOT/</string>
+		</dict>
+		<key>VMOptions</key>
+		<string>-Xms512m -Xmx512m</string>
+		<key>WorkingDirectory</key>
+		<string>$APP_PACKAGE/wd</string>
+	</dict>
+</dict>
+</plist>

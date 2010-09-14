@@ -1,0 +1,1092 @@
+package corelyzer.ui;
+
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Insets;
+import java.awt.Point;
+import java.awt.Toolkit;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
+
+import javax.swing.BorderFactory;
+import javax.swing.ButtonGroup;
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
+import javax.swing.JComponent;
+import javax.swing.JDialog;
+import javax.swing.JEditorPane;
+import javax.swing.JFormattedTextField;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JRadioButton;
+import javax.swing.JTabbedPane;
+import javax.swing.JTextField;
+import javax.swing.KeyStroke;
+import javax.swing.UIManager;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+import javax.swing.event.HyperlinkEvent;
+import javax.swing.event.HyperlinkListener;
+
+import com.intellij.uiDesigner.core.GridConstraints;
+import com.intellij.uiDesigner.core.GridLayoutManager;
+import com.intellij.uiDesigner.core.Spacer;
+import com.jtechlabs.ui.widget.directorychooser.JDirectoryChooser;
+
+import corelyzer.data.CRPreferences;
+import corelyzer.graphics.SceneGraph;
+import corelyzer.util.FileUtility;
+
+public class CRPreferencesDialog extends JDialog implements ChangeListener, WindowListener {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 2332149565974224470L;
+
+	public static void main(final String[] args) {
+		CRPreferencesDialog dialog = new CRPreferencesDialog(null);
+		dialog.pack();
+		dialog.setSize(450, 700);
+		dialog.setVisible(true);
+	}
+
+	private JPanel contentPane;
+	private JButton buttonOK;
+	private JButton buttonCancel;
+	private JButton helpButton;
+	private JTabbedPane stageTab;
+	private JEditorPane desc_textpane;
+	private JCheckBox lockCoreSectionImage;
+	private JCheckBox useQuaqua;
+	private JCheckBox autoCheckVersion;
+	private JButton canvasBackgroundColorButton;
+	private JCheckBox check_gridEnabled;
+	private JComboBox field_gridType;
+	private JButton grid_colorbtn;
+	private JFormattedTextField field_gridSpace;
+	private JFormattedTextField field_gridThickness;
+	private JButton imgBtn;
+	private JTextField field_imgblock;
+	private JButton downBtn;
+	private JTextField field_download;
+	private JPanel displayPanel;
+	private JPanel descriptionPane;
+	private JCheckBox autoZoomCheckBox;
+	private JCheckBox autoScaleGraphCheckBox;
+	private JCheckBox autoScaleAnnotationCheckBox;
+	private JRadioButton horiDepthRadioButton;
+	private JRadioButton vertDepthRadioButton;
+	private JTextField serverAddressTextField;
+	private JTextField serverPortTextField;
+	private JCheckBox showOriginAxisCheckbox;
+	private JCheckBox showCoreSectionLabelCheckbox;
+	private JCheckBox canvasAlwaysAtBelowCheckBox;
+	private JCheckBox depthScrollCheckbox;
+	private JTextField disPrefixTextField;
+	private JButton disPrefixSelectButton;
+	private JTextField dictDefFileTextField;
+
+	private JButton dictDefFileSelectButton;
+
+	public static boolean MAC_OS_X = System.getProperty("os.name").toLowerCase().startsWith("mac os x");
+	// data
+	// Stage Code
+	int number_of_stages = 4;
+	final int SETUP_DESC = 0;
+	final int SETUP_DIRS = 1;
+	final int SETUP_DISPLAY = 2;
+
+	final int SETUP_UI = 3;
+	CRPreferences prefs;
+
+	boolean glchanged;
+	// Display Panel
+	JButton displayBtn;
+
+	DisplayConfig dpcfg;
+	// grid
+	Color grid_color;
+
+	Color bg_color;
+
+	public CRPreferencesDialog(final JFrame parent) {
+		super(parent);
+
+		// init data
+		this.prefs = new CRPreferences();
+		glchanged = false;
+
+		$$$setupUI$$$();
+
+		setTitle("Preferences");
+		setContentPane(contentPane);
+		setModal(true);
+		getRootPane().setDefaultButton(buttonOK);
+
+		buttonOK.addActionListener(new ActionListener() {
+			public void actionPerformed(final ActionEvent e) {
+				onOK();
+			}
+		});
+
+		buttonCancel.addActionListener(new ActionListener() {
+			public void actionPerformed(final ActionEvent e) {
+				onCancel();
+			}
+		});
+
+		setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
+		addWindowListener(new WindowAdapter() {
+			public void windowClosing(final WindowEvent e) {
+				onCancel();
+			}
+		});
+
+		contentPane.registerKeyboardAction(new ActionListener() {
+			public void actionPerformed(final ActionEvent e) {
+				onCancel();
+			}
+		}, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+
+		helpButton.addActionListener(new ActionListener() {
+			public void actionPerformed(final ActionEvent event) {
+				onHelp();
+			}
+		});
+
+		imgBtn.addActionListener(new ActionListener() {
+			public void actionPerformed(final ActionEvent event) {
+				onImageDir();
+			}
+		});
+
+		downBtn.addActionListener(new ActionListener() {
+			public void actionPerformed(final ActionEvent event) {
+				onDownloadDir();
+			}
+		});
+
+		check_gridEnabled.addActionListener(new ActionListener() {
+			public void actionPerformed(final ActionEvent event) {
+				onCheckGrid();
+			}
+		});
+
+		grid_colorbtn.addActionListener(new ActionListener() {
+			public void actionPerformed(final ActionEvent event) {
+				onGridColor();
+			}
+		});
+
+		canvasBackgroundColorButton.addActionListener(new ActionListener() {
+			public void actionPerformed(final ActionEvent event) {
+				onBgColor();
+			}
+		});
+
+		autoZoomCheckBox.addActionListener(new ActionListener() {
+			public void actionPerformed(final ActionEvent event) {
+				prefs.setAutoZoom(autoZoomCheckBox.isSelected());
+			}
+		});
+
+		autoScaleGraphCheckBox.addActionListener(new ActionListener() {
+			public void actionPerformed(final ActionEvent event) {
+				boolean isChecked = autoScaleGraphCheckBox.isSelected();
+				prefs.setAutoScaleGraph(isChecked);
+				SceneGraph.setGraphAutoScale(isChecked);
+			}
+		});
+
+		autoScaleAnnotationCheckBox.addActionListener(new ActionListener() {
+			public void actionPerformed(final ActionEvent event) {
+				boolean isChecked = autoScaleAnnotationCheckBox.isSelected();
+				prefs.setAutoScaleMarker(isChecked);
+				SceneGraph.setMarkerAutoScale(isChecked);
+			}
+		});
+
+		horiDepthRadioButton.addActionListener(new ActionListener() {
+			public void actionPerformed(final ActionEvent event) {
+				switchDepthOrientation();
+			}
+		});
+
+		vertDepthRadioButton.addActionListener(new ActionListener() {
+			public void actionPerformed(final ActionEvent event) {
+				switchDepthOrientation();
+			}
+		});
+
+		showOriginAxisCheckbox.addChangeListener(new ChangeListener() {
+			public void stateChanged(final ChangeEvent event) {
+				JCheckBox cb = (JCheckBox) event.getSource();
+				boolean b = cb.isSelected();
+
+				CorelyzerApp app = CorelyzerApp.getApp();
+				if (app != null) {
+					SceneGraph.setShowOrigin(b);
+					app.updateGLWindows();
+				}
+			}
+		});
+
+		showCoreSectionLabelCheckbox.addChangeListener(new ChangeListener() {
+			public void stateChanged(final ChangeEvent event) {
+				JCheckBox cb = (JCheckBox) event.getSource();
+				boolean b = cb.isSelected();
+
+				CorelyzerApp app = CorelyzerApp.getApp();
+				if (app != null) {
+					SceneGraph.setShowSectionText(b);
+					app.updateGLWindows();
+				}
+			}
+		});
+
+		disPrefixSelectButton.addActionListener(new ActionListener() {
+			public void actionPerformed(final ActionEvent event) {
+				onSelectDISPrefix();
+			}
+		});
+
+		dictDefFileSelectButton.addActionListener(new ActionListener() {
+			public void actionPerformed(final ActionEvent event) {
+				onSelectDictDefinitionFile();
+			}
+		});
+	}
+
+	public CRPreferencesDialog(final JFrame f, final CRPreferences p) {
+		this(f);
+
+		this.prefs = new CRPreferences();
+		glchanged = false;
+		setPreferences(p);
+	}
+
+	/**
+	 * @noinspection ALL
+	 */
+	public JComponent $$$getRootComponent$$$() {
+		return contentPane;
+	}
+
+	/**
+	 * Method generated by IntelliJ IDEA GUI Designer >>> IMPORTANT!! <<< DO NOT
+	 * edit this method OR call it in your code!
+	 * 
+	 * @noinspection ALL
+	 */
+	private void $$$setupUI$$$() {
+		createUIComponents();
+		contentPane = new JPanel();
+		contentPane.setLayout(new GridLayoutManager(2, 1, new Insets(10, 10, 10, 10), -1, -1));
+		final JPanel panel1 = new JPanel();
+		panel1.setLayout(new GridLayoutManager(1, 2, new Insets(0, 0, 0, 0), -1, -1));
+		contentPane.add(panel1, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK
+				| GridConstraints.SIZEPOLICY_CAN_GROW, 1, null, null, null, 0, false));
+		final Spacer spacer1 = new Spacer();
+		panel1.add(spacer1, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL,
+				GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
+		final JPanel panel2 = new JPanel();
+		panel2.setLayout(new GridLayoutManager(1, 3, new Insets(0, 0, 0, 0), -1, -1));
+		panel1.add(panel2, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK
+				| GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
+		buttonCancel = new JButton();
+		buttonCancel.setText("Cancel");
+		panel2.add(buttonCancel, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL,
+				GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+		buttonOK = new JButton();
+		buttonOK.setText("OK");
+		panel2.add(buttonOK, new GridConstraints(0, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL,
+				GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+		helpButton = new JButton();
+		helpButton.setText("Help");
+		panel2.add(helpButton, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL,
+				GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+		final JPanel panel3 = new JPanel();
+		panel3.setLayout(new GridLayoutManager(1, 1, new Insets(0, 0, 0, 0), -1, -1));
+		contentPane
+				.add(panel3, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK
+						| GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null,
+						0, false));
+		stageTab = new JTabbedPane();
+		panel3.add(stageTab, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK
+				| GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, new Dimension(200,
+				200), null, 0, false));
+		descriptionPane = new JPanel();
+		descriptionPane.setLayout(new GridLayoutManager(1, 1, new Insets(0, 0, 0, 0), -1, -1));
+		stageTab.addTab("Description", descriptionPane);
+		descriptionPane.setBorder(BorderFactory.createTitledBorder(""));
+		descriptionPane.add(desc_textpane, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH,
+				GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_WANT_GROW, null, new Dimension(150, 50), null, 0, false));
+		final JPanel panel4 = new JPanel();
+		panel4.setLayout(new GridLayoutManager(5, 1, new Insets(0, 0, 0, 0), -1, -1));
+		stageTab.addTab("Directories", panel4);
+		panel4.setBorder(BorderFactory.createTitledBorder(""));
+		final JPanel panel5 = new JPanel();
+		panel5.setLayout(new GridLayoutManager(1, 3, new Insets(0, 0, 0, 0), -1, -1));
+		panel4.add(panel5, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK
+				| GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
+		final JLabel label1 = new JLabel();
+		label1.setText("Image Block Directory: ");
+		panel5.add(label1, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED,
+				GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+		imgBtn = new JButton();
+		imgBtn.setText("Select");
+		panel5.add(imgBtn, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL,
+				GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+		final Spacer spacer2 = new Spacer();
+		panel5.add(spacer2, new GridConstraints(0, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL,
+				GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
+		field_imgblock = new JTextField();
+		panel4.add(field_imgblock, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL,
+				GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
+		final JPanel panel6 = new JPanel();
+		panel6.setLayout(new GridLayoutManager(1, 3, new Insets(0, 0, 0, 0), -1, -1));
+		panel4.add(panel6, new GridConstraints(2, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK
+				| GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
+		final JLabel label2 = new JLabel();
+		label2.setText("Download Directory: ");
+		panel6.add(label2, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED,
+				GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(145, 16), null, 0, false));
+		downBtn = new JButton();
+		downBtn.setText("Select");
+		panel6.add(downBtn, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL,
+				GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+		final Spacer spacer3 = new Spacer();
+		panel6.add(spacer3, new GridConstraints(0, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL,
+				GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
+		final Spacer spacer4 = new Spacer();
+		panel4.add(spacer4, new GridConstraints(4, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1,
+				GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
+		field_download = new JTextField();
+		panel4.add(field_download, new GridConstraints(3, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL,
+				GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
+		stageTab.addTab("Display", displayPanel);
+		displayPanel.setBorder(BorderFactory.createTitledBorder(""));
+		final JPanel panel7 = new JPanel();
+		panel7.setLayout(new GridLayoutManager(13, 1, new Insets(0, 0, 0, 0), -1, -1));
+		stageTab.addTab("User Interface", panel7);
+		panel7.setBorder(BorderFactory.createTitledBorder(""));
+		lockCoreSectionImage = new JCheckBox();
+		lockCoreSectionImage.setText("Lock core section image?");
+		panel7.add(lockCoreSectionImage, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE,
+				GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+		useQuaqua = new JCheckBox();
+		useQuaqua.setEnabled(false);
+		useQuaqua.setText("Use Quaqua?");
+		panel7.add(useQuaqua, new GridConstraints(2, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK
+				| GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+		autoCheckVersion = new JCheckBox();
+		autoCheckVersion.setSelected(true);
+		autoCheckVersion.setText("Auto check version in startup?");
+		panel7.add(autoCheckVersion, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE,
+				GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+		final JPanel panel8 = new JPanel();
+		panel8.setLayout(new GridLayoutManager(4, 3, new Insets(0, 0, 0, 0), -1, -1));
+		panel7.add(panel8, new GridConstraints(12, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK
+				| GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
+		panel8.setBorder(BorderFactory.createTitledBorder("Canvas Grid"));
+		check_gridEnabled = new JCheckBox();
+		check_gridEnabled.setText("Show Grid");
+		panel8.add(check_gridEnabled, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE,
+				GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+		final Spacer spacer5 = new Spacer();
+		panel8.add(spacer5, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL,
+				GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
+		final JLabel label3 = new JLabel();
+		label3.setText("Grid Type: ");
+		panel8.add(label3, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED,
+				GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+		final JLabel label4 = new JLabel();
+		label4.setText("Grid Space: ");
+		panel8.add(label4, new GridConstraints(2, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED,
+				GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+		field_gridType = new JComboBox();
+		final DefaultComboBoxModel defaultComboBoxModel1 = new DefaultComboBoxModel();
+		defaultComboBoxModel1.addElement("Basic Cross");
+		defaultComboBoxModel1.addElement("Horizontal Lines");
+		defaultComboBoxModel1.addElement("Vertical Lines");
+		defaultComboBoxModel1.addElement("Points");
+		defaultComboBoxModel1.addElement("Cross Points");
+		field_gridType.setModel(defaultComboBoxModel1);
+		panel8.add(field_gridType, new GridConstraints(1, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL,
+				GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+		field_gridSpace = new JFormattedTextField();
+		field_gridSpace.setHorizontalAlignment(11);
+		field_gridSpace.setText("10.0");
+		panel8.add(field_gridSpace, new GridConstraints(2, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL,
+				GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
+		final JLabel label5 = new JLabel();
+		label5.setText("cm");
+		panel8.add(label5, new GridConstraints(2, 2, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED,
+				GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+		final JLabel label6 = new JLabel();
+		label6.setText("Thickness: ");
+		panel8.add(label6, new GridConstraints(3, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED,
+				GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+		field_gridThickness = new JFormattedTextField();
+		field_gridThickness.setHorizontalAlignment(11);
+		field_gridThickness.setText("1");
+		panel8.add(field_gridThickness, new GridConstraints(3, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL,
+				GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
+		grid_colorbtn = new JButton();
+		grid_colorbtn.setText("Color");
+		panel8.add(grid_colorbtn, new GridConstraints(1, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL,
+				GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+		final JPanel panel9 = new JPanel();
+		panel9.setLayout(new GridLayoutManager(2, 2, new Insets(0, 0, 0, 0), -1, -1));
+		panel7.add(panel9, new GridConstraints(11, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK
+				| GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
+		canvasBackgroundColorButton = new JButton();
+		canvasBackgroundColorButton.setText("Canvas background color");
+		panel9.add(canvasBackgroundColorButton, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL,
+				GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(98, 29),
+				null, 0, false));
+		final Spacer spacer6 = new Spacer();
+		panel9.add(spacer6, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL,
+				GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
+		final Spacer spacer7 = new Spacer();
+		panel9.add(spacer7, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1,
+				GridConstraints.SIZEPOLICY_WANT_GROW, null, new Dimension(98, 14), null, 0, false));
+		autoZoomCheckBox = new JCheckBox();
+		autoZoomCheckBox.setSelected(true);
+		autoZoomCheckBox.setText("Double clicks to zoom to section?");
+		panel7.add(autoZoomCheckBox, new GridConstraints(3, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE,
+				GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+		autoScaleGraphCheckBox = new JCheckBox();
+		autoScaleGraphCheckBox.setEnabled(false);
+		autoScaleGraphCheckBox.setSelected(false);
+		autoScaleGraphCheckBox.setText("Graph auto-scale?");
+		panel7.add(autoScaleGraphCheckBox, new GridConstraints(4, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE,
+				GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+		autoScaleAnnotationCheckBox = new JCheckBox();
+		autoScaleAnnotationCheckBox.setEnabled(false);
+		autoScaleAnnotationCheckBox.setSelected(false);
+		autoScaleAnnotationCheckBox.setText("Annotation icon auto-scale?");
+		panel7.add(autoScaleAnnotationCheckBox, new GridConstraints(5, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE,
+				GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+		final JPanel panel10 = new JPanel();
+		panel10.setLayout(new GridLayoutManager(1, 3, new Insets(0, 0, 0, 0), -1, -1));
+		panel7.add(panel10, new GridConstraints(10, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK
+				| GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
+		horiDepthRadioButton = new JRadioButton();
+		horiDepthRadioButton.setSelected(true);
+		horiDepthRadioButton.setText("Horizontal Depth");
+		panel10.add(horiDepthRadioButton, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE,
+				GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+		final Spacer spacer8 = new Spacer();
+		panel10.add(spacer8, new GridConstraints(0, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL,
+				GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
+		vertDepthRadioButton = new JRadioButton();
+		vertDepthRadioButton.setText("Vertical Depth");
+		panel10.add(vertDepthRadioButton, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE,
+				GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+		showOriginAxisCheckbox = new JCheckBox();
+		showOriginAxisCheckbox.setSelected(true);
+		showOriginAxisCheckbox.setText("Show origin axis?");
+		panel7.add(showOriginAxisCheckbox, new GridConstraints(6, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE,
+				GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+		showCoreSectionLabelCheckbox = new JCheckBox();
+		showCoreSectionLabelCheckbox.setSelected(true);
+		showCoreSectionLabelCheckbox.setText("Show section labels?");
+		panel7.add(showCoreSectionLabelCheckbox, new GridConstraints(7, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE,
+				GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+		canvasAlwaysAtBelowCheckBox = new JCheckBox();
+		canvasAlwaysAtBelowCheckBox.setSelected(true);
+		canvasAlwaysAtBelowCheckBox.setText("Canvas Always at Below?");
+		panel7.add(canvasAlwaysAtBelowCheckBox, new GridConstraints(8, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE,
+				GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+		depthScrollCheckbox = new JCheckBox();
+		depthScrollCheckbox.setText("Depth-scroll in vertical depth mode?");
+		panel7.add(depthScrollCheckbox, new GridConstraints(9, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE,
+				GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+		final JPanel panel11 = new JPanel();
+		panel11.setLayout(new GridLayoutManager(2, 4, new Insets(0, 0, 0, 0), -1, -1));
+		stageTab.addTab("Session Sharing", panel11);
+		final JLabel label7 = new JLabel();
+		label7.setText("Sharing Server: ");
+		panel11.add(label7, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED,
+				GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+		final Spacer spacer9 = new Spacer();
+		panel11.add(spacer9, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1,
+				GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
+		serverAddressTextField = new JTextField();
+		serverAddressTextField.setHorizontalAlignment(11);
+		serverAddressTextField.setText("127.0.0.1");
+		panel11.add(serverAddressTextField, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL,
+				GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(145, 28), null, 0, false));
+		final JLabel label8 = new JLabel();
+		label8.setText("Port: ");
+		panel11.add(label8, new GridConstraints(0, 2, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED,
+				GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(37, 16), null, 0, false));
+		serverPortTextField = new JTextField();
+		serverPortTextField.setHorizontalAlignment(11);
+		serverPortTextField.setText("16688");
+		panel11.add(serverPortTextField, new GridConstraints(0, 3, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL,
+				GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(79, 28), null, 0, false));
+		final JPanel panel12 = new JPanel();
+		panel12.setLayout(new GridLayoutManager(3, 3, new Insets(0, 0, 0, 0), -1, -1));
+		stageTab.addTab("DIS", panel12);
+		final JLabel label9 = new JLabel();
+		label9.setText("Local path prefix: ");
+		panel12.add(label9, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED,
+				GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+		final Spacer spacer10 = new Spacer();
+		panel12.add(spacer10, new GridConstraints(2, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1,
+				GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
+		disPrefixTextField = new JTextField();
+		disPrefixTextField.setEditable(false);
+		disPrefixTextField.setHorizontalAlignment(11);
+		disPrefixTextField.setText("");
+		panel12.add(disPrefixTextField, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL,
+				GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
+		disPrefixSelectButton = new JButton();
+		disPrefixSelectButton.setText("Select...");
+		panel12.add(disPrefixSelectButton, new GridConstraints(0, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL,
+				GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+		final JLabel label10 = new JLabel();
+		label10.setText("Dictionary definition: ");
+		panel12.add(label10, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED,
+				GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+		dictDefFileTextField = new JTextField();
+		dictDefFileTextField.setEditable(false);
+		dictDefFileTextField.setHorizontalAlignment(11);
+		panel12.add(dictDefFileTextField, new GridConstraints(1, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL,
+				GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
+		dictDefFileSelectButton = new JButton();
+		dictDefFileSelectButton.setText("Select...");
+		panel12.add(dictDefFileSelectButton, new GridConstraints(1, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL,
+				GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+		ButtonGroup buttonGroup;
+		buttonGroup = new ButtonGroup();
+		buttonGroup.add(horiDepthRadioButton);
+		buttonGroup.add(vertDepthRadioButton);
+	}
+
+	private void create_desc_panel() {
+		desc_textpane = new JEditorPane();
+		desc_textpane.setEditable(false);
+		desc_textpane.addHyperlinkListener(new HyperlinkListener() {
+			public void hyperlinkUpdate(final HyperlinkEvent hyperlinkEvent) {
+				if (hyperlinkEvent.getEventType().equals(HyperlinkEvent.EventType.ACTIVATED)) {
+
+					String app;
+					String url = hyperlinkEvent.getURL().toString();
+
+					try {
+						if (System.getProperty("os.name").toLowerCase().contains("windows")) {
+							app = "cmd.exe /c explorer " + url;
+							Runtime.getRuntime().exec(app);
+						} else {
+							app = "open";
+							String[] cmd = { app, url };
+							Runtime.getRuntime().exec(cmd);
+						}
+					} catch (IOException e) {
+						JOptionPane.showMessageDialog(CorelyzerApp.getApp().getMainFrame(), "Cannot open the link in your browser");
+					}
+
+				}
+			}
+		});
+
+		File f_cwd = new File(".");
+		String cwd = "";
+		try {
+			cwd = f_cwd.getCanonicalPath();
+		} catch (IOException e) {
+			System.err.println("This should not happen.");
+		}
+
+		String url = "file:///" + cwd + "/resources/preferences_desc.html";
+		try {
+			desc_textpane.setPage(new URL(url));
+		} catch (Exception e) {
+			System.err.println("Error! Cannot find preferences description.");
+		}
+	}
+
+	private JPanel create_display_panel() {
+		JPanel p = new JPanel(new BorderLayout());
+		p.setName("Display");
+
+		dpcfg = new DisplayConfig();
+		this.dpcfg.setPreferences(prefs);
+		p.add(dpcfg.dlg.getContentPane(), BorderLayout.CENTER);
+
+		return p;
+	}
+
+	private void createUIComponents() {
+		// color chooser
+		grid_color = new Color(200, 200, 200);
+
+		// create description panel
+		this.create_desc_panel();
+
+		// create display panel
+		this.displayPanel = this.create_display_panel();
+	}
+
+	public CRPreferences getPreferences() {
+		return prefs;
+	}
+
+	private void onBgColor() {
+		final ColorChooser chooser = new ColorChooser(this);
+		chooser.setVisible(true);
+		chooser.setTarget(this.canvasBackgroundColorButton);
+		chooser.setColor(this.bg_color);
+		chooser.addReturnActionListener(new ActionListener() {
+			public void actionPerformed(final ActionEvent event) {
+				bg_color = chooser.getColor();
+
+				CorelyzerApp app = CorelyzerApp.getApp();
+				if (app != null) {
+					float r = bg_color.getRed() / 255.0f;
+					float g = bg_color.getGreen() / 255.0f;
+					float b = bg_color.getBlue() / 255.0f;
+
+					SceneGraph.setBackgroundColor(r, g, b);
+
+					app.updateGLWindows();
+				}
+			}
+		});
+
+		Point loc = this.getLocation();
+		Dimension dim = this.getSize();
+		chooser.setLocation(loc.x + dim.width + 10, loc.y);
+	}
+
+	private void onCancel() {
+		this.prefs = null;
+		this.setVisible(false);
+
+		dispose();
+	}
+
+	private void onCheckGrid() {
+		if (check_gridEnabled.isSelected()) {
+			field_gridType.setEnabled(true);
+			field_gridSpace.setEnabled(true);
+			field_gridThickness.setEnabled(true);
+			grid_colorbtn.setEnabled(true);
+		} else {
+			field_gridType.setEnabled(false);
+			field_gridSpace.setEnabled(false);
+			field_gridThickness.setEnabled(false);
+			grid_colorbtn.setEnabled(false);
+		}
+	}
+
+	private void onDownloadDir() {
+		File f = new File(prefs.download_Directory);
+
+		if ((f = JDirectoryChooser.showDialog(this, f)) != null) {
+			String abspath = f.getAbsolutePath();
+
+			if (abspath.equals(this.field_download.getText())) {
+				glchanged = true;
+			}
+
+			this.field_download.setText(abspath);
+		}
+	}
+
+	private void onGridColor() {
+		final ColorChooser chooser = new ColorChooser(this);
+		chooser.setVisible(true);
+		chooser.setTarget(this.grid_colorbtn);
+		chooser.setColor(this.bg_color);
+		chooser.addReturnActionListener(new ActionListener() {
+			public void actionPerformed(final ActionEvent event) {
+				grid_color = chooser.getColor();
+			}
+		});
+
+		Point loc = this.getLocation();
+		Dimension dim = this.getSize();
+		chooser.setLocation(loc.x + dim.width + 10, loc.y);
+	}
+
+	private void onHelp() {
+		try {
+			// Centralized URLs in external cofigs
+			String app;
+			String url = "http://www.corewall.org/wiki/";
+			if (System.getProperty("os.name").toLowerCase().contains("windows")) {
+				app = "cmd.exe /c explorer " + url;
+				Runtime.getRuntime().exec(app);
+			} else {
+				app = "open";
+				String[] cmd = { app, url };
+				Runtime.getRuntime().exec(cmd);
+			}
+		} catch (IOException ex) {
+			System.err.println("IOException in help button");
+		}
+	}
+
+	private void onImageDir() {
+		File f = new File(prefs.texBlock_Directory);
+
+		if ((f = JDirectoryChooser.showDialog(this, f)) != null) {
+			String abspath = f.getAbsolutePath();
+
+			if (abspath.equals(this.field_imgblock.getText())) {
+				glchanged = true;
+			}
+
+			this.field_imgblock.setText(abspath);
+		}
+	}
+
+	private void onOK() {
+		this.saveAndApplySetups();
+		this.setVisible(false);
+	}
+
+	private void onSelectDictDefinitionFile() {
+		String f = FileUtility.selectASingleFile(this, "Select the annotation definition file", null, FileUtility.LOAD);
+
+		if (f != null) {
+			this.dictDefFileTextField.setText(f);
+		}
+	}
+
+	private void onSelectDISPrefix() {
+		File f = new File(this.disPrefixTextField.getText());
+
+		if (!f.exists()) {
+			f = new File(System.getProperty("user.home"));
+		}
+
+		if ((f = JDirectoryChooser.showDialog(this, f)) != null) {
+			String abspath = f.getAbsolutePath();
+
+			this.disPrefixTextField.setText(abspath);
+		}
+	}
+
+	public void positionCentricTo(final JFrame parent) {
+		Point pLoc;
+		Dimension pDim;
+		if (parent != null) {
+			pLoc = parent.getLocation();
+			pDim = parent.getSize();
+
+		} else {
+			pLoc = new Point(0, 0);
+			pDim = Toolkit.getDefaultToolkit().getScreenSize();
+		}
+
+		Dimension mDim = this.getSize();
+		this.setLocation(pLoc.x + pDim.width / 2 - mDim.width / 2, pLoc.y + pDim.height / 2 - mDim.height / 2);
+	}
+
+	private void saveAndApplySetups() {
+		this.prefs.isInited = true;
+		// collect info in the UIs
+		// Dirs
+		String sp = System.getProperty("file.separator");
+		if (!field_imgblock.getText().equals("")) {
+			this.prefs.texBlock_Directory = this.field_imgblock.getText() + sp;
+		}
+
+		if (!field_download.getText().equals("")) {
+			this.prefs.download_Directory = this.field_download.getText() + sp;
+		}
+
+		// Display
+		if (dpcfg.getPreferences(prefs)) {
+			glchanged = true;
+		}
+
+		// UIs
+		this.prefs.lockCoreSectionImage = lockCoreSectionImage.isSelected();
+		this.prefs.setAutoCheckVersion(this.autoCheckVersion.isSelected());
+		if (MAC_OS_X) {
+			this.prefs.setUseQuaqua(useQuaqua.isSelected());
+		}
+
+		// Grids
+		this.prefs.grid_show = check_gridEnabled.isSelected();
+		this.prefs.grid_type = field_gridType.getSelectedIndex() < 0 ? 0 : field_gridType.getSelectedIndex();
+		this.prefs.grid_size = Float.parseFloat(field_gridSpace.getValue().toString());
+		this.prefs.grid_thickness = Integer.parseInt(field_gridThickness.getValue().toString());
+		this.prefs.grid_r = grid_color.getRed() / 255.0f;
+		this.prefs.grid_g = grid_color.getGreen() / 255.0f;
+		this.prefs.grid_b = grid_color.getBlue() / 255.0f;
+
+		this.prefs.save();
+
+		CorelyzerApp app = CorelyzerApp.getApp();
+		SceneGraph.setTexBlockDirectory(this.prefs.texBlock_Directory);
+
+		if (app == null) {
+			System.out.println("CRPreferencesSave: Null app pointer!");
+			return;
+		}
+
+		// app.preferences = null;
+		app.preferences = this.prefs;
+
+		// could add runtime restart GL stuff here
+		if (!app.isGLInited) {
+			app.destroyGLWindows();
+			app.setPreferences(prefs);
+			app.createGLWindows();
+			app.getMainFrame().setVisible(true);
+			app.getToolFrame().setVisible(true);
+		} else {
+			if (glchanged) {
+				Object[] options = { "Cancel", "Restart" };
+
+				String mesg = "You might need to restart Corelyzer to make " + "display configuration take effect.";
+				int n = JOptionPane.showOptionDialog(this, mesg, "Restart Corelyzer?", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, options,
+						options[1]);
+
+				if (n == 1) {
+					System.out.println("---> [INFO] Restart from Preferences.");
+					app.quit();
+					return;
+				}
+			} else {
+				System.out.println("---> Should be fine to keep running");
+				// gl stuff not changed. do nothing here
+			}
+		}
+
+		// Grid stuff should be after any possible gl restart
+		SceneGraph.lock();
+		if (check_gridEnabled.isSelected()) {
+			SceneGraph.enableCanvasGrid(true);
+			SceneGraph.setCanvasGridColor(this.prefs.grid_r, this.prefs.grid_g, this.prefs.grid_b);
+			SceneGraph.setCanvasGridSize(this.prefs.grid_size);
+			SceneGraph.setCanvasGridThickness(this.prefs.grid_thickness);
+			SceneGraph.setCanvasGridType(this.prefs.grid_type);
+		} else {
+			SceneGraph.enableCanvasGrid(false);
+		}
+		SceneGraph.unlock();
+		app.updateGLWindows();
+
+		// Apply Quaqua Look and Feel if it's selected
+		if (MAC_OS_X && prefs.getUseQuaqua()) {
+			System.setProperty("Quaqua.tabLayoutPolicy", "wrap");
+
+			try {
+				UIManager.setLookAndFeel("ch.randelshofer.quaqua.QuaquaLookAndFeel");
+			} catch (Exception e) {
+				System.err.println("Exception in setting LAF: " + e);
+			}
+		}
+
+		// sharing server address and port number
+		prefs.setProperty("sessionSharing.serverAddress", this.serverAddressTextField.getText());
+		prefs.setProperty("sessionSharing.serverPort", this.serverPortTextField.getText());
+
+		// show origin coord and section label
+		prefs.setProperty("ui.showOrigin", String.valueOf(this.showOriginAxisCheckbox.isSelected()));
+		prefs.setProperty("ui.showSectionLabel", String.valueOf(this.showCoreSectionLabelCheckbox.isSelected()));
+
+		// if the canvas always at the bottom
+		prefs.setProperty("ui.canvas.alwaysBelow", String.valueOf(this.canvasAlwaysAtBelowCheckBox.isSelected()));
+
+		prefs.setProperty("ui.verticalDepthScroll", String.valueOf(this.depthScrollCheckbox.isSelected()));
+
+		prefs.setProperty("dis.dictDefinitionFile", this.dictDefFileTextField.getText());
+		prefs.setProperty("dis.prefix", this.disPrefixTextField.getText());
+
+		// If only UI config is modified, then the program can keep going
+		// if Directory & DisplayConfig modified, restart will be needed
+	}
+
+	public void setPreferences(final CRPreferences p) {
+		if (p == null) {
+			return;
+		}
+
+		// Notice! We are making a duplication here!
+		// So the preferences will not effect current preferences in the
+		// main CorelyzerApp
+		prefs = new CRPreferences(p);
+		// prefs = p;
+
+		// Update Description Panel
+		File f_cwd = new File(".");
+		String cwd = "";
+
+		try {
+			cwd = f_cwd.getCanonicalPath();
+		} catch (IOException e) {
+			System.err.println("This should not happen.");
+		}
+
+		String url;
+		if (prefs.isInited) {
+			buttonCancel.setEnabled(true);
+			url = "file:///" + cwd + "/resources/preferences_desc.html";
+		} else {
+
+			url = "file:///" + cwd + "/resources/preferences_init.html";
+		}
+
+		try {
+			desc_textpane.setPage(new URL(url));
+		} catch (Exception e) {
+			System.err.println("Error! Cannot find preferences " + "init description: " + url);
+		}
+
+		// Update Directory Panel
+		this.field_imgblock.setText(prefs.texBlock_Directory);
+		this.field_download.setText(prefs.download_Directory);
+
+		// Update Display Panel
+		dpcfg.setPreferences(prefs);
+
+		// Update UI Panel
+		this.lockCoreSectionImage.setSelected(prefs.lockCoreSectionImage);
+		this.autoCheckVersion.setSelected(prefs.getAutoCheckVersion());
+
+		if (MAC_OS_X) {
+			this.useQuaqua.setEnabled(true);
+			this.useQuaqua.setSelected(prefs.getUseQuaqua());
+		}
+
+		// Update Grid
+		this.check_gridEnabled.setSelected(prefs.grid_show);
+		this.field_gridType.setSelectedIndex(prefs.grid_type);
+		this.field_gridSpace.setValue(prefs.grid_size);
+		this.field_gridThickness.setValue(prefs.grid_thickness);
+		this.grid_color = new Color((int) (prefs.grid_r * 255.0f), (int) (prefs.grid_g * 255.0f), (int) (prefs.grid_b * 255.0f));
+		this.grid_colorbtn.setBackground(this.grid_color);
+
+		if (prefs.grid_show) {
+			this.field_gridType.setEnabled(true);
+			this.field_gridSpace.setEnabled(true);
+			this.field_gridThickness.setEnabled(true);
+			this.grid_colorbtn.setEnabled(true);
+		}
+
+		// autoZoom
+		this.autoZoomCheckBox.setSelected(prefs.isAutoZoom());
+
+		// autoScales
+		this.autoScaleGraphCheckBox.setSelected(prefs.isAutoScaleGraph());
+		this.autoScaleAnnotationCheckBox.setSelected(prefs.isAutoScaleMarker());
+
+		// depth orientation
+		boolean depthOrientation = SceneGraph.getDepthOrientation();
+
+		if (depthOrientation) {
+			this.horiDepthRadioButton.setSelected(true);
+		} else {
+			this.vertDepthRadioButton.setSelected(true);
+		}
+
+		// sharing server address and port number
+		String srvAddress, srvPort;
+
+		if (prefs.getProperty("sessionSharing.serverAddress") == null || prefs.getProperty("sessionSharing.serverAddress").equals("")) {
+			srvAddress = "127.0.0.1";
+		} else {
+			srvAddress = prefs.getProperty("sessionSharing.serverAddress");
+		}
+
+		if (prefs.getProperty("sessionSharing.serverPort") == null || prefs.getProperty("sessionSharing.serverPort").equals("")) {
+			srvPort = "16688";
+		} else {
+			srvPort = prefs.getProperty("sessionSharing.serverPort");
+		}
+
+		this.serverAddressTextField.setText(srvAddress);
+		this.serverPortTextField.setText(srvPort);
+
+		boolean showOrigin = Boolean.parseBoolean(prefs.getProperty("ui.showOrigin"));
+		boolean showSectionLabel = Boolean.parseBoolean(prefs.getProperty("ui.showSectionLabel"));
+
+		this.showOriginAxisCheckbox.setSelected(showOrigin);
+		this.showCoreSectionLabelCheckbox.setSelected(showSectionLabel);
+
+		boolean isCanvasAlwaysAtBottom = Boolean.parseBoolean(prefs.getProperty("ui.canvas.alwaysBelow"));
+		this.canvasAlwaysAtBelowCheckBox.setSelected(isCanvasAlwaysAtBottom);
+
+		boolean isVerticalDepthScroll = Boolean.parseBoolean(prefs.getProperty("ui.verticalDepthScroll"));
+		this.depthScrollCheckbox.setSelected(isVerticalDepthScroll);
+
+		String dictDefFile = prefs.getProperty("dis.dictDefinitionFile");
+		if (dictDefFile == null || dictDefFile.equals("")) {
+			String sp = System.getProperty("file.separator");
+			dictDefFile = cwd + sp + "resources" + sp + "annotations" + sp + "defaultDictionary.plist";
+		}
+		this.dictDefFileTextField.setText(dictDefFile);
+
+		String prefDISPrefix = prefs.getProperty("dis.prefix");
+		if (prefDISPrefix == null || prefDISPrefix.equals("")) {
+			prefDISPrefix = System.getProperty("user.home");
+		}
+		this.disPrefixTextField.setText(prefDISPrefix);
+	}
+
+	public void start(final int step, final CRPreferences p) {
+		this.setPreferences(p);
+		stageTab.setSelectedIndex(step);
+	}
+
+	public void stateChanged(final ChangeEvent e) {
+	}
+
+	private void switchDepthOrientation() {
+		boolean isHorizontal = horiDepthRadioButton.isSelected();
+
+		CorelyzerApp app = CorelyzerApp.getApp();
+		if (app != null) {
+			SceneGraph.setDepthOrientation(isHorizontal);
+			app.updateGLWindows();
+		}
+	}
+
+	public void windowActivated(final WindowEvent windowEvent) {
+	}
+
+	public void windowClosed(final WindowEvent e) {
+	}
+
+	/**
+	 * Sends the results to the CorelyzerApp object and saves the settings for
+	 * the future.
+	 */
+	public void windowClosing(final WindowEvent e) {
+		System.out.println("CRPreferencesDialog Window Closed");
+		this.saveAndApplySetups();
+	}
+
+	public void windowDeactivated(final WindowEvent windowEvent) {
+	}
+
+	public void windowDeiconified(final WindowEvent windowEvent) {
+	}
+
+	public void windowIconified(final WindowEvent windowEvent) {
+	}
+
+	public void windowOpened(final WindowEvent e) {
+	}
+}
