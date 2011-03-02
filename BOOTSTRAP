@@ -1,0 +1,8 @@
+#!/bin/sh
+
+cd scenegraph/deps/win32
+if [ ! -d bootstrap ]; then
+	tar xzvf bootstrap.tar.gz
+	cd bootstrap
+	make libpng jpeg tiff glew pthreads freetype
+fi
