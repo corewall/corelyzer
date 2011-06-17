@@ -1151,7 +1151,7 @@ MultiLevelTextureSetEX* create_texset_from_png(const char* filename, int nlevels
         return NULL ; //-1;
     }
 
-    if( info_ptr->bit_depth != 8 )
+    if ( png_get_bit_depth( png_ptr, info_ptr ) != 8 )
     {
         printf("Unsupported PNG bit depth\n");
         png_destroy_read_struct( &png_ptr, &info_ptr, NULL);
