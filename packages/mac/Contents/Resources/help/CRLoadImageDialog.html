@@ -1,0 +1,30 @@
+<html>
+    <body>
+        <h1>CRLoadImageDialog</h1>
+        <hr>
+		<p>
+Use this dialog to select the image files that you want to load into Corelyzer.<br>
+<h2>How to determine the "DPI" value</h2>
+"DPI" stands for "dots per inch". Corelyzer use this value to map digitalized image
+        to physical scale. DPI values are determined using the following order:<br>
+        <ul>
+            <li>If the DPI values are not zeros in the table:</li>
+            The DPI_x and DPI_y values will be used directly if they are not zeros.<br>
+            <br>
+
+            <li>If "DPI" values are zero, but the "length" values are not zero</li>
+            The DPI values will be calculated using the dimensions of the image(width and height in pixels) and
+            the physical (core) length of the image (in meter).<br>
+            <br>
+
+            <i>dpi = (image_width_in_pixel) / (length * 100 / 2.54)</i>
+
+            <li>Default DPI values(254.0) will be used</li>
+            <br>
+        </ul>
+        </p>
+        <hr>
+        <address>(c) 2008 Corelyzer by Electronic Visualization Laboratory,
+            University of Illinois at Chicago</address>
+    </body>
+</html>

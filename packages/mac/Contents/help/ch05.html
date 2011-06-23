@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>Chapter 5. Load Images</title><meta name="generator" content="DocBook XSL Stylesheets V1.74.0" /><link rel="home" href="index.html" title="Corelyzer User's Manual" /><link rel="up" href="index.html" title="Corelyzer User's Manual" /><link rel="prev" href="ch04s03.html" title="4.3. Visualization canvas" /><link rel="next" href="ch05s02.html" title="5.2. Load Images from online services" /></head><body><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Chapter 5. Load Images</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="ch04s03.html">Prev</a> </td><th width="60%" align="center"> </th><td width="20%" align="right"> <a accesskey="n" href="ch05s02.html">Next</a></td></tr></table><hr /></div><div class="chapter" lang="en" xml:lang="en"><div class="titlepage"><div><div><h2 class="title"><a id="id461132"></a>Chapter 5. Load Images</h2></div></div></div><div class="toc"><p><b>Table of Contents</b></p><dl><dt><span class="sect1"><a href="ch05.html#id461193">5.1. Load Images from local files</a></span></dt><dt><span class="sect1"><a href="ch05s02.html">5.2. Load Images from online services</a></span></dt><dt><span class="sect1"><a href="ch05s03.html">5.3. Load Images from CoreCast syndication feeds</a></span></dt><dd><dl><dt><span class="sect2"><a href="ch05s03.html#id461422">5.3.1. Subscribe to CoreCast feeds</a></span></dt><dt><span class="sect2"><a href="ch05s03.html#id461505">5.3.2. Load core images from CoreCast feeds</a></span></dt></dl></dd><dt><span class="sect1"><a href="ch05s04.html">5.4. Load images using IODP-formatted section list</a></span></dt><dt><span class="sect1"><a href="ch05s05.html">5.5. Load FMS images from IODP-USIO logging database</a></span></dt></dl></div><p>
+      Corelyzer by default visualizes core imagery by placing the
+      image on a horizontal track. A track is just a way of grouping
+      multiple section images. Before you can load an image in
+      Corelyzer, you must first create a track. To create a track you
+      must select the menu "File -&gt; Create a Track", after which you
+      will be prompted to enter a name for a track. Once you do this
+      the Track listbox in the main menu will update.
+
+      </p><div class="figure"><a id="id461148"></a><p class="title"><b>Figure 5.1. Create a track</b></p><div class="figure-contents"><div><img src="images/create_track.png" alt="Create a track" /></div></div></div><p><br class="figure-break" />
+    </p><p>
+      Tracks are a way of grouping. Since we have nothing
+      in our grouping/track then nothing in our visualization window
+      will change. Now we add images so that way we can see something
+      and have something to interact with. First, let's remember that
+      our track is a horizontally oriented track, with an increasing
+      depth as we go from left to right. This means we will need
+      images that are horizontally oriented in such a way that they
+      are increasing in depth from left to right. 
+    </p><p>
+      IODP images are
+      vertical, with increasing depth as you go from top to
+      bottom. Fortunately we have created a Corelyzer Plugin that
+      makes use of CHRONOS webservices to access the JANUS
+      database. The plugin is called the "Chronos-Janus Plugin" and will
+      be discussed later. For now, we will assume that there are some
+      images of core sections that are horizontally oriented, with an
+      increasing depth from left to right.
+    </p><p>
+      If you know the
+      images' orientation, you can also specify that individually in
+      the image loading dialog shown below.
+    </p><p>
+      We also have to make sure that your images have the correct
+      dots-per-inch (DPI). Why does the DPI of the image matter? This
+      is discussed in detail in the appendix. It basically establish
+      the correct mapping between the image dimension to the physical
+      core dimensions. 
+    </p><p>
+      How do you know what is the right DPI of your image? This all
+      depends on the equipment in which the image was
+      retrieved. Usually most line-scan cameras that are manufactured
+      for the creations of high-resolution digital line scan images of
+      core sections have this indicated in the advertisements of the
+      scanner. Unfortunately, it seems that most of the scanners don't
+      save off the correct DPI. There is a quick and dirty way of
+      checking and making sure the DPI is correct in the section
+      Making Sure the DPI of an Image is Correct. Or in the image
+      loading dialog below, you can also specify the core section
+      image's length, the DPI values will be calculated by Corelyzer.
+    </p><div class="sect1" lang="en" xml:lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="id461193"></a>5.1. Load Images from local files</h2></div></div></div><p>
+        So now we will assume that the images are:
+
+        </p><div class="itemizedlist"><ul type="disc"><li><p>Horizontally oriented</p></li><li><p>Have an increasing depth from left to right</p></li><li><p>Have the correct dots-per-inch (DPI)</p></li></ul></div><p>
+
+        To bring up the file selection dialog to tell Corelyzer which
+        images to load, we need to first select the grouping track in
+        the track list, and then select the menu item "File -&gt; Open
+        Image Files...".
+      </p><p>
+        The “Load Images” dialog will pop up and allow
+        you to load the section images with properties like, orientation
+        (vertical or horizontal), length, DPI, and starting depth (in
+        meters) of
+        the section image etc. The upper-right of the dialog is an Excel-like
+      table. Click on the "Select Image Files" button to fill the
+      table with core section images. You can double-click each cell
+      to make individual modifications. Press "Enter" when you finish
+      editing a cell. Note that if you leave the DPI_X and DPI_Y value
+      as 0, the length value will be used with image dimensions to
+      calculate DPI values.
+      </p><p>
+      Also, you can enable the "Batch input" checkbox to fill the
+      table parameters. You can select orientation, length, DPI, and
+      start depth and depth increment. Click on "Apply" button will
+      update and fill specified parameters into the table above.
+      </p><p>
+        Click “OK” button when you are satisfied with the table
+        content. Corelyzer will start loading selected images with
+        specified parameters.
+
+        </p><div class="figure"><a id="id461243"></a><p class="title"><b>Figure 5.2. Load Images dialog</b></p><div class="figure-contents"><div><img src="images/loadImage_dialog.png" alt="Load Images dialog" /></div></div></div><p><br class="figure-break" />
+
+      </p><p>
+        Once completed the visualization window will display our
+        imagery, and the Section listbox in the main iCores control
+        window will update with the image
+        filenames loaded on the Track. Notice in the image below that
+        our image has a ruler in it, and that the ruler in the image
+        closely matches the markers indicating depth at the bottom of
+        the visualization window.
+
+        </p><div class="figure"><a id="id461259"></a><p class="title"><b>Figure 5.3. Visualization canvas with loaded core section
+          images</b></p><div class="figure-contents"><div><img src="images/viz_loaded.png" alt="Visualization canvas with loaded core section images" /></div></div></div><p><br class="figure-break" />
+      </p><p>
+        A screen capture video of these actions can be found in this
+        <a class="ulink" href="http://www.evl.uic.edu/cavern/corewall/documents/movies/5.1-LoadLocalImages.mov" target="_top">link
+        online (size: 3.5MB)</a>.
+      </p></div></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="ch04s03.html">Prev</a> </td><td width="20%" align="center"> </td><td width="40%" align="right"> <a accesskey="n" href="ch05s02.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">4.3. Visualization canvas </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> 5.2. Load Images from online services</td></tr></table></div></body></html>

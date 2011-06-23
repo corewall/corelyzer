@@ -1,0 +1,174 @@
+body 
+{ 
+font-size: 62.5%; 
+background-color: #ffffff;
+font-family: verdana, arial, 'sans serif'; color:black; 
+}
+
+p { margin:1.5px; }
+
+h1
+{ 
+/* Head Title Style (CoreWall Annotaiton Repository) */
+text-align: center; font-size: 1.8em; font-weight: bold; text-decoration: underline; margin-bottom: 0pt;
+}
+
+hr
+{ 
+text-align: left;
+margin: 0;
+color:black;
+height: 0; 
+width: 425px;
+page-break-before: avoid;
+page-break-after: auto;
+}
+
+table
+{
+page-break-inside: avoid;
+}
+
+table.header
+{
+    border: 2px inset #8B8378;
+    -moz-border-radius: 2px;
+    border-collapse: collapse;
+    width: 750px;
+}
+
+table.header td
+{
+    border: 1px solid black;
+    padding: 0.1em 1ex 0.1em 1ex;
+    color black;
+    font-size: 1.1em;
+    align: left;
+}
+table.header th
+{
+    border: 1px solid black;
+    padding: 0.1em 1ex 0.1em 1ex;
+    color black;
+    font-size: 1.1em;
+    background-color: #ccccff;
+    align: left;
+}
+
+table.main
+{
+    width: 750px;
+    border: 0px;
+    cellspacing: 0px;
+    cellpadding: 0px;
+    border-collapse: collapse;
+}
+table.main td.image
+{
+    vertical-align: top;
+    width: 400px;
+    padding: 0px;
+}
+table.main td.annotation
+{
+    vertical-align: top;
+    width: 350px;
+    padding: 0px;
+}
+table.ann
+{
+    border: 1px inset #8B8378;
+    -moz-border-radius: 1px;
+    border-collapse: collapse;
+    width: 350px;
+    background-color: #e5ecf9;
+    margin-left: 1px;
+}
+
+table.ann_header
+{
+    width: 345px;
+    border: 0px;
+    border-collapse: collapse;
+    font-weight: bold;
+}
+
+table.ann_header td
+{
+    color black;
+    font-size: 1.2em;
+    background-color: #ccccff;
+    border-width: 2px;
+	padding: 0px;
+	border-style: solid;
+	border-color: #9999ff;
+	border-top: none;
+	border-right: none;
+	border-left: none;
+}
+table.ann_header p.type
+{
+    color black;
+    font-size: 1.1em;
+    width: 345px;
+    margin-left: 2%;
+}
+table.ann_content
+{
+    width: 345px;
+    border-collapse: collapse;
+    margin-bottom: 0.5em;
+    margin-top: 0.5em;
+}
+table.ann_content th
+{
+    font-size: 1.1em;
+}
+table.ann_content th.indent
+{
+    width: 7%;
+}
+table.ann_content th.time
+{
+    width: 53%;
+    border-width: 2px;
+	padding: 0px;
+	border-style: solid;
+	border-color: black;
+	border-top: none;
+	border-right: none;
+	border-left: none;
+	text-align: left;
+	margin-left: 0%;
+}
+
+table.ann_content th.author
+{
+    width: 40%;
+    text-align: right;
+    border-width: 2px;
+	padding: 0px;
+	border-style: solid;
+	border-color: black;
+	border-top: none;
+	border-right: none;
+	border-left: none;
+}
+
+table.ann_content p.c
+{
+    font-size: 1.2em;
+    margin-right: 1%;
+    margin-left: 12%;
+    text-align: justify;
+}
+table.ann_content img
+{
+    width: 300px;
+}
+
+a:link    {color:Black}
+a:visited {color:Black}
+a:active  {color:MediumBlue}
+a:hover   {color:MediumBlue}
+

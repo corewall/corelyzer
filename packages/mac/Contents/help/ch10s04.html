@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>10.4. Administrator commands</title><meta name="generator" content="DocBook XSL Stylesheets V1.74.0" /><link rel="home" href="index.html" title="Corelyzer User's Manual" /><link rel="up" href="ch10.html" title="Chapter 10. Corelyzer server and plugin clients" /><link rel="prev" href="ch10s03.html" title="10.3. Running the administration client" /><link rel="next" href="ch10s05.html" title="10.5. Admin commands reference table" /></head><body><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">10.4. Administrator commands</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="ch10s03.html">Prev</a> </td><th width="60%" align="center">Chapter 10. Corelyzer server and plugin clients</th><td width="20%" align="right"> <a accesskey="n" href="ch10s05.html">Next</a></td></tr></table><hr /></div><div class="sect1" lang="en" xml:lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="id462932"></a>10.4. Administrator commands</h2></div></div></div><p>
+        </p><div class="itemizedlist"><ul type="disc"><li><p>
+              Command: "new-section". Arguments: "Section name", "Starting depth" in
+              meters" and "Length in meters".
+            </p><p>
+              Purpose: The main purpose of the command is to notify to
+              the server that a new core sections exists.  Effectively
+              creating empty slots of split-core image and whole-core
+              image entries.  This is also used so that when a new
+              data comes in, there are correlations to depth intervals
+              and section names.
+            </p></li><li><p>
+              Command: "new-missing-section". Arguments: "Section name
+              prefix", "Starting depth in meters" and "Length in meters".
+            </p><p>
+              Purpose: The main purpose of the command is to notify to
+              the server that a new missing core sections exists.
+              Effectively creating empty slots of split-core image and
+              whole-core image entries.  Using command like
+              “new-missing-section and001 0.0 1.5” will create a new
+              section with section name “and001_0.0-1.5-missing”.
+            </p></li><li><p>
+              Command: "new-split-core". Arguments: "The URL to the
+              image file", "The name of the section the image comes
+              from", "The DPI (dots-per-inch) of the image in X
+              (horizontal) direction" and (Optional) "The DPI of the
+              image in Y (vertical) direction"
+            </p><p>
+              Purpose: The purpose of this command is to let the
+              server know the web address of the split-core image that
+              was created from the core section.  This will let the
+              server then notify the clients that the image exists and
+              is available for download and viewing in Corelyzer.
+            </p></li><li><p>
+              Command: "new-missing-split-core". Arguments: "The section name of missing split core"
+            </p><p>
+              Purpose: The purpose of this command is to assign a
+              empty split core image to a core section due to there
+              might be no split core image available but users still
+              need to access the data and whole core images. The
+              missing section name convention will be like
+              &lt;prefix&gt;_&lt;start_depth&gt;-&lt;end_depth&gt;, eg:
+              “and001_186.7-187.5”.
+            </p></li><li><p>
+              Command: "new-whole-core". Arguments: "The URL to the
+              image file", "The name of the section the image comes
+              from" and "The DPI (dots-per-inch) of the image".
+
+            </p><p>
+              Purpose: The purpose of this command is to let the
+              server know the web address of the whole-core image that
+              was created from the core section.  This will let the
+              server then notify the clients that the image exists and
+              is available for download and viewing in Corelyzer.
+            </p></li><li><p>
+              Command: "new-dataset". Arguments: "Data file to parse"
+              and "The name of the dataset to append/overwrite".
+            </p><p>
+              Purpose: This command will parse a tab-delimited data
+              file and feed the server new data tables.  The tab
+              delimited data file must follow the formatting exampled
+              in Appendix B.  This command will retrieve a listing of
+              sections to use the depth and length of the sections to
+              determine how to partition the data file into tables.  
+            </p><p>
+              Once the tables are created the tables are sent to the
+              server and stored in a file with the following name
+              convention:
+            </p><pre class="programlisting">
+              dataset.&lt;section name&gt;.&lt;dataset name&gt;.tab
+            </pre><p>
+              If the dataset name does not exist in the server, it
+              will be created automatically.  If the name exists then
+              the files created on the server will automatically be
+              appended.
+            </p><p>
+              NOTE: Existing files will be overwritten automatically!
+              If this is an undesired effect, please make sure that
+              there are no rows that contain depths of sections that
+              would previously had a table made for them for the
+              dataset.  If you are only appending to a single
+              tab-delimited file without changing previous rows then
+              the overwrite will effectively be doing nothing for
+              previously created tables.
+            </p></li><li><p>
+              Command: "list-sections". Arguments: None
+            </p><p>
+              Purpose: The purpose of this command is to list the
+              existing sections known to the server.  Returned is a
+              listing of section names, their depth and length in
+              meters.  The output is displayed to the command-line.
+            </p></li><li><p>
+              Command: "list-datasets". Arugments: None
+            </p><p>
+              Purpose: The purpose of this command is to display
+              datasets known to the server.  Displayed are the names
+              of the datasets followed by the attributes in the
+              dataset and their respective minimum and maximum values
+              within the whole dataset.
+            </p></li><li><p>
+              Command: "list-tables". Arguments: "The name of the
+              dataset"
+            </p><p>
+              Purpose: This command will display a listing of tables
+              within a given dataset.  This is useful if you do not
+              know if a given section is covered by a dataset because
+              the names of the tables are the names of the sections.
+            </p></li><li><p>
+              Command: "list-table-data". Arguments: "The name of the
+              dataset" and "The name of the section/table to view"
+            </p><p>
+              Purpose: This command will display the data of a table
+              from a given dataset.  The data is displayed in a
+              tab-delimited form with the first line as the header
+              followed by lines of numerical values.  Table cells that
+              are invalid will appear blank.
+            </p></li><li><p>
+              Command: "run-backup". Arguments:	None
+            </p><p>
+              Purpose: The server runs backups automatically if the
+              last backup has occurred more than 24 hours ago.  This
+              command forces the current day’s backup to occur.
+            </p></li><li><p>
+              Command: "logout". Arguments: None
+            </p><p>
+              Purpose: This command allows the administrator to logout
+              and ends the client program.
+            </p></li><li><p>
+              Command: "server-shutdown". Arguments: None
+            </p><p>
+              Purpose: This command allows the server to properly
+              shutdown.
+            </p></li></ul></div><p>
+
+      </p></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="ch10s03.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="ch10.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="ch10s05.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">10.3. Running the administration client </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> 10.5. Admin commands reference table</td></tr></table></div></body></html>

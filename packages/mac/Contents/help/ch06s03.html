@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>6.3. Use Custom Data Import</title><meta name="generator" content="DocBook XSL Stylesheets V1.74.0" /><link rel="home" href="index.html" title="Corelyzer User's Manual" /><link rel="up" href="ch06.html" title="Chapter 6. Load and Plot Numerical Log Data" /><link rel="prev" href="ch06s02.html" title="6.2. Use Quick Data Import" /><link rel="next" href="ch06s04.html" title="6.4. Download from IODP-USIO logging database" /></head><body><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">6.3. Use Custom Data Import</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="ch06s02.html">Prev</a> </td><th width="60%" align="center">Chapter 6. Load and Plot Numerical Log Data</th><td width="20%" align="right"> <a accesskey="n" href="ch06s04.html">Next</a></td></tr></table><hr /></div><div class="sect1" lang="en" xml:lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="id461825"></a>6.3. Use Custom Data Import</h2></div></div></div><p>
+        In the case your data file is not in Corelyzer dataset XML
+        schema yet, you can use the “Custom Data Import” feature under
+        “File” menu to specify few parameters and have the program to
+        convert
+        your data file into Corelyzer dataset XML format. A user can
+        convert a plain text tabular data file or a Geotek generated
+        data (after pre-processing and data cleaning) to Corelyzer XML
+        data format and directly imported into Corelyzer working session.
+      </p><p>
+        Import parameters:
+        </p><div class="itemizedlist"><ul type="disc"><li><p>
+              File name: Original input file name. Use "File..." button
+              to select your input file.
+            </p></li><li><p>
+              Field Separator:
+              Input what is used to separate each fields in the input
+              file. Commonly used separator might be comma(,) for CSV
+              file. Or Tab(type in \t) delimited file.
+            </p></li><li><p>
+              Section Prefix:
+              The prefix used for naming each section
+            </p></li><li><p>
+              Start Line Number:
+              In the input file, the starting line number of data
+              values, starting from 1.
+
+            </p></li><li><p>
+              End Line Number:
+              In the input file, the ending line number of data values
+
+            </p></li><li><p>
+              Fields Label Line Number:
+              What is the line number for labels of each value in
+              columns.
+
+            </p></li><li><p>
+              Unit Label Line Number:
+              What is the line number for units of each value in columns. 
+              If there is no such line, just input the same line
+              number as "Field Label Line Number"
+
+            </p></li><li><p>
+              Name Column Number:
+              Which column field should be picked used as the name of
+              section.
+
+              The final section name will be composed with "Section
+              Prefix" and "Name Column Number".
+              A simple comma separated expression is allowed to
+              compose the section name.
+
+            </p></li><li><p>
+              Depth Column Number:
+              Which column will be treated as depth values. Column
+              index starts with 1.
+            </p></li><li><p>
+              Select Value Columns:
+              From previous inputs, the field labels will be
+              identified. Then you can check which fields do you want
+              to select to the final dataset file.
+            </p></li></ul></div><p>
+      </p><div class="sect2" lang="en" xml:lang="en"><div class="titlepage"><div><div><h3 class="title"><a id="id461937"></a>6.3.1. A step-by-step walkthrough example</h3></div></div></div><p>
+          Next is a step by step walkthrough example. The example source
+          data file is downloaded from <a class="ulink" href="http://iodp.ldeo.columbia.edu/DATA/" target="_top">IODP Log database
+          at Lamont-Doherty Earth Observatory, Columbia
+          University</a>. The data file used in
+          this example is <a class="ulink" href="attachments/763B-ngt.dat" target="_top">763B-ngt.dat</a>. The
+          resulting Corelyzer dataset file is <a class="ulink" href="attachments/764B-ngt.xml" target="_top">output_data.xml</a>.
+        </p><p>
+          Select the "Custom Data Import" from the "File" menu.
+
+          </p><div class="figure"><a id="id461971"></a><p class="title"><b>Figure 6.1. Select "Custom Data Import"</b></p><div class="figure-contents"><div><img src="images/dataimport-1.png" alt="Select &quot;Custom Data Import&quot;" /></div></div></div><p><br class="figure-break" />
+        </p><p>
+          The selected file will be loaded into "Plain Text Data
+          Import" dialog. The upper half of the dialog shows different
+          data format parameters in tabs. The lower half shows the
+          content of the text file with line number attached to the
+          beginning of each line.
+        </p><p>
+          In the "File Info" tab, the selected file will be shown and
+          you have to select from one of the available separator
+          (comma, tab or space). In the this example, tab separator is
+          selected.
+
+          </p><div class="figure"><a id="id461999"></a><p class="title"><b>Figure 6.2. Data import - file info</b></p><div class="figure-contents"><div><img src="images/dataimport-2.png" alt="Data import - file info" /></div></div></div><p><br class="figure-break" />
+        </p><p>
+          Because some text files will have certain number of comments
+          lines in the header to describe the data file. In the "Data
+          Range" tab, you can specify the actual data line
+          range. Notice that the first number in each in the lower
+          "File Content" panel shows the line number starting from
+          one. In this example, the actual data starts from 6th line
+          till the very end of the file (line 1586). In some
+          equipments, bad or invalid values will be recorded during
+          data acquisition with some fixed numbers like -999.99. 
+          If you want to ignore these bad values,
+          check the "Ignore some bad values?" checkbox and type in the
+          designated value.
+
+          </p><div class="figure"><a id="id462015"></a><p class="title"><b>Figure 6.3. Data range tab</b></p><div class="figure-contents"><div><img src="images/dataimport-3.png" alt="Data range tab" /></div></div></div><p><br class="figure-break" />
+        </p><p>
+          Next, you need to specify the lines showing the labels for
+          fields and units. If the data file does not have the unit
+          label line, just select the same line as the field label. In
+          this example 5th line shows the labels for data fields.
+
+          </p><div class="figure"><a id="id462035"></a><p class="title"><b>Figure 6.4. Field and Unit Labels</b></p><div class="figure-contents"><div><img src="images/dataimport-4.png" alt="Field and Unit Labels" /></div></div></div><p><br class="figure-break" />
+        </p><p>
+          Next, depth information parameters have to be specified. You
+          have to specify which column means depth. In this example,
+          the depth is in the first column.
+        </p><p>
+          In the "Depth Mode" selection, you can select from either
+          "Section Depth" or "Accumulated Depth". "Section Depth" means
+          the depth values are measured from the beginning of each
+          section that the data are acquired from. "Accumulated Depth"
+          means the depth is measured from the bottom of the sea/lake
+          floor.
+        </p><p>
+          Because internally Corelyzer arranges depth values into
+          sections, it in one way fits how certain parties obtain the
+          data from sections of cores. In the other way, it helps
+          renderning performance. So if the "Customize Section Name"
+          is not checked, the data will be put into sections suffixed
+          with section numbers automatically. If your data files has
+          section information embedded (like data files from LacCore
+          repository), or you have your own section naming convension,
+          you can customize your section names with "Section Prefix"
+          and "Name Column Number".
+        </p><p>
+          For example, if you have a data file looks like this:
+
+          </p><pre class="programlisting">
+Geotek MSCL Version 3.0 - GLAD4-HST03-1A.OUT created at 12:37:15 on 08-21-2003.,,,,,,,,,
+...
+SB DEPTH  ,SECT NUM  ,SECT DEPTH,ST        ,PWAmp     ,PWVel     ,Den1      ,MS1       ,Imp       ,FP        
+m         ,          ,cm        ,cm        ,          ,m/s       ,gm/cc     ,SI        ,          ,          
+0.06,1H-1,6,6.605,50,130.9347,1.2618,82.5908,165.2135,0.8632
+0.07,1H-1,7,6.605,50,131.1427,1.1873,89.2873,155.7109,0.9064
+0.08,1H-1,8,6.605,50,130.9736,1.2688,95.0648,166.1739,0.8592
+...
+2.41,1H-2,92,6.604,50,130.9019,1.5467,152.7585,202.4669,0.698
+2.42,1H-2,93,6.604,50,131.1098,1.5654,152.2331,205.2369,0.6871
+2.43,1H-2,94,6.604,50,130.9408,1.6787,148.03,219.8154,0.6214
+...
+4.41,2H-2,20,6.605,50,5436.214,1.9546,271.8012,10625.5,0.4614
+4.42,2H-2,21,6.605,50,130.9477,2.0751,287.0326,271.7301,0.3915
+4.43,2H-2,22,6.606,50,130.9545,1.9434,300.9818,254.4949,0.4679
+...
+          </pre><p>
+          
+          Each section's name can be composed by prefix
+          "GLAD4-HST03-1A" with suffix from the string in the "SECT
+          NUM" column. So check the "Customize Section Name" checkbox
+          with "GLAD4-HST03-1A" section prefix and the number "2" in
+          the "Name Column Number" will give the sections named
+          "GLAD4-HST03-1A-1H-1", "GLAD4-HST03-1A-1H-2" and
+          "GLAD4-HST03-1A-2H-2". Also notice that you need to use
+          values from multiple columns to compose your full section
+          name, you can also fill in string like, "2,-,4,-,7" to have
+          values from multiple columns in the full section name
+          separated by "-".
+
+          </p><div class="figure"><a id="id462076"></a><p class="title"><b>Figure 6.5. Depth setup</b></p><div class="figure-contents"><div><img src="images/dataimport-5.png" alt="Depth setup" /></div></div></div><p><br class="figure-break" />
+        </p><p>
+          In the "Fields Selection" tab, you then can select the data
+          field columns that you want to import into Corelyzer.
+
+          </p><div class="figure"><a id="id462094"></a><p class="title"><b>Figure 6.6. Fields selection</b></p><div class="figure-contents"><div><img src="images/dataimport-6.png" alt="Fields selection" /></div></div></div><p><br class="figure-break" />
+        </p><p>
+          The data import process will then ask you to save the
+          converted file (in Corelyzer native xml format) to your disk
+          for future use. After saving, the data will be loaded into
+          current Corelyzer session.
+          
+          </p><div class="figure"><a id="id462114"></a><p class="title"><b>Figure 6.7. Save converted file</b></p><div class="figure-contents"><div><img src="images/dataimport-7.png" alt="Save converted file" /></div></div></div><p><br class="figure-break" />
+        </p><p>
+          Notice that just like core images, data plots have to belong
+          to a track grouping. So if you haven't have a track created
+          or you want to have dedicated track grouping for data graph
+          plots, create a new track from the "File" menu.
+
+          </p><div class="figure"><a id="id462135"></a><p class="title"><b>Figure 6.8. Create a track for data graph plot</b></p><div class="figure-contents"><div><img src="images/dataimport-8.png" alt="Create a track for data graph plot" /></div></div></div><p><br class="figure-break" />
+        </p><p>
+        A screen capture video of these actions can be found in this
+        <a class="ulink" href="http://www.evl.uic.edu/cavern/corewall/documents/movies/6.3-LoadCustomData.mov" target="_top">link
+        online (size: 6.7MB)</a>.
+      </p></div></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="ch06s02.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="ch06.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="ch06s04.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">6.2. Use Quick Data Import </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> 6.4. Download from IODP-USIO logging database</td></tr></table></div></body></html>

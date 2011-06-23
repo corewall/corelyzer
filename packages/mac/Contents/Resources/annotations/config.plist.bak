@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>name0</key>
+	<string>Clast</string>
+	<key>form0</key>
+	<string>corelyzer.ui.annotation.clast.ClastInfoDialog</string>
+	<key>desc0</key>
+	<string>Clastology collection analysis</string>
+	<key>dict0</key>
+	<string>clast.plist</string>
+	<key>name1</key>
+	<string>Sample</string>
+	<key>form1</key>
+	<string>corelyzer.ui.annotation.sampling.SampleRequestDialog</string>
+	<key>desc1</key>
+	<string>Sample request information</string>
+	<key>dict1</key>
+	<string>sample.plist</string>
+	<key>name2</key>
+	<string>Property Values</string>
+	<key>form2</key>
+	<string>corelyzer.ui.annotation.propertyList.DefaultFormDialog</string>
+	<key>desc2</key>
+	<string>Default propery-value-pairs</string>
+	<key>dict2</key>
+	<string>propvalue.plist</string>
+</dict>
+</plist>

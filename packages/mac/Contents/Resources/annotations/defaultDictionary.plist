@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plist version="1.0">
+<dict>
+	<key>id</key>
+	<string></string>
+	<key>starting_depth</key>
+	<string></string>
+	<key>ending_depth</key>
+	<string></string>
+	<key>starting_width</key>
+	<string></string>
+	<key>ending_width</key>
+	<string></string>
+	<key>coordinates</key>
+	<string></string>
+	<key>line_width</key>
+	<string></string>
+	<key>rotation</key>
+	<string></string>
+	<key>roi_type</key>
+	<string></string>
+	<key>color</key>
+	<string></string>
+	<key>analyst</key>
+	<string></string>
+	<key>anno_class</key>
+	<string></string>
+	<key>anno_detail</key>
+	<string></string>
+	<key>anno_type</key>
+	<string></string>
+	<key>value1</key>
+	<string></string>
+	<key>value2</key>
+	<string></string>
+	<key>value3</key>
+	<string></string>
+	<key>value4</key>
+	<string></string>
+	<key>remarks</key>
+	<string></string>
+	<key>name</key>
+	<string></string>
+</dict>
+</plist>

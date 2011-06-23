@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>Chapter 9. Save and Load Sessions</title><meta name="generator" content="DocBook XSL Stylesheets V1.74.0" /><link rel="home" href="index.html" title="Corelyzer User's Manual" /><link rel="up" href="index.html" title="Corelyzer User's Manual" /><link rel="prev" href="ch08s03.html" title="8.3. Measuring Mode" /><link rel="next" href="ch10.html" title="Chapter 10. Corelyzer server and plugin clients" /></head><body><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Chapter 9. Save and Load Sessions</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="ch08s03.html">Prev</a> </td><th width="60%" align="center"> </th><td width="20%" align="right"> <a accesskey="n" href="ch10.html">Next</a></td></tr></table><hr /></div><div class="chapter" lang="en" xml:lang="en"><div class="titlepage"><div><div><h2 class="title"><a id="id462760"></a>Chapter 9. Save and Load Sessions</h2></div></div></div><p>
+      You can save your current working session by selecting “Save
+      Session As ...” under “File” menu. This function will save all
+      the information that you loaded into the scene into a XML-based
+      “CML” file. CML file schema description can be found in <a class="ulink" href="http://instaar.colorado.edu/%7Ejenkinsc/dbseabed/corewall/CmlXml_Syntax_1.pdf" target="_top">here</a>.
+    </p><p>
+      This file doesn’t save all the images and dataset
+      files with it, it keeps track of where all the related files
+      are located. You can later load everything back by selecting
+      “Open a Session File” under the same “File” menu.
+    </p><p>
+      The “cml” file is small, and if the resource you loaded into the
+      scene are all downloaded from the Internet within Corelyzer,
+      these resources’ URL will be kept and by passing just the “cml”
+      file around, other people can load back the same session that
+      you were working on.
+    </p><p>
+      But if the resources you loaded in your working session are all
+      files in your local hard disk, and you want to pass the working
+      session to your colleague? Please use the “Export…” and
+      “Import…” functions under “Core Archive” menu in the "File"
+      menu. 
+
+      The “Export…” function
+      will pack all the resources along with a session “cml” file into
+      a big compressed “Core ARchive”, a “.car” file. It will contain
+      all the images, datasets, annotations and their attachments
+      within. The other people can just use “Import…” to open it up
+      and restore everything you were working on his/her screen.
+    </p></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="ch08s03.html">Prev</a> </td><td width="20%" align="center"> </td><td width="40%" align="right"> <a accesskey="n" href="ch10.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">8.3. Measuring Mode </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> Chapter 10. Corelyzer server and plugin clients</td></tr></table></div></body></html>

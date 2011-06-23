@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plist version="1.0">
+<dict>
+	<key>sessionname</key>
+	<string></string>
+	<key>trackname</key>
+	<string></string>
+	<key>corename</key>
+	<string></string>
+	<key>starting_depth</key>
+	<string></string>
+	<key>ending_depth</key>
+	<string></string>
+	<key>starting_width</key>
+	<string></string>
+	<key>ending_width</key>
+	<string></string>
+	<key>username</key>
+	<string></string>
+	<key>date</key>
+	<string></string>
+	<key>id</key>
+	<string></string>
+	<key>name</key>
+	<string></string>
+	<key>anno_class</key>
+	<string>CLR_propvalue</string>
+	<key>anno_app</key>
+	<string>CLR</string>
+	<key>anno_type</key>
+	<string></string>
+	<key>anno_state</key>
+	<string>added</string>
+	<key>notes</key>
+	<string></string>		
+	
+	<key>coordinates</key>
+	<string></string>
+	<key>line_width</key>
+	<string></string>
+	<key>rotation</key>
+	<string></string>
+	<key>roi_type</key>
+	<string></string>
+	<key>color</key>
+	<string></string>
+	<key>analyst</key>
+	<string></string>
+	<key>anno_detail</key>
+	<string></string>
+	<key>value1</key>
+	<string></string>
+	<key>value2</key>
+	<string></string>
+	<key>value3</key>
+	<string></string>
+	<key>value4</key>
+	<string></string>
+	<key>remarks</key>
+	<string></string>
+</dict>
+</plist>

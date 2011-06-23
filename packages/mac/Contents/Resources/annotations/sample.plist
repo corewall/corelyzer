@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- !DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd" -->
+<plist version="1.0">
+<dict>
+	<key>sessionname</key>
+	<string></string>
+	<key>trackname</key>
+	<string></string>
+	<key>corename</key>
+	<string></string>
+	<key>starting_depth</key>
+	<string></string>
+	<key>ending_depth</key>
+	<string></string>
+	<key>starting_width</key>
+	<string></string>
+	<key>ending_width</key>
+	<string></string>
+	<key>username</key>
+	<string></string>
+	<key>date</key>
+	<string></string>
+	<key>id</key>
+	<string>N/A</string>
+	<key>name</key>
+	<string>N/A</string>
+	<key>anno_class</key>
+	<string>CLR_sampling</string>
+	<key>anno_app</key>
+	<string>CLR</string>
+	<key>anno_type</key>
+	<string></string>
+	<key>anno_state</key>
+	<string>added</string>
+	<key>notes</key>
+	<string></string>
+	
+	<key>contact</key>
+	<string></string>
+	<key>sampleType</key>
+	<string></string>
+	<key>requestid</key>
+	<string></string>
+</dict>
+</plist>
