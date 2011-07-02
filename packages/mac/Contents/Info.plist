@@ -22,7 +22,7 @@
 		</dict>
 	</array>
 	<key>CFBundleExecutable</key>
-	<string>JavaApplicationStub</string>
+	<string>Corelyzer</string>
 	<key>CFBundleGetInfoString</key>
 	<string>:version, CoreWall Project (http://corewall.org)</string>
 	<key>CFBundleIconFile</key>
