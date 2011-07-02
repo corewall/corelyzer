@@ -20,51 +20,6 @@ task 'package-check'(dependsOn: [':app:build']) << {
  */
 task 'package-mac'(dependsOn: 'package-check') << {
 	def app = file('dist/mac/Corelyzer.app')
-	ant.delete(dir: app, failonerror: false)
-	mkdir(app)
-
-	// copy the skeleton
-	copy {
-		into app
-		from 'packages/mac'
-	}
-
-	// copy the jars and native libraries
-	copy {
-		into file('dist/mac/Corelyzer.app/Contents/Resources/Java')
-		from 'app/dist'
-		from file('app/deps/mac')
-		from file('scenegraph/dist').listFiles().findAll { it.name.endsWith('.jar') || it.name.endsWith('.jnilib') }
-	}
-
-	// update our Info.plist
-	def classpath = file('dist/mac/Corelyzer.app/Contents/Resources/Java').listFiles().findAll { it.name.endsWith('.jar') }.collect { file ->
-		'\t\t\t<string>\\$JAVAROOT/' + file.name + '</string>'
-	}
-	def plist = file('dist/mac/Corelyzer.app/Contents/Info.plist')
-	def text = plist.text.toString()
-	text = text.replaceAll(':version', version) // add our version
-	text = text.replaceAll(':classpath', classpath.join('\n'))
-	plist.write(text)
-
-	ant {
-		// make our app executable
-		chmod(file:"dist/mac/Corelyzer.app/Contents/MacOS/Corelyzer", perm:"ugo+rx")
-
-		// make a tarball
-		exec(executable: 'tar', dir: 'dist/mac') {
-			arg(value: 'czvf')
-			arg(value: "Corelyzer-${version}.tar.gz")
-			arg(value: 'Corelyzer.app')
-		}
-	}
-}
-
-/**
- * Package things up as a Mac application bundle
- */
-task 'package-mac-min'(dependsOn: 'package-check') << {
-	def app = file('dist/mac/Corelyzer.app')
 	if (app.exists()) {
 		// copy the jars and native libraries
 		copy {
@@ -138,9 +93,7 @@ task 'package-win'(dependsOn: 'package-check') << {
 
 task 'package'(dependsOn: ['package-mac', 'package-win']) << {}
 
-/*
 task wrapper(type: Wrapper) {
 	gradleVersion = '0.9.2'
-	jarPath = 'wrapper'
+	jarFile = 'wrapper/gradle-wrapper.jar'
 }
-*/
