@@ -5,6 +5,15 @@ allprojects {
 	targetCompatibility = '1.5'
 }
 
+defaultTasks 'clean', 'package'
+
+task clean << {
+	ant.delete(dir: file('dist'), failonerror: false)
+}
+
+/**
+ * Packaging tasks.	 It may be good to just extend the gradle dist task instead of having a custom task.
+ */
 task 'package-check'(dependsOn: [':app:build']) << {
 	def required = file("scenegraph/dist/scenegraph-${version}.jar")
 	if (!required.exists()) {
@@ -23,9 +32,9 @@ task 'package-mac'(dependsOn: 'package-check') << {
 	if (app.exists()) {
 		// copy the jars and native libraries
 		copy {
-			into file('dist/mac/Corelyzer.app/Contents/Resources/Java')
+			into 'dist/mac/Corelyzer.app/Contents/Resources/Java'
 			from 'app/dist'
-			from file('app/deps/mac')
+			from 'app/deps/mac'
 			from file('scenegraph/dist').listFiles().findAll { it.name.endsWith('.jar') || it.name.endsWith('.jnilib') }
 		}
 	} else {
@@ -37,11 +46,21 @@ task 'package-mac'(dependsOn: 'package-check') << {
 			from 'packages/mac'
 		}
 
+		// copy the base resources and help files
+		copy {
+			into 'dist/mac/Corelyzer.app/Contents/Resources'
+			from 'packages/base/resources'
+		}
+		copy {
+			into 'dist/mac/Corelyzer.app/Contents/help'
+			from 'packages/base/help'
+		}
+
 		// copy the jars and native libraries
 		copy {
-			into file('dist/mac/Corelyzer.app/Contents/Resources/Java')
+			into 'dist/mac/Corelyzer.app/Contents/Resources/Java'
 			from 'app/dist'
-			from file('app/deps/mac')
+			from 'app/deps/mac'
 			from file('scenegraph/dist').listFiles().findAll { it.name.endsWith('.jar') || it.name.endsWith('.jnilib') }
 		}
 
@@ -70,25 +89,59 @@ task 'package-mac'(dependsOn: 'package-check') << {
 }
 
 task 'package-win'(dependsOn: 'package-check') << {
-	def dist = file('dist/win')
-	ant.delete(dir: dist, failonerror: false)
-	mkdir(dist)
+	def dist = file("dist/win/Corelyzer")
+	def libs = file('dist/win/Corelyzer/lib')
+	if (dist.exists()) {
+		// copy the jars to Corelyzer/lib
+		copy {
+			into libs
+			from 'app/dist'
+			from 'app/deps/win'
+			from file('scenegraph/dist').listFiles().findAll { it.name.endsWith('.jar') }
+		}
 
-	// copy the skeleton
-	copy {
-		into dist
-		from 'packages/win'
+		// copy dlls to Corelyzer since I couldn't find a way to make Windows find them in lib
+		copy {
+			into dist
+			from 'app/deps/win'
+			from file('scenegraph/dist').listFiles().findAll { it.name.endsWith('.dll') }
+		}
+	} else {
+		mkdir(dist)
+		mkdir(libs)
+
+		// copy the skeleton
+		copy {
+			into dist
+			from 'packages/win'
+		}
+
+		// copy the base resources and help files
+		copy {
+			into dist
+			from 'packages/base'
+		}
+
+		// copy the jars to Corelyzer/lib
+		copy {
+			into libs
+			from 'app/dist'
+			from 'app/deps/win'
+			from file('scenegraph/dist').listFiles().findAll { it.name.endsWith('.jar') }
+		}
+
+		// copy dlls to Corelyzer since I couldn't find a way to make Windows find them in lib
+		copy {
+			into dist
+			from 'app/deps/win'
+			from file('scenegraph/dist').listFiles().findAll { it.name.endsWith('.dll') }
+		}
+
+		// create our zip file
+		ant.zip(basedir: file("dist/win"), destfile: file("dist/win/Corelyzer-${version}.zip"), includes: "Corelyzer/**")
+
+		// TODO create installer
 	}
-
-	// copy the jars and native libraries
-	copy {
-		into dist
-		from 'app/dist'
-		from file('app/deps/win')
-		from file('scenegraph/dist').listFiles().findAll { it.name.endsWith('.jar') || it.name.endsWith('.dll') }
-	}
-
-	// TODO create installer
 }
 
 task 'package'(dependsOn: ['package-mac', 'package-win']) << {}
