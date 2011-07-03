@@ -1,14 +1,13 @@
 allprojects {
 	version = '1.4.0-SNAPSHOT'
 	group = 'org.corewall'
-	sourceCompatibility = '1.5'
-	targetCompatibility = '1.5'
 }
 
 defaultTasks 'clean', 'package'
 
 task clean << {
 	ant.delete(dir: file('dist'), failonerror: false)
+	ant.delete(dir: file('bin'), failonerror: false)
 }
 
 /**

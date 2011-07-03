@@ -1,6 +1,9 @@
 apply plugin: 'java'
 apply plugin: 'eclipse'
 
+sourceCompatibility = 1.5
+targetCompatibility = 1.5
+
 manifest.mainAttributes(
 	'Implementation-Title': 'Corelyzer Application',
 	'Implementation-Version': version
@@ -40,6 +43,7 @@ dependencies {
 
 clean.doLast {
 	ant.delete(dir: file('dist'), failonerror: false)
+	ant.delete(dir: file('bin'), failonerror: false)
 }
 
 build.doLast {
