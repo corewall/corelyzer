@@ -3017,6 +3017,28 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setLineGraphRange
 {
     set_line_graph_range(graphid, jmin, jmax);
 }
+	
+/*
+ * Class:     SceneGraph
+ * Method:    setLineGraphExcludeRange
+ * Signature: (IIIFF)V
+ */
+JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setLineGraphExcludeRange
+(JNIEnv * jenv, jclass jcls, jint graphid, jfloat jmin, jfloat jmax)
+{
+	set_line_graph_exclude_range(graphid, jmin, jmax);
+}
+	
+/*
+ * Class:     SceneGraph
+ * Method:    setLineGraphExcludeStyle
+ * Signature: (IIII)V
+ */
+JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setLineGraphExcludeStyle
+(JNIEnv * jenv, jclass jcls, jint graphid, jint jstyle)
+{
+	set_line_graph_exclude_style(graphid, jstyle);
+}
 
 /*
  * Class:     SceneGraph
@@ -3218,7 +3240,40 @@ JNIEXPORT jfloat JNICALL Java_corelyzer_graphics_SceneGraph_getGraphOrigMin
     return get_graph_orig_min(graphid);  
 }
 
+/*
+ * Class:     corelyzer_helper_SceneGraph
+ * Method:    getGraphExcludeMin
+ * Signature: (I)F
+ */
+JNIEXPORT jfloat JNICALL Java_corelyzer_graphics_SceneGraph_getGraphExcludeMin
+(JNIEnv * jenv, jclass jcls, jint graphid)
+{
+	return get_graph_exclude_min(graphid);
+}
 
+/*
+ * Class:     corelyzer_helper_SceneGraph
+ * Method:    getGraphExcludeMax
+ * Signature: (I)F
+ */
+JNIEXPORT jfloat JNICALL Java_corelyzer_graphics_SceneGraph_getGraphExcludeMax
+(JNIEnv * jenv, jclass jcls, jint graphid)
+{
+	return get_graph_exclude_max(graphid);
+}
+
+/*
+ * Class:     corelyzer_helper_SceneGraph
+ * Method:    getGraphExcludeMax
+ * Signature: (I)I
+ */
+JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_getGraphExcludeStyle
+(JNIEnv * jenv, jclass jcls, jint graphid)
+{
+	return get_graph_exclude_style(graphid);
+}
+	
+	
 /*
  * Class:     SceneGraph
  * Method:    getGraphSlot

@@ -55,6 +55,10 @@
 #define GRAPH_LINE		0
 #define GRAPH_POINT		1
 #define GRAPH_CPOINT	2
+#define GRAPH_LINEPOINT 3
+
+#define EXCLUDE_STYLE_CONTINUOUS 0
+#define EXCLUDE_STYLE_SHOWGAPS   1
 
 typedef struct {
     int   scene;
@@ -72,6 +76,11 @@ typedef struct {
     // data
     float orig_min;
     float orig_max;
+	
+	// excluded value range
+	float exclude_min;
+	float exclude_max;
+	int exclude_style; // 0 = continuous, 1 = show gaps
 
     float r;
     float g;
@@ -82,7 +91,7 @@ typedef struct {
     float y;	// y pos (pixel)
     
     int   slot;
-	int	  type;
+	int	  type; // graph type: 0 = line, 1 = point, 2 = cross point, 3 = point and line
 
     char* label;
     bool  show;
@@ -90,6 +99,25 @@ typedef struct {
 	bool  graphonly;
 
 } Graph;
+
+struct GraphPoint {
+	float x;
+	float y;
+	bool exclude;
+	
+	GraphPoint() : x(0.0f), y(0.0f), exclude(false) { }
+	GraphPoint( const float x, const float y, const bool exclude ) {
+		this->x = x; this->y = y; this->exclude = exclude;
+	}
+};
+
+enum GraphPointShape {
+	GPS_ROUND = 1,
+	GPS_TRIANGLE = 2,
+	GPS_SQUARE = 3,
+	GPS_DIAMOND = 4,
+	GPS_X = 5
+};
 
 typedef struct {
     // upper left object coordinate
@@ -127,14 +155,22 @@ float get_min            (int gid);
 float get_max            (int gid);
 float get_graph_orig_max (int gid);
 float get_graph_orig_min (int gid);
+float get_graph_exclude_max(int gid);
+float get_graph_exclude_min(int gid);
+int	  get_graph_exclude_style(int gid);
 float get_graph_height   (int gid); // returns height in inches
 float get_line_graph_color_component (int gid, int component);
 int   get_line_graph_type (int gid);
 
 void  set_line_graph_color (int gid, float r, float g, float b);
 void  set_line_graph_range (int gid, float min, float max);
+void  set_line_graph_exclude_range(int gid, float min, float max);
+void  set_line_graph_exclude_style(int gid, int style);
 void  set_line_graph_label (int gid, char *label);
 void  set_line_graph_type  (int gid, int type);
+
+void render_graph_point( const GraphPoint &pt, const GraphPointShape ptStyle, const float scaling );
+
 
 // function to position the graph vertically with respect to section
 // 0th slot is right above section image, 1st is above the 0th

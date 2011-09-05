@@ -81,41 +81,12 @@ public class DISOperationController {
 				tnode.addCoreSection(sec);
 				CoreGraph.getInstance().notifyListeners();
 
-				// If the dataset table contains section depth offset,
-				// use it
-				float unitScale;
-				switch (wt.getDepthUnits()) {
-					case UnitLength.CM:
-						unitScale = 0.01f;
-						break;
-
-					case UnitLength.M:
-						unitScale = 1.0f;
-						break;
-
-					case UnitLength.FOOT:
-						unitScale = 0.3048f;
-						break;
-
-					case UnitLength.INCH:
-						unitScale = 0.0254f;
-						break;
-
-					case UnitLength.MM:
-						unitScale = 0.001f;
-						break;
-
-					case UnitLength.YARD:
-						unitScale = 0.9144f;
-						break;
-
-					default:
-						unitScale = 1.0f;
-				}
+				// If the dataset table contains section depth offset, use it
 
 				// Figure out the top depth of a section
 				float sectionBeginDepth;
 				float sectionTopDepth = wt.getTopDepth(); // in meters
+				final float unitScale = UnitLength.getUnitScale( wt.getDepthUnits() );
 
 				if (sectionTopDepth != -1) {
 					sectionBeginDepth = sectionTopDepth;

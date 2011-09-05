@@ -37,6 +37,8 @@
 #endif
 
 #include "fontsys.h"
+#include <float.h>
+#include <math.h>
 #include <util.h>
 
 //======================================================================
@@ -58,7 +60,9 @@ bool is_graph(int gid)
 int add_line_graph_to_section(int track, int section,
                           int dataset, int table, int field)
 {
-    if(!is_dataset(dataset))
+	printf("Adding linegraph %d\n", dataset);
+    
+	if(!is_dataset(dataset))
     {
         printf("Cannot find dataset(%d)\n", dataset);
 
@@ -140,6 +144,8 @@ int add_line_graph_to_section(int track, int section,
 
     g->orig_min = get_field_min(dataset, table, field);
     g->orig_max = get_field_max(dataset, table, field);
+	
+	g->exclude_min = FLT_MIN; g->exclude_max = FLT_MAX;
 	
 	g->type	   = GRAPH_LINE;
 
@@ -400,6 +406,17 @@ void render_label(Canvas* c, CoreSection* cs, int gid)
 	glPopMatrix();
 }
 
+bool exclude_value(const int gid, const float value)
+{
+	const float min = graphvec[gid]->exclude_min;
+	const float max = graphvec[gid]->exclude_max;
+	if ( min > max )
+		return ( value < min && value > max ); // exclude middle range
+	else
+		return (value < min || value > max ); // exclude extreme values
+
+}
+
 void render_graph(Canvas* c, CoreSection* cs, int gid)
 {
     if( !is_graph(gid) )
@@ -420,12 +437,12 @@ void render_graph(Canvas* c, CoreSection* cs, int gid)
     float cd = y + c->coverage_y;  // down
 
     float scale = c->w / c->w0;
-    int stride = 1; // todo adjust according to Z for striding value array
+	int stride = 1; // todo adjust according to Z for striding value array
 
+    /*
     float depthStart = (2.54f*cl) / (c->dpi_x * 100.0f);
     float depthEnd   = (2.54f*cr) / (c->dpi_x * 100.0f);
 
-    /*
     printf("- [DEBUG] Coverage bounds: %.2f, %.2f, %.2f, %.2f\n", cl, cr, cu, cd);
     printf("-         - Canvas scale: %.2f\n", scale);
     printf("-         - Coverage: %.2f, %.2f\n", c->coverage_x, c->coverage_y);
@@ -568,107 +585,115 @@ void render_graph(Canvas* c, CoreSection* cs, int gid)
             glBindTexture(GL_TEXTURE_2D, 0);
             glColor3f(g->r, g->g, g->b);
 
-			if (g->type == GRAPH_LINE)
+			// build vector of all datapoints (including excluded points)
+			std::vector<GraphPoint> points;
+			const int rowCount = get_table_height( g->dataset, g->table );
+			for ( int ridx = 0; ridx < rowCount; ridx++ )
 			{
-                // Have antialias lines
+				const bool isValid = is_table_cell_valid(g->dataset, g->table, g->field, ridx );
+				
+				if ( isValid )
+				{
+					const float depth = get_table_row_depth( g->dataset, g->table, ridx );
+					const float value = get_table_cell( g->dataset, g->table, g->field, ridx );
+
+					// unitscale is relative to 'cm'
+					const float x_coord = (depth * depthunitscale * INCH_PER_CM);
+					const float y_coord = (value * INCH_PER_CM) * c->dpi_y;
+
+					const bool exclude = exclude_value( gid, value );
+					
+					points.push_back( GraphPoint( x_coord, y_coord, exclude ));
+				}
+			}
+
+			if ( g->type == GRAPH_LINE || g->type == GRAPH_LINEPOINT )
+			{
+				// antialias lines
                 glEnable(GL_LINE_SMOOTH);
                 glEnable(GL_BLEND);
                 glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
                 glHint(GL_LINE_SMOOTH_HINT, GL_DONT_CARE);
-			    glLineWidth(3.0f);
+				glPointSize(2);
+				
+				// use thinner line for "Line and Points" graph type
+				const float lineWidth = ( g->type == GRAPH_LINEPOINT ) ? 1.0f : 3.0f;
+				glLineWidth(lineWidth);
 
-				glBegin(GL_LINE_STRIP);
+				const int numPoints = points.size();
+
+				if ( g->exclude_style == EXCLUDE_STYLE_CONTINUOUS )
 				{
-					int rows = get_table_height( g->dataset, g->table );
-
-                    // float prevDepth;
-                    // float prev_y;
-
-                    bool isInGLBlock = true; // Whether inside a glBegin-glEnd block
-                    int numberOfVerticesInStrip = 0; // For segments with only one vertex
-                    float pre_x_coord = 0.0f;
-                    float pre_y_coord = 0.0f;
-                    
-					for(int r = 0; r < rows; r += stride) 
+					glBegin(GL_LINE_STRIP);
 					{
-					    // Get data tuple
-						float depth, value;
-						bool isValid;
-						
-						depth = get_table_row_depth( g->dataset, g->table, r);
-						value = get_table_cell( g->dataset, g->table, g->field, r);
-						isValid = is_table_cell_valid(g->dataset, g->table, g->field, r);
-
-                        if(isValid)
-                        {
-                            if(!isInGLBlock)
-                            {
-                                glBegin(GL_LINE_STRIP);
-                                isInGLBlock = true;
-                            }
-
-                            float x_coord = (depth * depthunitscale * INCH_PER_CM);
-                            float y_coord = (value * INCH_PER_CM) * c->dpi_y;
-
-						    glVertex2f(x_coord, y_coord);
-
-                            pre_x_coord = x_coord;
-                            pre_y_coord = y_coord;
-
-						    numberOfVerticesInStrip++;                                                                            
-                        }
-                        else
-                        {
-                            if(isInGLBlock)
-                            {
-                                if(numberOfVerticesInStrip == 1)
-                                {
-                                    // Add a fake point to show it on screen.
-                                    float x_coord = pre_x_coord - 0.01f;
-                                    float y_coord = pre_y_coord;
-                                    
-                                    glVertex2f(x_coord, y_coord);
-                                }
-
-                                glEnd();
-                                isInGLBlock = false;
-
-                                numberOfVerticesInStrip = 0;
-                            }
-                        }
-
-                        /* Check whether the plot is out of a section range
-                        int direction = isOutside(prevDepth, depth, depthStart, depthEnd);
-                        if(r == 0)
-                        {
-                            direction = 0;
-                        }
-
-	                    if(direction == 0) // within coverage
-	                    {
-                            // unitscale is relative to 'cm'
-                            float x_coord = (depth * depthunitscale * INCH_PER_CM);
-                            float y_coord = (value * INCH_PER_CM) * c->dpi_y;
-
-						    glVertex2f(x_coord, y_coord);                            
-                        }
-                        else if(direction = -1) // before coverage depth range
-                        {
-                            prevDepth = depth;
-                            
-                            continue;
-						}
-						else if(direction = 1) // after coverage depth range
+						// omit excluded points, no gaps between valid datapoints
+						for ( int pidx = 0; pidx < numPoints; pidx++ )
 						{
-                            break;
-                        }
-
-						prevDepth = depth;
-						// prev_y = y_coord;
-						*/
+							if (!points[pidx].exclude)
+								glVertex2f(points[pidx].x, points[pidx].y);
+						}
 					}
+					glEnd();
 				}
-				glEnd();
+				else
+				{
+					// draw with gaps between valid datapoints
+					bool isInGLBlock = false;
+					int vertsInStrip = 0;
+					for ( int pidx = 0; pidx < numPoints; pidx++ )
+					{
+						if (!points[pidx].exclude)
+						{
+							if ( !isInGLBlock )
+							{
+								glBegin(GL_LINE_STRIP);
+								isInGLBlock = true;
+							}
+							glVertex2f(points[pidx].x, points[pidx].y);
+							vertsInStrip++;
+						}
+						else
+						{
+							if ( isInGLBlock )
+							{
+								glEnd();
+								isInGLBlock = false;
+								
+								// if an excluded point immediately follows a single valid point, no
+								// line can be drawn - draw a point instead
+								if (vertsInStrip == 1)
+								{
+									glBegin(GL_POINTS);
+									glVertex2f(points[pidx - 1].x, points[pidx - 1].y);
+									glEnd();
+								}
+								vertsInStrip = 0;
+							}							
+						}
+					}
+					
+					if ( isInGLBlock )
+						glEnd();
+				}
+
+				if ( g->type == GRAPH_LINEPOINT )
+				{
+					// line is drawn, now draw points over it
+					glEnable(GL_POINT_SMOOTH);
+					glPointSize(4);
+
+					glBegin(GL_POINTS);
+					{
+						for ( int pidx = 0; pidx < numPoints; pidx ++ )
+						{
+							if ( !points[pidx].exclude )
+								glVertex2f( points[pidx].x, points[pidx].y );
+						}
+					}
+					glEnd();
+					glDisable(GL_POINT_SMOOTH);
+				}
+
 				glLineWidth(1.0f);
 			}
 			else if (g->type == GRAPH_POINT)
@@ -676,25 +701,11 @@ void render_graph(Canvas* c, CoreSection* cs, int gid)
 				glPointSize(2);
 				glBegin(GL_POINTS);
 				{
-					int rows = get_table_height( g->dataset, g->table );
-	                
-					for(int r = 0; r < rows; r++)
+					const int numPoints = points.size();
+					for ( int pidx = 0; pidx < numPoints; pidx++ )
 					{
-						float depth, value;
-						depth = get_table_row_depth( g->dataset, g->table, r);
-						value = get_table_cell( g->dataset, g->table, g->field, r);
-
-						bool isValid = is_table_cell_valid(g->dataset, g->table, g->field, r);
-						if(!isValid)
-						{
-						    continue;
-                        }
-
-						// unitscale is relative to 'cm'
-						float x_coord = (depth * depthunitscale * INCH_PER_CM);
-						float y_coord = (value * INCH_PER_CM) * c->dpi_y;
-	                    
-						glVertex2f(x_coord, y_coord);
+						if (!points[pidx].exclude)
+							glVertex2f(points[pidx].x, points[pidx].y);
 					}
 				}
 				glEnd();
@@ -709,39 +720,22 @@ void render_graph(Canvas* c, CoreSection* cs, int gid)
 				// printf("graph depthunitscale: %f\n", depthunitscale);
 				glBegin(GL_LINES);
 				{
-					int rows = get_table_height( g->dataset, g->table );
-	                
-					for(int r = 0; r < rows; r++) 
+					const int numPoints = points.size();
+					for ( int pidx = 0; pidx < numPoints; pidx++ )
 					{
-						float depth, value;
-						depth = get_table_row_depth( g->dataset, g->table, r);
-						value = get_table_cell( g->dataset, g->table, g->field, r);
-
-						bool isValid = is_table_cell_valid(g->dataset, g->table, g->field, r);
-						if(!isValid)
-						{
-						    continue;
-                        }
-
-						// unitscale is relative to 'cm'
-						float x_coord = (depth * depthunitscale * INCH_PER_CM);
-						float y_coord = (value * INCH_PER_CM) * c->dpi_y;
-	                    
 						// vertical segment
-						glVertex2f(x_coord, y_coord+halfy);
-						glVertex2f(x_coord, y_coord-halfy);
-						
+						glVertex2f( points[pidx].x, points[pidx].y + halfy );
+						glVertex2f( points[pidx].x, points[pidx].y - halfy );
 						// horizontal segment
-						glVertex2f(x_coord+halfx, y_coord);
-						glVertex2f(x_coord-halfx, y_coord);
+						glVertex2f( points[pidx].x + halfx, points[pidx].y );
+						glVertex2f( points[pidx].x - halfx, points[pidx].y );
 					}
 				}
 				glEnd();
 			}
             
             glDisable( GL_SCISSOR_TEST );
-            glPopAttrib();
-
+            glPopAttrib(); // GL_SCISSOR_BIT | GL_CURRENT_BIT
         }
         glPopMatrix();
         delete b;
@@ -749,7 +743,64 @@ void render_graph(Canvas* c, CoreSection* cs, int gid)
 		// restore graph offset translation
 		glTranslatef(-cs->graph_offset, 0.0, 0.0);
     }
+}
 
+// 9/4/2011 brg: currently unused, part of multiple point shapes mini-feature
+void make_poly_verts( std::vector<GraphPoint> &gpVec, const int numSides, const float startRads )
+{
+	if ( numSides < 3 )
+		return;
+	
+	const float radsPerVert = ( 2.0f * PI ) / numSides;
+	float curRads = startRads;
+	for ( int i = 0; i < numSides; i++ )
+	{
+		GraphPoint newVert( cos(curRads), sin(curRads), false );
+		gpVec.push_back( newVert );
+		curRads += radsPerVert;
+	}
+}
+
+// 9/4/2011 brg: currently unused, part of multiple point shapes mini-feature
+inline void render_graph_point( const GraphPoint &pt, const GraphPointShape ptShape, const float scaling )
+{
+	std::vector<GraphPoint> gpVec;
+	switch ( ptShape )
+	{
+		// This could be a huge performance hit, but forcing client to call
+		// glBegin/End() only for certain types of points is gross, too.
+		case GPS_ROUND:
+		{
+			glBegin(GL_POINTS);
+			glVertex2f( pt.x, pt.y );
+			glEnd();
+			break;
+		}
+			
+		case GPS_TRIANGLE:
+		case GPS_SQUARE:
+		case GPS_DIAMOND:
+		{
+			const int numSides = ( ptShape == GPS_TRIANGLE ) ? 3 : 4;
+			const float startRads = ( ptShape == GPS_SQUARE ) ? PI / 4.0f : PI / 2.0f;
+			make_poly_verts( gpVec, numSides, startRads ); // 9/2/2011 brgtodo: silly to recompute for every point
+			
+			glBegin(GL_POLYGON);
+			for ( int i = 0; i < gpVec.size(); i++ )
+			{
+				const float x = pt.x + ( gpVec[i].x * 0.2f * INCH_PER_CM );// / scaling ;
+				const float y = pt.y + ( gpVec[i].y * 0.2f * INCH_PER_CM * scaling );
+				glVertex2f( x, y );
+			}
+			glEnd();
+			
+			break;
+		}
+
+		case GPS_X:
+			break;
+	}
+	
 }
 
 
@@ -867,6 +918,24 @@ float get_graph_orig_min (int gid)
     return graphvec[gid]->orig_min;
 }
 
+float get_graph_exclude_min(int gid)
+{
+	if (!is_graph(gid)) return 0.0f;
+	return graphvec[gid]->exclude_min;
+}
+
+float get_graph_exclude_max(int gid)
+{
+	if (!is_graph(gid)) return 0.0f;
+	return graphvec[gid]->exclude_max;
+}
+
+int get_graph_exclude_style(int gid)
+{
+	if (!is_graph(gid)) return 0;
+	return graphvec[gid]->exclude_style;
+}
+
 //======================================================================
 void set_min(int gid, float min)
 {
@@ -879,6 +948,22 @@ void set_max(int gid, float max)
 {
     if(!is_graph(gid)) return;
     graphvec[gid]->max = max;
+}
+
+//======================================================================
+void set_exclude_min(int gid, float min)
+{
+	if (!is_graph(gid))
+		return;
+	graphvec[gid]->exclude_min = min;
+}
+
+//======================================================================
+void set_exclude_max(int gid, float max)
+{
+	if (!is_graph(gid))
+		return;
+	graphvec[gid]->exclude_max = max;
 }
 
 //======================================================================
@@ -898,6 +983,22 @@ void set_line_graph_range(int gid, float min, float max)
 
     set_min(gid, min);
     set_max(gid, max);
+}
+
+//======================================================================
+void set_line_graph_exclude_range(const int gid, const float min, const float max)
+{
+    if (!is_graph(gid)) return;
+	
+    set_exclude_min(gid, min);
+    set_exclude_max(gid, max);
+}
+
+//======================================================================
+void set_line_graph_exclude_style(const int gid, const int style)
+{
+    if (!is_graph(gid)) return;
+	graphvec[gid]->exclude_style = style;
 }
 
 //======================================================================

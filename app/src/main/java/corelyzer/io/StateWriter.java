@@ -253,7 +253,19 @@ public class StateWriter {
 		str = str + SceneGraph.getGraphMax(gid);
 		g.setAttributeNS(null, "max", str);
 		str = "";
+		
+		str = str + SceneGraph.getGraphExcludeMin(gid);
+		g.setAttributeNS(null, "exclude_min", str);
+		str = "";
 
+		str = str + SceneGraph.getGraphExcludeMax(gid);
+		g.setAttributeNS(null, "exclude_max", str);
+		str = "";
+		
+		str = str + SceneGraph.getGraphExcludeStyle(gid);
+		g.setAttributeNS(null, "exclude_style", str);
+		str = "";
+		
 		str = str + SceneGraph.getGraphSlot(gid);
 		g.setAttributeNS(null, "slot", str);
 		str = "";

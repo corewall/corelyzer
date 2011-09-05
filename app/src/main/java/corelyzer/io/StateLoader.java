@@ -1027,6 +1027,40 @@ public class StateLoader {
 			}
 		}
 
+		// graph min/max
+		float min = 0.0f, max = 0.0f;
+		String minValue = e.getAttribute("min");
+		if (!minValue.equals("")) {
+			min = Float.valueOf(minValue);
+		}
+		String maxValue = e.getAttribute("max");
+		if (!maxValue.equals("")) {
+			max = Float.valueOf(maxValue);
+		}
+		
+		SceneGraph.setLineGraphRange(gid, min, max);
+		
+		// graph exclude range min/max
+		// brgtodo: this pattern of value extraction is very common, extract method?
+		float excludeMin = -Float.MAX_VALUE, excludeMax = Float.MAX_VALUE;
+		String excludeMinValue = e.getAttribute("exclude_min");
+		if (!excludeMinValue.equals("")) {
+			excludeMin = Float.valueOf(excludeMinValue);
+		}
+		String excludeMaxValue = e.getAttribute("exclude_max");
+		if (!excludeMaxValue.equals("")) {
+			excludeMax = Float.valueOf(excludeMaxValue);
+		}		
+		SceneGraph.setLineGraphExcludeRange( gid, excludeMin, excludeMax );
+
+		int excludeGraphStyle = 0;
+		String excludeGraphStyleValue = e.getAttribute("exclude_style");
+		if (!excludeGraphStyleValue.equals("")) {
+			excludeGraphStyle = Integer.valueOf(excludeGraphStyleValue);
+		}
+		SceneGraph.setLineGraphExcludeStyle(gid, excludeGraphStyle);		
+		
+		// color
 		float red = 0.0f;
 		float green = 0.0f;
 		float blue = 0.0f;
@@ -1133,8 +1167,7 @@ public class StateLoader {
 
 		pdlg.setString("Creating graph from dataset: " + datasetName);
 
-		for (int i = 0; (dataset == null) && (i < datasets.size()); // datarepo.length();
-		i++) {
+		for (int i = 0; (dataset == null) && (i < datasets.size()); /*datarepo.length();*/ i++) {
 			WellLogDataSet tempdataset = datasets.elementAt(i); // datarepo.getDataSet(i);
 			String sourceFilename = tempdataset.getSourceFilename().toLowerCase();
 
@@ -1184,6 +1217,40 @@ public class StateLoader {
 
 		SceneGraph.setLineGraphLabel(gid, fieldName);
 
+		// graph min/max
+		float min = 0.0f, max = 0.0f;
+		String minValue = e.getAttribute("min");
+		if (!minValue.equals("")) {
+			min = Float.valueOf(minValue);
+		}
+		String maxValue = e.getAttribute("max");
+		if (!maxValue.equals("")) {
+			max = Float.valueOf(maxValue);
+		}
+
+		SceneGraph.setLineGraphRange( gid, min, max );
+		
+		// graph exclude range min/max
+		// brgtodo: this pattern of value extraction is very common, extract method?
+		float excludeMin = -Float.MAX_VALUE, excludeMax = Float.MAX_VALUE;
+		String excludeMinValue = e.getAttribute("exclude_min");
+		if (!excludeMinValue.equals("")) {
+			excludeMin = Float.valueOf(excludeMinValue);
+		}
+		String excludeMaxValue = e.getAttribute("exclude_max");
+		if (!excludeMaxValue.equals("")) {
+			excludeMax = Float.valueOf(excludeMaxValue);
+		}
+		SceneGraph.setLineGraphExcludeRange( gid, excludeMin, excludeMax );
+		
+		int excludeGraphStyle = 0;
+		String excludeGraphStyleValue = e.getAttribute("exclude_style");
+		if (!excludeGraphStyleValue.equals("")) {
+			excludeGraphStyle = Integer.valueOf(excludeGraphStyleValue);
+		}
+		SceneGraph.setLineGraphExcludeStyle(gid, excludeGraphStyle);
+		
+		// color
 		float red = 0.0f;
 		float green = 0.0f;
 		float blue = 0.0f;

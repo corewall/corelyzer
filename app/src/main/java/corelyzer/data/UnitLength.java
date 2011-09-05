@@ -38,4 +38,38 @@ public class UnitLength {
 	public static final int INCH = 3;
 	public static final int FOOT = 4;
 	public static final int YARD = 5;
+	
+	public static float getUnitScale(int depthUnit) {
+		float unitScale = 0.0f;
+		switch ( depthUnit ) {
+			case UnitLength.CM:
+				unitScale = 0.01f;
+				break;
+				
+			case UnitLength.M:
+				unitScale = 1.0f;
+				break;
+				
+			case UnitLength.FOOT:
+				unitScale = 0.3048f;
+				break;
+				
+			case UnitLength.INCH:
+				unitScale = 0.0254f;
+				break;
+				
+			case UnitLength.MM:
+				unitScale = 0.001f;
+				break;
+				
+			case UnitLength.YARD:
+				unitScale = 0.9144f;
+				break;
+				
+			default:
+				unitScale = 1.0f;
+		}
+
+		return unitScale;
+	}
 }

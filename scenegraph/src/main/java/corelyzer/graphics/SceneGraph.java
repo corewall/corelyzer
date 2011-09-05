@@ -601,6 +601,12 @@ public class SceneGraph {
 
 	public native static float getGraphOrigMin(int graphId);
 
+	public native static float getGraphExcludeMin(int graphId);
+
+	public native static float getGraphExcludeMax(int graphId);
+	
+	public native static int getGraphExcludeStyle(int graphId);
+	
 	public native static boolean getGraphsCollapse();
 
 	/**
@@ -1560,6 +1566,11 @@ public class SceneGraph {
 	 */
 	public native static void setLineGraphRange(int gid, float min, float max);
 
+	// exlcuded values
+	public native static void setLineGraphExcludeRange(int gid, float min, float max);
+	
+	public native static void setLineGraphExcludeStyle(int gid, int style);
+	
 	/**
 	 * Access method. Set the type of graph.
 	 * 
