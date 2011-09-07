@@ -1244,7 +1244,8 @@ MultiLevelTextureSetEX* create_texset_from_png(const char* filename, int nlevels
 #ifndef _WINGDI_H
 typedef unsigned char  BYTE;
 typedef unsigned short WORD;
-typedef unsigned long  DWORD;
+typedef unsigned int   DWORD;
+typedef unsigned long  QWORD;
 #endif
 
 bool IsBigEndian()
@@ -1307,7 +1308,17 @@ MultiLevelTextureSetEX* create_texset_from_bmp(const char* filename, int nlevels
     double time1 = aTime();
 #endif
 
-    BMPHeader header;
+	// Ensure typedef sizes are as expected. DWORD used to be typedef'd as an unsigned long, which is
+	// 8 bytes when compiled for an 64-bit environment, not 4 as is assumed in the BMP reading logic.
+	if ( sizeof(DWORD) != 4 || sizeof(WORD) != 2 || sizeof(BYTE) != 1 )
+	{
+		printf("Unexpected typedef sizing!\nDWORD size = %d (expected 4), WORD size = %d (2), BYTE size = %d (1)\n",
+			   sizeof(DWORD), sizeof(WORD), sizeof(BYTE));
+		fclose(fptr);
+		return NULL;
+	}
+    
+	BMPHeader header;
     fread((char*) &(header.sig), sizeof(WORD), 1, fptr);
     if( IsBigEndian() && header.sig != 0x424D )
     {
@@ -1322,10 +1333,10 @@ MultiLevelTextureSetEX* create_texset_from_bmp(const char* filename, int nlevels
         return NULL; //-1;
     }
 
-    fread(&(header.filesize),   sizeof(DWORD), 1, fptr);
+	fread(&(header.filesize),   sizeof(DWORD), 1, fptr);
     fread(&(header.reserved),   sizeof(DWORD), 1, fptr);
     fread(&(header.dataoffset), sizeof(DWORD), 1, fptr);
-
+	
     if( IsBigEndian() )
     {
         header.sig        = Flip(header.sig);
@@ -1361,16 +1372,14 @@ MultiLevelTextureSetEX* create_texset_from_bmp(const char* filename, int nlevels
         infoheader.numcolorsused      = Flip( infoheader.numcolorsused );
         infoheader.numimportantcolors = Flip( infoheader.numimportantcolors );
     }
-
-    //for now, don't bother supporting RLE compression or less than 24 bpp
-
-    if( infoheader.compression != 0 )
+	
+    // for now, don't bother supporting RLE compression or less than 24 bpp
+	if( infoheader.compression != 0 )
     {
         printf("Not supporting compressed bitmaps for now.\n");
         fclose(fptr);
         return NULL; //-1;
     }
-
     if( infoheader.bpp != 24 )
     {
         printf("Not supporting BMP files less than true color. %d\n", infoheader.bpp);
