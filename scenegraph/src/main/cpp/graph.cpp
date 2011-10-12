@@ -57,46 +57,53 @@ bool is_graph(int gid)
 }
 
 //======================================================================
+static bool are_graph_params_valid( const int track, const int section, const int dataset, const int table, const int field )
+{
+	if (!is_dataset(dataset))
+    {
+        printf("Cannot find dataset(%d)\n", dataset);
+        return false;
+    }
+	
+    if (!is_table(dataset, table))
+    {
+        printf("Cannot find table(%d, %d)\n", dataset, table);
+        return false;
+    }
+	
+    if ( field < 0 )
+    {
+        printf("Cannot find field(%d)\n", field);
+		
+        return false;
+    }
+	
+    if ( !is_track(track) )
+    {
+        printf("Cannot find track(%d)\n", track);
+        return false;
+    }
+	
+    if ( !is_section_model( get_scene_track( track ), section ))
+    {
+        printf("Cannot find section(%d, %d)\n", track, section);
+        return false;
+    }
+	
+	return true;
+}
+
+//======================================================================
 int add_line_graph_to_section(int track, int section,
                           int dataset, int table, int field)
 {
-	printf("Adding linegraph %d\n", dataset);
+	printf("Adding linegraph - track %d, section %d, dataset %d, table %d, field %d\n", track, section, dataset, table, field);
     
-	if(!is_dataset(dataset))
-    {
-        printf("Cannot find dataset(%d)\n", dataset);
-
-        return -1;
-    }
-
-    if(!is_table(dataset, table))
-    {
-        printf("Cannot find table(%d, %d)\n", dataset, table);
-
-        return -1;
-    }
-
-    if( field < 0 )
-    {
-        printf("Cannot find field(%d)\n", field);
-
-        return -1;
-    }
-
-    if( !is_track(track) )
-    {
-        printf("Cannot find track(%d)\n", track);
-        return -1;
-    }
-
-    if( !is_section_model( get_scene_track(track), section) )
-    {
-        printf("Cannot find section(%d, %d)\n", track, section);
-        return -1;
-    }
-
+	if (!are_graph_params_valid(track, section, dataset, table, field))
+		return -1;
+	
     CoreSection* cs = get_track_section( get_scene_track(track), section);
-    if(!cs)
+    if (!cs)
     {
         printf("CoreSection(native) is null\n");
         return -1;
@@ -104,7 +111,7 @@ int add_line_graph_to_section(int track, int section,
 	
     int gid = locate_graph(track, section, dataset, table, field);
 
-    if( is_graph(gid) ) {
+    if ( is_graph( gid )) {
 		graphvec[gid]->show = true;
         return gid; 
     }
@@ -176,17 +183,18 @@ int add_line_graph_to_section(int track, int section,
 int remove_line_graph_from_section(int track, int section,
                                    int dataset, int table, int field)
 {
+	printf("Removing linegraph - track %d, section %d, dataset %d, table %d, field %d\n", track, section, dataset, table, field);
 
-	if( !is_dataset(dataset) || !is_table(dataset, table) ) return -1;
-
-    if( field < 0 ) return -1;
-
-    if( !is_track(track) ) return -1;
-
-    if( !is_section_model( get_scene_track(track), section) ) return -1;
+	if (!are_graph_params_valid(track, section, dataset, table, field))
+		return -1;
+	
     CoreSection* cs = get_track_section( get_scene_track(track), section);
-    if( !cs) return -1;
-
+    if (!cs)
+    {
+        printf("CoreSection(native) is null\n");
+        return -1;
+    }
+	
     // get the reference to the graph in the core section and remove it
     // update all the slots of all the other graphs
     int gid = locate_graph(track, section, dataset, table, field);
@@ -209,9 +217,7 @@ int remove_line_graph_from_section(int track, int section,
 
     // update slots
     int i = 0;
-    for( csitr = cs->graphvec.begin();
-         csitr != cs->graphvec.end();
-         csitr++, i++)
+    for ( csitr = cs->graphvec.begin(); csitr != cs->graphvec.end(); csitr++, i++)
     {
         set_graph_slot( *csitr, i);
     }
