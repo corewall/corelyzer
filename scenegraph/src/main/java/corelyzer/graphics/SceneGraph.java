@@ -274,6 +274,17 @@ public class SceneGraph {
 	public native static void enableVerticalLineFromGraph(int graphId);
 
 	/**
+	 * Return first found graph (displayed or not) with matching dataset and field
+	 * 
+	 * @param datasetId
+	 *            Dataset ID
+	 * @param fieldId
+	 *            Field ID
+	 * @return ID of matching graph if found, otherwise -1
+	 */
+	public native static int findGraphByField( int datasetId, int fieldId );
+	
+	/**
 	 * Create a Public Native Side Canvas with initial parameters
 	 * 
 	 * @param x

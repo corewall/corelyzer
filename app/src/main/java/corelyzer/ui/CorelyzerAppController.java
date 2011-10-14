@@ -1970,7 +1970,7 @@ public class CorelyzerAppController implements ActionListener {
 
 		// GraphDialog graphDialog = new GraphDialog("Graph Dialog");
 		CRGraphDialog graphDialog = new CRGraphDialog(this.view.getMainFrame());
-		graphDialog.setSelectedTrackListId(t);
+		//graphDialog.setSelectedTrackListId(t);
 		graphDialog.setDatasetVec(datasets);
 		graphDialog.selectDataset(d);
 		graphDialog.pack();

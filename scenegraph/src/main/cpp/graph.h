@@ -184,6 +184,8 @@ Box*  get_graph_box(CoreSection* cs, int gid);
 Box*  get_graph_box(Canvas* c, CoreSection* cs, int gid);
 std::vector< int >  match_my_graph_id (int trackId, int sectionId);
 
+int	find_graph_by_field( const int dataset, const int field );
+
 int isOutside(float prevDepth, float depth, float startDepth, float endDepth);
 bool ifCollapse();
 void setCollapse(bool aBool);

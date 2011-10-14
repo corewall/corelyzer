@@ -3264,7 +3264,7 @@ JNIEXPORT jfloat JNICALL Java_corelyzer_graphics_SceneGraph_getGraphExcludeMax
 
 /*
  * Class:     corelyzer_helper_SceneGraph
- * Method:    getGraphExcludeMax
+ * Method:    getGraphExcludeStyle
  * Signature: (I)I
  */
 JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_getGraphExcludeStyle
@@ -3301,9 +3301,20 @@ JNIEXPORT jfloat JNICALL Java_corelyzer_graphics_SceneGraph_getLineGraphColorCom
  * Signature: (I)I
  */
 JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_getLineGraphType
-  (JNIEnv *jenv, jclass jcls, jint graphid)
+  (JNIEnv * jenv, jclass jcls, jint graphid)
 {
 	return get_line_graph_type( graphid );
+}
+	
+/*
+ * Class:     SceneGraph
+ * Method:    findGraph
+ * Signature: (I)II
+ */
+JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_findGraphByField
+  (JNIEnv * jenv, jclass jcls, jint datasetid, jint fieldid )
+{
+	return find_graph_by_field( datasetid, fieldid );
 }
 
 /*

@@ -97,7 +97,7 @@ static bool are_graph_params_valid( const int track, const int section, const in
 int add_line_graph_to_section(int track, int section,
                           int dataset, int table, int field)
 {
-	printf("Adding linegraph - track %d, section %d, dataset %d, table %d, field %d\n", track, section, dataset, table, field);
+//	printf("Adding linegraph - track %d, section %d, dataset %d, table %d, field %d\n", track, section, dataset, table, field);
     
 	if (!are_graph_params_valid(track, section, dataset, table, field))
 		return -1;
@@ -854,6 +854,19 @@ std::vector< int > match_my_graph_id(int trackId, int sectionId)
     return gids;
 }
 
+//======================================================================
+// find graph with matching dataset and field
+int	find_graph_by_field( const int dataset, const int field )
+{
+	for ( int i = 0; i < graphvec.size(); i++ )
+	{
+		if ( graphvec[i] )
+			if ( graphvec[i]->dataset == dataset && graphvec[i]->field == field )
+				return i;
+	}
+	
+	return -1;
+}
 
 //======================================================================
 int get_data_set_index(int gid)

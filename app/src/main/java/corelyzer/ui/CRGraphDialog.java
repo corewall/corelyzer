@@ -77,8 +77,9 @@ import corelyzer.data.WellLogTable;
 import corelyzer.data.coregraph.CoreGraph;
 import corelyzer.data.lists.CRDefaultListModel;
 import corelyzer.graphics.SceneGraph;
+import corelyzer.ui.ColorEditor;
+import corelyzer.ui.ColorRenderer;
 
-// TODO: update states more accurtely.
 public class CRGraphDialog extends JFrame {
 	/**
 	 * 
@@ -94,17 +95,13 @@ public class CRGraphDialog extends JFrame {
 	}
 
 	private JPanel contentPane;
-	private JButton applybtn;
-	private JButton closebtn;
+	private JButton applybtn, closebtn;
 	private JComboBox datasetList;
-	//private JCheckBox allSectionsBox;
 	private JList sectionsList;
 	private JLabel sectionsListLabel;
 	private JCheckBox ifCollapseGraphs;
-	private JButton colorbtn;
 	private JComboBox typeList;
-	private JTextField scaleMinText;
-	private JTextField scaleMaxText;
+	private JTextField scaleMinText, scaleMaxText;
 	private JTextField excludeMinText, excludeMaxText;
 	private JCheckBox leaveGapsBox;
 
@@ -121,9 +118,6 @@ public class CRGraphDialog extends JFrame {
 	// Data (original field data)
 	Vector<Float> origMinVals, origMaxVals;
 
-	// Min/max values in all sections/tables
-//	Vector<Float> allMinVals, allMaxVals;
-
 	// Min/max exclude range
 	Vector<Float> excludeMinVals, excludeMaxVals;
 	Vector<Integer> excludeStyleVals;
@@ -131,39 +125,13 @@ public class CRGraphDialog extends JFrame {
 	Vector<Boolean> showGraphVals;
 	Vector<Float> dataRangeMinVals, dataRangeMaxVals;
 	
+	static GraphColorsManager colorsManager = new GraphColorsManager();
 	Vector<Color> colors;
 
 	// 8/24/2011 brgtodo: typing would be clearer with an enum
 	Vector<Integer> graphTypes; // line, point, crosspoint, point&lines
 
 	Vector<WellLogDataSet> datasets;
-
-	ColorChooser colorchooser;
-
-	// int currentDatasetIndex;
-	int currentTableIndex;
-	int selectedTrackId; // native code index (scenegraph)
-	int selectedSectionId; // native code index (sceengraph)
-	int selectedTrackListId; // java side index (CorelyzerApp)
-	int selectedSectionListId; // java side index (CorelyzerApp)
-	int selectedFieldId;
-
-	int lastSelectedField; // 9/2/2011 brg: being updated but otherwise unused
-	
-	private class GraphParams {
-		public int trackId;
-		public int sectionId;
-		public int datasetId;
-		public int dataTableId;
-		
-		public GraphParams( final int trackId, final int sectionId, final int datasetId, final int dataTableId )
-		{
-			this.trackId = trackId;
-			this.sectionId = sectionId;
-			this.datasetId = datasetId;
-			this.dataTableId = dataTableId;
-		}
-	}
 
 	/**
 	 * Querying SceneGraph about graphs associated with a given section is a common task, encapsulate
@@ -188,8 +156,7 @@ public class CRGraphDialog extends JFrame {
 				if ( dataTableId == -1 ) return null;
 				
 				final WellLogDataSet ds = (WellLogDataSet) this.datasetList.getSelectedItem();
-				//final int gid = SceneGraph.getGraphID( tnode.getId(), cs.getId(), ds.getId(), dataTableId, row );
-				gpResult = this.new GraphParams( tnode.getId(), cs.getId(), ds.getId(), dataTableId );
+				gpResult = new GraphParams( tnode.getId(), cs.getId(), ds.getId(), dataTableId );
 				break;
 			}
 		}
@@ -210,7 +177,7 @@ public class CRGraphDialog extends JFrame {
 		this.setAlwaysOnTop(true);
 		this.setLocationRelativeTo(parent);
 		setTitle("Graph Dialog");
-
+		
 		myInit();
 
 		setContentPane(contentPane);
@@ -318,11 +285,6 @@ public class CRGraphDialog extends JFrame {
 		datasetList.setModel(defaultComboBoxModel1);
 		panel4.add(datasetList, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL,
 				GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-//		allSectionsBox = new JCheckBox();
-//		allSectionsBox.setSelected(true);
-//		allSectionsBox.setText("Apply to all sections in this dataset?");
-//		panel4.add(allSectionsBox, new GridConstraints(2, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK
-//				| GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
 		sectionsListLabel = new JLabel( "Choose graph section: " );
 		panel4.add(sectionsListLabel, new GridConstraints(3, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED,
 				GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
@@ -405,12 +367,12 @@ public class CRGraphDialog extends JFrame {
 
 		// Color/line style
 		JPanel colorLinePanel = new JPanel();
-		colorLinePanel.setLayout(new GridLayoutManager(1, 2, new Insets(0,0,0,0), -1, -1));
-		colorbtn = new JButton();
-		colorbtn.setText("Color");
-		colorLinePanel.add(colorbtn, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL,
-				GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(153, 29),
-				null, 0, false));
+		colorLinePanel.setLayout(new GridLayoutManager(1, 1, new Insets(0,0,0,0), -1, -1));
+//		colorbtn = new JButton();
+//		colorbtn.setText("Color");
+//		colorLinePanel.add(colorbtn, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL,
+//				GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(153, 29),
+//				null, 0, false));
 		typeList = new JComboBox();
 		final DefaultComboBoxModel defaultComboBoxModel2 = new DefaultComboBoxModel();
 		defaultComboBoxModel2.addElement("Line");
@@ -418,7 +380,7 @@ public class CRGraphDialog extends JFrame {
 		defaultComboBoxModel2.addElement("Cross point");
 		defaultComboBoxModel2.addElement("Line & Points");
 		typeList.setModel(defaultComboBoxModel2);
-		colorLinePanel.add(typeList, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_EAST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_GROW,
+		colorLinePanel.add(typeList, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_EAST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_GROW,
 				GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
 
 		panel5.add(colorLinePanel, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_GROW,
@@ -450,50 +412,6 @@ public class CRGraphDialog extends JFrame {
 	}
 
 	private void applyGraphSelection( final int sectionIndex ) {
-		// brg 10/5/2011 this will never happen...
-/*
-		if (section < 0) {
-			return;
-		}
-
-		WellLogDataSet ds = (WellLogDataSet) this.datasetList.getSelectedItem();
-
-		// loop through field list, check each checkbox's status
-		for (int curRowIndex = 0; curRowIndex < fieldsTable.getRowCount(); curRowIndex++) {
-			boolean isChecked = fieldsTable.isRowChecked( curRowIndex );
-
-			if (isChecked) {
-				// get the graph id and set the min/max and color values
-				// apply the changes to the graph. If there isn't a graph
-				// then create it, if possible
-
-				int gid = SceneGraph.getGraphID(selectedTrackId, section, ds.getId(), // currentDatasetIndex,
-						currentTableIndex, curRowIndex );
-
-				if (gid < 0) {
-					gid = SceneGraph.addLineGraphToSection(selectedTrackId, section, ds.getId(), // getDatasetId(currentDatasetIndex),
-							currentTableIndex, curRowIndex );
-				}
-
-				if (gid == -1) {
-					System.out.println("- GraphID of -1 after calling SceneGraph.addLineGraphToSection.");
-					continue;
-				} else {
-					System.out.println("- GraphID = " + gid + " (success)");
-				}
-				
-				this.setGraphProperties( gid, curRowIndex );
-			} else {
-				// make sure it's removed if there exists a graph
-				int gid = SceneGraph.getGraphID(selectedTrackId, section, ds.getId(), currentTableIndex, curRowIndex );
-
-				if (gid >= 0) {
-					SceneGraph.removeLineGraphFromSection(gid);
-				}
-			}
-		}
-*/
-		
 		final GraphParams gp = this.getGraphParams( sectionIndex );
 		if ( gp != null )
 		{
@@ -503,7 +421,6 @@ public class CRGraphDialog extends JFrame {
 				if ( showGraph ) {
 					// Get the graph id and set properties (min/maxes, color values, type, etc.)
 					// If there isn't a graph try to create one.
-					
 					int gid = SceneGraph.getGraphID( gp.trackId, gp.sectionId, gp.datasetId, gp.dataTableId, curRowIndex );
 					
 					if (gid < 0) {
@@ -530,29 +447,6 @@ public class CRGraphDialog extends JFrame {
 		}
 	}
 
-	// Returns an integer array containing indices of selected items in sectionsList.
-	private int[] getSelectedSections()
-	{
-/*
-		int[] selectedSections = null;
-		if ( allSectionsBox.isSelected() )
-		{
-			// if "all sections" box is checked, fake out the array since
-			// the actual JList elements won't be selected
-			final int numSections = sectionsList.getModel().getSize();
-			selectedSections = new int[numSections];
-			for ( int i = 0; i < numSections; i++ ) { selectedSections[i] = i; }
-		}
-		else // use the JList method
-		{
-			selectedSections = sectionsList.getSelectedIndices();
-		}
-		
-		return selectedSections;
-*/
-		return sectionsList.getSelectedIndices();
-	}
-	
 	// find data table ID for the specified section
 	private int getTableIndexByName( final String sectionName ) {
 		WellLogDataSet ds = (WellLogDataSet) this.datasetList.getSelectedItem();
@@ -609,22 +503,6 @@ public class CRGraphDialog extends JFrame {
 
 	private void myInit() {
 		// data
-		// currentDatasetIndex = -1;
-		currentTableIndex = -1;
-		selectedFieldId = -1;
-		selectedTrackId = -1;
-		selectedSectionId = -1;
-
-		// ui
-		this.colorchooser = new ColorChooser(this);
-		this.colorchooser.setVisible(false);
-		this.colorchooser.addReturnActionListener(new ActionListener() {
-
-			public void actionPerformed(final ActionEvent event) {
-				onColorChooserReturn();
-			}
-		});
-
 		this.datasetModel = new DefaultComboBoxModel();
 		this.datasetList.setModel(datasetModel);
 		this.datasetList.addActionListener(new ActionListener() {
@@ -634,53 +512,35 @@ public class CRGraphDialog extends JFrame {
 			}
 		});
 
-//		this.allSectionsBox.addActionListener(new ActionListener() {
-//
-//			public void actionPerformed(final ActionEvent e) {
-//				onAllSectionsAction();
-//			}
-//		});
-
 		this.sectionsListModel = new DefaultListModel();
 		this.sectionsList.setModel(this.sectionsListModel);
-
-		// 9/2/2011 brgtodo: experiment with multiple selection
 		this.sectionsList.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
-
 		this.sectionsList.addListSelectionListener(new ListSelectionListener() {
 			public void valueChanged(final ListSelectionEvent event) {
 				onSectionsListChanged();
 			}
 		});
-		
-		// all sections box is checked on open (see setupUI()), disable section list/label
-//		sectionsList.clearSelection();
-//		sectionsList.setEnabled( false );
-//		sectionsListLabel.setEnabled( false );
 
+		fieldsTable.setDefaultRenderer(Color.class, new ColorRenderer( false ));
+		fieldsTable.setDefaultEditor(Color.class, new ColorEditor());
 		fieldsTable.setShowHorizontalLines(true);
-		fieldsTable.addCheckEventListener(new TableModelListener() {
-
-			public void tableChanged(final TableModelEvent event) {
-				onFieldsTableChanged(event);
+		fieldsTable.getModel().addTableModelListener( new TableModelListener() {
+			public void tableChanged( TableModelEvent event ) {
+				onFieldsTableChanged( event );
 			}
-		});
+		});		
 		fieldsTable.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
-
 			public void valueChanged(final ListSelectionEvent event) {
 				onFieldsListChanged();
 			}
 		});
 
-		colors = new Vector<Color>();
 		graphTypes = new Vector<Integer>();
 		scaleMinVals = new Vector<Float>();
 		scaleMaxVals = new Vector<Float>();
 
 		this.origMinVals = new Vector<Float>();
 		this.origMaxVals = new Vector<Float>();
-//		this.allMinVals = new Vector<Float>();
-//		this.allMaxVals = new Vector<Float>();
 		this.excludeMinVals = new Vector<Float>();
 		this.excludeMaxVals = new Vector<Float>();
 		this.excludeStyleVals = new Vector<Integer>();
@@ -688,12 +548,6 @@ public class CRGraphDialog extends JFrame {
 		this.dataRangeMaxVals = new Vector<Float>();
 		this.showGraphVals = new Vector<Boolean>();
 
-		colorbtn.addActionListener(new ActionListener() {
-
-			public void actionPerformed(final ActionEvent e) {
-				onColorButton();
-			}
-		});
 		scaleMinText.addFocusListener(new FocusListener() {
 
 			public void focusGained(final FocusEvent event) {
@@ -731,46 +585,14 @@ public class CRGraphDialog extends JFrame {
 
 		ifCollapseGraphs.setSelected(SceneGraph.getGraphsCollapse());
 		ifCollapseGraphs.addActionListener(new ActionListener() {
-
 			public void actionPerformed(final ActionEvent event) {
 				ifCollapseAction();
 			}
 		});
 	}
 
-/*
-	private void onAllSectionsAction() {
-		// 9/2/2011 brgtodo: experiment with multiple selection
-		if ( allSectionsBox.isSelected() ) {
-			sectionsList.clearSelection();
-			sectionsList.setEnabled( false );
-			sectionsListLabel.setEnabled( false );
-			this.onFieldsListChanged();
-		} else {
-			sectionsList.setEnabled( true );
-			sectionsListLabel.setEnabled( true );
-		}
-	}
-*/
 	private void onApply() {
-		// APPLY BUTTON
-/*
-		if (allSectionsBox.isSelected()) {
-			int numsecs = SceneGraph.getNumSections(selectedTrackId);
-			int temp = currentTableIndex;
-
-			for (int i = 0; i < numsecs; i++) {
-				currentTableIndex = this.getTableIndex(i);
-				applyGraphSelection(i);
-			}
-
-			currentTableIndex = temp;
-		} else {
-			applyGraphSelection(selectedSectionId);
-		}
-*/
-		int[] selectedSections = this.getSelectedSections();
-		for ( int curSectionIndex : selectedSections )
+		for ( int curSectionIndex : this.sectionsList.getSelectedIndices() )
 		{
 			applyGraphSelection( curSectionIndex );
 		}
@@ -780,58 +602,6 @@ public class CRGraphDialog extends JFrame {
 
 	private void onCancel() {
 		dispose();
-	}
-
-	private void onColorButton() {
-		this.colorchooser.setVisible(true);
-		this.colorchooser.setTarget(this.colorbtn);
-		int field = fieldsTable.getSelectedRow();
-		this.colorchooser.setColor(colors.elementAt(field));
-	}
-
-	private void onColorChooserReturn() {
-		// COLOR SELECTED
-		int field = fieldsTable.getSelectedRow();
-		if (field < 0) {
-			return;
-		}
-
-		colors.setElementAt(colorchooser.getColor(), field);
-
-		// update current section info f i x m e
-/*
-		CRDefaultListModel tmodel = CorelyzerApp.getApp().getTrackListModel();
-		TrackSceneNode tnode = (TrackSceneNode) tmodel.elementAt(selectedTrackListId);
-		String secname = this.sectionsListModel.getElementAt(this.selectedSectionListId).toString();
-
-		CoreSection sec = tnode.getCoreSection(secname);
-		if (sec == null) {
-			this.selectedSectionId = -1;
-		} else {
-			this.selectedSectionId = sec.getId();
-		}
-
-		WellLogDataSet ds = (WellLogDataSet) this.datasetList.getSelectedItem();
-*/
-		
-		int[] selectedSections = this.getSelectedSections();
-		for ( int curSectionIndex : selectedSections )
-		{
-			final GraphParams gp = this.getGraphParams( curSectionIndex );
-			if ( gp == null )
-				continue;
-			
-			final int gid = SceneGraph.getGraphID( gp.trackId, gp.sectionId, gp.datasetId, gp.dataTableId, field );
-			if (gid < 0)
-				continue;
-			
-			// if a graph is present, change its color
-			final Color c = colors.elementAt(field);
-			SceneGraph.setLineGraphColor(gid, (c.getRed() / 255.0f), (c.getGreen() / 255.0f), (c.getBlue() / 255.0f));
-		}
-
-		CorelyzerApp.getApp().updateGLWindows();
-		//this.onApply();
 	}
 
 	private void onDatasetAction() {
@@ -883,10 +653,7 @@ public class CRGraphDialog extends JFrame {
 					// + ", id: " + ds.getId());
 
 					cg.setCurrentDatasetIdx(i);
-
-					// this.currentDatasetIndex = i;
 					this.repaint();
-
 					break;
 				}
 			}
@@ -897,17 +664,15 @@ public class CRGraphDialog extends JFrame {
 			String name = ds.getTable(i).getName();
 			this.sectionsListModel.addElement(name);
 		}
-		// this.selectedSectionListId = this.sectionsList.getSelectedIndex();
-		this.selectedSectionListId = 0;
-		this.sectionsList.setSelectedIndex(0);
 
+		this.sectionsList.setSelectedIndex(0);
+		
 		fieldsTable.tableChanged(new TableModelEvent(fieldsTable.getModel()));
 	}
 
 	// ---------------------------------------------------------------
 
 	private void onFieldsListChanged() {
-		// if (currentDatasetIndex < 0) {
 		WellLogDataSet ds = (WellLogDataSet) this.datasetList.getSelectedItem();
 
 		if (ds == null) {
@@ -918,8 +683,6 @@ public class CRGraphDialog extends JFrame {
 		if (field < 0) {
 			return;
 		}
-
-		lastSelectedField = field;
 
 		// (View) update min/max text with the values of selected field index
 		scaleMinText.setText(scaleMinVals.elementAt(field).toString());
@@ -945,21 +708,11 @@ public class CRGraphDialog extends JFrame {
 		} catch (Exception e) {
 			System.out.println("Couldn't set exclude min/max field: " + e.getMessage() );
 		}
-		
-		// (Data) Update field's min/max values
-//		DecimalFormat df = new DecimalFormat("#,###,###,##0.000");
-//		float allValueMin = this.allSectionsBox.isSelected() ? this.allMinVals.elementAt(field) : this.origMinVals.elementAt(field);
-//		float allValueMax = this.allSectionsBox.isSelected() ? this.allMaxVals.elementAt(field) : this.origMaxVals.elementAt(field);
-
-		//this.valueMin.setText("Value min: " + df.format(allValueMin));
-		//this.valueMax.setText("Value max: " + df.format(allValueMax));
-
-		colorbtn.setBackground(colors.elementAt(field));
 
 		// brg 10/10/2011: only want to call onTypeListAction() when the user changes
 		// the popup, not when we programmatically set its value when the fields table
-		// selection changes. i can't find a way to distinguish between those events
-		// (and indeed there may not be). this method is gross but works: remove the popup's
+		// selection changes. Can't find a way to distinguish between those events
+		// (and indeed there may not be). This method is gross but works: remove the popup's
 		// action listeners, set the popup selection, then restore the listeners.
 		ActionListener[] savedListeners = typeList.getActionListeners();
 		for ( ActionListener l : savedListeners ) { typeList.removeActionListener( l ); }
@@ -976,238 +729,78 @@ public class CRGraphDialog extends JFrame {
 
 	private void onFieldsTableChanged(final TableModelEvent event) {
 		System.out.println("onFieldsTableChanged():");
-		int row = event.getFirstRow();
-		boolean checked = fieldsTable.isRowChecked(row);
-		CRDefaultListModel tmodel = CorelyzerApp.getApp().getTrackListModel();
-
-		if (!checked) {
-			// if there is a graph id to match the track, section, dataset, table, field attributes
-			// then have it removed, and for each section in the track
-			//TrackSceneNode tnode = null;
-
-/*			int[] selectedSections = this.getSelectedSections();
-			for ( int selSectionIdx = 0; selSectionIdx < selectedSections.length; selSectionIdx++ )
+		final int row = event.getFirstRow();
+		final int col = event.getColumn();
+		
+		if ( col == 0 /* "Show" checkbox */ )
+		{
+			if ( !fieldsTable.isRowChecked( row )) // remove graph(s)
 			{
-				final String selSectionName = this.sectionsList.getModel().getElementAt( selectedSections[selSectionIdx] ).toString();
-				for ( int trackIdx = 0; trackIdx < tmodel.size(); trackIdx++ )
+				// if there is a graph id to match the track, section, dataset, table, field attributes
+				// then have it removed, and for each section in the track
+				for ( int curSectionIndex : this.sectionsList.getSelectedIndices() )
 				{
-					tnode = (TrackSceneNode) tmodel.elementAt( trackIdx );
-					final CoreSection cs = tnode.getCoreSection( selSectionName );
-					if ( cs != null )
+					final GraphParams gp = this.getGraphParams( curSectionIndex );
+					if ( gp != null )
 					{
-						final int dataTableId = this.getTableIndexByName( cs.getName() );
-						final WellLogDataSet ds = (WellLogDataSet) this.datasetList.getSelectedItem();
-						System.out.println("Get scenegraph id for graph: track " + trackIdx + " section " + cs.getId() +
-										   " dataset " + ds.getId() + " table " + dataTableId + " field " + row);
-						final int gid = SceneGraph.getGraphID( tnode.getId(), cs.getId(), ds.getId(), dataTableId, row );
-						
+						//System.out.println("Get scenegraph id for graph: track " + gp.trackId + " section " + gp.sectionId +
+						//				   " dataset " + gp.datasetId + " table " + gp.dataTableId + " field " + row );
+						final int gid = SceneGraph.getGraphID( gp.trackId, gp.sectionId, gp.datasetId, gp.dataTableId, row );
 						SceneGraph.removeLineGraphFromSection(gid);
 					}
 				}
 			}
-*/
-			
-			//int[] selectedSections = this.getSelectedSections();
-			for ( int curSectionIndex : this.getSelectedSections() )
+			else // add graph(s)
+			{
+				for ( int curSectionIndex : this.sectionsList.getSelectedIndices() )
+				{
+					GraphParams gp = this.getGraphParams( curSectionIndex );
+					if ( gp == null )
+						continue;
+					
+					// If the dataset table contains section depth offset, use it.
+					WellLogDataSet ds = (WellLogDataSet) this.datasetModel.getSelectedItem();
+					WellLogTable table = ds.getTable( gp.dataTableId );
+					
+					final int gid = SceneGraph.addLineGraphToSection( gp.trackId, gp.sectionId, gp.datasetId, gp.dataTableId, row );
+					if ( gid == -1 ) {
+						System.out.println("- Creating graph, but gid is: " + gid);
+						return;
+					}
+					//System.out.println( "setting properties for gid = " + gid );
+					this.setGraphProperties( gid, row );
+					
+					// java side
+					TrackSceneNode tnode = CoreGraph.getInstance().getCurrentSession().getTrackSceneNodeWithTrackId( gp.trackId );
+					CoreSectionGraph csg = new CoreSectionGraph( gp.datasetId, gp.dataTableId, row, gid, tnode);
+					
+					final String secname = this.sectionsListModel.getElementAt(curSectionIndex).toString();
+					csg.setName(secname);
+					
+					tnode.addCoreSectionGraph(csg, gp.sectionId, gid);
+				}
+			} // end adding graphs
+		}
+		else if ( col == 2 /* Color */ )
+		{
+			Color newColor = (Color)fieldsTable.getModel().getValueAt( row, col );
+			for ( int curSectionIndex : this.sectionsList.getSelectedIndices() )
 			{
 				final GraphParams gp = this.getGraphParams( curSectionIndex );
-				if ( gp != null )
-				{
-					System.out.println("Get scenegraph id for graph: track " + gp.trackId + " section " + gp.sectionId +
-									   " dataset " + gp.datasetId + " table " + gp.dataTableId + " field " + row );
-					final int gid = SceneGraph.getGraphID( gp.trackId, gp.sectionId, gp.datasetId, gp.dataTableId, row );
-					SceneGraph.removeLineGraphFromSection(gid);
-				}
-			}
-			
-			
-			
-//			WellLogDataSet ds = (WellLogDataSet) this.datasetList.getSelectedItem();
-
-//			if (!allSectionsBox.isSelected()) {
-//				int gid = SceneGraph.getGraphID(selectedTrackId, selectedSectionId, ds.getId(), // currentDatasetIndex,
-//						currentTableIndex, row);
-//
-//				SceneGraph.removeLineGraphFromSection(gid);
-//
-//			} else {
-//			{
-				// brg 10/2/2011: Lots of logic based on the current track, but we really want to search all tracks always
-				//CoreGraph cg = CoreGraph.getInstance();
-				//TrackSceneNode tnode = cg.getCurrentTrack();
-//				CRDefaultListModel tmodel = CorelyzerApp.getApp().getTrackListModel();
-//				TrackSceneNode tnode = null;
-				//CoreSection sec = null;
-/*				
-				for ( int trackIdx = 0; trackIdx < tmodel.size(); trackIdx++ )
-				{
-					tnode = (TrackSceneNode) tmodel.elementAt( trackIdx );
-
-					if (tnode != null) {
-						for (int sectionIdx = 0; sectionIdx < tnode.getNumCores(); sectionIdx++) {
-							CoreSection cs = tnode.getCoreSection( sectionIdx );
-
-							if (cs != null) {
-								//int tid = this.getTableIndex( sectionIdx );
-								final int tid = this.getTableIndexByName( cs.getName() );
-								if ( tid == -1 )
-									continue;
-								
-								// section is in dataset - is it selected in sections list? no need
-								// to check if all sections box is checked
-								if ( !allSectionsBox.isSelected() )
-								{
-									System.out.println("looking for section [" + cs.getName() + "]");
-									final int[] selectedSections = this.sectionsList.getSelectedIndices();
-									boolean matchFound = false;
-									for ( int selIdx = 0; selIdx < selectedSections.length; selIdx++ )
-									{
-										final int curSectionIdx = selectedSections[selIdx];
-										final String curSectionName = this.sectionsList.getModel().getElementAt(curSectionIdx).toString();
-										System.out.println("\t" + curSectionName);
-										if ( cs.getName().compareToIgnoreCase( curSectionName ) == 0 )
-										{
-											matchFound = true;
-											System.out.println("match found!");
-											break;
-										}
-									}
-									
-									if ( !matchFound )
-									{
-										System.out.println("no match");
-										continue;
-									}
-								}
-								
-								System.out.println("Get scenegraph id for graph: track " + trackIdx + " section " + cs.getId() +
-												   " dataset " + ds.getId() + " table " + tid + " field " + row);
-								int gid = SceneGraph.getGraphID( trackIdx, cs.getId(), ds.getId(), // currentDatasetIndex,
-										tid, row);
-
-								SceneGraph.removeLineGraphFromSection(gid);
-							} else {
-								System.out.println("- cs is null!");
-							}
-						}
-					} else {
-						System.out.println("- tnode is null!");
-					}
-				}
-			}
-*/
-		}
-			// end removing graphs
-		else // adding graphs
-		{
-			//int[] selectedSections = this.getSelectedSections();
-			//System.out.println("num selected sections = " + selectedSections.length);
-			
-//			for ( int sidx = 0; sidx < selectedSections.length; sidx++ )
-			for ( int curSectionIndex : this.getSelectedSections() ) //selectedSections )
-			{
-//				final int curSectionIndex = selectedSections[sidx];
-			
-//				CRDefaultListModel tmodel = CorelyzerApp.getApp().getTrackListModel();
-//				TrackSceneNode tnode = null;
-//				CoreSection sec = null;
-				//TrackSceneNode tnode = (TrackSceneNode) tmodel.elementAt(selectedTrackListId);
-
-				GraphParams gp = this.getGraphParams( curSectionIndex );
 				if ( gp == null )
-					continue; // brgtodo: stifle "add missing section" code for now
-				//boolean matchFound = (gp != null);
+					continue;
 				
-				//				final String secname = this.sectionsListModel.getElementAt(curSectionIndex).toString();
-//				for ( int trackIdx = 0; !matchFound && trackIdx < tmodel.size(); trackIdx++ )
-//				{
-//					tnode = (TrackSceneNode) tmodel.elementAt( trackIdx );
-//					sec = tnode.getCoreSection(secname);
-//					if ( sec != null )
-//						matchFound = true;
-//				}
+				final int gid = SceneGraph.getGraphID( gp.trackId, gp.sectionId, gp.datasetId, gp.dataTableId, row );
+				if (gid < 0)
+					continue;
 				
-				//boolean justAppend = false;
-
-				// If the dataset table contains section depth offset, use it.
-				WellLogDataSet ds = (WellLogDataSet) this.datasetModel.getSelectedItem();
-				//final int dataTableId = this.getTableIndexByName( secname );
-				//if ( dataTableId == -1 ) return;
-				
-				WellLogTable table = ds.getTable( gp.dataTableId );
-
-				// brgtodo ??? the whole "add an unfound section when
-				// graphing" model seems to invite bad results.  We're better at finding sections now,
-				// but may want to stifle this behavior and eventually make it modifiable in prefs?
-				// commenting out for now.
-/*
-				if ( !matchFound )
-				{
-					// need to create new section
-					// native first, java next for gid
-					int secid = SceneGraph.addSectionToTrack(tnode.getId(), tnode.getNumCores());
-					SceneGraph.setSectionName(tnode.getId(), secid, secname);
-					// property?
-					sec = new CoreSection(secname, secid);
-					tnode.addCoreSection(sec);
-					CoreGraph.getInstance().notifyListeners();
-
-					// Figure out the top depth of a section
-					float sectionBeginDepth;
-					float sectionTopDepth = table.getTopDepth(); // in meters
-					final float unitScale = UnitLength.getUnitScale( table.getDepthUnits() );
-
-					if (sectionTopDepth != -1) {
-						sectionBeginDepth = sectionTopDepth;
-					} else if (table.getDepth_offset() != -1) {
-						sectionBeginDepth = table.getDepth_offset() * unitScale;
-					} else {
-						sectionBeginDepth = 0.0f;
-						justAppend = true;
-					}
-
-					SceneGraph.positionSection(tnode.getId(), secid, sectionBeginDepth * 100.0f / 2.54f * SceneGraph.getCanvasDPIX(0), 0);
-				}
-*/
-				// if we created new coresection and add new graph
-				// but has no sectionTopDepth or depth_offset
-				// send section to the end of the track
-				//if (justAppend) {
-				//	SceneGraph.pushSectionToEnd(tnode.getId(), sec.getId());
-				//	sec.setDepth(SceneGraph.getSectionDepth(tnode.getId(), sec.getId()));
-				//}
-
-				// now we have the section
-				// native first, java next for gid
-				// System.out.println("[Bremen] Creating graph using dataset: "
-				// + ds.toString()
-				// + " with id: " + ds.getId() + ", tableIdx: " +
-				// this.currentTableIndex);
-
-
-				//final int gid = SceneGraph.addLineGraphToSection( tnode.getId(), sec.getId(), ds.getId(), dataTableId, row );
-				final int gid = SceneGraph.addLineGraphToSection( gp.trackId, gp.sectionId, gp.datasetId, gp.dataTableId, row );
-				if ( gid == -1 ) {
-					System.out.println("- Creating graph, but gid is: " + gid);
-					return;
-				}
-				System.out.println( "setting properties for gid = " + gid );
-				this.setGraphProperties( gid, row );
-
-				// java side
-				TrackSceneNode tnode = CoreGraph.getInstance().getCurrentSession().getTrackSceneNodeWithTrackId( gp.trackId );
-				CoreSectionGraph csg = new CoreSectionGraph( gp.datasetId/*ds.getId()*/, gp.dataTableId, row, gid, tnode);
-				
-				final String secname = this.sectionsListModel.getElementAt(curSectionIndex).toString();
-				csg.setName(secname);
-				
-				tnode.addCoreSectionGraph(csg, gp.sectionId/*sec.getId()*/, gid);
-
-				// update current gid : native code id
-				//this.selectedTrackId = tnode.getId();
-				//this.selectedSectionId = sec.getId();
+				// if a graph is present, change its color
+				SceneGraph.setLineGraphColor(gid, ( newColor.getRed() / 255.0f), ( newColor.getGreen() / 255.0f), ( newColor.getBlue() / 255.0f));
 			}
-		} // end adding graphs
+
+			final WellLogDataSet ds = (WellLogDataSet) this.datasetList.getSelectedItem();
+			CRGraphDialog.colorsManager.updateColorVector( ds, newColor, row );
+		}
 		
 		CorelyzerApp.getApp().updateGLWindows();
 	}
@@ -1226,7 +819,8 @@ public class CRGraphDialog extends JFrame {
 		
 		SceneGraph.setLineGraphExcludeStyle( gid, excludeStyleVals.elementAt( row ));
 		
-		final Color c = colors.elementAt( row );
+		final WellLogDataSet ds = (WellLogDataSet) this.datasetList.getSelectedItem();
+		final Color c = CRGraphDialog.colorsManager.getColorVector( ds ).elementAt( row );
 		SceneGraph.setLineGraphColor(gid, (c.getRed() / 255.0f), (c.getGreen() / 255.0f), (c.getBlue() / 255.0f));
 		
 		final Integer graphType = graphTypes.elementAt(row);
@@ -1234,7 +828,6 @@ public class CRGraphDialog extends JFrame {
 		
 		final String fieldLabel = this.fieldsTable.getRowLabel(row);
 		SceneGraph.setLineGraphLabel( gid, fieldLabel );
-		
 	}
 
 	private void onScaleMaxTextLostFocus() {
@@ -1308,42 +901,14 @@ public class CRGraphDialog extends JFrame {
 		}		
 	}
 
+	// brgtodo 10/12/2011: called twice when section is changed with a mouse click,
+	// only once when changed with arrow key, why?
 	private void onSectionsListChanged() {
 		WellLogDataSet ds = (WellLogDataSet) this.datasetList.getSelectedItem();
-
-		// if (currentDatasetIndex < 0) {
 		if (ds == null) {
 			return;
 		}
 
-		this.selectedSectionListId = this.sectionsList.getSelectedIndex();
-		if (this.selectedSectionListId == -1) {
-			return;
-		}
-
-		this.currentTableIndex = this.selectedSectionListId;
-		
-		// 9/29/2011 brg: all the work to maintain currently selected section and track
-		// on both sides of the fence is pervasive, and, I think, unnecessary. This is a
-		// dialog, performance isn't important - just grab what you need at the last minute
-		// and use it!
-
-		// need to update selectedSectionId
-		CRDefaultListModel tmodel = CorelyzerApp.getApp().getTrackListModel();
-		TrackSceneNode tnode = (TrackSceneNode) tmodel.elementAt(selectedTrackListId);
-		String secname = this.sectionsListModel.getElementAt(this.selectedSectionListId).toString();
-
-		CoreSection sec = tnode.getCoreSection(secname);
-		if (sec == null) {
-			this.selectedSectionId = -1;
-		} else {
-			this.selectedSectionId = sec.getId();
-		}
-
-		sectionsListLabel.setText( "Choose graph section(s): (" + sectionsList.getSelectedIndices().length + "/" +
-								  sectionsList.getModel().getSize() + " selected)" );
-		
-		// this.updateFields(this.currentDatasetIndex);
 		this.updateFields(ds);
 
 		this.fieldsTable.setRowSelectionInterval(0, 0);
@@ -1363,27 +928,7 @@ public class CRGraphDialog extends JFrame {
 
 		graphTypes.setElementAt( typeList.getSelectedIndex(), field );
 
-		// if there is a graph already there then change the type of
-		// the graph
-
-		// update current section info f i x m e
-/*
-		CRDefaultListModel tmodel = CorelyzerApp.getApp().getTrackListModel();
-		TrackSceneNode tnode = (TrackSceneNode) tmodel.elementAt(selectedTrackListId);
-		String secname = this.sectionsListModel.getElementAt(this.selectedSectionListId).toString();
-
-		CoreSection sec = tnode.getCoreSection(secname);
-		if (sec == null) {
-			this.selectedSectionId = -1;
-		} else {
-			this.selectedSectionId = sec.getId();
-		}
-
-		WellLogDataSet ds = (WellLogDataSet) this.datasetList.getSelectedItem();
-*/
-		
-		int[] selectedSections = this.getSelectedSections();
-		for ( int curSectionIndex : selectedSections )
+		for ( int curSectionIndex : this.sectionsList.getSelectedIndices() )
 		{
 			final GraphParams gp = this.getGraphParams( curSectionIndex );
 			if ( gp == null )
@@ -1398,7 +943,6 @@ public class CRGraphDialog extends JFrame {
 		}
 
 		CorelyzerApp.getApp().updateGLWindows();
-		//this.onApply();
 	}
 
 	public void selectDataset(final int index) {
@@ -1429,30 +973,6 @@ public class CRGraphDialog extends JFrame {
 			// this.datasetModel.addElement(tokens[tokens.length - 1]);
 			this.datasetModel.addElement(ds);
 		}
-	}
-
-	/*
-	 * private int getDatasetId(int datasetIndex) { int datasetId = -1;
-	 * 
-	 * CoreGraph cg = CoreGraph.getInstance(); if (cg != null) { Session s =
-	 * cg.getCurrentSession(); if (s != null) { WellLogDataSet d =
-	 * s.getDataset(datasetIndex); if (d != null) { datasetId = d.getId(); } } }
-	 * 
-	 * return datasetId; }
-	 */
-
-	public void setSelectedSectionId(final int id) {
-		if (id < 0) {
-			return;
-		}
-		this.selectedSectionId = id;
-	}
-
-	public void setSelectedSectionListId(final int id) {
-		if (id < 0) {
-			return;
-		}
-		this.selectedSectionListId = id;
 	}
 
 	public void setSelectedTrackAndSectionId(final int trackId, final int sectionId) {
@@ -1491,51 +1011,38 @@ public class CRGraphDialog extends JFrame {
 			// end of index matching
 		}
 
-		setSelectedTrackListId(trackId); // java index
-		setSelectedSectionListId(sectionId); // java index
-		setSelectedTrackId(tid); // native index
-		setSelectedSectionId(sid); // native index
-
-		this.sectionsList.setSelectedIndex(sectionId);
+		this.sectionsList.setSelectedIndex( sectionId );
 		this.onSectionsListChanged();
 	}
 
-	public void setSelectedTrackId(final int id) {
-		if (id < 0) {
-			return;
-		}
-		this.selectedTrackId = id;
-	}
-
-	public void setSelectedTrackListId(final int id) {
-		if (id < 0) {
-			return;
-		}
-		this.selectedTrackListId = id;
-	}
-	
-	// Aggregate data for currently selected sections
-	private void aggregateEverything( final WellLogDataSet ds )
+	// Aggregate selected sections' data to display in fields table as follows:
+	// - "Show" checkbox: if any sections have a graph on the current field, check
+	// - Data range: min of all section mins, max of all section maxes
+	// - Scale min/max: min of all section mins, max of all section maxes
+	// - Exclude min/max: min of all section mins, max of all section maxes
+	// - Graph type: use first type encountered in a graph
+	// - Leave gaps checkbox (exclude style): if any sections leave gaps, check
+	private void aggregateFieldsData( final WellLogDataSet ds )
 	{
 		for ( int field = 0; field < ds.getTable( 0 ).getNumFields(); field++ )
 		{
 			boolean fieldHasGraph = false;
-			int excludeStyle = 0;
-			int graphType = 0;
 			boolean graphTypeSet = false;
+			int graphType = 0;
+			int excludeStyle = 0;
 
 			float graphScaleMin = Float.MAX_VALUE, graphScaleMax = -Float.MAX_VALUE;
 			float noGraphScaleMin = Float.MAX_VALUE, noGraphScaleMax = -Float.MAX_VALUE;
 
 			float dataRangeMin = Float.MAX_VALUE, dataRangeMax = -Float.MAX_VALUE;
 			
+			// init exclude min/max to defaults: if none of the sections exclude values,
+			// these are the magic numbers that cause no text to be displayed in the exclude
+			// fields. brgtodo 10/5/2011
 			float graphExcludeMin = -Float.MAX_VALUE, graphExcludeMax = Float.MAX_VALUE;
 			float noGraphExcludeMin = -Float.MAX_VALUE, noGraphExcludeMax = Float.MAX_VALUE;
 			
-			Color graphColor = null;
-			
-			int[] selectedSections = this.getSelectedSections();
-			for ( int curSectionIndex : selectedSections )
+			for ( int curSectionIndex : this.sectionsList.getSelectedIndices() )
 			{
 				final GraphParams gp = this.getGraphParams( curSectionIndex );
 				if ( gp != null )
@@ -1586,13 +1093,6 @@ public class CRGraphDialog extends JFrame {
 							graphTypeSet = true;
 						}
 						
-						// color
-						final float r = SceneGraph.getLineGraphColorComponent( gid, 0 );
-						final float g = SceneGraph.getLineGraphColorComponent( gid, 1 );
-						final float b = SceneGraph.getLineGraphColorComponent( gid, 2 );
-						graphColor = new Color( r, g, b );
-						//colors.add(new Color(r, g, b));
-						
 						// exclude style
 						if ( SceneGraph.getGraphExcludeStyle( gid ) > 0 )
 							excludeStyle = 1; // leave gaps
@@ -1606,15 +1106,6 @@ public class CRGraphDialog extends JFrame {
 						noGraphScaleMax = Math.max( noGraphScaleMax, t.getColumnMax( field ));
 						noGraphExcludeMin = -Float.MAX_VALUE;//Math.min( noGraphExcludeMin, Float.MAX_VALUE );//SceneGraph.getGraphExcludeMin( gid ));
 						noGraphExcludeMax = Float.MAX_VALUE;//Math.max( noGraphExcludeMax, -Float.MAX_VALUE );//SceneGraph.getGraphExcludeMax( gid ));
-
-						Random randGen = new Random();
-						int r = (int) (100 + 0.49803 * randGen.nextInt(256));
-						int g = (int) (100 + 0.49803 * randGen.nextInt(256));
-						int b = (int) (100 + 0.49803 * randGen.nextInt(256));
-						graphColor = new Color( r, g, b );
-						//colors.add(new Color(r, g, b));
-						
-						//	System.out.println("no graph on section: exclmin = " + noGraphExcludeMin + " exclmax = " + noGraphExcludeMax );
 					}
 
 					// data range min/max: same whether or not there's a graph
@@ -1636,22 +1127,16 @@ public class CRGraphDialog extends JFrame {
 			graphTypes.add( graphType );
 			excludeStyleVals.add( excludeStyle );
 			showGraphVals.add( new Boolean( fieldHasGraph ));
-			colors.add( graphColor );
 		}
 	}
 
-	// private void updateFields(int dsIdx) {
 	private void updateFields(final WellLogDataSet ds) {
-		// if (dsIdx < 0) return;
 		if (ds == null) {
 			return;
 		}
 
-		lastSelectedField = -1;
-
 		// clear the fields table and the min/max value vectors
 		fieldsTable.clearTable();
-		colors.clear();
 		graphTypes.clear();
 
 		scaleMinVals.clear();
@@ -1668,140 +1153,120 @@ public class CRGraphDialog extends JFrame {
 		
 		showGraphVals.clear();
 
-//		this.allMinVals.clear();
-//		this.allMaxVals.clear();
-
-		this.aggregateEverything( ds );
+		this.aggregateFieldsData( ds );
 		
-		int[] selectedSections = this.getSelectedSections(); //sectionsList.getSelectedIndices();
-		// aggregate showGraph values dumbly - if *any* of the selected sections has a graph
-		// on a field, check the "Show" box
-//		final int numFields = ds.getTable(0).getNumFields();
-//		boolean[] showGraph = new boolean[numFields];
-//		for ( int i = 0; i < showGraph.length; i++ ) { showGraph[i] = false; }
-			
-/*
-		for ( int curSectionIndex : selectedSections )
-		{
-			// search for graphs in current section
-			final GraphParams gp = this.getGraphParams( curSectionIndex );
-			if ( gp != null )
-			{
-				// for each field, see if there's a graph in the section
-				for ( int fieldId = 0; fieldId < ds.getTable(0).getNumFields(); fieldId++ )
-				{
-					if ( SceneGraph.getGraphID( gp.trackId, gp.sectionId, gp.datasetId, gp.dataTableId, fieldId ) >= 0 )
-					{
-						if ( !showGraph[ fieldId ] )
-							showGraph[ fieldId ] = true;
-					}
-				}
-			}
-		}
-*/
-		// 9/29/2011 brg: aggregate min/max data range for all selected sections to display
-		// in Data Range column of fields table
-//		WellLogTable t = ds.getTable(0);
-//		Vector<Float> dataRangeMin = new Vector<Float>();
-//		Vector<Float> dataRangeMax = new Vector<Float>();
-//		for ( int fidx = 0; fidx < t.getNumFields(); fidx++ ) {
-//			float min = Float.MAX_VALUE; //0.0f;
-//			float max = -Float.MAX_VALUE;//0.0f;
-//			for ( int curSectionIndex : selectedSections ) { //selIdx = 0; selIdx < selectedSections.length; selIdx++) {
-//				final int dataTableId = this.getTableIndex( curSectionIndex );
-//				t = ds.getTable( dataTableId );
-//				//t = ds.getTable(selectedSections[selIdx]);
-//		
-//				min = ( min > t.getColumnMin( fidx )) ? t.getColumnMin( fidx ) : min;
-//				max = ( max < t.getColumnMax( fidx )) ? t.getColumnMax( fidx ) : max;
-//			}
-//			
-//			dataRangeMinVals.add( min );
-//			dataRangeMaxVals.add( max );
-//		}
+		Vector<Color> colors = CRGraphDialog.colorsManager.getColorVector( ds );
 		
-		// WellLogDataSet ds = datasets.elementAt(dsIdx);
-		//WellLogTable t = ds.getTable(this.selectedSectionListId);
-
 		final WellLogTable t = ds.getTable( 0 ); // only used to get field count and names, any table will do so use the first
 		Random generator = new Random(System.currentTimeMillis());
 		for (int j = 0; j < t.getNumFields(); j++)
 		{
 			final boolean checkShowGraph = showGraphVals.elementAt( j ).booleanValue();
 			final String fieldName = t.getHeader( j + 1 );
+			final Color color = colors.elementAt( j );
 			final String dataRange = String.valueOf( dataRangeMinVals.elementAt( j )) + " - " + String.valueOf( dataRangeMaxVals.elementAt( j ));
-			fieldsTable.addRow( checkShowGraph, fieldName, dataRange );
-
-			// if there is already a graph then we need to
-			// pull up the info about the graph, otherwise
-			// we use defaults
-			//this.origMinVals.add(t.getColumnMin(j));
-			//this.origMaxVals.add(t.getColumnMax(j));
-
-			//if ( !checkShowGraph ) {
-				//scaleMinVals.add(t.getColumnMin(j));
-				//scaleMaxVals.add(t.getColumnMax(j));
-				//scaleMinVals.add( dataRangeMin.elementAt( j ));
-				//scaleMaxVals.add( dataRangeMax.elementAt( j ));
-				//graphTypes.add(0);
-				
-				// dummys for exclude range and style
-				//excludeMinVals.add( -Float.MAX_VALUE );
-				//excludeMaxVals.add( Float.MAX_VALUE );
-				//excludeStyleVals.add( 0 ); // no gaps 10/2/2011 brgtodo ENUM
-
-				//int r = (int) (100 + 0.49803 * generator.nextInt(256));
-				//int g = (int) (100 + 0.49803 * generator.nextInt(256));
-				//int b = (int) (100 + 0.49803 * generator.nextInt(256));
-
-				//colors.add(new Color(r, g, b));
-			//} else {
-				// 10/4/2011 brgtodo: just use graph of first selected section for now...
-				//GraphParams gp = this.getGraphParams( selectedSections[0] );
-				//final int gid = SceneGraph.getGraphID( gp.trackId, gp.sectionId, gp.datasetId, gp.dataTableId, j );
-				//System.out.println("updateFields: gid = " + gid);
-				//final int gid = SceneGraph.getGraphID( selectedTrackId, selectedSectionId, ds.getId(), this.selectedSectionListId, j );
-
-				//scaleMinVals.add(SceneGraph.getGraphMin(gid));
-				//scaleMaxVals.add(SceneGraph.getGraphMax(gid));
-				
-				//excludeMinVals.add(SceneGraph.getGraphExcludeMin(gid));
-				//excludeMaxVals.add(SceneGraph.getGraphExcludeMax(gid));
-				//excludeStyleVals.add(SceneGraph.getGraphExcludeStyle(gid));
-				
-				//float r, g, b;
-				//r = SceneGraph.getLineGraphColorComponent(gid, 0);
-				//g = SceneGraph.getLineGraphColorComponent(gid, 1);
-				//b = SceneGraph.getLineGraphColorComponent(gid, 2);
-				//colors.add(new Color(r, g, b));
-				
-				//final int gt = SceneGraph.getLineGraphType(gid);
-				//graphTypes.add(gt);
-			//}
+			fieldsTable.addRow( checkShowGraph, fieldName, color, dataRange );
 		}
 
 		this.scaleMinText.setText("");
 		this.scaleMaxText.setText("");
-
-		// collect fields' all min/max
-//		for (int i = 0; i < t.getNumFields(); i++) {
-//			float min = 0.0f;
-//			float max = 0.0f;
-//
-//			for (int j = 0; j < ds.getNumTables(); j++) {
-//				WellLogTable table = ds.getTable(j);
-//
-//				if (j == 0) {
-//					min = table.getColumnMin(i);
-//					max = table.getColumnMax(i);
-//				} else {
-//					min = min > table.getColumnMin(i) ? table.getColumnMin(i) : min;
-//					max = max < table.getColumnMax(i) ? table.getColumnMax(i) : max;
-//				}
-//			}
-//
-//			this.allMinVals.add(min);
-//			this.allMaxVals.add(max);
-//		}
 	}
+}
+
+// Convenience class that aggregates values needed to query SceneGraph about graphs
+class GraphParams {
+	public int trackId;
+	public int sectionId;
+	public int datasetId;
+	public int dataTableId;
+	
+	public GraphParams( final int trackId, final int sectionId, final int datasetId, final int dataTableId )
+	{
+		this.trackId = trackId;
+		this.sectionId = sectionId;
+		this.datasetId = datasetId;
+		this.dataTableId = dataTableId;
+	}
+}
+
+// Maintains a list of graphing colors for the session.
+class GraphColorsManager
+{
+	public GraphColorsManager()
+	{
+		colorVec = new Vector<Vector<Color>>();
+		nameVec = new Vector<String>();
+	}
+	
+	// Returns a vector of graph colors in field order for specified dataset.
+	// If no vector exists, it will be created, using colors from existing graphs
+	// and random values for the rest.
+	public Vector<Color> getColorVector( final WellLogDataSet ds )
+	{
+		//System.out.print("Looking for matching color vector...");
+		Vector<Color> v = this.findMatchingVector( ds );
+		if ( v == null )
+		{
+			//System.out.println("not found, creating new vector");
+			v = new Vector<Color>();
+			for ( int fidx = 0; fidx < ds.getTable( 0 ).getNumFields(); fidx++ )
+			{
+				Color c = null;
+				final int colorSourceGraph = SceneGraph.findGraphByField( ds.getId(), fidx );
+				if ( colorSourceGraph >= 0 )
+				{
+					final float r = SceneGraph.getLineGraphColorComponent( colorSourceGraph, 0 );
+					final float g = SceneGraph.getLineGraphColorComponent( colorSourceGraph, 1 );
+					final float b = SceneGraph.getLineGraphColorComponent( colorSourceGraph, 2 );				
+					c = new Color( r, g, b );
+				}
+				else
+				{
+					c = this.makeRandomGraphColor();
+				}
+
+				v.add( c );
+			}
+			
+			colorVec.add( v );
+			nameVec.add( ds.getSourceFilename() );
+		}
+		
+		return v;
+	}
+	
+	public void updateColorVector( final WellLogDataSet ds, final Color newColor, final int field )
+	{
+		Vector<Color> v = this.findMatchingVector( ds );
+		if ( v != null )
+		{
+			v.setElementAt( newColor, field );
+		}
+	}
+	
+	private Vector<Color> findMatchingVector( final WellLogDataSet ds )
+	{
+		for ( int i = 0; i < nameVec.size(); i++ )
+		{
+			if ( ds.getSourceFilename() == nameVec.elementAt( i ))
+			{
+				return colorVec.elementAt( i );
+			}
+		}
+
+		return null;
+	}
+	
+	private Color makeRandomGraphColor()
+	{
+		Random randGen = new Random();
+		int r = (int) (100 + 0.49803 * randGen.nextInt(256));
+		int g = (int) (100 + 0.49803 * randGen.nextInt(256));
+		int b = (int) (100 + 0.49803 * randGen.nextInt(256));
+		Color c = new Color( r, g, b );
+		return c;
+	}
+	
+	Vector<Vector<Color>> colorVec;
+	Vector<String> nameVec;
 }

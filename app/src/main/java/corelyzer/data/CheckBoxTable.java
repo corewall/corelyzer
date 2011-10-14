@@ -1,5 +1,6 @@
 package corelyzer.data;
 
+import java.awt.Color;
 import java.awt.Dimension;
 import java.util.Vector;
 
@@ -31,17 +32,19 @@ public class CheckBoxTable extends JTable {
 
 		getColumnModel().getColumn(0).setHeaderValue("Show");
 		getColumnModel().getColumn(1).setHeaderValue("Field");
-		getColumnModel().getColumn(2).setHeaderValue("Data Range");
+		getColumnModel().getColumn(2).setHeaderValue("Color");
+		getColumnModel().getColumn(3).setHeaderValue("Data Range");
 	}
 
 	public void addCheckEventListener(final TableModelListener l) {
-		model.checklistener = l;
+		//model.checklistener = l;
 	}
 
 	/** Add another selectable entry into the table, with the associated label */
-	public void addRow(final boolean b, final String label, final String range) {
+	public void addRow(final boolean b, final String label, final Color c, final String range) {
 		model.checkVec.add(new Boolean(b));
 		model.labelVec.add(label);
+		model.colorVec.add(c);
 		model.valueRangeVec.add(range);
 	}
 
@@ -49,6 +52,7 @@ public class CheckBoxTable extends JTable {
 	public void clearTable() {
 		model.checkVec.clear();
 		model.labelVec.clear();
+		model.colorVec.clear();
 		model.valueRangeVec.clear();
 		repaint();
 	}
@@ -72,7 +76,8 @@ public class CheckBoxTable extends JTable {
 		getColumnModel().getColumn(0).setPreferredWidth(60);
 		//getColumnModel().getColumn(1).setPreferredWidth(d.width - 60);
 		getColumnModel().getColumn(1).setPreferredWidth(60);
-		getColumnModel().getColumn(2).setPreferredWidth(d.width - 120);
+		getColumnModel().getColumn(2).setPreferredWidth(30);
+		getColumnModel().getColumn(3).setPreferredWidth(d.width - 120);
 	}
 
 	@Override
@@ -80,7 +85,8 @@ public class CheckBoxTable extends JTable {
 		super.setSize(width, height);
 		getColumnModel().getColumn(0).setPreferredWidth(60);
 		getColumnModel().getColumn(1).setPreferredWidth(/*width - */60);
-		getColumnModel().getColumn(2).setPreferredWidth(width - 120);
+		getColumnModel().getColumn(2).setPreferredWidth(30);
+		getColumnModel().getColumn(3).setPreferredWidth(width - 120);
 	}
 }
 
@@ -95,12 +101,15 @@ class CheckBoxTableModel extends AbstractTableModel {
 	public Vector<Boolean> checkVec;
 	/** A vector of strings for the labels */
 	public Vector<String> labelVec;
+	public Vector<Color> colorVec;
 	public Vector<String> valueRangeVec;
-	public TableModelListener checklistener;
+
+	//public TableModelListener checklistener;
 
 	public CheckBoxTableModel() {
 		checkVec = new Vector<Boolean>();
 		labelVec = new Vector<String>();
+		colorVec = new Vector<Color>();
 		valueRangeVec = new Vector<String>();
 	}
 
@@ -112,7 +121,7 @@ class CheckBoxTableModel extends AbstractTableModel {
 	/** Returns the number of colums in the table model, currently 3. */
 
 	public int getColumnCount() {
-		return 3;
+		return 4;
 	}
 
 	/** Returns the number of rows in the table model */
@@ -122,12 +131,12 @@ class CheckBoxTableModel extends AbstractTableModel {
 	}
 
 	/**
-	 * Returns the object if the row is valid and the col >= 0 and < 3.
+	 * Returns the object if the row is valid and the col >= 0 and < 4.
 	 * Otherwise it returns null.
 	 */
 
 	public Object getValueAt(final int row, final int col) {
-		if (col >= 3 || col < 0) {
+		if (col >= 4 || col < 0) {
 			return null;
 		}
 		if (row >= getRowCount() || row < 0) {
@@ -140,6 +149,9 @@ class CheckBoxTableModel extends AbstractTableModel {
 			return labelVec.elementAt(row);
 		}
 		if (col == 2) {
+			return colorVec.elementAt(row);
+		}
+		if (col == 3) {
 			return valueRangeVec.elementAt(row);
 		}
 		return null;
@@ -149,7 +161,7 @@ class CheckBoxTableModel extends AbstractTableModel {
 
 	@Override
 	public boolean isCellEditable(final int row, final int col) {
-		return ( col == 0 );
+		return ( col == 0 || col == 2 );
 	}
 
 	/**
@@ -165,14 +177,16 @@ class CheckBoxTableModel extends AbstractTableModel {
 			} else {
 				checkVec.setElementAt(new Boolean(true), row);
 			}
-			if (checklistener != null) {
-				checklistener.tableChanged(new TableModelEvent(this, row, row, 0));
-			}
+			this.fireTableCellUpdated( row, col );
 		}
 		if (col == 1) {
 			labelVec.setElementAt(value.toString(), row);
 		}
 		if (col == 2) {
+			colorVec.setElementAt((Color)value, row);
+			this.fireTableCellUpdated( row, col );
+		}
+		if (col == 3) {
 			valueRangeVec.setElementAt(value.toString(), row);
 		}
 	}
