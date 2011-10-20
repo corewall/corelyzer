@@ -631,7 +631,7 @@ public class CorelyzerGLCanvas implements GLEventListener, MouseListener, MouseW
 		graphDialog.setSelectedTrackAndSectionId(t, s);
 
 		graphDialog.pack();
-		graphDialog.setSize(480, 480);
+		graphDialog.setSize(480, 500);
 		graphDialog.setVisible(true);
 	}
 

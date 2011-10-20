@@ -183,7 +183,7 @@ int add_line_graph_to_section(int track, int section,
 int remove_line_graph_from_section(int track, int section,
                                    int dataset, int table, int field)
 {
-	printf("Removing linegraph - track %d, section %d, dataset %d, table %d, field %d\n", track, section, dataset, table, field);
+	//printf("Removing linegraph - track %d, section %d, dataset %d, table %d, field %d\n", track, section, dataset, table, field);
 
 	if (!are_graph_params_valid(track, section, dataset, table, field))
 		return -1;
