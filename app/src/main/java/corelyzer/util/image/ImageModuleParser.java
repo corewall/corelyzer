@@ -1,4 +1,5 @@
-package com.sun.syndication.feed.module.image;
+//package com.sun.syndication.feed.module.image;
+package corelyzer.util.image;
 
 import org.jdom.Element;
 

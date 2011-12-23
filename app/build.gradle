@@ -29,6 +29,7 @@ dependencies {
 	compile 'jexcelapi:jxl:2.6' // switch to POI?
 	compile 'net.java.dev.swing-layout:swing-layout:1.0.2' // switch to MigLayout?
 	compile 'com.miglayout:miglayout:3.7.4' // brg
+	compile 'net.java.dev.glazedlists:glazedlists_java15:1.8.0' // brg - required by iCores
 	compile 'commons-codec:commons-codec:1.2' // remove dependency
 	compile 'install4j:i4jruntime:3.2.4' // do we need this?
 	compile ':jdc:1.0.0' // switch to standard directory chooser?

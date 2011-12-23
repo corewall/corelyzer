@@ -34,8 +34,9 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
-import com.sun.syndication.feed.module.core.CoreModule;
-import com.sun.syndication.feed.module.image.ImageModule;
+import corelyzer.util.core.CoreModule;
+import corelyzer.util.image.ImageModule;
+
 import com.sun.syndication.feed.synd.SyndFeed;
 import com.sun.syndication.io.SyndFeedInput;
 

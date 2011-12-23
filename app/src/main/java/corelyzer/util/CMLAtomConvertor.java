@@ -34,10 +34,11 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
-import com.sun.syndication.feed.module.core.CoreModule;
-import com.sun.syndication.feed.module.core.CoreModuleImpl;
-import com.sun.syndication.feed.module.image.ImageModule;
-import com.sun.syndication.feed.module.image.ImageModuleImpl;
+import corelyzer.util.core.CoreModule;
+import corelyzer.util.core.CoreModuleImpl;
+import corelyzer.util.image.ImageModule;
+import corelyzer.util.image.ImageModuleImpl;
+
 import com.sun.syndication.feed.synd.SyndCategory;
 import com.sun.syndication.feed.synd.SyndContent;
 import com.sun.syndication.feed.synd.SyndContentImpl;

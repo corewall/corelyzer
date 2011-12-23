@@ -1,4 +1,5 @@
-package com.sun.syndication.feed.module.core;
+//package com.sun.syndication.feed.module.core;
+package corelyzer.util.core;
 
 import org.jdom.Element;
 

@@ -65,8 +65,6 @@ import org.chronos.util.j2k.J2KUtils;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
-import com.sun.syndication.feed.module.core.CoreModule;
-import com.sun.syndication.feed.module.image.ImageModule;
 
 import corelyzer.data.CRPreferences;
 import corelyzer.data.CoreSection;
@@ -76,6 +74,8 @@ import corelyzer.data.TrackSceneNode;
 import corelyzer.data.lists.CRDefaultListModel;
 import corelyzer.graphics.SceneGraph;
 import corelyzer.helper.ExampleFileFilter;
+import corelyzer.util.core.CoreModule;
+import corelyzer.util.image.ImageModule;
 import corelyzer.util.FeedUtils;
 import corelyzer.util.FileUtility;
 
