@@ -81,7 +81,7 @@ implements TableCellRenderer {
             }
         }
 		
-        setToolTipText("RGB value: " + newColor.getRed() + ", "
+        setToolTipText("Click to choose a new color. RGB value: " + newColor.getRed() + ", "
 					   + newColor.getGreen() + ", "
 					   + newColor.getBlue());
         return this;
