@@ -1,0 +1,85 @@
+// !$*UTF8*$!
+{
+	CA5D963F1491659A00248B7D /* Project object */ = {
+		activeBuildConfigurationName = Debug;
+		addToTargets = (
+		);
+		codeSenseManager = CA5D96441491659A00248B7D /* Code sense */;
+		ignoreBreakpointsInProjectsDict = {
+		};
+		perUserDictionary = {
+			PBXConfiguration.PBXFileTableDataSource3.PBXFileTableDataSource = {
+				PBXFileTableDataSourceColumnSortingDirectionKey = "-1";
+				PBXFileTableDataSourceColumnSortingKey = PBXFileDataSource_Filename_ColumnID;
+				PBXFileTableDataSourceColumnWidthsKey = (
+					20,
+					436,
+					20,
+					48.16259765625,
+					43,
+					43,
+					20,
+				);
+				PBXFileTableDataSourceColumnsKey = (
+					PBXFileDataSource_FiletypeID,
+					PBXFileDataSource_Filename_ColumnID,
+					PBXFileDataSource_Built_ColumnID,
+					PBXFileDataSource_ObjectSize_ColumnID,
+					PBXFileDataSource_Errors_ColumnID,
+					PBXFileDataSource_Warnings_ColumnID,
+					PBXFileDataSource_Target_ColumnID,
+				);
+			};
+			PBXPerProjectTemplateStateSaveDate = 345073050;
+			PBXWorkspaceStateSaveDate = 345073050;
+		};
+		sourceControlManager = CA5D96431491659A00248B7D /* Source Control */;
+		userBuildSettings = {
+		};
+	};
+	CA5D96431491659A00248B7D /* Source Control */ = {
+		isa = PBXSourceControlManager;
+		fallbackIsa = XCSourceControlManager;
+		isSCMEnabled = 0;
+		scmConfiguration = {
+			repositoryNamesForRoots = {
+				"" = "";
+			};
+		};
+	};
+	CA5D96441491659A00248B7D /* Code sense */ = {
+		isa = PBXCodeSenseManager;
+		indexTemplatePath = "";
+	};
+	CA5D9647149165A400248B7D /* ChatTable.java */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {888, 3783}}";
+			sepNavSelRange = "{0, 0}";
+			sepNavVisRange = "{0, 1818}";
+			sepNavWindowFrame = "{{107, 91}, {947, 698}}";
+		};
+	};
+	CA5D964F149165A400248B7D /* CorelyzerSessionClientPlugin.java */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {888, 32461}}";
+			sepNavSelRange = "{0, 0}";
+			sepNavVisRange = "{0, 1530}";
+			sepNavWindowFrame = "{{130, 70}, {947, 698}}";
+		};
+	};
+	CA5D965F149165A400248B7D /* SplitCoreTable.java */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {927, 3042}}";
+			sepNavSelRange = "{52, 19}";
+			sepNavVisRange = "{0, 571}";
+		};
+	};
+	CA5D9660149165A400248B7D /* WholeCoreTable.java */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {888, 2951}}";
+			sepNavSelRange = "{0, 0}";
+			sepNavVisRange = "{0, 1172}";
+			sepNavWindowFrame = "{{153, 49}, {947, 698}}";
+		};
+	};
+}

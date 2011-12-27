@@ -10,3 +10,4 @@ bootstrap/
 **/.settings
 **/bin
 test
+.svn

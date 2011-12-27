@@ -1,0 +1,390 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 42;
+	objects = {
+
+/* Begin PBXFileReference section */
+		CA5D95D714915F5800248B7D /* CacheEntry.java */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.java; path = CacheEntry.java; sourceTree = "<group>"; };
+		CA5D95D814915F5800248B7D /* CacheFeedUtil.java */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.java; path = CacheFeedUtil.java; sourceTree = "<group>"; };
+		CA5D95D914915F5800248B7D /* CacheManager.java */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.java; path = CacheManager.java; sourceTree = "<group>"; };
+		CA5D95DA14915F5800248B7D /* CacheRefreshThread.java */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.java; path = CacheRefreshThread.java; sourceTree = "<group>"; };
+		CA5D95DB14915F5800248B7D /* DownloadThread.java */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.java; path = DownloadThread.java; sourceTree = "<group>"; };
+		CA5D95DC14915F5800248B7D /* ICacheManager.java */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.java; path = ICacheManager.java; sourceTree = "<group>"; };
+		CA5D95DD14915F5800248B7D /* ImageLoadEntry.java */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.java; path = ImageLoadEntry.java; sourceTree = "<group>"; };
+		CA5D95DE14915F5800248B7D /* ImageLoadThread.java */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.java; path = ImageLoadThread.java; sourceTree = "<group>"; };
+		CA5D95E014915F5800248B7D /* CollectionEntry.java */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.java; path = CollectionEntry.java; sourceTree = "<group>"; };
+		CA5D95E114915F5800248B7D /* ImageEntry.java */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.java; path = ImageEntry.java; sourceTree = "<group>"; };
+		CA5D95E214915F5800248B7D /* ProjectEntry.java */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.java; path = ProjectEntry.java; sourceTree = "<group>"; };
+		CA5D95E314915F5800248B7D /* SectionEntry.java */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.java; path = SectionEntry.java; sourceTree = "<group>"; };
+		CA5D95E414915F5800248B7D /* SubscribeEntry.java */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.java; path = SubscribeEntry.java; sourceTree = "<group>"; };
+		CA5D95E714915F5800248B7D /* DatasetHandler.java */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.java; path = DatasetHandler.java; sourceTree = "<group>"; };
+		CA5D95E814915F5800248B7D /* DisplayFieldHandler.java */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.java; path = DisplayFieldHandler.java; sourceTree = "<group>"; };
+		CA5D95E914915F5800248B7D /* DepthAwareExecutorService.java */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.java; path = DepthAwareExecutorService.java; sourceTree = "<group>"; };
+		CA5D95EA14915F5800248B7D /* DownloadJob.java */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.java; path = DownloadJob.java; sourceTree = "<group>"; };
+		CA5D95EB14915F5800248B7D /* HandlerDirectory.java */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.java; path = HandlerDirectory.java; sourceTree = "<group>"; };
+		CA5D95EC14915F5800248B7D /* IHandler.java */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.java; path = IHandler.java; sourceTree = "<group>"; };
+		CA5D95EE14915F5800248B7D /* DisplayImageHandler.java */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.java; path = DisplayImageHandler.java; sourceTree = "<group>"; };
+		CA5D95EF14915F5800248B7D /* LoadImageHandler.java */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.java; path = LoadImageHandler.java; sourceTree = "<group>"; };
+		CA5D95F114915F5800248B7D /* Job.java */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.java; path = Job.java; sourceTree = "<group>"; };
+		CA5D95F214915F5800248B7D /* RequestContext.java */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.java; path = RequestContext.java; sourceTree = "<group>"; };
+		CA5D95F514915F5800248B7D /* CoreSectionInfoRetrival.java */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.java; path = CoreSectionInfoRetrival.java; sourceTree = "<group>"; };
+		CA5D95F614915F5800248B7D /* LocalRepoManager.java */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.java; path = LocalRepoManager.java; sourceTree = "<group>"; };
+		CA5D95F714915F5800248B7D /* MyAuthenticator.java */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.java; path = MyAuthenticator.java; sourceTree = "<group>"; };
+		CA5D95F914915F5800248B7D /* ICoresPlugin.java */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.java; name = ICoresPlugin.java; path = ../ICoresPlugin.java; sourceTree = SOURCE_ROOT; };
+		CA5D95FE14915F5800248B7D /* categories.pbxbtree */ = {isa = PBXFileReference; lastKnownFileType = file; path = categories.pbxbtree; sourceTree = "<group>"; };
+		CA5D95FF14915F5800248B7D /* cdecls.pbxbtree */ = {isa = PBXFileReference; lastKnownFileType = file; path = cdecls.pbxbtree; sourceTree = "<group>"; };
+		CA5D960014915F5800248B7D /* decls.pbxbtree */ = {isa = PBXFileReference; lastKnownFileType = file; path = decls.pbxbtree; sourceTree = "<group>"; };
+		CA5D960114915F5800248B7D /* files.pbxbtree */ = {isa = PBXFileReference; lastKnownFileType = file; path = files.pbxbtree; sourceTree = "<group>"; };
+		CA5D960214915F5800248B7D /* imports.pbxbtree */ = {isa = PBXFileReference; lastKnownFileType = file; path = imports.pbxbtree; sourceTree = "<group>"; };
+		CA5D960314915F5800248B7D /* pbxindex.header */ = {isa = PBXFileReference; lastKnownFileType = file; path = pbxindex.header; sourceTree = "<group>"; };
+		CA5D960414915F5800248B7D /* protocols.pbxbtree */ = {isa = PBXFileReference; lastKnownFileType = file; path = protocols.pbxbtree; sourceTree = "<group>"; };
+		CA5D960514915F5800248B7D /* refs.pbxbtree */ = {isa = PBXFileReference; lastKnownFileType = file; path = refs.pbxbtree; sourceTree = "<group>"; };
+		CA5D960714915F5800248B7D /* control */ = {isa = PBXFileReference; lastKnownFileType = file; path = control; sourceTree = "<group>"; };
+		CA5D960814915F5800248B7D /* strings */ = {isa = PBXFileReference; lastKnownFileType = file; path = strings; sourceTree = "<group>"; };
+		CA5D960914915F5800248B7D /* subclasses.pbxbtree */ = {isa = PBXFileReference; lastKnownFileType = file; path = subclasses.pbxbtree; sourceTree = "<group>"; };
+		CA5D960A14915F5800248B7D /* iCoresSrc.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = iCoresSrc.xcodeproj; sourceTree = "<group>"; };
+		CA5D960E14915F5800248B7D /* ROMEUtils.java */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.java; path = ROMEUtils.java; sourceTree = "<group>"; };
+		CA5D961014915F5800248B7D /* AvailableCollectionsDialog.form */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = AvailableCollectionsDialog.form; sourceTree = "<group>"; };
+		CA5D961114915F5800248B7D /* AvailableCollectionsDialog.java */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.java; path = AvailableCollectionsDialog.java; sourceTree = "<group>"; };
+		CA5D961214915F5800248B7D /* CollectionInfoPanel.form */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = CollectionInfoPanel.form; sourceTree = "<group>"; };
+		CA5D961314915F5800248B7D /* CollectionInfoPanel.java */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.java; path = CollectionInfoPanel.java; sourceTree = "<group>"; };
+		CA5D961414915F5800248B7D /* FilterTablePanel.java */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.java; path = FilterTablePanel.java; sourceTree = "<group>"; };
+		CA5D961514915F5800248B7D /* ICoreFrame.form */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = ICoreFrame.form; sourceTree = "<group>"; };
+		CA5D961614915F5800248B7D /* ICoreFrame.java */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.java; path = ICoreFrame.java; sourceTree = "<group>"; };
+		CA5D961714915F5800248B7D /* ResourceManager.java */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.java; path = ResourceManager.java; sourceTree = "<group>"; };
+		CA5D961A14915F5800248B7D /* add.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = add.png; sourceTree = "<group>"; };
+		CA5D961B14915F5800248B7D /* indicator.gif */ = {isa = PBXFileReference; lastKnownFileType = image.gif; path = indicator.gif; sourceTree = "<group>"; };
+		CA5D961C14915F5800248B7D /* pi.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = pi.png; sourceTree = "<group>"; };
+		CA5D961D14915F5800248B7D /* remove.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = remove.png; sourceTree = "<group>"; };
+		CA5D961E14915F5800248B7D /* spyglass.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = spyglass.jpg; sourceTree = "<group>"; };
+		CA5D961F14915F5800248B7D /* SubscribeDialog.form */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = SubscribeDialog.form; sourceTree = "<group>"; };
+		CA5D962014915F5800248B7D /* SubscribeDialog.java */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.java; path = SubscribeDialog.java; sourceTree = "<group>"; };
+		CA5D962214915F5800248B7D /* CollectionTableModel.java */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.java; path = CollectionTableModel.java; sourceTree = "<group>"; };
+		CA5D962314915F5800248B7D /* EntriesTableModel.java */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.java; path = EntriesTableModel.java; sourceTree = "<group>"; };
+		CA5D962414915F5800248B7D /* EntryTableFormat.java */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.java; path = EntryTableFormat.java; sourceTree = "<group>"; };
+		CA5D962514915F5800248B7D /* EntryTextFilter.java */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.java; path = EntryTextFilter.java; sourceTree = "<group>"; };
+		CA5D962614915F5800248B7D /* TableMouseListener.java */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.java; path = TableMouseListener.java; sourceTree = "<group>"; };
+		CA5D962814915F5800248B7D /* FeedTreeCellRenderer.java */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.java; path = FeedTreeCellRenderer.java; sourceTree = "<group>"; };
+		CA5D962914915F5800248B7D /* FeedTreeModel.java */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.java; path = FeedTreeModel.java; sourceTree = "<group>"; };
+		CA5D962A14915F5800248B7D /* FeedTreeNode.java */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.java; path = FeedTreeNode.java; sourceTree = "<group>"; };
+		CA5D962B14915F5800248B7D /* FeedTreeSelectionListener.java */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.java; path = FeedTreeSelectionListener.java; sourceTree = "<group>"; };
+		CA5D962C14915F5800248B7D /* SubscriptionTreeNode.java */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.java; path = SubscriptionTreeNode.java; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		CA5D95CC14915F3C00248B7D = {
+			isa = PBXGroup;
+			children = (
+				CA5D95D614915F5800248B7D /* cache */,
+				CA5D95DF14915F5800248B7D /* data */,
+				CA5D95E514915F5800248B7D /* handlers */,
+				CA5D95F414915F5800248B7D /* helper */,
+				CA5D95F914915F5800248B7D /* ICoresPlugin.java */,
+				CA5D95FA14915F5800248B7D /* iCoresSrc */,
+				CA5D960D14915F5800248B7D /* rome */,
+				CA5D960F14915F5800248B7D /* ui */,
+				CA5D962D14915F5800248B7D /* util */,
+			);
+			sourceTree = "<group>";
+		};
+		CA5D95D614915F5800248B7D /* cache */ = {
+			isa = PBXGroup;
+			children = (
+				CA5D95D714915F5800248B7D /* CacheEntry.java */,
+				CA5D95D814915F5800248B7D /* CacheFeedUtil.java */,
+				CA5D95D914915F5800248B7D /* CacheManager.java */,
+				CA5D95DA14915F5800248B7D /* CacheRefreshThread.java */,
+				CA5D95DB14915F5800248B7D /* DownloadThread.java */,
+				CA5D95DC14915F5800248B7D /* ICacheManager.java */,
+				CA5D95DD14915F5800248B7D /* ImageLoadEntry.java */,
+				CA5D95DE14915F5800248B7D /* ImageLoadThread.java */,
+			);
+			name = cache;
+			path = ../cache;
+			sourceTree = SOURCE_ROOT;
+		};
+		CA5D95DF14915F5800248B7D /* data */ = {
+			isa = PBXGroup;
+			children = (
+				CA5D95E014915F5800248B7D /* CollectionEntry.java */,
+				CA5D95E114915F5800248B7D /* ImageEntry.java */,
+				CA5D95E214915F5800248B7D /* ProjectEntry.java */,
+				CA5D95E314915F5800248B7D /* SectionEntry.java */,
+				CA5D95E414915F5800248B7D /* SubscribeEntry.java */,
+			);
+			name = data;
+			path = ../data;
+			sourceTree = SOURCE_ROOT;
+		};
+		CA5D95E514915F5800248B7D /* handlers */ = {
+			isa = PBXGroup;
+			children = (
+				CA5D95E614915F5800248B7D /* dataset */,
+				CA5D95E914915F5800248B7D /* DepthAwareExecutorService.java */,
+				CA5D95EA14915F5800248B7D /* DownloadJob.java */,
+				CA5D95EB14915F5800248B7D /* HandlerDirectory.java */,
+				CA5D95EC14915F5800248B7D /* IHandler.java */,
+				CA5D95ED14915F5800248B7D /* image */,
+				CA5D95F014915F5800248B7D /* imagej */,
+				CA5D95F114915F5800248B7D /* Job.java */,
+				CA5D95F214915F5800248B7D /* RequestContext.java */,
+				CA5D95F314915F5800248B7D /* slicer */,
+			);
+			name = handlers;
+			path = ../handlers;
+			sourceTree = SOURCE_ROOT;
+		};
+		CA5D95E614915F5800248B7D /* dataset */ = {
+			isa = PBXGroup;
+			children = (
+				CA5D95E714915F5800248B7D /* DatasetHandler.java */,
+				CA5D95E814915F5800248B7D /* DisplayFieldHandler.java */,
+			);
+			path = dataset;
+			sourceTree = "<group>";
+		};
+		CA5D95ED14915F5800248B7D /* image */ = {
+			isa = PBXGroup;
+			children = (
+				CA5D95EE14915F5800248B7D /* DisplayImageHandler.java */,
+				CA5D95EF14915F5800248B7D /* LoadImageHandler.java */,
+			);
+			path = image;
+			sourceTree = "<group>";
+		};
+		CA5D95F014915F5800248B7D /* imagej */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = imagej;
+			sourceTree = "<group>";
+		};
+		CA5D95F314915F5800248B7D /* slicer */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = slicer;
+			sourceTree = "<group>";
+		};
+		CA5D95F414915F5800248B7D /* helper */ = {
+			isa = PBXGroup;
+			children = (
+				CA5D95F514915F5800248B7D /* CoreSectionInfoRetrival.java */,
+				CA5D95F614915F5800248B7D /* LocalRepoManager.java */,
+				CA5D95F714915F5800248B7D /* MyAuthenticator.java */,
+				CA5D95F814915F5800248B7D /* ui */,
+			);
+			name = helper;
+			path = ../helper;
+			sourceTree = SOURCE_ROOT;
+		};
+		CA5D95F814915F5800248B7D /* ui */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = ui;
+			sourceTree = "<group>";
+		};
+		CA5D95FA14915F5800248B7D /* iCoresSrc */ = {
+			isa = PBXGroup;
+			children = (
+				CA5D95FB14915F5800248B7D /* build */,
+				CA5D960A14915F5800248B7D /* iCoresSrc.xcodeproj */,
+			);
+			name = iCoresSrc;
+			sourceTree = "<group>";
+		};
+		CA5D95FB14915F5800248B7D /* build */ = {
+			isa = PBXGroup;
+			children = (
+				CA5D95FC14915F5800248B7D /* iCoresSrc.build */,
+			);
+			path = build;
+			sourceTree = "<group>";
+		};
+		CA5D95FC14915F5800248B7D /* iCoresSrc.build */ = {
+			isa = PBXGroup;
+			children = (
+				CA5D95FD14915F5800248B7D /* iCoresSrc.pbxindex */,
+			);
+			path = iCoresSrc.build;
+			sourceTree = "<group>";
+		};
+		CA5D95FD14915F5800248B7D /* iCoresSrc.pbxindex */ = {
+			isa = PBXGroup;
+			children = (
+				CA5D95FE14915F5800248B7D /* categories.pbxbtree */,
+				CA5D95FF14915F5800248B7D /* cdecls.pbxbtree */,
+				CA5D960014915F5800248B7D /* decls.pbxbtree */,
+				CA5D960114915F5800248B7D /* files.pbxbtree */,
+				CA5D960214915F5800248B7D /* imports.pbxbtree */,
+				CA5D960314915F5800248B7D /* pbxindex.header */,
+				CA5D960414915F5800248B7D /* protocols.pbxbtree */,
+				CA5D960514915F5800248B7D /* refs.pbxbtree */,
+				CA5D960614915F5800248B7D /* strings.pbxstrings */,
+				CA5D960914915F5800248B7D /* subclasses.pbxbtree */,
+			);
+			path = iCoresSrc.pbxindex;
+			sourceTree = "<group>";
+		};
+		CA5D960614915F5800248B7D /* strings.pbxstrings */ = {
+			isa = PBXGroup;
+			children = (
+				CA5D960714915F5800248B7D /* control */,
+				CA5D960814915F5800248B7D /* strings */,
+			);
+			path = strings.pbxstrings;
+			sourceTree = "<group>";
+		};
+		CA5D960B14915F5800248B7D /* Products */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		CA5D960D14915F5800248B7D /* rome */ = {
+			isa = PBXGroup;
+			children = (
+				CA5D960E14915F5800248B7D /* ROMEUtils.java */,
+			);
+			name = rome;
+			path = ../rome;
+			sourceTree = SOURCE_ROOT;
+		};
+		CA5D960F14915F5800248B7D /* ui */ = {
+			isa = PBXGroup;
+			children = (
+				CA5D961014915F5800248B7D /* AvailableCollectionsDialog.form */,
+				CA5D961114915F5800248B7D /* AvailableCollectionsDialog.java */,
+				CA5D961214915F5800248B7D /* CollectionInfoPanel.form */,
+				CA5D961314915F5800248B7D /* CollectionInfoPanel.java */,
+				CA5D961414915F5800248B7D /* FilterTablePanel.java */,
+				CA5D961514915F5800248B7D /* ICoreFrame.form */,
+				CA5D961614915F5800248B7D /* ICoreFrame.java */,
+				CA5D961714915F5800248B7D /* ResourceManager.java */,
+				CA5D961814915F5800248B7D /* resources */,
+				CA5D961F14915F5800248B7D /* SubscribeDialog.form */,
+				CA5D962014915F5800248B7D /* SubscribeDialog.java */,
+				CA5D962114915F5800248B7D /* table */,
+				CA5D962614915F5800248B7D /* TableMouseListener.java */,
+				CA5D962714915F5800248B7D /* tree */,
+			);
+			name = ui;
+			path = ../ui;
+			sourceTree = SOURCE_ROOT;
+		};
+		CA5D961814915F5800248B7D /* resources */ = {
+			isa = PBXGroup;
+			children = (
+				CA5D961914915F5800248B7D /* icons */,
+			);
+			path = resources;
+			sourceTree = "<group>";
+		};
+		CA5D961914915F5800248B7D /* icons */ = {
+			isa = PBXGroup;
+			children = (
+				CA5D961A14915F5800248B7D /* add.png */,
+				CA5D961B14915F5800248B7D /* indicator.gif */,
+				CA5D961C14915F5800248B7D /* pi.png */,
+				CA5D961D14915F5800248B7D /* remove.png */,
+				CA5D961E14915F5800248B7D /* spyglass.jpg */,
+			);
+			path = icons;
+			sourceTree = "<group>";
+		};
+		CA5D962114915F5800248B7D /* table */ = {
+			isa = PBXGroup;
+			children = (
+				CA5D962214915F5800248B7D /* CollectionTableModel.java */,
+				CA5D962314915F5800248B7D /* EntriesTableModel.java */,
+				CA5D962414915F5800248B7D /* EntryTableFormat.java */,
+				CA5D962514915F5800248B7D /* EntryTextFilter.java */,
+			);
+			path = table;
+			sourceTree = "<group>";
+		};
+		CA5D962714915F5800248B7D /* tree */ = {
+			isa = PBXGroup;
+			children = (
+				CA5D962814915F5800248B7D /* FeedTreeCellRenderer.java */,
+				CA5D962914915F5800248B7D /* FeedTreeModel.java */,
+				CA5D962A14915F5800248B7D /* FeedTreeNode.java */,
+				CA5D962B14915F5800248B7D /* FeedTreeSelectionListener.java */,
+				CA5D962C14915F5800248B7D /* SubscriptionTreeNode.java */,
+			);
+			path = tree;
+			sourceTree = "<group>";
+		};
+		CA5D962D14915F5800248B7D /* util */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = util;
+			path = ../util;
+			sourceTree = SOURCE_ROOT;
+		};
+/* End PBXGroup section */
+
+/* Begin PBXProject section */
+		CA5D95CE14915F3C00248B7D /* Project object */ = {
+			isa = PBXProject;
+			buildConfigurationList = CA5D95D114915F3C00248B7D /* Build configuration list for PBXProject "iCoresSrc" */;
+			compatibilityVersion = "Xcode 2.4";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				English,
+				Japanese,
+				French,
+				German,
+			);
+			mainGroup = CA5D95CC14915F3C00248B7D;
+			projectDirPath = "";
+			projectReferences = (
+				{
+					ProductGroup = CA5D960B14915F5800248B7D /* Products */;
+					ProjectRef = CA5D960A14915F5800248B7D /* iCoresSrc.xcodeproj */;
+				},
+			);
+			projectRoot = "";
+			targets = (
+			);
+		};
+/* End PBXProject section */
+
+/* Begin XCBuildConfiguration section */
+		CA5D95CF14915F3C00248B7D /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+			};
+			name = Debug;
+		};
+		CA5D95D014915F3C00248B7D /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = YES;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		CA5D95D114915F3C00248B7D /* Build configuration list for PBXProject "iCoresSrc" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				CA5D95CF14915F3C00248B7D /* Debug */,
+				CA5D95D014915F3C00248B7D /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = CA5D95CE14915F3C00248B7D /* Project object */;
+}

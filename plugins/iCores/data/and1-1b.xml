@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xmlns:taxo="http://purl.org/rss/1.0/modules/taxonomy/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:core="http://www.corewall.org/core" xmlns:sy="http://purl.org/rss/1.0/modules/syndication/" xmlns:dc="http://purl.org/dc/elements/1.1/">
+  <title>AND1-1B Hole</title>
+  <link rel="self" href="file:and1-1b.xml" />
+  <subtitle>Drilled as part of the ANDRILL McMurdo Ice Shelf (MIS) Expedition (2006-2007)</subtitle>
+  <id>tag:andrill.org,2007-05-14:/and1-1b.xml</id>
+  <updated>2007-05-14T16:11:33Z</updated>
+  <dc:creator>ANDRILL MIS Science Team</dc:creator>
+  <dc:date>2007-05-14T16:11:33Z</dc:date>
+  <entry>
+    <title>Split Core Image for 0.00m-1.50m in the AND1-1B hole</title>
+    <link rel="alternate" href="file:section_0.00-1.50.jpeg" />
+    <category term="split core image" />
+    <author>
+      <name>ANDRILL MIS Science Team</name>
+    </author>
+    <id>tag:andrill.org,2007-05-14:/mis/and1-1b/images/split/section_0.00-1.50</id>
+    <updated>2007-05-14T16:11:33Z</updated>
+    <published>2007-05-14T16:11:33Z</published>
+    <summary>Split Core Image for 0.00m-1.50m in the AND1-1B hole.  Captured as part of the ANDRILL McMurdo Ice Shelf (MIS) Expedition (2006-2007)</summary>
+    <dc:creator>ANDRILL MIS Science Team</dc:creator>
+    <dc:date>2007-05-14T16:11:33Z</dc:date>
+    <core:depth>0.0</core:depth>
+    <core:length>1.5</core:length>
+  </entry>
+  <entry>
+    <title>Split Core Image for 1.50m-3.00m in the AND1-1B hole</title>
+    <link rel="alternate" href="file:section_1.50-3.00.jpeg" />
+    <category term="split core image" />
+    <author>
+      <name>ANDRILL MIS Science Team</name>
+    </author>
+    <id>tag:andrill.org,2007-05-14:/mis/and1-1b/images/split/section_1.50-3.00</id>
+    <updated>2007-05-14T16:11:33Z</updated>
+    <published>2007-05-14T16:11:33Z</published>
+    <summary>Split Core Image for 1.50m-3.00m in the AND1-1B hole.  Captured as part of the ANDRILL McMurdo Ice Shelf (MIS) Expedition (2006-2007)</summary>
+    <dc:creator>ANDRILL MIS Science Team</dc:creator>
+    <dc:date>2007-05-14T16:11:33Z</dc:date>
+    <core:depth>1.5</core:depth>
+    <core:length>1.5</core:length>
+  </entry>
+  <entry>
+    <title>Split Core Image for 3.00m-4.50m in the AND1-1B hole</title>
+    <link rel="alternate" href="file:section_3.00-4.50.jpeg" />
+    <category term="split core image" />
+    <author>
+      <name>ANDRILL MIS Science Team</name>
+    </author>
+    <id>tag:andrill.org,2007-05-14:/mis/and1-1b/images/split/section_3.00-4.50</id>
+    <updated>2007-05-14T16:11:33Z</updated>
+    <published>2007-05-14T16:11:33Z</published>
+    <summary>Split Core Image for 3.00m-4.50m in the AND1-1B hole.  Captured as part of the ANDRILL McMurdo Ice Shelf (MIS) Expedition (2006-2007)</summary>
+    <dc:creator>ANDRILL MIS Science Team</dc:creator>
+    <dc:date>2007-05-14T16:11:33Z</dc:date>
+    <core:depth>3.0</core:depth>
+    <core:length>1.5</core:length>
+  </entry>
+  <entry>
+    <title>Split Core Image for 4.50m-6.00m in the AND1-1B hole</title>
+    <link rel="alternate" href="file:section_4.50-6.00.jpeg" />
+    <category term="split core image" />
+    <author>
+      <name>ANDRILL MIS Science Team</name>
+    </author>
+    <id>tag:andrill.org,2007-05-14:/mis/and1-1b/images/split/section_4.50-6.00</id>
+    <updated>2007-05-14T16:11:33Z</updated>
+    <published>2007-05-14T16:11:33Z</published>
+    <summary>Split Core Image for 4.50m-6.00m in the AND1-1B hole.  Captured as part of the ANDRILL McMurdo Ice Shelf (MIS) Expedition (2006-2007)</summary>
+    <dc:creator>ANDRILL MIS Science Team</dc:creator>
+    <dc:date>2007-05-14T16:11:33Z</dc:date>
+    <core:depth>4.5</core:depth>
+    <core:length>1.5</core:length>
+  </entry>
+  <entry>
+    <title>Split Core Image for 6.00m-7.50m in the AND1-1B hole</title>
+    <link rel="alternate" href="file:section_6.00-7.50.jpeg" />
+    <category term="split core image" />
+    <author>
+      <name>ANDRILL MIS Science Team</name>
+    </author>
+    <id>tag:andrill.org,2007-05-14:/mis/and1-1b/images/split/section_6.00-7.50</id>
+    <updated>2007-05-14T16:11:33Z</updated>
+    <published>2007-05-14T16:11:33Z</published>
+    <summary>Split Core Image for 6.00m-7.50m in the AND1-1B hole.  Captured as part of the ANDRILL McMurdo Ice Shelf (MIS) Expedition (2006-2007)</summary>
+    <dc:creator>ANDRILL MIS Science Team</dc:creator>
+    <dc:date>2007-05-14T16:11:33Z</dc:date>
+    <core:depth>6.0</core:depth>
+    <core:length>1.5</core:length>
+  </entry>
+</feed>
+

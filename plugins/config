@@ -1,0 +1,25 @@
+#CW = /Users/julian/dev/EVL/corelyzer/branches/branch-1.3.1
+CW = /Users/bgrivna/Desktop/brg/proj/corewall/corelyzer
+
+export SYSTEM = $(shell uname -s)
+export PROCESSOR = $(shell uname -p)
+
+ifeq ($(SYSTEM),Darwin)
+        CP = $(CW)/scenegraph/dist/scenegraph-1.4.0-SNAPSHOT.jar:$(CW)/app/deps/jogl-1.1.1.jar:$(CW)/app/dist/app-1.4.0-SNAPSHOT.jar
+else
+        CP = $(CW)/bin/Corelyzer.jar:$(CW)/bin/jars/linux/amd64/jogl.jar
+endif
+
+ifeq ($(SYSTEM),CYGWIN_NT-5.1)
+	CP = "$(CW)\\bin\\Corelyzer.jar;$(CW)\\bin\\jars\\windows\\win32\\jogl.jar"
+endif
+
+# jni native compilation
+COMPILER_FLAGS = -isysroot /Developer/SDKs/MacOSX10.4u.sdk -arch i386
+ENVP = MACOSX_DEPLOYMENT_TARGET=10.4
+INCLUDE_DIR = -I. -I./include -I/Developer/SDKs/MacOSX10.4u.sdk/System/Library/Frameworks/JavaVM.framework/Versions/Current/Headers
+LIBRARY_DIR = -framework JavaVM
+LIBRARIES = -lstdc++ -lpthread
+REZ = /Developer/Tools/Rez -t APPL -o $(EXEC) mac.r
+DYNFLAG = -bundle $(COMPILER_FLAGS)
+

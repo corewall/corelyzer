@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://purl.org/atom/ns#" xmlns:taxo="http://purl.org/rss/1.0/modules/taxonomy/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:sy="http://purl.org/rss/1.0/modules/syndication/" xmlns:dc="http://purl.org/dc/elements/1.1/" version="0.3">
+  <title>Hole ABC</title>
+  <link rel="alternate" href="http://localhost/andrill/" />
+  <tagline>Core Feed created with iCores</tagline>
+  <entry>
+    <title>Section 1</title>
+    <link rel="alternate" href="http://localhost/andrill/split/001-001B 062PQ3%20128.51-128.81.jpeg" />
+    <author>
+      <name />
+    </author>
+    <modified>2007-04-23T04:00:00Z</modified>
+    <issued>2007-04-23T04:00:00Z</issued>
+    <content type="text/plain" mode="xml">
+      <START_INTERVAL xmlns="">128.51</START_INTERVAL>
+    </content>
+    <content type="text/plain" mode="xml">
+      <LENGTH xmlns="">0.30</LENGTH>
+    </content>
+    <dc:date>2007-04-23T04:00:00Z</dc:date>
+  </entry>
+  <entry>
+    <title>Section 2</title>
+    <link rel="alternate" href="http://localhost/andrill/split/001-001B 062PQ3%20128.51-128.81.jpeg" />
+    <author>
+      <name />
+    </author>
+    <modified>2007-04-23T04:00:00Z</modified>
+    <issued>2007-04-23T04:00:00Z</issued>
+    <content type="text/plain" mode="xml">
+      <START_INTERVAL xmlns="">128.51</START_INTERVAL>
+    </content>
+    <content type="text/plain" mode="xml">
+      <LENGTH xmlns="">0.30</LENGTH>
+    </content>
+    <dc:date>2007-04-23T04:00:00Z</dc:date>
+  </entry>
+  <entry>
+    <title>Section 3</title>
+    <link rel="alternate" href="http://localhost/andrill/split/001-001B 062PQ3%20128.51-128.81.jpeg" />
+    <author>
+      <name />
+    </author>
+    <modified>2007-04-23T04:00:00Z</modified>
+    <issued>2007-04-23T04:00:00Z</issued>
+    <content type="text/plain" mode="xml">
+      <START_INTERVAL xmlns="">128.51</START_INTERVAL>
+    </content>
+    <content type="text/plain" mode="xml">
+      <LENGTH xmlns="">0.30</LENGTH>
+    </content>
+    <dc:date>2007-04-23T04:00:00Z</dc:date>
+  </entry>
+</feed>
+

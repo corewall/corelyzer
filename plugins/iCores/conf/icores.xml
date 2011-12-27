@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom"
+      xmlns:image="http://www.corewall.org/image"
+      xmlns:taxo="http://purl.org/rss/1.0/modules/taxonomy/"
+      xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+      xmlns:core="http://www.corewall.org/core"
+      xmlns:sy="http://purl.org/rss/1.0/modules/syndication/"
+      xmlns:dc="http://purl.org/dc/elements/1.1/">
+  <title>iCores Feeds</title>
+  <link rel="self" href="file:/icores.xml" />
+  <subtitle>The top-level iCores feed.</subtitle>
+  <id>tag:localhost,2007-05-14:/icores.xml</id>
+  <updated>2007-05-14T21:11:44Z</updated>
+  <dc:creator>iCores v 0.0.1</dc:creator>
+  <dc:date>2007-05-14T21:11:44Z</dc:date>
+  <entry>
+    <title>Local</title>
+    <link rel="alternate" href="file:conf/local.xml" />
+    <category term="feed" />
+    <author>
+      <name>iCores v 0.0.1</name>
+    </author>
+    <id>tag:andrill.org,2007-05-14:/local.xml</id>
+    <updated>2007-05-14T21:11:44Z</updated>
+    <published>2007-05-14T21:11:44Z</published>
+    <summary>Resources on the local computer</summary>
+    <dc:creator>iCores v 0.0.1</dc:creator>
+    <dc:date>2007-05-14T21:11:44Z</dc:date>
+  </entry>
+  <entry>
+    <title>Subscriptions</title>
+    <link rel="alternate" href="file:conf/subscriptions.xml" />
+    <category term="feed" />
+    <author>
+      <name>iCores v 0.0.1</name>
+    </author>
+    <id>tag:andrill.org,2007-05-14:/subscriptions.xml</id>
+    <updated>2007-05-14T21:11:44Z</updated>
+    <published>2007-05-14T21:11:44Z</published>
+    <summary>iCores subscriptions</summary>
+    <dc:creator>iCores v 0.0.1</dc:creator>
+    <dc:date>2007-05-14T21:11:44Z</dc:date>
+  </entry>
+  <entry>
+    <title>CMLs</title>
+    <link rel="alternate" href="file:conf/CMLs.xml" />
+    <category term="feed" />
+    <author>
+      <name>iCores v 0.0.1</name>
+    </author>
+    <id>tag:andrill.org,2007-05-14:/CMLs.xml</id>
+    <updated>2007-05-14T21:11:44Z</updated>
+    <published>2007-05-14T21:11:44Z</published>
+    <summary>CML list files</summary>
+    <dc:creator>iCores v 0.0.1</dc:creator>
+    <dc:date>2007-05-14T21:11:44Z</dc:date>
+  </entry>
+</feed>
+

@@ -1,0 +1,124 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 42;
+	objects = {
+
+/* Begin PBXFileReference section */
+		CA5D9647149165A400248B7D /* ChatTable.java */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.java; name = ChatTable.java; path = ../ChatTable.java; sourceTree = SOURCE_ROOT; };
+		CA5D9648149165A400248B7D /* ClientConnectionThread.java */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.java; name = ClientConnectionThread.java; path = ../ClientConnectionThread.java; sourceTree = SOURCE_ROOT; };
+		CA5D9649149165A400248B7D /* ClientData.java */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.java; name = ClientData.java; path = ../ClientData.java; sourceTree = SOURCE_ROOT; };
+		CA5D964A149165A400248B7D /* ClientRequest.java */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.java; name = ClientRequest.java; path = ../ClientRequest.java; sourceTree = SOURCE_ROOT; };
+		CA5D964B149165A400248B7D /* ClientState.java */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.java; name = ClientState.java; path = ../ClientState.java; sourceTree = SOURCE_ROOT; };
+		CA5D964C149165A400248B7D /* CorelyzerSessionAdminClient.java */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.java; name = CorelyzerSessionAdminClient.java; path = ../CorelyzerSessionAdminClient.java; sourceTree = SOURCE_ROOT; };
+		CA5D964D149165A400248B7D /* CorelyzerSessionBatchAdminClient.java */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.java; name = CorelyzerSessionBatchAdminClient.java; path = ../CorelyzerSessionBatchAdminClient.java; sourceTree = SOURCE_ROOT; };
+		CA5D964E149165A400248B7D /* CorelyzerSessionClient.java */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.java; name = CorelyzerSessionClient.java; path = ../CorelyzerSessionClient.java; sourceTree = SOURCE_ROOT; };
+		CA5D964F149165A400248B7D /* CorelyzerSessionClientPlugin.java */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.java; name = CorelyzerSessionClientPlugin.java; path = ../CorelyzerSessionClientPlugin.java; sourceTree = SOURCE_ROOT; };
+		CA5D9650149165A400248B7D /* CorelyzerSessionLog.java */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.java; name = CorelyzerSessionLog.java; path = ../CorelyzerSessionLog.java; sourceTree = SOURCE_ROOT; };
+		CA5D9651149165A400248B7D /* CorelyzerSessionServer.java */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.java; name = CorelyzerSessionServer.java; path = ../CorelyzerSessionServer.java; sourceTree = SOURCE_ROOT; };
+		CA5D9652149165A400248B7D /* DataManager.java */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.java; name = DataManager.java; path = ../DataManager.java; sourceTree = SOURCE_ROOT; };
+		CA5D9653149165A400248B7D /* DiscussionData.java */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.java; name = DiscussionData.java; path = ../DiscussionData.java; sourceTree = SOURCE_ROOT; };
+		CA5D9654149165A400248B7D /* DiscussionThreadWindow.java */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.java; name = DiscussionThreadWindow.java; path = ../DiscussionThreadWindow.java; sourceTree = SOURCE_ROOT; };
+		CA5D9655149165A400248B7D /* GlobalEventBroadcastThread.java */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.java; name = GlobalEventBroadcastThread.java; path = ../GlobalEventBroadcastThread.java; sourceTree = SOURCE_ROOT; };
+		CA5D9656149165A400248B7D /* ServerResponse.java */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.java; name = ServerResponse.java; path = ../ServerResponse.java; sourceTree = SOURCE_ROOT; };
+		CA5D9657149165A400248B7D /* SessionAnnotation.java */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.java; name = SessionAnnotation.java; path = ../SessionAnnotation.java; sourceTree = SOURCE_ROOT; };
+		CA5D9658149165A400248B7D /* SessionChat.java */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.java; name = SessionChat.java; path = ../SessionChat.java; sourceTree = SOURCE_ROOT; };
+		CA5D9659149165A400248B7D /* SessionDatafile.java */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.java; name = SessionDatafile.java; path = ../SessionDatafile.java; sourceTree = SOURCE_ROOT; };
+		CA5D965A149165A400248B7D /* SessionDataset.java */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.java; name = SessionDataset.java; path = ../SessionDataset.java; sourceTree = SOURCE_ROOT; };
+		CA5D965B149165A400248B7D /* SessionSection.java */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.java; name = SessionSection.java; path = ../SessionSection.java; sourceTree = SOURCE_ROOT; };
+		CA5D965C149165A400248B7D /* SessionTable.java */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.java; name = SessionTable.java; path = ../SessionTable.java; sourceTree = SOURCE_ROOT; };
+		CA5D965D149165A400248B7D /* SessionTrack.java */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.java; name = SessionTrack.java; path = ../SessionTrack.java; sourceTree = SOURCE_ROOT; };
+		CA5D965E149165A400248B7D /* SharedMiceThread.java */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.java; name = SharedMiceThread.java; path = ../SharedMiceThread.java; sourceTree = SOURCE_ROOT; };
+		CA5D965F149165A400248B7D /* SplitCoreTable.java */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.java; name = SplitCoreTable.java; path = ../SplitCoreTable.java; sourceTree = SOURCE_ROOT; };
+		CA5D9660149165A400248B7D /* WholeCoreTable.java */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.java; name = WholeCoreTable.java; path = ../WholeCoreTable.java; sourceTree = SOURCE_ROOT; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		CA5D963D1491659A00248B7D = {
+			isa = PBXGroup;
+			children = (
+				CA5D9647149165A400248B7D /* ChatTable.java */,
+				CA5D9648149165A400248B7D /* ClientConnectionThread.java */,
+				CA5D9649149165A400248B7D /* ClientData.java */,
+				CA5D964A149165A400248B7D /* ClientRequest.java */,
+				CA5D964B149165A400248B7D /* ClientState.java */,
+				CA5D964C149165A400248B7D /* CorelyzerSessionAdminClient.java */,
+				CA5D964D149165A400248B7D /* CorelyzerSessionBatchAdminClient.java */,
+				CA5D964E149165A400248B7D /* CorelyzerSessionClient.java */,
+				CA5D964F149165A400248B7D /* CorelyzerSessionClientPlugin.java */,
+				CA5D9650149165A400248B7D /* CorelyzerSessionLog.java */,
+				CA5D9651149165A400248B7D /* CorelyzerSessionServer.java */,
+				CA5D9652149165A400248B7D /* DataManager.java */,
+				CA5D9653149165A400248B7D /* DiscussionData.java */,
+				CA5D9654149165A400248B7D /* DiscussionThreadWindow.java */,
+				CA5D9655149165A400248B7D /* GlobalEventBroadcastThread.java */,
+				CA5D9656149165A400248B7D /* ServerResponse.java */,
+				CA5D9657149165A400248B7D /* SessionAnnotation.java */,
+				CA5D9658149165A400248B7D /* SessionChat.java */,
+				CA5D9659149165A400248B7D /* SessionDatafile.java */,
+				CA5D965A149165A400248B7D /* SessionDataset.java */,
+				CA5D965B149165A400248B7D /* SessionSection.java */,
+				CA5D965C149165A400248B7D /* SessionTable.java */,
+				CA5D965D149165A400248B7D /* SessionTrack.java */,
+				CA5D965E149165A400248B7D /* SharedMiceThread.java */,
+				CA5D965F149165A400248B7D /* SplitCoreTable.java */,
+				CA5D9660149165A400248B7D /* WholeCoreTable.java */,
+			);
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXProject section */
+		CA5D963F1491659A00248B7D /* Project object */ = {
+			isa = PBXProject;
+			buildConfigurationList = CA5D96421491659A00248B7D /* Build configuration list for PBXProject "andrillSrc" */;
+			compatibilityVersion = "Xcode 2.4";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				English,
+				Japanese,
+				French,
+				German,
+			);
+			mainGroup = CA5D963D1491659A00248B7D;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+			);
+		};
+/* End PBXProject section */
+
+/* Begin XCBuildConfiguration section */
+		CA5D96401491659A00248B7D /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+			};
+			name = Debug;
+		};
+		CA5D96411491659A00248B7D /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = YES;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		CA5D96421491659A00248B7D /* Build configuration list for PBXProject "andrillSrc" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				CA5D96401491659A00248B7D /* Debug */,
+				CA5D96411491659A00248B7D /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = CA5D963F1491659A00248B7D /* Project object */;
+}

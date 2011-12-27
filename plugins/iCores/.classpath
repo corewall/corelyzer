@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/corelyzer"/>
+	<classpathentry kind="lib" path="libs/glazedlists_java15.jar"/>
+	<classpathentry kind="lib" path="libs/javac2.jar"/>
+	<classpathentry kind="lib" path="libs/jdom-1.0.jar"/>
+	<classpathentry kind="lib" path="libs/rome-0.9.jar"/>
+	<classpathentry kind="lib" path="libs/core-rome.jar"/>
+	<classpathentry kind="lib" path="libs/image-rome.jar"/>
+	<classpathentry kind="output" path="classes/test"/>
+</classpath>
