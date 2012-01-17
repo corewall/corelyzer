@@ -463,6 +463,15 @@ public class CorelyzerApp extends WindowAdapter implements MouseListener, Startu
 			column_offset = 0;
 		}
 
+		// brg 1/17/2012: In Windows Vista and 7, Z-order issues with tool windows and the main canvas
+		// are abundant and beyond my abilities to fix. We discovered a workaround - reduce the
+		// canvas size by a single row/column of pixels, and everything will work properly. Enforce
+		// this programatically until we find a fix.
+		final String osName = System.getProperty("os.name").toLowerCase();
+		final boolean isWindowsCompositingOS = (osName.equals("windows 7") || osName.equals("windows vista"));
+		if ( isWindowsCompositingOS )
+			tileHeight--; // remove one row
+		
 		SceneGraph.setCanvasRowcAndColumn(nrows, ncols);
 
 		int r, c;
