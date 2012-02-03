@@ -43,25 +43,8 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.List;
 
-import javax.swing.BorderFactory;
-import javax.swing.DefaultComboBoxModel;
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JComboBox;
-import javax.swing.JComponent;
-import javax.swing.JDialog;
-import javax.swing.JFileChooser;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JProgressBar;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
-import javax.swing.JTextField;
-import javax.swing.KeyStroke;
-import javax.swing.SwingUtilities;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
+import javax.swing.*;
+import javax.swing.event.*;
 
 import org.chronos.util.j2k.J2KUtils;
 
@@ -911,8 +894,37 @@ public class CRLoadImageDialog extends JDialog {
 		imageFileFilter.addExtension("bmp");
 		imageFileFilter.addExtension("jp2"); // jpeg2000
 
-		//JFileChooser chooser = new JFileChooser();
-		LoadImageChooser chooser = new LoadImageChooser();
+		// 2/2/2012 brg: Sorting filenames properly, i.e. [file1, file2, file3, file20], not [file1, file2, file20, file3],
+		// is tricky. Ended up with a mixed solution: using a funky JFileChooser subclass trick on Windows to override the
+		// sort algorithm, and Quaqua on Mac. (The subclass trick works on Mac too, but the dialog looks unacceptably
+		// strange while Quaqua's looks very nice.)
+		JFileChooser chooser = null;
+		LookAndFeel oldLAF = null;
+		
+		final boolean MAC_OS_X = System.getProperty("os.name").toLowerCase().startsWith("mac os x");
+		if ( MAC_OS_X )
+		{
+			// 2/2/2012 brg: On Mac, use Quaqua file chooser to sort image files
+			// properly: 
+			oldLAF = UIManager.getLookAndFeel();
+
+			try {
+				UIManager.setLookAndFeel("ch.randelshofer.quaqua.QuaquaLookAndFeel");
+			} catch (ClassNotFoundException cnfe) {
+				try {
+					UIManager.setLookAndFeel("ch.randelshofer.quaqua.QuaquaLookAndFeel15");
+				} catch (Exception e) {
+					System.out.println("Couldn't set Quaqua LAF - Java 1.5 or 1.6 required");
+				}
+			} catch (Exception e) { System.out.println("Couldn't set Quaqua LAF"); }
+
+			chooser = new JFileChooser();
+		}
+		else // Windows
+		{
+			chooser = new LoadImageChooser();
+		}
+		
 		chooser.setDialogTitle("Load image file(s)");
 		chooser.setCurrentDirectory(new File(CRPreferences.getCurrentDir()));
 		chooser.resetChoosableFileFilters();
@@ -920,6 +932,15 @@ public class CRLoadImageDialog extends JDialog {
 		chooser.setMultiSelectionEnabled(true);
 		int returnVal = chooser.showOpenDialog(this);
 
+		if ( MAC_OS_X ) // restore original look and feel
+		{
+			try {
+				UIManager.setLookAndFeel( oldLAF );
+			} catch (UnsupportedLookAndFeelException e) {
+				System.out.println("Couldn't restore original LAF");
+			}
+		}
+		
 		if (returnVal == JFileChooser.APPROVE_OPTION) {
 			final File[] selectedFiles = chooser.getSelectedFiles();
 

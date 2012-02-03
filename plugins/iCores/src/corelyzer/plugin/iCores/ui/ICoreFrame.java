@@ -107,11 +107,10 @@ public class ICoreFrame extends JFrame implements SubscribeHandler, ProgressHand
     public ICoreFrame(CRPreferences p) {
         super();
 
-        String versionNumber = System.getProperty("corelyzer.version");
+		final String versionNumber = CorelyzerApp.getApp().getCorelyzerVersion();
         if (versionNumber == null || versionNumber.equals("")) {
             versionNumber = "undetermined";
         }
-
         setTitle("Corelyzer " + versionNumber);
         iCoreFrame = this;
 

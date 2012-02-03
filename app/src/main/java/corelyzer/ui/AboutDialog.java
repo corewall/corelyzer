@@ -72,7 +72,7 @@ public class AboutDialog extends JDialog implements ActionListener {
 		JLabel label = new JLabel(new ImageIcon("resources/corelyzer_icon.jpg"));
 		add(label);
 
-		String version = System.getProperty("corelyzer.version");
+		String version = CorelyzerApp.getApp().getCorelyzerVersion();
 		label = new JLabel("Version " + version);
 		add(label);
 
@@ -185,7 +185,7 @@ public class AboutDialog extends JDialog implements ActionListener {
 				System.err.println("-- [INFO] IOException - Read version info failed");
 			}
 
-			String myVersion = System.getProperty("corelyzer.version");
+			String myVersion = CorelyzerApp.getApp().getCorelyzerVersion();
 			if (myVersion.compareTo(latest_version) >= 0) {
 			} else {
 				Object[] options = { "Download from CoreWall.org Now", "Later" };

@@ -821,6 +821,11 @@ public class CorelyzerApp extends WindowAdapter implements MouseListener, Startu
 		return getListModel(CRListModels.TRACK);
 	}
 
+	public String getCorelyzerVersion()
+	{
+		return this.getClass().getPackage().getImplementationVersion();
+	}
+
 	public void GLWindowsToBack() {
 		SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
@@ -1924,7 +1929,7 @@ public class CorelyzerApp extends WindowAdapter implements MouseListener, Startu
 	}
 
 	private void setupUI() {
-		String versionNumber = System.getProperty("corelyzer.version");
+		String versionNumber = CorelyzerApp.getApp().getCorelyzerVersion();
 		if ((versionNumber == null) || versionNumber.equals("")) {
 			versionNumber = "undetermined";
 		}
