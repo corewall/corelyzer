@@ -42,23 +42,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.List;
 
-import javax.swing.BorderFactory;
-import javax.swing.DefaultComboBoxModel;
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JComboBox;
-import javax.swing.JComponent;
-import javax.swing.JDialog;
-import javax.swing.JFileChooser;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JProgressBar;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
-import javax.swing.JTextField;
-import javax.swing.KeyStroke;
-import javax.swing.SwingUtilities;
+import javax.swing.*;
 
 import org.chronos.util.j2k.J2KUtils;
 
@@ -816,6 +800,21 @@ public class CRLoadImageDialog extends JDialog {
 		imageFileFilter.addExtension("bmp");
 		imageFileFilter.addExtension("jp2"); // jpeg2000
 
+		// 2/2/2012 brg: On Mac, use Quaqua file chooser to sort image files
+		// properly: [file1, file3, file20], not [file1, file20, file3]
+		final LookAndFeel oldLAF = UIManager.getLookAndFeel();
+
+		try {
+			//UIManager.setLookAndFeel(QuaquaManager.getLookAndFeel());
+			UIManager.setLookAndFeel("ch.randelshofer.quaqua.QuaquaLookAndFeel");
+		} catch (ClassNotFoundException cnfe) {
+			try {
+				UIManager.setLookAndFeel("ch.randelshofer.quaqua.QuaquaLookAndFeel15");
+			} catch (Exception e) {
+				System.out.println("Couldn't set Quaqua LAF - Java 1.5 or 1.6 required");
+			}
+		} catch (Exception e) { System.out.println("Couldn't set Quaqua LAF"); }
+
 		JFileChooser chooser = new JFileChooser();
 		chooser.setDialogTitle("Load image file(s)");
 		chooser.setCurrentDirectory(new File(CRPreferences.getCurrentDir()));
@@ -823,6 +822,12 @@ public class CRLoadImageDialog extends JDialog {
 		chooser.setFileFilter(imageFileFilter);
 		chooser.setMultiSelectionEnabled(true);
 		int returnVal = chooser.showOpenDialog(this);
+
+		try {
+			UIManager.setLookAndFeel( oldLAF );
+		} catch (UnsupportedLookAndFeelException e) {
+			System.out.println("Couldn't restore original LAF");
+		}
 
 		if (returnVal == JFileChooser.APPROVE_OPTION) {
 			final File[] selectedFiles = chooser.getSelectedFiles();

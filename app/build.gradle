@@ -39,6 +39,7 @@ dependencies {
 	compile ':jai_codec:1.1.3'
 	compile ':jai_imageio:1.1'
 	compile ':clibwrapper_jiio:1.1'
+	compile ':quaqua-filechooser-only:'
 	compile 'ch.qos.logback:logback-core:0.5'
 	compile 'ch.qos.logback:logback-classic:0.5'
 }
