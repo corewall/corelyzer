@@ -25,6 +25,7 @@
 
 package corelyzer.ui;
 
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Frame;
 import java.awt.Insets;
@@ -59,6 +60,8 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 
 import org.chronos.util.j2k.J2KUtils;
 
@@ -74,10 +77,10 @@ import corelyzer.data.TrackSceneNode;
 import corelyzer.data.lists.CRDefaultListModel;
 import corelyzer.graphics.SceneGraph;
 import corelyzer.helper.ExampleFileFilter;
-import corelyzer.util.core.CoreModule;
-import corelyzer.util.image.ImageModule;
 import corelyzer.util.FeedUtils;
 import corelyzer.util.FileUtility;
+import corelyzer.util.core.CoreModule;
+import corelyzer.util.image.ImageModule;
 
 public class CRLoadImageDialog extends JDialog {
 	/**
@@ -95,21 +98,28 @@ public class CRLoadImageDialog extends JDialog {
 	private JPanel contentPane;
 	private JButton buttonOK;
 	private JButton buttonCancel;
-	private JTextField dpiTextField;
-	private JTextField startDepthField;
-	private JTextField depthIncTextField;
-	private JButton applyButton;
 	private JButton filesButton;
 	private JButton openButton;
 	private JButton saveButton;
 	private JButton resetButton;
 	private JButton helpButton;
 	private JTable imageTable;
-	private JComboBox orientationComboBox;
-	private JTextField lengthField;
-	private JCheckBox useBatchInputCheckbox;
 
 	private JPanel batchInputPanel;
+	private JCheckBox useBatchInputCheckbox;
+	private JLabel orientationLabel;
+	private JComboBox orientationComboBox;
+	private JLabel lengthLabel;
+	private JTextField lengthField;
+	private JLabel dpiXLabel;
+	private JTextField dpiXField;
+	private JLabel dpiYLabel;
+	private JTextField dpiYField;
+	private JLabel startDepthLabel;
+	private JTextField startDepthField;
+	private JLabel depthIncLabel;
+	private JTextField depthIncField;
+	private JButton applyButton;
 
 	public CRLoadImageDialog(final Frame owner) {
 		super(owner);
@@ -181,8 +191,56 @@ public class CRLoadImageDialog extends JDialog {
 				onBatch();
 			}
 		});
+		
+		// batch label coloring
+		final Color darkGreen = new Color(0, 100, 0);
+		orientationComboBox.addActionListener(new ActionListener() {
+			public void actionPerformed(final ActionEvent event) {
+				if (orientationComboBox.getSelectedIndex() == 2 /* "blank" */)
+					orientationLabel.setForeground(Color.BLACK);
+				else
+					orientationLabel.setForeground(darkGreen);
+			}
+		});
+		lengthField.getDocument().addDocumentListener( DocumentListenerFactory.create(lengthField, lengthLabel, darkGreen));
+		dpiXField.getDocument().addDocumentListener( DocumentListenerFactory.create(dpiXField, dpiXLabel, darkGreen));
+		dpiYField.getDocument().addDocumentListener( DocumentListenerFactory.create(dpiYField, dpiYLabel, darkGreen));
+		startDepthField.getDocument().addDocumentListener( DocumentListenerFactory.create(startDepthField, startDepthLabel, darkGreen));
+		depthIncField.getDocument().addDocumentListener( DocumentListenerFactory.create(depthIncField, depthIncLabel, darkGreen));
 	}
-
+	
+	public void updateBatchLabelColors()
+	{
+		final Color darkGreen = new Color(0, 100, 0);
+		orientationLabel.setForeground( orientationComboBox.getSelectedIndex() == 2 ? Color.BLACK : darkGreen );
+		lengthLabel.setForeground( lengthField.getText().equals("") ? Color.BLACK : darkGreen );
+		dpiXLabel.setForeground( dpiXField.getText().equals("") ? Color.BLACK : darkGreen );
+		dpiYLabel.setForeground( dpiYField.getText().equals("") ? Color.BLACK : darkGreen );
+		startDepthLabel.setForeground( startDepthField.getText().equals("") ? Color.BLACK : darkGreen );
+		depthIncLabel.setForeground( depthIncField.getText().equals("") ? Color.BLACK : darkGreen );
+	}
+	
+	private static class DocumentListenerFactory {
+		public static DocumentListener create(final JTextField field, final JLabel label, final Color color)
+		{
+			DocumentListener dl = new DocumentListener() {
+				public void insertUpdate(DocumentEvent e) {
+					final Color labelColor = field.getText().equals("") ? Color.BLACK : color;
+					label.setForeground(labelColor);
+				}
+				
+				public void removeUpdate(DocumentEvent e) {
+					final Color labelColor = field.getText().equals("") ? Color.BLACK : color;
+					label.setForeground(labelColor);
+				}
+				
+				public void changedUpdate(DocumentEvent e) { }
+			};
+			
+			return dl;
+		}
+	}
+	
 	/**
 	 * @noinspection ALL
 	 */
@@ -257,7 +315,7 @@ public class CRLoadImageDialog extends JDialog {
 				new Dimension(122, 33), null, 0, false));
 		openButton = new JButton();
 		openButton.setEnabled(true);
-		openButton.setText("Open a Image Listing File");
+		openButton.setText("Open an Image Listing File");
 		panel7.add(openButton, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL,
 				GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
 		final JPanel panel8 = new JPanel();
@@ -289,48 +347,59 @@ public class CRLoadImageDialog extends JDialog {
 						| GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
 		scrollPane1.setViewportView(imageTable);
 		batchInputPanel = new JPanel();
-		batchInputPanel.setLayout(new GridLayoutManager(6, 2, new Insets(0, 0, 0, 0), -1, -1));
+		batchInputPanel.setLayout(new GridLayoutManager(7, 2, new Insets(0, 0, 0, 0), -1, -1));
 		batchInputPanel.setEnabled(true);
 		panel3.add(batchInputPanel, new GridConstraints(2, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH,
 				GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK
 						| GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
 		batchInputPanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), null));
 		final Spacer spacer3 = new Spacer();
-		batchInputPanel.add(spacer3, new GridConstraints(5, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1,
+		batchInputPanel.add(spacer3, new GridConstraints(6, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1,
 				GridConstraints.SIZEPOLICY_WANT_GROW, null, new Dimension(195, 14), null, 0, false));
-		final JLabel label1 = new JLabel();
-		label1.setText("DPI: ");
-		batchInputPanel.add(label1, new GridConstraints(2, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED,
+		dpiXLabel = new JLabel("DPI X: ");
+		batchInputPanel.add(dpiXLabel, new GridConstraints(2, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED,
 				GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(195, 16), null, 0, false));
-		final JLabel label2 = new JLabel();
-		label2.setText("Start Depth (meter): ");
-		batchInputPanel.add(label2, new GridConstraints(3, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED,
+		dpiYLabel = new JLabel("DPI Y: ");
+		batchInputPanel.add(dpiYLabel, new GridConstraints(3, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED,
 				GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(195, 16), null, 0, false));
-		final JLabel label3 = new JLabel();
-		label3.setText("Depth Increment (meter): ");
-		batchInputPanel.add(label3, new GridConstraints(4, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED,
+		startDepthLabel = new JLabel("Start Depth (meter): ");
+		batchInputPanel.add(startDepthLabel, new GridConstraints(4, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED,
 				GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(195, 16), null, 0, false));
-		dpiTextField = new JTextField();
-		dpiTextField.setEnabled(false);
-		dpiTextField.setHorizontalAlignment(11);
-		dpiTextField.setText("254");
-		batchInputPanel.add(dpiTextField, new GridConstraints(2, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL,
+		depthIncLabel = new JLabel("Depth Increment (meter): ");
+		batchInputPanel.add(depthIncLabel, new GridConstraints(5, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED,
+				GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(195, 16), null, 0, false));
+		
+		dpiXField = new JTextField();
+		dpiXField.setEnabled(false);
+		dpiXField.setHorizontalAlignment(11);
+		dpiXField.setText("254");
+		
+		dpiYField = new JTextField();
+		dpiYField.setEnabled(false);
+		dpiYField.setHorizontalAlignment(11);
+		dpiYField.setText("254");
+		
+		batchInputPanel.add(dpiXField, new GridConstraints(2, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL,
 				GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(100, -1), null, 0, false));
+		
+		batchInputPanel.add(dpiYField, new GridConstraints(3, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL,
+				GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(100, -1), null, 0, false));
+		
 		startDepthField = new JTextField();
 		startDepthField.setEnabled(false);
 		startDepthField.setHorizontalAlignment(11);
 		startDepthField.setText("0.0");
-		batchInputPanel.add(startDepthField, new GridConstraints(3, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL,
+		batchInputPanel.add(startDepthField, new GridConstraints(4, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL,
 				GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(100, -1), null, 0, false));
-		depthIncTextField = new JTextField();
-		depthIncTextField.setEnabled(false);
-		depthIncTextField.setHorizontalAlignment(11);
-		depthIncTextField.setText("1.5");
-		batchInputPanel.add(depthIncTextField, new GridConstraints(4, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL,
+		depthIncField = new JTextField();
+		depthIncField.setEnabled(false);
+		depthIncField.setHorizontalAlignment(11);
+		depthIncField.setText("1.5");
+		batchInputPanel.add(depthIncField, new GridConstraints(5, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL,
 				GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(100, -1), null, 0, false));
 		final JPanel panel11 = new JPanel();
 		panel11.setLayout(new GridLayoutManager(1, 2, new Insets(0, 0, 0, 0), -1, -1));
-		batchInputPanel.add(panel11, new GridConstraints(5, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH,
+		batchInputPanel.add(panel11, new GridConstraints(6, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH,
 				GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK
 						| GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
 		applyButton = new JButton();
@@ -346,12 +415,12 @@ public class CRLoadImageDialog extends JDialog {
 		final DefaultComboBoxModel defaultComboBoxModel1 = new DefaultComboBoxModel();
 		defaultComboBoxModel1.addElement("Horizontal");
 		defaultComboBoxModel1.addElement("Vertical");
+		defaultComboBoxModel1.addElement("[Blank]");
 		orientationComboBox.setModel(defaultComboBoxModel1);
 		batchInputPanel.add(orientationComboBox, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL,
 				GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-		final JLabel label4 = new JLabel();
-		label4.setText("Length (meter): ");
-		batchInputPanel.add(label4, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED,
+		lengthLabel = new JLabel("Length (meter): ");
+		batchInputPanel.add(lengthLabel, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED,
 				GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
 		lengthField = new JTextField();
 		lengthField.setEnabled(false);
@@ -359,29 +428,54 @@ public class CRLoadImageDialog extends JDialog {
 		lengthField.setText("1.0");
 		batchInputPanel.add(lengthField, new GridConstraints(1, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL,
 				GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
-		final JLabel label5 = new JLabel();
-		label5.setText("Orientation: ");
-		batchInputPanel.add(label5, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED,
+		orientationLabel = new JLabel("Orientation: ");
+		batchInputPanel.add(orientationLabel, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED,
 				GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(195, 16), null, 0, false));
 		useBatchInputCheckbox = new JCheckBox();
-		useBatchInputCheckbox.setText("Batch input");
+		useBatchInputCheckbox.setText("Batch input: only populated fields (indicated by green labels) will be applied");
 		panel3.add(useBatchInputCheckbox, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE,
 				GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+		
+		updateBatchLabelColors();
+		onBatch();
 	}
 
 	private void applyGroupPropToTable() {
-		int orientation = orientationComboBox.getSelectedIndex();
-		int dpi = Integer.valueOf(dpiTextField.getText());
-
-		float length = Float.valueOf(lengthField.getText());
-		float depthInc = Float.valueOf(depthIncTextField.getText());
-		float depthStart = Float.valueOf(startDepthField.getText());
-
 		ImagePropertyTable theTable = (ImagePropertyTable) imageTable;
-		theTable.applyAllOrientation(orientation);
-		theTable.applyAllLength(length);
-		theTable.applyAllDPI(dpi);
-		theTable.applyAllDepths(depthStart, depthInc);
+		
+		final int orientation = orientationComboBox.getSelectedIndex();
+		if ( orientation < 2 )
+			theTable.applyAllOrientation( orientation );
+
+		if (!dpiXField.getText().equals(""))
+		{
+			final int dpiX = Integer.valueOf(dpiXField.getText());
+			theTable.applyAllDPIX(dpiX);
+		}
+		
+		if (!dpiYField.getText().equals(""))
+		{
+			final int dpiY = Integer.valueOf(dpiYField.getText());
+			theTable.applyAllDPIY(dpiY);
+		}
+
+		if (!lengthField.getText().equals(""))
+		{
+			final float length = Integer.valueOf(lengthField.getText());
+			theTable.applyAllLength(length);
+		}
+		
+		// depth increment and start depth: both must be populated to apply
+		if (!depthIncField.getText().equals("") && !startDepthField.getText().equals(""))
+		{
+			final float depthInc = Float.valueOf(depthIncField.getText());
+			final float depthStart = Float.valueOf(startDepthField.getText());
+			theTable.applyAllDepths(depthStart, depthInc);
+		}
+		else if (!depthIncField.getText().equals("") || !startDepthField.getText().equals(""))
+		{
+			JOptionPane.showMessageDialog(this, "Both Start Depth and Depth Increment must be populated to apply values in Depth column");
+		}
 	}
 
 	private void createUIComponents() {
@@ -587,27 +681,28 @@ public class CRLoadImageDialog extends JDialog {
 	}
 
 	private void onApply() {
-		if (dpiTextField.getText().equals("") || depthIncTextField.getText().equals("") || startDepthField.getText().equals("")) {
-
-			JOptionPane.showMessageDialog(this, "At least one of left " + "fields are blank.\nPlease " + "input all values and " + "try again.");
-			return;
-		}
-
-		if (!isValidInt(dpiTextField.getText()) || !isValidFloat(depthIncTextField.getText()) || !isValidFloat(startDepthField.getText())) {
-			JOptionPane.showMessageDialog(this, "At least one of left " + "fields are not numbers.\n" + "Please " + "type in numbers and " + "try again.");
-			return;
-		}
+//		if (!isValidInt(dpiXTextField.getText()) || !isValidInt(dpiYTextField.getText()) || !isValidFloat(depthIncTextField.getText()) || !isValidFloat(startDepthField.getText())) {
+//			JOptionPane.showMessageDialog(this, "At least one of left " + "fields are not numbers.\n" + "Please " + "type in numbers and " + "try again.");
+//			return;
+//		}
 
 		applyGroupPropToTable();
 	}
 
 	private void onBatch() {
-		boolean b = useBatchInputCheckbox.isSelected();
+		final boolean b = useBatchInputCheckbox.isSelected();
+		orientationLabel.setEnabled(b);
 		orientationComboBox.setEnabled(b);
+		lengthLabel.setEnabled(b);
 		lengthField.setEnabled(b);
-		dpiTextField.setEnabled(b);
+		dpiXLabel.setEnabled(b);
+		dpiXField.setEnabled(b);
+		dpiYLabel.setEnabled(b);
+		dpiYField.setEnabled(b);
+		startDepthLabel.setEnabled(b);
 		startDepthField.setEnabled(b);
-		depthIncTextField.setEnabled(b);
+		depthIncLabel.setEnabled(b);
+		depthIncField.setEnabled(b);
 		applyButton.setEnabled(b);
 	}
 
@@ -816,7 +911,8 @@ public class CRLoadImageDialog extends JDialog {
 		imageFileFilter.addExtension("bmp");
 		imageFileFilter.addExtension("jp2"); // jpeg2000
 
-		JFileChooser chooser = new JFileChooser();
+		//JFileChooser chooser = new JFileChooser();
+		LoadImageChooser chooser = new LoadImageChooser();
 		chooser.setDialogTitle("Load image file(s)");
 		chooser.setCurrentDirectory(new File(CRPreferences.getCurrentDir()));
 		chooser.resetChoosableFileFilters();

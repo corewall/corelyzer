@@ -124,10 +124,20 @@ public class ImagePropertyTable extends JTable {
 		updateUI();
 	}
 
-	public void applyAllDPI(final float dpi) {
+	public void function() {
+		System.out.println("hello");
+	}
+	
+	public void applyAllDPIX(final float dpiX) {
 		for (int i = 0; i < this.model.getRowCount(); i++) {
-			model.dpixVec.set(i, dpi);
-			model.dpiyVec.set(i, dpi);
+			model.dpixVec.set(i, dpiX);
+		}
+		updateUI();
+	}
+
+	public void applyAllDPIY(final float dpiY) {
+		for (int i = 0; i < this.model.getRowCount(); i++) {
+			model.dpiyVec.set(i, dpiY);
 		}
 		updateUI();
 	}
@@ -156,8 +166,10 @@ public class ImagePropertyTable extends JTable {
 
 	public void applyAllOrientation(final int orientationIdx) {
 		String orientation = ImagePropertyTableModel.HORIZONTAL;
-		if (1 == orientationIdx) {
+		if ( orientationIdx == 1 ) {
 			orientation = ImagePropertyTableModel.VERTICAL;
+		} else if ( orientationIdx == 2 ) {
+			return; // don't apply "[Blank]", which exists only to exclude orientation from a batch apply
 		}
 
 		for (int i = 0; i < this.model.getRowCount(); i++) {
