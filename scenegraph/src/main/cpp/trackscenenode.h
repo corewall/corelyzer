@@ -55,6 +55,7 @@ typedef struct TrackSceneNode_s {
 	float nextPos;
 
 	bool  movable;
+	bool staggered;
 } TrackSceneNode;
 
 

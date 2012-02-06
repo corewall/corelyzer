@@ -1851,15 +1851,14 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setSectionHighlightCol
  */
 JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_moveSection
   (JNIEnv *jenv, jclass jcls, jint track, jint section, jfloat dx, jfloat dy){
-
-    TrackSceneNode* t;
+	TrackSceneNode* t;
     CoreSection* cs;
 
     t  = get_scene_track( default_track_scene, track);
     cs = get_track_section(t,section);
     
-    if(!cs) return;
-    if(!cs->movable) return;
+	if(!cs) return;
+	if(!cs->movable) return;
 
 #ifdef DEBUG
     printf("Updating section position from %f, %f to %f, %f\n",
@@ -5348,6 +5347,30 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_resetDefaultTrackYPos
 {
     reset_default_track_ypos();      
 }
+
+/*
+ * Class:     corelyzer_helper_SceneGraph
+ * Method:    staggerTrackSections
+ * Signature: (IZ)V
+ */
+JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_staggerTrackSections
+  (JNIEnv * jenv, jclass jcls, jint trackId, jboolean stagger)
+{
+	stagger_track_sections(trackId, stagger);
+}
+
+/*
+ * Class:     corelyzer_helper_SceneGraph
+ * Method:    trackIsStaggered
+ * Signature: (I)Z
+ */
+JNIEXPORT jboolean JNICALL Java_corelyzer_graphics_SceneGraph_trackIsStaggered
+  (JNIEnv * jenv, jclass jcls, jint trackId)
+{
+    TrackSceneNode* track = get_scene_track(trackId);
+	return track->staggered;
+}
+
 
 /*
  * Class:     corelyzer_helper_SceneGraph

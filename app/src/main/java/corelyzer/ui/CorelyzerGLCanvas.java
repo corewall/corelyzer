@@ -46,8 +46,10 @@ import java.util.concurrent.locks.ReentrantLock;
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLCanvas;
 import javax.media.opengl.GLEventListener;
+import javax.swing.AbstractButton;
 import javax.swing.ButtonGroup;
 import javax.swing.ImageIcon;
+import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
@@ -134,8 +136,8 @@ public class CorelyzerGLCanvas implements GLEventListener, MouseListener, MouseW
 	JMenuItem propertyMenuItem;
 	JMenuItem splitMenuItem;
 
-	// Section-based items' indices {Graph, Property, Split, Delete}
-	static int[] sectionBasedPopupMenuItemIndices = { 7, 8, 9, 10 };
+	// Section-based items' indices {Graph, Property, Split, Delete, Stagger}
+	static int[] sectionBasedPopupMenuItemIndices = { 7, 8, 9, 10, 11 };
 
 	// For track depth fine tune action called from remote control server
 	private static boolean isFineTune = false;
@@ -481,12 +483,21 @@ public class CorelyzerGLCanvas implements GLEventListener, MouseListener, MouseW
 				doDeleteSection();
 			}
 		});
+		
+		JMenuItem staggerSectionsItem = new JCheckBoxMenuItem("Stagger Sections", false);
+		staggerSectionsItem.addActionListener(new ActionListener() {
+			public void actionPerformed(final ActionEvent e) {
+				AbstractButton b = (AbstractButton)e.getSource();
+				doStaggerSections(b.getModel().isSelected());
+			}
+		});
 
 		this.scenePopupMenu.addSeparator();
 		this.scenePopupMenu.add(graphMenuItem);
 		this.scenePopupMenu.add(splitMenuItem);
 		this.scenePopupMenu.add(propertyMenuItem);
 		this.scenePopupMenu.add(deleteItem);
+		this.scenePopupMenu.add(staggerSectionsItem);
 
 		CorelyzerApp.getApp().getPluginManager().addPluginPopupSubMenus(this.scenePopupMenu);
 	}
@@ -566,6 +577,12 @@ public class CorelyzerGLCanvas implements GLEventListener, MouseListener, MouseW
 				app.updateGLWindows();
 			}
 		}
+	}
+	
+	private void doStaggerSections(final boolean stagger)
+	{
+		SceneGraph.staggerTrackSections(selectedTrack, stagger);
+		CorelyzerApp.getApp().updateGLWindows();
 	}
 
 	private void doExportTrack() {
@@ -1597,6 +1614,11 @@ public class CorelyzerGLCanvas implements GLEventListener, MouseListener, MouseW
 
 			// Enable section-based popupMenu options
 			this.setEnableSectionBasedPopupMenuOptions(true);
+			
+			// 2/5/2012 brg: check Stagger Sections menu item if necessary
+			final boolean trackIsStaggered = SceneGraph.trackIsStaggered(selectedTrack);
+			AbstractButton ab = (AbstractButton)this.scenePopupMenu.getComponent(11);
+			ab.getModel().setSelected(trackIsStaggered);
 
 			CoreSectionImage csImg = cs.getCoreSectionImage();
 			if (csImg != null && csImg.getId() != -1) {

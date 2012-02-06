@@ -57,6 +57,7 @@ void create_track(const char* sessionName, const char* trackName, TrackSceneNode
     t->h  = 0;
 	t->nextPos = 0.0f;
 	t->movable = false; // only in depth direction
+	t->staggered = false;
 
     t->highlight_color = new GLfloat[3];
     t->highlight_color[0] = 1.0f;

@@ -96,6 +96,7 @@ void set_remote_controlled(bool b);
 bool get_remote_controlled();
 
 void reset_default_track_ypos();
+void stagger_track_sections(const int trackid, const bool stagger);
 
 #endif
 

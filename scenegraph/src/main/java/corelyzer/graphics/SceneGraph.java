@@ -1763,6 +1763,9 @@ public class SceneGraph {
 	 */
 	public native static void setVerticalLineFromGraphXPosition(int graphId, float x);
 
+	public native static boolean trackIsStaggered(int track);
+	public native static void staggerTrackSections(int track, boolean stagger);
+	
 	/**
 	 * Let's the corelyzer.helper.SceneGraph library know that it's being
 	 * startup and requires a plugin manager so that the

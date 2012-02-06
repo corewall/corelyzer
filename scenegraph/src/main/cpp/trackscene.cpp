@@ -25,6 +25,8 @@
  *****************************************************************************/
 
 #include <string>
+#include "canvas.h"
+#include "graph.h"
 #include "trackscene.h"
 #include "trackscenenode.h"
 #include "freedraw.h"
@@ -809,4 +811,42 @@ int get_render_mode()
 void set_render_mode(int m)
 {
     renderMode = m;
+}
+
+void stagger_track_sections(const int trackid, const bool stagger)
+{
+	if (!is_track(trackid))
+	{
+		printf("stagger_track_sections() failed: invalid track %d\n", trackid);
+		return;
+	}
+	
+	TrackSceneNode *track = get_scene_track(trackid);
+	const int numSections = track->modelvec.size();
+	bool sectionWasOffset = false;
+	for (int i = 0; i < numSections; i++)
+	{
+		if (i % 2 != 0) // offset odd sections
+		{
+			CoreSection *cs = get_track_section(track, i);
+			if (!cs)
+			{
+				printf("stagger_track_sections() failed: invalid section %d\n", i);
+				return;
+			}
+			
+			float dpix, dpiy;
+			get_canvas_dpi( 0, &dpix, &dpiy );
+
+			// offset by height of core section
+			const float secHeightPix = cs->height * INCH_PER_CM * dpiy;
+			const float offset = secHeightPix * (stagger ? -1.0f : 1.0f);
+
+			cs->py += offset;
+			sectionWasOffset = true;
+		}
+	}
+	
+	if (sectionWasOffset)
+		track->staggered = stagger;
 }
