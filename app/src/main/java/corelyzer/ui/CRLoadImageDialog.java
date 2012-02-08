@@ -175,49 +175,35 @@ public class CRLoadImageDialog extends JDialog {
 			}
 		});
 		
-		// batch label coloring
-		final Color darkGreen = new Color(0, 100, 0);
+		// batch label enabling/disabling based on field contents
 		orientationComboBox.addActionListener(new ActionListener() {
 			public void actionPerformed(final ActionEvent event) {
-				if (orientationComboBox.getSelectedIndex() == 2 /* "blank" */)
-					orientationLabel.setForeground(Color.BLACK);
+				if (orientationComboBox.getSelectedIndex() == 2) // [Blank]
+					orientationLabel.setEnabled(false);
 				else
-					orientationLabel.setForeground(darkGreen);
+					orientationLabel.setEnabled(true);
 			}
 		});
-		lengthField.getDocument().addDocumentListener( DocumentListenerFactory.create(lengthField, lengthLabel, darkGreen));
-		dpiXField.getDocument().addDocumentListener( DocumentListenerFactory.create(dpiXField, dpiXLabel, darkGreen));
-		dpiYField.getDocument().addDocumentListener( DocumentListenerFactory.create(dpiYField, dpiYLabel, darkGreen));
-		startDepthField.getDocument().addDocumentListener( DocumentListenerFactory.create(startDepthField, startDepthLabel, darkGreen));
-		depthIncField.getDocument().addDocumentListener( DocumentListenerFactory.create(depthIncField, depthIncLabel, darkGreen));
+		lengthField.getDocument().addDocumentListener( LabelEnablerFactory.create(lengthField, lengthLabel ));
+		dpiXField.getDocument().addDocumentListener( LabelEnablerFactory.create(dpiXField, dpiXLabel ));
+		dpiYField.getDocument().addDocumentListener( LabelEnablerFactory.create(dpiYField, dpiYLabel ));
+		startDepthField.getDocument().addDocumentListener( LabelEnablerFactory.create(startDepthField, startDepthLabel ));
+		depthIncField.getDocument().addDocumentListener( LabelEnablerFactory.create(depthIncField, depthIncLabel ));
 	}
 	
-	public void updateBatchLabelColors()
-	{
-		final Color darkGreen = new Color(0, 100, 0);
-		orientationLabel.setForeground( orientationComboBox.getSelectedIndex() == 2 ? Color.BLACK : darkGreen );
-		lengthLabel.setForeground( lengthField.getText().equals("") ? Color.BLACK : darkGreen );
-		dpiXLabel.setForeground( dpiXField.getText().equals("") ? Color.BLACK : darkGreen );
-		dpiYLabel.setForeground( dpiYField.getText().equals("") ? Color.BLACK : darkGreen );
-		startDepthLabel.setForeground( startDepthField.getText().equals("") ? Color.BLACK : darkGreen );
-		depthIncLabel.setForeground( depthIncField.getText().equals("") ? Color.BLACK : darkGreen );
-	}
-	
-	private static class DocumentListenerFactory {
-		public static DocumentListener create(final JTextField field, final JLabel label, final Color color)
+	private static class LabelEnablerFactory {
+		public static DocumentListener create(final JTextField field, final JLabel label)
 		{
 			DocumentListener dl = new DocumentListener() {
-				public void insertUpdate(DocumentEvent e) {
-					final Color labelColor = field.getText().equals("") ? Color.BLACK : color;
-					label.setForeground(labelColor);
-				}
-				
-				public void removeUpdate(DocumentEvent e) {
-					final Color labelColor = field.getText().equals("") ? Color.BLACK : color;
-					label.setForeground(labelColor);
-				}
-				
+				public void insertUpdate(DocumentEvent e) { doUpdate(); }
+				public void removeUpdate(DocumentEvent e) {	doUpdate(); }
 				public void changedUpdate(DocumentEvent e) { }
+				
+				private void doUpdate()
+				{
+					final boolean populated = !field.getText().equals("");
+					label.setEnabled(populated);
+				}
 			};
 			
 			return dl;
@@ -415,11 +401,10 @@ public class CRLoadImageDialog extends JDialog {
 		batchInputPanel.add(orientationLabel, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED,
 				GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(195, 16), null, 0, false));
 		useBatchInputCheckbox = new JCheckBox();
-		useBatchInputCheckbox.setText("Batch input: only populated fields (indicated by green labels) will be applied");
+		useBatchInputCheckbox.setText("Batch input: blank fields will not be applied");
 		panel3.add(useBatchInputCheckbox, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE,
 				GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
 		
-		updateBatchLabelColors();
 		onBatch();
 	}
 
@@ -444,7 +429,7 @@ public class CRLoadImageDialog extends JDialog {
 
 		if (!lengthField.getText().equals(""))
 		{
-			final float length = Integer.valueOf(lengthField.getText());
+			final float length = Float.valueOf(lengthField.getText());
 			theTable.applyAllLength(length);
 		}
 		
@@ -664,12 +649,11 @@ public class CRLoadImageDialog extends JDialog {
 	}
 
 	private void onApply() {
-//		if (!isValidInt(dpiXTextField.getText()) || !isValidInt(dpiYTextField.getText()) || !isValidFloat(depthIncTextField.getText()) || !isValidFloat(startDepthField.getText())) {
-//			JOptionPane.showMessageDialog(this, "At least one of left " + "fields are not numbers.\n" + "Please " + "type in numbers and " + "try again.");
-//			return;
-//		}
-
-		applyGroupPropToTable();
+		try {
+			applyGroupPropToTable();
+		} catch (NumberFormatException e) {
+			JOptionPane.showMessageDialog(this, "Invalid value: " + e.getMessage());
+		}
 	}
 
 	private void onBatch() {
