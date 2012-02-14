@@ -835,11 +835,12 @@ void stagger_track_sections(const int trackid, const bool stagger)
 				return;
 			}
 			
+			// offset by height (non-depth axis) of core section
 			float dpix, dpiy;
 			get_canvas_dpi( 0, &dpix, &dpiy );
-
-			// offset by height of core section
-			const float secHeightPix = cs->height * INCH_PER_CM * dpiy;
+			const float secHeightAxisDPI = ( cs->orientation == LANDSCAPE ? dpiy : dpix );
+			const float secHeight = ( cs->orientation == LANDSCAPE ? cs->height : cs->width );
+			const float secHeightPix = secHeight * INCH_PER_CM * secHeightAxisDPI;
 			const float offset = secHeightPix * (stagger ? -1.0f : 1.0f);
 
 			cs->py += offset;
