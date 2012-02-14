@@ -184,11 +184,11 @@ public class CRLoadImageDialog extends JDialog {
 					orientationLabel.setEnabled(true);
 			}
 		});
-		lengthField.getDocument().addDocumentListener( LabelEnablerFactory.create(lengthField, lengthLabel ));
-		dpiXField.getDocument().addDocumentListener( LabelEnablerFactory.create(dpiXField, dpiXLabel ));
-		dpiYField.getDocument().addDocumentListener( LabelEnablerFactory.create(dpiYField, dpiYLabel ));
-		startDepthField.getDocument().addDocumentListener( LabelEnablerFactory.create(startDepthField, startDepthLabel ));
-		depthIncField.getDocument().addDocumentListener( LabelEnablerFactory.create(depthIncField, depthIncLabel ));
+		lengthField.getDocument().addDocumentListener( LabelEnablerFactory.create( lengthField, lengthLabel ));
+		dpiXField.getDocument().addDocumentListener( LabelEnablerFactory.create( dpiXField, dpiXLabel ));
+		dpiYField.getDocument().addDocumentListener( LabelEnablerFactory.create( dpiYField, dpiYLabel ));
+		startDepthField.getDocument().addDocumentListener( LabelEnablerFactory.create( startDepthField, startDepthLabel ));
+		depthIncField.getDocument().addDocumentListener( LabelEnablerFactory.create( depthIncField, depthIncLabel ));
 	}
 	
 	private static class LabelEnablerFactory {
@@ -658,19 +658,33 @@ public class CRLoadImageDialog extends JDialog {
 
 	private void onBatch() {
 		final boolean b = useBatchInputCheckbox.isSelected();
-		orientationLabel.setEnabled(b);
+
 		orientationComboBox.setEnabled(b);
-		lengthLabel.setEnabled(b);
 		lengthField.setEnabled(b);
-		dpiXLabel.setEnabled(b);
 		dpiXField.setEnabled(b);
-		dpiYLabel.setEnabled(b);
 		dpiYField.setEnabled(b);
-		startDepthLabel.setEnabled(b);
 		startDepthField.setEnabled(b);
-		depthIncLabel.setEnabled(b);
 		depthIncField.setEnabled(b);
 		applyButton.setEnabled(b);
+
+		if (!b)
+		{
+			orientationLabel.setEnabled(b);
+			lengthLabel.setEnabled(b);
+			dpiXLabel.setEnabled(b);
+			dpiYLabel.setEnabled(b);
+			startDepthLabel.setEnabled(b);
+			depthIncLabel.setEnabled(b);
+		}
+		else
+		{
+			orientationLabel.setEnabled( orientationComboBox.getSelectedIndex() != 2 ); // [Blank]
+			lengthLabel.setEnabled(!lengthField.getText().equals(""));
+			dpiXLabel.setEnabled(!dpiXField.getText().equals(""));
+			dpiYLabel.setEnabled(!dpiYField.getText().equals(""));
+			startDepthLabel.setEnabled(!startDepthField.getText().equals(""));
+			depthIncLabel.setEnabled(!depthIncField.getText().equals(""));
+		}
 	}
 
 	private void onCancel() {
