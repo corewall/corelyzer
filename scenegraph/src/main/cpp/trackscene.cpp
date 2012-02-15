@@ -851,3 +851,27 @@ void stagger_track_sections(const int trackid, const bool stagger)
 	if (sectionWasOffset)
 		track->staggered = stagger;
 }
+
+void trim_sections(const int trackid, const float trim)
+{
+	if (!is_track(trackid))
+	{
+		printf("trim_sections() failed: invalid track %d\n", trackid);
+		return;
+	}
+	
+	TrackSceneNode *track = get_scene_track(trackid);
+	const int numSections = track->modelvec.size();
+	for ( int i = 0; i < numSections; i++ )
+	{
+		CoreSection *cs = get_track_section(track, i);
+		if (!cs)
+		{
+			printf("stagger_track_sections() failed: invalid section %d\n", i);
+			return;
+		}
+		
+		if ( cs->intervalBottom > trim )
+			cs->intervalBottom -= trim;
+	}
+}
