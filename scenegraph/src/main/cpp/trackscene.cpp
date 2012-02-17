@@ -852,7 +852,7 @@ void stagger_track_sections(const int trackid, const bool stagger)
 		track->staggered = stagger;
 }
 
-void trim_sections(const int trackid, const float trim)
+void trim_sections(const int trackid, const float trim, const bool fromBottom)
 {
 	if (!is_track(trackid))
 	{
@@ -871,7 +871,27 @@ void trim_sections(const int trackid, const float trim)
 			return;
 		}
 		
-		if ( cs->intervalBottom > trim )
+		if ( fromBottom )
 			cs->intervalBottom -= trim;
+		else
+			cs->intervalTop += trim;
+		
+		// clamp values
+		if ( cs->intervalBottom > cs->width )
+			cs->intervalBottom = cs->width;
+		if ( cs->intervalTop < 0 )
+			cs->intervalTop = 0;
+		
+		// enforce minimum visible interval width of .5cm
+		const float visibleInterval = cs->intervalBottom - cs->intervalTop;
+		const float minVisibleInterval = 0.5f;
+		if ( visibleInterval < minVisibleInterval )
+		{
+			const float underage = minVisibleInterval - visibleInterval;
+			if ( fromBottom )
+				cs->intervalBottom += underage;
+			else
+				cs->intervalTop -= underage;
+		}
 	}
 }

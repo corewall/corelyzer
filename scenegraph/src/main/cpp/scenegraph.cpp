@@ -5374,12 +5374,12 @@ JNIEXPORT jboolean JNICALL Java_corelyzer_graphics_SceneGraph_trackIsStaggered
 /*
  * Class:     corelyzer_helper_SceneGraph
  * Method:    trimSections
- * Signature: (IF)V
+ * Signature: (IFZ)V
  */
 JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_trimSections
-(JNIEnv * jenv, jclass jcls, jint trackId, jfloat trim)
+(JNIEnv * jenv, jclass jcls, jint trackId, jfloat trim, jboolean fromBottom)
 {
-    trim_sections(trackId, trim);
+    trim_sections(trackId, trim, fromBottom);
 }
 
 

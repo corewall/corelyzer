@@ -595,10 +595,10 @@ public class CorelyzerGLCanvas implements GLEventListener, MouseListener, MouseW
 	
 	private void doTrimSections()
 	{
-		final String trimString = JOptionPane.showInputDialog(this.canvas, "Trim all sections in selected track (cm)");
-		final float trim = Float.parseFloat(trimString);
-		SceneGraph.trimSections(selectedTrack, trim);
-		CorelyzerApp.getApp().updateGLWindows();
+		TrimDialog td = new TrimDialog(this.canvas, selectedTrack);
+		td.pack();
+		td.setLocationRelativeTo(null);
+		td.setVisible(true);
 	}
 
 	private void doExportTrack() {
