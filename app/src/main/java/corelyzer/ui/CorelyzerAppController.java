@@ -347,7 +347,7 @@ public class CorelyzerAppController implements ActionListener {
 	}
 
 	public void deiconifyAllPlugins() {
-		pluginManager.iconifyAllPlugins();
+		pluginManager.deiconifyAllPlugins();
 	}
 
 	public void deleteDataset(final Session s, final WellLogDataSet d) {
