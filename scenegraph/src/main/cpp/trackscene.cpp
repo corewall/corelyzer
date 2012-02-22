@@ -895,3 +895,39 @@ void trim_sections(const int trackid, const float trim, const bool fromBottom)
 		}
 	}
 }
+
+void stack_sections(const int trackid)
+{
+	if (!is_track(trackid))
+	{
+		printf("stack_sections() failed: invalid track %d\n", trackid);
+		return;
+	}
+	
+	TrackSceneNode *track = get_scene_track(trackid);
+	const int numSections = track->modelvec.size();
+
+	for (int i = 1; i < numSections; i++)
+	{
+		CoreSection *cs1 = get_track_section(track, i - 1);
+		CoreSection *cs2 = get_track_section(track, i);
+		if (!cs1) {	printf("stack_sections() failed: invalid first section %d\n", i - 1); return; }
+		if (!cs2) {	printf("stack_sections() failed: invalid second section %d\n", i); return; }
+
+		// convert depth axis of section 1 to pixels
+		float dpix, dpiy;
+		get_canvas_dpi( 0, &dpix, &dpiy );
+		const float secDepthAxisDPI = ( cs1->orientation == LANDSCAPE ? dpix : dpiy );
+		const float secDepth = ( cs1->orientation == LANDSCAPE ? cs1->width : cs1->height );
+
+		// determine visible interval and use for stacking (rather than full height/width)
+		const float visibleSecDepth = secDepth - cs1->intervalTop - (secDepth - cs1->intervalBottom);
+		const float visibleSecDepthInPix = cs1->px + (visibleSecDepth * INCH_PER_CM * secDepthAxisDPI);
+		
+		// abut top of section 2 to end of section 1
+		cs2->px -= (cs2->px - visibleSecDepthInPix);
+		
+		// adjust depth or sections can be mistakenly culled from drawing
+		cs2->depth = cs2->px * CM_PER_INCH / dpix;
+	}
+}

@@ -100,5 +100,7 @@ void stagger_track_sections(const int trackid, const bool stagger);
 
 void trim_sections(const int trackid, const float trim, const bool fromBottom);
 
+void stack_sections(const int trackid);
+
 #endif
 

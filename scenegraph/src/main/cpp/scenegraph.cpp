@@ -5382,6 +5382,16 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_trimSections
     trim_sections(trackId, trim, fromBottom);
 }
 
+/*
+ * Class:     corelyzer_helper_SceneGraph
+ * Method:    stackSections
+ * Signature: (I)V
+ */
+JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_stackSections
+(JNIEnv * jenv, jclass jcls, jint trackId)
+{
+    stack_sections(trackId);
+}
 
 /*
  * Class:     corelyzer_helper_SceneGraph

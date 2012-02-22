@@ -1766,6 +1766,7 @@ public class SceneGraph {
 	public native static boolean trackIsStaggered(int track);
 	public native static void staggerTrackSections(int track, boolean stagger);
 	public native static void trimSections(int track, float trim, boolean fromBottom);
+	public native static void stackSections(int track);
 	
 	/**
 	 * Let's the corelyzer.helper.SceneGraph library know that it's being

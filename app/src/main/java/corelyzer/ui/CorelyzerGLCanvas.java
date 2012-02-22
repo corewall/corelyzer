@@ -136,8 +136,8 @@ public class CorelyzerGLCanvas implements GLEventListener, MouseListener, MouseW
 	JMenuItem propertyMenuItem;
 	JMenuItem splitMenuItem;
 
-	// Section-based items' indices {Graph, Property, Split, Delete, Stagger, Trim}
-	static int[] sectionBasedPopupMenuItemIndices = { 7, 8, 9, 10, 11, 12 };
+	// Section-based items' indices {Graph, Property, Split, Delete, Stagger, Trim, Stack}
+	static int[] sectionBasedPopupMenuItemIndices = { 7, 8, 9, 10, 11, 12, 13 };
 
 	// For track depth fine tune action called from remote control server
 	private static boolean isFineTune = false;
@@ -498,6 +498,13 @@ public class CorelyzerGLCanvas implements GLEventListener, MouseListener, MouseW
 				doTrimSections();
 			}
 		});
+		
+		JMenuItem stackSectionsItem = new JMenuItem("Stack Sections");
+		stackSectionsItem.addActionListener(new ActionListener() {
+			public void actionPerformed(final ActionEvent e) {
+				doStackSections();
+			}
+		});
 
 		this.scenePopupMenu.addSeparator();
 		this.scenePopupMenu.add(graphMenuItem);
@@ -506,6 +513,7 @@ public class CorelyzerGLCanvas implements GLEventListener, MouseListener, MouseW
 		this.scenePopupMenu.add(deleteItem);
 		this.scenePopupMenu.add(staggerSectionsItem);
 		this.scenePopupMenu.add(trimSectionsItem);
+		this.scenePopupMenu.add(stackSectionsItem);
 
 		CorelyzerApp.getApp().getPluginManager().addPluginPopupSubMenus(this.scenePopupMenu);
 	}
@@ -599,6 +607,12 @@ public class CorelyzerGLCanvas implements GLEventListener, MouseListener, MouseW
 		td.pack();
 		td.setLocationRelativeTo(null);
 		td.setVisible(true);
+	}
+	
+	private void doStackSections()
+	{
+		SceneGraph.stackSections(selectedTrack);
+		CorelyzerApp.getApp().updateGLWindows();
 	}
 
 	private void doExportTrack() {
