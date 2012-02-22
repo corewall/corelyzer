@@ -4,7 +4,7 @@ CW = /Users/bgrivna/Desktop/brg/proj/corewall/corelyzer
 # brg 1/23/2012: Should match [root]/build.gradle allprojects.version.
 # Changing manually until I get plugins building under Gradle, at which
 # point we can import those settings and dispense with this.
-CORELYZER_VERSION = 1.4.1_b1-SNAPSHOT
+CORELYZER_VERSION = 1.4.1_b3-SNAPSHOT
 
 export SYSTEM = $(shell uname -s)
 export PROCESSOR = $(shell uname -p)

@@ -1,5 +1,5 @@
 allprojects {
-	version = '1.4.1_b1-SNAPSHOT'
+	version = '1.4.1_b3-SNAPSHOT'
 	group = 'org.corewall'
 }
 
