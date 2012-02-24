@@ -107,24 +107,12 @@ public class ICoreFrame extends JFrame implements SubscribeHandler, ProgressHand
     public ICoreFrame(CRPreferences p) {
         super();
 
-		final String versionNumber = CorelyzerApp.getApp().getCorelyzerVersion();
+		String versionNumber = CorelyzerApp.getApp().getCorelyzerVersion();
         if (versionNumber == null || versionNumber.equals("")) {
             versionNumber = "undetermined";
         }
         setTitle("Corelyzer " + versionNumber);
         iCoreFrame = this;
-
-	// 12/8/2011 brg: This code is duplicated in the other "Getting
-	// configuration filenames"-commented block below. Looks like
-	// transition from Preferences to CRPreferences (I can't find
-	// code for the former) wasn't quite finished.
-        // Getting configuration filenames
-	//        prefs = (p == null) ? (new Preferences()) : p;
-        //this.iCoresFilename = prefs.config_Directory + sp + "icores.xml";
-        //this.localFilename = prefs.config_Directory + sp + "icores_local.xml";
-        //this.subscriptionsFilename = prefs.config_Directory + sp +
-        //        "icores_subscriptions.xml";
-        //this.cmlsFilename = prefs.config_Directory + sp + "icores_CMLs.xml";
 
         // Model init
         // collectionPanels = new HashMap<String, JPanel>();
@@ -214,17 +202,6 @@ public class ICoreFrame extends JFrame implements SubscribeHandler, ProgressHand
 
         // Update model & view based on configs init-ed
         refreshTree();
-
-		// 12/13/2011 brg: more weird duplication
-        // Controller
-        // init http authenticator
-        //Authenticator.setDefault(new MyAuthenticator());
-        //resourceManager = new ResourceManager();
-        //cacheMgr = new CacheManager(prefs);
-        //cacheMgr.init();
-
-        // Update model & view based on configs init-ed
-        //refreshTree();
     }
 
     public static ICoreFrame getIcoreFrame() {
@@ -585,26 +562,6 @@ public class ICoreFrame extends JFrame implements SubscribeHandler, ProgressHand
             //noinspection SuspiciousMethodCalls
             this.subscriptionCategory.getChildren().remove(obj);
             
-			// 12/8/2011 brg: More duplication
-			// TODO cleanup right-hand-side panel
-            // Remove associated CacheEntry & feed node
-            //FeedTreeNode aNode = (FeedTreeNode) obj;
-			//String url = aNode.getUrl();
-			//
-            //if (cacheMgr.hasItem(url)) {
-			//System.out.println("---> [INFO] Remove subscription: '" +
-            //            url + "'");
-            //    cacheMgr.remove(url);
-            //}
-			//
-            //allSubscriptions.remove(url);            
-            //System.out.println("---> [INFO] Removed SubsNode: '" + url +
-            //        "' Node: '" + aNode.getTitle() + "', " +
-            //        allSubscriptions.size() + " left");
-
-            //noinspection SuspiciousMethodCalls
-            //this.subscriptionCategory.getChildren().remove(obj);
-			
             this.coreRepoTree.updateUI();
         }
     }
@@ -674,11 +631,14 @@ public class ICoreFrame extends JFrame implements SubscribeHandler, ProgressHand
         // Some hiccup when init the tree
         if (coreRepoTree.getRowCount() == 0) return;
 
-        for (int row = 0; row < this.coreRepoTree.getRowCount(); row++) {
-            coreRepoTree.expandRow(row);
+        try {
+	        for (int row = 0; row < this.coreRepoTree.getRowCount(); row++) {
+	            coreRepoTree.expandRow(row);
+	        }
+            coreRepoTree.setSelectionRow(0);
+        } catch (NullPointerException e) {
+        	System.out.println(e.getMessage());
         }
-
-        coreRepoTree.setSelectionRow(0);
     }
 
     public JTree getRepoTree() {
