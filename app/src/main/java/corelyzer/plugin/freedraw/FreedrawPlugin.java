@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
 import corelyzer.graphics.SceneGraph;
 import corelyzer.plugin.CorelyzerPlugin;
@@ -134,7 +134,7 @@ public abstract class FreedrawPlugin extends CorelyzerPlugin implements Freedraw
 	 * Route to the appropriate Freedraw.
 	 */
 	@Override
-	public final void renderRectangle(final GL gl, final int freeDraw, final int canvas, final int track, final int section, final float x, final float y,
+	public final void renderRectangle(final GL2 gl, final int freeDraw, final int canvas, final int track, final int section, final float x, final float y,
 			final float w, final float h, final float scale) {
 
 		// create our context to wrap our parameters

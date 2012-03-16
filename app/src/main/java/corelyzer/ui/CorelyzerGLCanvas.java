@@ -44,7 +44,7 @@ import java.util.Vector;
 import java.util.concurrent.locks.ReentrantLock;
 
 import javax.media.opengl.GLAutoDrawable;
-import javax.media.opengl.GLCanvas;
+import javax.media.opengl.awt.GLCanvas;
 import javax.media.opengl.GLEventListener;
 import javax.swing.AbstractButton;
 import javax.swing.ButtonGroup;
@@ -1507,6 +1507,8 @@ public class CorelyzerGLCanvas implements GLEventListener, MouseListener, MouseW
 	public void reshape(final GLAutoDrawable drawble, final int x, final int y, final int w, final int h) {
 		// do nothing
 	}
+	
+	public void dispose(final GLAutoDrawable drawable) { }
 
 	private void scrollSceneWithScrollWheel(final MouseWheelEvent e) {
 		int scrollAmount = e.getScrollAmount();

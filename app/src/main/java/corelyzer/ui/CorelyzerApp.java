@@ -51,7 +51,8 @@ import javax.help.CSH;
 import javax.help.HelpBroker;
 import javax.help.HelpSet;
 import javax.help.HelpSetException;
-import javax.media.opengl.GLCanvas;
+import javax.media.opengl.GLProfile;
+import javax.media.opengl.awt.GLCanvas;
 import javax.media.opengl.GLCapabilities;
 import javax.media.opengl.GLContext;
 import javax.swing.BorderFactory;
@@ -191,7 +192,7 @@ public class CorelyzerApp extends WindowAdapter implements MouseListener, Startu
 		// Check what's missing & invoke preference dialog accordingly
 
 		if (!hasConfDir || !(hasDirConf && hasDisplayConf && hasUIConf) || !hasDirs) {
-			CRPreferencesDialog prefDialog = new CRPreferencesDialog(null, prefs);
+			CRPreferencesDialog prefDialog = new CRPreferencesDialog(CorelyzerApp.getApp().getToolFrame(), prefs);
 			prefDialog.pack();
 			prefDialog.setSize(450, 750);
 
@@ -244,7 +245,7 @@ public class CorelyzerApp extends WindowAdapter implements MouseListener, Startu
 	CRPreferences preferences;
 	boolean isGLInited = false;
 	private static CorelyzerApp app;
-	private GLContext baseContext;
+	private GLContext sharedContext;
 
 	private Vector<CorelyzerGLCanvas> canvasVec;
 	private Vector<Window> windowVec;
@@ -390,6 +391,8 @@ public class CorelyzerApp extends WindowAdapter implements MouseListener, Startu
 	// and brings up the display configuration dialog.
 	public CorelyzerApp() {
 		super();
+		canvasVec = new Vector<CorelyzerGLCanvas>();
+		windowVec = new Vector<Window>();
 	}
 
 	public CorelyzerApp(final String[] plugins) {
@@ -406,22 +409,11 @@ public class CorelyzerApp extends WindowAdapter implements MouseListener, Startu
 		app = this;
 		setPreferences(prefs);
 		setupUI();
-
+		
 		controller.startup();
-
-		// create an initial OpenGL context!!
-		// create our default gljpanel for all panels to share with it's
-		// context, don't attach it to anything
-
-		GLCanvas basePanel = new GLCanvas();
-		canvasVec = new Vector<CorelyzerGLCanvas>();
-		windowVec = new Vector<Window>();
-
-		baseContext = basePanel.getContext();
-
 		controller.macOSXRegistration();
 
-		StartupNotification startupNotify = new StartupNotification();
+		//StartupNotification startupNotify = new StartupNotification();
 		// noinspection AccessStaticViaInstance
 		StartupNotification.registerStartupListener(this);
 	}
@@ -473,19 +465,14 @@ public class CorelyzerApp extends WindowAdapter implements MouseListener, Startu
 			tileHeight--; // remove one row
 		
 		SceneGraph.setCanvasRowcAndColumn(nrows, ncols);
-
-		int r, c;
+		
+		sharedContext = null;
+		int r, c, canvasNum = 0;
 		for (r = 0; r < nrows; r++) {
 			for (c = 0; c < ncols; c++) {
-				// System.out.println("Making tile " + r + ", " + c);
-				Window win;
-				GLCanvas cvs;
-				CorelyzerGLCanvas cglc;
-				float px, py;
-				int id;
-
 				// Allow alpha GL context
-				GLCapabilities cap = new GLCapabilities();
+				GLProfile profile = GLProfile.getDefault();
+				GLCapabilities cap = new GLCapabilities( profile );//GLProfile.getDefault() );
 				cap.setAlphaBits(8);
 				// System.out.println("---> GL " + cap.toString());
 
@@ -494,11 +481,19 @@ public class CorelyzerApp extends WindowAdapter implements MouseListener, Startu
 				 * win).setUndecorated(true); } else { win = new JWindow(); }
 				 */
 
-				win = new JFrame();
+				Window win = new JFrame();
 				((JFrame) win).setUndecorated(true);
 
 				win.setLocation(c * tileWidth + column_offset, r * tileHeight + row_offset);
-				cvs = new GLCanvas(cap, null, baseContext, null);
+				
+				// brg 3/16/2012: Once we have a shared context, it must be passed in the constructor.
+				// The setContext() method doesn't work. (JOGL bug?)
+				GLCanvas cvs = null;
+				if ( sharedContext != null )
+					cvs = new GLCanvas(cap, null, sharedContext, null);
+				else
+					cvs = new GLCanvas(cap);
+
 				win.add(cvs);
 				win.addWindowFocusListener(new WindowFocusListener() {
 					public void windowGainedFocus(final WindowEvent event) {
@@ -520,14 +515,16 @@ public class CorelyzerApp extends WindowAdapter implements MouseListener, Startu
 						}
 					}
 				});
+				
+				canvasNum++;
+				
 				windowVec.add(win);
 
-				px = tileWidth * c + (borderLeft + borderRight) * screenDpiX * c;
-				py = tileHeight * r + (borderUp + borderDown) * screenDpiY * r;
-
-				id = SceneGraph.genCanvas(px, py, tileWidth, tileHeight, screenDpiX, screenDpiY);
-
-				cglc = new CorelyzerGLCanvas(cvs, tileWidth, tileHeight, px, py, id);
+				final float px = tileWidth * c + (borderLeft + borderRight) * screenDpiX * c;
+				final float py = tileHeight * r + (borderUp + borderDown) * screenDpiY * r;
+				final int id = SceneGraph.genCanvas(px, py, tileWidth, tileHeight, screenDpiX, screenDpiY);
+				
+				CorelyzerGLCanvas cglc = new CorelyzerGLCanvas(cvs, tileWidth, tileHeight, px, py, id);
 				canvasVec.add(cglc);
 
 				// if it's the bottom most screen or the first column,
@@ -542,8 +539,14 @@ public class CorelyzerApp extends WindowAdapter implements MouseListener, Startu
 
 				win.pack();
 				win.setVisible(true);
+				
+				// brg 3/16/2012: In JOGL2, a GLCanvas's context is only usable after the
+				// canvas has been made visible. Grab the context from the first canvas
+				// and share with subsequent canvases at construction-time.
+				if ( sharedContext == null )
+					sharedContext = cvs.getContext();
+				
 				win.toBack();
-				// win.show();
 			}
 		}
 
@@ -2056,7 +2059,7 @@ public class CorelyzerApp extends WindowAdapter implements MouseListener, Startu
 		int myLocX = canvasWidth / 2 - mydim.width / 2;
 		toolFrame.setLocation(myLocX, 0);
 		toolFrame.setVisible(true);
-
+		
 		// delete key listener on track and section list
 		KeyListener listKeyListener = new KeyListener() {
 			public void keyPressed(final KeyEvent keyEvent) {
@@ -2085,7 +2088,7 @@ public class CorelyzerApp extends WindowAdapter implements MouseListener, Startu
 		trackList.addKeyListener(listKeyListener);
 		sectionList.addKeyListener(listKeyListener);
 	}
-
+	
 	public void setUsePluginUI(final boolean usePluginUI) {
 		this.usePluginUI = usePluginUI;
 	}
@@ -2172,12 +2175,14 @@ public class CorelyzerApp extends WindowAdapter implements MouseListener, Startu
 		// resume all plugin frame
 		controller.deiconifyAllPlugins();
 
-		// to restore workaround in iconifing window
+		// 2/28/2012 brg: Unclear why this works, but it does. Possibly because
+		// plug-in mainFrame is associated with another thread?
+		// to restore workaround in iconifying window
 		if (!MAC_OS_X && usePluginUI) {
 			getDefaultMainFrame().setVisible(false);
 			getMainFrame().setExtendedState(Frame.NORMAL);
 		}
-
+		
 		getMainFrame().setVisible(toolFrame.isAppFrameSelected());
 	}
 
@@ -2191,13 +2196,15 @@ public class CorelyzerApp extends WindowAdapter implements MouseListener, Startu
 				jf.setVisible(false);
 			}
 		}
-
-		// minimize the tool window
+		
+		 // minimize the tool window
 		toolFrame.setVisible(false);
 
-		// iconify all plugin fram if there is
+		// iconify all plugin frames
 		controller.iconifyAllPlugins();
-
+		
+		// 2/28/2012 brg: Unclear why this works, but it does. Possibly because
+		// plug-in frame is associated with another thread?
 		// to avoid missing application in taskbar under Windows
 		if (!MAC_OS_X && usePluginUI) {
 			getDefaultMainFrame().setVisible(true);

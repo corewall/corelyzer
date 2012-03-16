@@ -3,7 +3,7 @@ package corelyzer.plugin;
 import java.awt.Component;
 import java.util.Vector;
 
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 import javax.swing.JFrame;
 import javax.swing.JPopupMenu;
 
@@ -104,14 +104,14 @@ public abstract class CorelyzerPlugin {
 	 * to the FreeDraw area that needs to be filled in. Either or both track and
 	 * section can be -1.
 	 */
-	public void renderRectangle(final GL gl, final int freeDraw, final int canvas, final int track, final int section, final float x, final float y,
+	public void renderRectangle(final GL2 gl, final int freeDraw, final int canvas, final int track, final int section, final float x, final float y,
 			final float w, final float h, final float scale) {
 
 		// draw a rectangle filling white quad
-		gl.glPushAttrib(GL.GL_CURRENT_BIT | GL.GL_ENABLE_BIT);
-		gl.glDisable(GL.GL_TEXTURE_2D);
+		gl.glPushAttrib(GL2.GL_CURRENT_BIT | GL2.GL_ENABLE_BIT);
+		gl.glDisable(GL2.GL_TEXTURE_2D);
 		gl.glColor3f(1, 1, 1);
-		gl.glBegin(GL.GL_QUADS);
+		gl.glBegin(GL2.GL_QUADS);
 		{
 			gl.glVertex3f(x, y, 0);
 			gl.glVertex3f(x, y + h, 0);
@@ -139,7 +139,7 @@ public abstract class CorelyzerPlugin {
 			return;
 		}
 
-		renderRectangle(cglc.getCanvas().getGL(), freeDraw, canvas, track, section, x, y, w, h, scale);
+		renderRectangle(cglc.getCanvas().getGL().getGL2(), freeDraw, canvas, track, section, x, y, w, h, scale);
 	}
 
 	public void setWantToReplaceMainFrame(final boolean wantToReplaceMainFrame) {
