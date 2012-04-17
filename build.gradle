@@ -1,5 +1,5 @@
 allprojects {
-	version = '1.4.1_b3-SNAPSHOT'
+	version = '1.4.3_beta'
 	group = 'org.corewall'
 }
 
@@ -94,59 +94,49 @@ task 'package-mac'(dependsOn: 'package-check') << {
 	}
 }
 
-task 'package-win'(dependsOn: 'package-check') << {
-	def dist = file("dist/win/Corelyzer")
-	def libs = file('dist/win/Corelyzer/lib')
-	if (dist.exists()) {
-		// copy the jars to Corelyzer/lib
-		copy {
-			into libs
-			from 'app/dist'
-			from 'app/deps/win'
-			from file('scenegraph/dist').listFiles().findAll { it.name.endsWith('.jar') }
-		}
 
-		// copy dlls to Corelyzer since I couldn't find a way to make Windows find them in lib
-		copy {
-			into dist
-			from 'app/deps/win'
-			from file('scenegraph/dist').listFiles().findAll { it.name.endsWith('.dll') }
-		}
-	} else {
-		mkdir(dist)
-		mkdir(libs)
+// Windows packaging
+
+def winDist = file("dist/win/Corelyzer")
+def winLibs = file('dist/win/Corelyzer/lib')
+task 'package-win'(dependsOn: ['package-check', 'create-win-dist']) << {
+	// copy the jars to Corelyzer/lib
+	copy {
+		into winLibs
+		from 'app/dist'
+		from file('app/deps/win').listFiles().findAll { it.name.endsWith('.jar') }
+		from file('scenegraph/dist').listFiles().findAll { it.name.endsWith('.jar') }
+	}
+
+	// copy dlls to Corelyzer since I couldn't find a way to make Windows find them in lib
+	copy {
+		into winDist
+		from file('app/deps/win').listFiles().findAll { it.name.endsWith('.dll') }
+		from file('scenegraph/dist').listFiles().findAll { it.name.endsWith('.dll') }
+	}
+
+	// create our zip file
+	ant.zip(basedir: file("dist/win"), destfile: file("dist/win/Corelyzer-${version}.zip"), includes: "Corelyzer/**")
+
+	// TODO create installer
+}
+
+task 'create-win-dist' << {
+	if (!winDist.exists()) {
+		mkdir(winDist)
+		mkdir(winLibs)
 
 		// copy the skeleton
 		copy {
-			into dist
+			into winDist
 			from 'packages/win'
 		}
 
 		// copy the base resources and help files
 		copy {
-			into dist
+			into winDist
 			from 'packages/base'
 		}
-
-		// copy the jars to Corelyzer/lib
-		copy {
-			into libs
-			from 'app/dist'
-			from 'app/deps/win'
-			from file('scenegraph/dist').listFiles().findAll { it.name.endsWith('.jar') }
-		}
-
-		// copy dlls to Corelyzer since I couldn't find a way to make Windows find them in lib
-		copy {
-			into dist
-			from 'app/deps/win'
-			from file('scenegraph/dist').listFiles().findAll { it.name.endsWith('.dll') }
-		}
-
-		// create our zip file
-		ant.zip(basedir: file("dist/win"), destfile: file("dist/win/Corelyzer-${version}.zip"), includes: "Corelyzer/**")
-
-		// TODO create installer
 	}
 }
 

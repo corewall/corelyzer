@@ -33,15 +33,14 @@ dependencies {
 	compile 'commons-codec:commons-codec:1.2' // remove dependency
 	compile 'install4j:i4jruntime:3.2.4' // do we need this?
 	compile ':jdc:1.0.0' // switch to standard directory chooser?
-	compile ':jogl:1.1.1'
-	compile ':gluegen-rt:1.1.1'
 	compile ':jai_core:1.1.3'
 	compile ':jai_codec:1.1.3'
 	compile ':jai_imageio:1.1'
 	compile ':clibwrapper_jiio:1.1'
-	compile ':quaqua-filechooser-only:'
 	compile 'ch.qos.logback:logback-core:0.5'
 	compile 'ch.qos.logback:logback-classic:0.5'
+	compile ':gluegen-rt:2.0rc5'
+	compile ':jogl.all:2.0rc5'
 }
 
 clean.doLast {
