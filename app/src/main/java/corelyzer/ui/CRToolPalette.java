@@ -500,6 +500,12 @@ public class CRToolPalette extends JFrame implements ActionListener {
 
 			f.setVisible(isVisible);
 		} else if (MINIMIZEACTION.equals(cmd)) {
+			// 4/8/2012 brg: When minimizing on Mac, CorelyzerApp strangely receives a deactivate event before a
+			// window iconified event, which causes PaletteVisibilityManager to go haywire. I believe the deactivate
+			// event results from the OS's animation of the minimization. Thus we suspend the PVM here, and
+			// unsuspend it in CorelyzerApp.windowDeiconified().
+			app.suspendPaletteVisibilityManager(true);
+			
 			app.getMainFrame().setVisible(true);
 			this.mainUIToggleButton.setSelected(true);
 			app.getMainFrame().setExtendedState(ICONIFIED);

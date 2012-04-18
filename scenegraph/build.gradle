@@ -122,7 +122,7 @@ def compileMac(src, arch, includes, dir) {
 	def out = src.name.substring(0, src.name.lastIndexOf('.') + 1) + "${arch}"
 	ant {
 		echo("Compiling ${src.name} for Mac ${arch}")
-		exec(executable: 'c++', dir: dir, failonerror: true) {
+		exec(executable: 'c++', dir: dir, logError: true, failonerror: true) {
 			arg(value: '-mmacosx-version-min=10.3')
 			arg(value: '-c')
 			arg(value: '-isysroot')
