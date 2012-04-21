@@ -78,6 +78,8 @@ ActionListener {
 											colorChooser,
 											this,  //OK button handler
 											null); //no CANCEL button handler
+        
+        dialog.setAlwaysOnTop(true); // otherwise the dialog appears behind Graph dialog when opened
     }
 	
     /**

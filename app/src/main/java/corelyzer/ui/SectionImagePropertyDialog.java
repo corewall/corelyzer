@@ -26,7 +26,6 @@ package corelyzer.ui;
 
 import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
@@ -57,10 +56,6 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import net.miginfocom.swing.MigLayout;
-
-import com.intellij.uiDesigner.core.GridConstraints;
-import com.intellij.uiDesigner.core.GridLayoutManager;
-import com.intellij.uiDesigner.core.Spacer;
 
 import corelyzer.controller.CRExperimentController;
 import corelyzer.data.CoreSection;
