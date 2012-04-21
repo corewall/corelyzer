@@ -122,7 +122,7 @@ def compileMac(src, arch, includes, dir) {
 	def out = src.name.substring(0, src.name.lastIndexOf('.') + 1) + "${arch}"
 	ant {
 		echo("Compiling ${src.name} for Mac ${arch}")
-		exec(executable: 'c++', dir: dir, failonerror: true) {
+		exec(executable: 'c++', dir: dir, logError: true, failonerror: true) {
 			arg(value: '-mmacosx-version-min=10.3')
 			arg(value: '-c')
 			arg(value: '-isysroot')
@@ -167,20 +167,25 @@ task 'build-jni-win'(dependsOn: 'generate-jni-headers') << {
 		}
 	}
 
+	// 4/2/2012 brg: Don't bother compiling, cross-compiled Win32 build has
+	// texture generation problems that I have yet to sort out.
+	// Use working MSVC-built scenegraph.dll in deps.
+
 	// compile
-	mkdir(build)
-	def path = file('deps/win32/bootstrap/usr/bin/').absolutePath
-	src.eachFileMatch({ it.endsWith('.c') || it.endsWith('.cpp')} ) { file ->
-		compileWin(file, includes, build, path)
-	}
+	//mkdir(build)
+	//def path = file('deps/win32/bootstrap/usr/bin/').absolutePath
+	//src.eachFileMatch({ it.endsWith('.c') || it.endsWith('.cpp')} ) { file ->
+	//	compileWin(file, includes, build, path)
+	//}
 
 	// link
-	linkWin(deps.listFiles().findAll { it.name.endsWith('.lib')}, build, path)
+	//linkWin(deps.listFiles().findAll { it.name.endsWith('.lib')}, build, path)
 
 	copy {
 		into dist
-		from new File(build, 'scenegraph.dll')
+		from new File(deps, 'scenegraph.dll') // MSVC build
 		from new File(deps, 'OpenJPEG.dll')
+		from new File(deps, 'pthreadVC2.dll')
 	}
 }
 

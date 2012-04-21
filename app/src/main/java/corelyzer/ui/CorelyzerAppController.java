@@ -103,6 +103,11 @@ public class CorelyzerAppController implements ActionListener {
 
 	// private BonjourManager bonjourManager;
 	private ControlServerApplication remoteControlServer;
+	
+	// image file loading error codes, corresponding to those in scenegraph.cpp
+	final static int FILE_READ_ERROR = -1;
+	final static int FILE_DOES_NOT_EXIST = -2;
+	final static int FILE_IS_EMPTY = -3;
 
 	public CorelyzerAppController() {
 		super();
@@ -1161,9 +1166,19 @@ public class CorelyzerAppController implements ActionListener {
 		{
 			int genblockStatus = SceneGraph.genTextureBlocks(filename.toString());
 
-			if (genblockStatus == -1) {
-				String mesg = "Unknown file format: '" + filename + "'";
-				JOptionPane.showMessageDialog(view.getMainFrame(), mesg);
+			if (genblockStatus < 0)
+			{
+				String msg = null;
+				if (genblockStatus == FILE_READ_ERROR)
+					msg = "Unknown file format: '" + filename + "'";
+				else if (genblockStatus == FILE_DOES_NOT_EXIST)
+					msg = "File could not be found: '" + filename + "'";
+				else if (genblockStatus == FILE_IS_EMPTY)
+					msg = "File contains no data: '" + filename + "'";
+				else
+					msg = "File could not be opened, unrecognized error: '" + filename + "'";
+				
+				JOptionPane.showMessageDialog(view.getMainFrame(), msg);
 				System.err.println("---> [INFO] Generate texture failed!");
 
 				SceneGraph.imageUnlock();

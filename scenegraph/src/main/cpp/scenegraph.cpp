@@ -1291,98 +1291,84 @@ JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_loadImage
 JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_genTextureBlocks
   (JNIEnv *jenv, jclass jcls, jstring name)
 {
-    int i = -1;
-    char* nbuf = NULL;
-
+	// 4/17/2012 brg: File verification error codes, corresponding to codes in
+	// CorelyzerAppController.java. Names are more readable than arbitrary integers!
+	// Ideally we'd report a more meaningful error (from the appropriate library) in
+	// the case of FILE_READ_ERROR.
+	const int FILE_READ_ERROR = -1;
+	const int FILE_DOES_NOT_EXIST = -2;
+	const int FILE_IS_EMPTY = -3;
+	
     // get the name and based on file extension, call the proper load function
-
-    i = jenv->GetStringLength(name);
-    nbuf = (char*) malloc(i*sizeof(char)+1);
-    jenv->GetStringUTFRegion(name, 0, i, nbuf);
+    const int fileNameLen = jenv->GetStringLength(name);
+    char *fileName = (char*) malloc(fileNameLen * sizeof(char) + 1);
+    jenv->GetStringUTFRegion(name, 0, fileNameLen, fileName);
 
     // fixme printf("---> [INFO] GenTextureBlocks() %s\n", nbuf);
-
     // fixme 1. Unicode path,
     
-
-    // 2. non-exist path
-    FILE *f = fopen(nbuf, "r");
-    if(!f)
+    // Verify file exists
+    FILE *f = fopen(fileName, "r");
+    if (!f)
     {
-        free(nbuf);
-        return -1;
+        free(fileName);
+        return FILE_DOES_NOT_EXIST;
     }
+	
+	// 4/9/2012 brg: Verify file contains data (empty files cause a crash)
+	if ( fgetc(f) == EOF )
+	{
+		free(fileName);
+		fclose(f);
+		return FILE_IS_EMPTY;
+	}
     fclose(f);
 
     // TextureSet* ts = (TextureSet*) malloc(sizeof(TextureSet));
     TextureSet* ts = new TextureSet();
 
-    if( strstr(nbuf,".JPEG") || strstr(nbuf,".jpeg") ||
-        strstr(nbuf,".JPG")  || strstr(nbuf,".jpg") )
+    if( strstr(fileName,".JPEG") || strstr(fileName,".jpeg") ||
+        strstr(fileName,".JPG")  || strstr(fileName,".jpg") )
     {
-        ts->texset = create_texset_from_jpeg(nbuf, LEVELS);
-
-        if(ts->texset == NULL)
-        {
-            free(nbuf);
-            return -1;
-        }
+        ts->texset = create_texset_from_jpeg(fileName, LEVELS);
     }
-    else if( strstr(nbuf,".PNG") || strstr(nbuf,".png"))
+    else if( strstr(fileName,".PNG") || strstr(fileName,".png"))
     {
-        ts->texset = create_texset_from_png(nbuf, LEVELS);
-
-        if(ts->texset == NULL)
-        {
-            free(nbuf);
-            return -1;
-        }
+        ts->texset = create_texset_from_png(fileName, LEVELS);
     }
-    else if( strstr(nbuf,".BMP") || strstr(nbuf,".bmp"))
+    else if( strstr(fileName,".BMP") || strstr(fileName,".bmp"))
     {
-        ts->texset = create_texset_from_bmp(nbuf, LEVELS);
-
-        if(ts->texset == NULL)
-        {
-            free(nbuf);
-            return -1;
-        }
+        ts->texset = create_texset_from_bmp(fileName, LEVELS);
     }
-    else if( strstr(nbuf,".TIFF") || strstr(nbuf,".tiff") ||
-             strstr(nbuf,".TIF")  || strstr(nbuf,".tif") )
+    else if( strstr(fileName,".TIFF") || strstr(fileName,".tiff") ||
+             strstr(fileName,".TIF")  || strstr(fileName,".tif") )
     {
-        ts->texset = create_texset_from_tiff(nbuf, LEVELS);
-
-        if(ts->texset == NULL)
-        {
-            free(nbuf);
-            return -1;
-        }
+        ts->texset = create_texset_from_tiff(fileName, LEVELS);
     }
-    else if(strstr(nbuf, ".jp2"))
+    else if(strstr(fileName, ".jp2"))
     {
-        printf("---> [TODO] Loading JPEG2000: %s\n", nbuf);
-        ts->texset = create_texset_from_jp2k(nbuf, LEVELS);
-
-        if(ts->texset == NULL)
-        {
-            free(nbuf);
-            return -1;
-        }
+        printf("---> [TODO] Loading JPEG2000: %s\n", fileName);
+        ts->texset = create_texset_from_jp2k(fileName, LEVELS);
     }
     else
     {
-        printf("Could not load image %s, unsupported format\n", nbuf);
-        free(nbuf);
-        return -1;
+        printf("Could not load image %s, unsupported format\n", fileName);
+        free(fileName);
+        return FILE_READ_ERROR;
     }
+	
+	if (ts->texset == NULL)
+	{
+		free(fileName);
+		return FILE_READ_ERROR;
+	}
 
-    ts->imageFilename = (char*) malloc(i*sizeof(char)+1);
-    strcpy(ts->imageFilename, nbuf);    
-    free(nbuf);
+    ts->imageFilename = (char*) malloc(fileNameLen * sizeof(char) + 1);
+    strcpy(ts->imageFilename, fileName);    
+    free(fileName);
 
     // find a place to insert
-    for(int i=0; i<tVec.size(); i++)
+    for (int i = 0; i < tVec.size(); i++)
     {
         if(tVec[i] == NULL)
         {

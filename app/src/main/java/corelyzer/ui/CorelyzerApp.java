@@ -190,7 +190,6 @@ public class CorelyzerApp extends WindowAdapter implements MouseListener, Startu
 		}
 
 		// Check what's missing & invoke preference dialog accordingly
-
 		if (!hasConfDir || !(hasDirConf && hasDisplayConf && hasUIConf) || !hasDirs) {
 			CRPreferencesDialog prefDialog = new CRPreferencesDialog(CorelyzerApp.getApp().getToolFrame(), prefs);
 			prefDialog.pack();
@@ -380,6 +379,8 @@ public class CorelyzerApp extends WindowAdapter implements MouseListener, Startu
 			stateLoader.loadState(myApp.fileassociation);
 			myApp.updateGLWindows();
 		}
+		
+		myApp.installPaletteVisibilityManager();
 	}
 
 	// Reuse helpAction in main frame and tool palette
@@ -409,7 +410,7 @@ public class CorelyzerApp extends WindowAdapter implements MouseListener, Startu
 		app = this;
 		setPreferences(prefs);
 		setupUI();
-		
+
 		controller.startup();
 		controller.macOSXRegistration();
 
@@ -418,6 +419,19 @@ public class CorelyzerApp extends WindowAdapter implements MouseListener, Startu
 		StartupNotification.registerStartupListener(this);
 	}
 
+	private PaletteVisibilityManager pvm = new PaletteVisibilityManager();
+	
+	public void installPaletteVisibilityManager()
+	{
+		for ( Window canvasWindow : windowVec )
+		{
+			canvasWindow.addWindowListener( pvm );
+		}
+
+		toolFrame.addWindowListener( pvm );
+		getMainFrame().addWindowListener( pvm );
+	}
+	
 	public boolean containsDatasetName(final String aName) {
 		return controller.containsTrackName(aName);
 	}
@@ -678,17 +692,7 @@ public class CorelyzerApp extends WindowAdapter implements MouseListener, Startu
 
 	// Returns the main user interface JFrame
 	public JFrame getMainFrame() {
-		JFrame f;
-
-		if (usePluginUI) {
-			mainFrame.setVisible(false);
-			f = getPluginFrame();
-		} else {
-			f = mainFrame;
-		}
-
-		f.setVisible(true);
-		return f;
+		return  ( usePluginUI ? getPluginFrame() : mainFrame );
 	}
 
 	public JMenuBar getMenuBar() {
@@ -1937,8 +1941,6 @@ public class CorelyzerApp extends WindowAdapter implements MouseListener, Startu
 			versionNumber = "undetermined";
 		}
 		mainFrame = new JFrame("Corelyzer " + versionNumber);
-		mainFrame.setVisible(false);
-
 		mainFrame.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 		mainFrame.setSize(320, 100);
 		mainFrame.setLocation(600, 100);
@@ -2048,8 +2050,6 @@ public class CorelyzerApp extends WindowAdapter implements MouseListener, Startu
 
 		setupMenuStuff();
 		setupPopupMenu();
-		mainFrame.setAlwaysOnTop(true);
-		mainFrame.setVisible(false);
 
 		// init new mode tool frame
 		toolFrame = new CRToolPalette();
@@ -2112,6 +2112,17 @@ public class CorelyzerApp extends WindowAdapter implements MouseListener, Startu
 
 		getToolFrame().setVisible(true);
 		getMainFrame().setVisible(true);
+		
+		// 4/8/2012 brg: When a plugin's frame is used in place of the default main frame on Mac,
+		// the z-order is incorrect at startup. Clicking on the canvas causes the main frame to
+		// fall behind the canvas. I discovered that opening/closing a modal dialog solved the
+		// problem, apparently due to the enclosing getMainFrame().setAlwaysOnTop(false) and
+		// getMainFrame().setAlwaysOnTop(true) calls. Still can't figure out why this is necessary,
+		// as iCores calls setAlwaysOnTop(true) on itself...does OSX only respect such calls from
+		// the main application and not a plugin? Whatever the case, these calls make everything
+		// correct at startup.
+		getMainFrame().setAlwaysOnTop(false);
+		getMainFrame().setAlwaysOnTop(true);
 	}
 
 	/**
@@ -2150,6 +2161,8 @@ public class CorelyzerApp extends WindowAdapter implements MouseListener, Startu
 			});
 		}
 	}
+	
+	public void suspendPaletteVisibilityManager( final boolean suspend ) { pvm.setSuspended( suspend ); }
 
 	// Handles when the main frame closes so that the application and
 	// corelyzer.helper.SceneGraph system can close down properly
@@ -2184,6 +2197,8 @@ public class CorelyzerApp extends WindowAdapter implements MouseListener, Startu
 		}
 		
 		getMainFrame().setVisible(toolFrame.isAppFrameSelected());
+		
+		CorelyzerApp.getApp().suspendPaletteVisibilityManager( false );
 	}
 
 	@Override
