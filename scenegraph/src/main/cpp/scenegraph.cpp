@@ -5278,6 +5278,15 @@ int duplicateSection(int trackId, int sectionId, int newTrackId)
     newSection->orientation = cs->orientation;
     newSection->rotangle = cs->rotangle;
     newSection->highlight = cs->highlight;
+
+	// 4/20/2012 brg: highlight_color wasn't being allocated, resulting in a crash when splitting cores.
+	// Really, this should be resolved through a proper default constructor, along with a copy ctor. Use
+	// default color for now rather than trying to copy source section's colors over.
+	newSection->highlight_color = new GLfloat[3];
+	newSection->highlight_color[0] = 1.0f;
+    newSection->highlight_color[1] = 1.0f;
+    newSection->highlight_color[2] = 1.0f;
+
     newSection->px = cs->px;
     newSection->py = cs->py;
     newSection->draw_vert_line = cs->draw_vert_line;
@@ -5291,7 +5300,7 @@ int duplicateSection(int trackId, int sectionId, int newTrackId)
     newSection->src = cs->src; // texture index
     inc_texset_ref_count(newSection->src);
 
-    // put into newTrack
+	// put into newTrack
     newSection->track = newTrackId;
     newSection->section = append_model(newTrack, newSection);
 

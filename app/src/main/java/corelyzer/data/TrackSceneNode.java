@@ -122,23 +122,34 @@ public class TrackSceneNode {
 		}
 	}
 
+	// Add CoreSection cs to the end of secVec
 	public void addCoreSection(final CoreSection cs) {
-
+		addCoreSection(cs, -1);
+	}
+	
+	// If insertIndex != -1, insert CoreSection cs into secVec at insertIndex, otherwise add to the end 
+	public void addCoreSection(final CoreSection cs, final int insertIndex)
+	{
 		if (cs == null) {
 			return;
 		}
-		// already exist?
+
+		// bail out if a section with this name already exists
 		CoreSection sec = this.getCoreSection(cs.getName());
 		if (sec != null) {
 			return;
 		} else {
-			this.secVec.addElement(cs);
+			if ( insertIndex == -1 )
+				this.secVec.addElement(cs);
+			else
+				this.secVec.insertElementAt(cs, insertIndex);
+			
 			this.zOrder.addElement(this.secVec.size() - 1);
 			this.secnameHash.put(cs.getName(), cs);
 			this.secidHash.put(cs.getId(), cs);
 		}
 	}
-
+	
 	// graph, section gid, graph gid
 	public void addCoreSectionGraph(final CoreSectionGraph grp, final int secId, final int gid) {
 

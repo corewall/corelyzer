@@ -191,7 +191,9 @@ public class CorelyzerApp extends WindowAdapter implements MouseListener, Startu
 
 		// Check what's missing & invoke preference dialog accordingly
 		if (!hasConfDir || !(hasDirConf && hasDisplayConf && hasUIConf) || !hasDirs) {
-			CRPreferencesDialog prefDialog = new CRPreferencesDialog(CorelyzerApp.getApp().getToolFrame(), prefs);
+			// 4/25/2012 brg: toolFrame doesn't exist at this point, leading to NullPointerException that
+			// prevents launch: go with no parent instead.
+			CRPreferencesDialog prefDialog = new CRPreferencesDialog(null, prefs);
 			prefDialog.pack();
 			prefDialog.setSize(450, 750);
 
@@ -1347,7 +1349,17 @@ public class CorelyzerApp extends WindowAdapter implements MouseListener, Startu
 			}
 		});
 		loadImageMenu.add(loadImageMenuItem);
-
+		
+		// "Auto-load" 4/25/2012 brg
+		JMenuItem autoLoadImageMenuItem = new JMenuItem("Auto Open Local Image Files...");
+		autoLoadImageMenuItem.setEnabled(true);
+		autoLoadImageMenuItem.addActionListener(new ActionListener() {
+			public void actionPerformed(final ActionEvent event) {
+				controller.autoLoadImageAction();
+			}
+		});
+		loadImageMenu.add(autoLoadImageMenuItem);
+		
 		// online image services
 		JMenuItem chronosMenuItem = new JMenuItem("Online Image Services...");
 		loadImageMenu.add(chronosMenuItem);

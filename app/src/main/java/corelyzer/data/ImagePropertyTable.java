@@ -64,6 +64,14 @@ public class ImagePropertyTable extends JTable {
 		getColumnModel().getColumn(3).setHeaderValue("DPI_X");
 		getColumnModel().getColumn(4).setHeaderValue("DPI_Y");
 		getColumnModel().getColumn(5).setHeaderValue("Depth (m)");
+		
+		// Set preferred widths - large filename column, smaller columns for numeric data
+		getColumnModel().getColumn(0).setPreferredWidth( 200 );
+		getColumnModel().getColumn(1).setPreferredWidth( 40 );
+		getColumnModel().getColumn(2).setPreferredWidth( 40 );
+		getColumnModel().getColumn(3).setPreferredWidth( 40 );
+		getColumnModel().getColumn(4).setPreferredWidth( 40 );
+		getColumnModel().getColumn(5).setPreferredWidth( 40 );
 
 		// JComboBox column
 		JComboBox comboBox = new JComboBox();
@@ -226,5 +234,19 @@ public class ImagePropertyTable extends JTable {
 
 		return new Point((int) xDPI, (int) yDPI);
 	}
-
+	
+	public static class ImageProperties {
+		public String orientation;
+		public float length;
+		public float depth;
+		public float dpix;
+		public float dpiy;
+		
+		public ImageProperties() {
+			orientation = "Horizontal";
+			length = DEFAULT_LENGTH;
+			depth = DEFAULT_DEPTH;
+			dpix = dpiy = DEFAULT_DPI;
+		}
+	}
 }

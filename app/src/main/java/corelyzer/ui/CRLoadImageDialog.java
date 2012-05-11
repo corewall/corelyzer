@@ -42,6 +42,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.List;
+import java.util.Vector;
 
 import javax.swing.*;
 import javax.swing.event.*;
@@ -56,6 +57,7 @@ import corelyzer.data.CRPreferences;
 import corelyzer.data.CoreSection;
 import corelyzer.data.ImagePropertyTable;
 import corelyzer.data.ImagePropertyTableModel;
+import corelyzer.data.SectionImageProperties;
 import corelyzer.data.TrackSceneNode;
 import corelyzer.data.lists.CRDefaultListModel;
 import corelyzer.graphics.SceneGraph;
@@ -88,6 +90,7 @@ public class CRLoadImageDialog extends JDialog {
 	private JButton helpButton;
 	private JTable imageTable;
 
+	// 5/7/2012 brg: TODO use extracted BatchInputPanel class
 	private JPanel batchInputPanel;
 	private JCheckBox useBatchInputCheckbox;
 	private JLabel orientationLabel;
@@ -315,6 +318,9 @@ public class CRLoadImageDialog extends JDialog {
 				GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK
 						| GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
 		scrollPane1.setViewportView(imageTable);
+
+		
+		
 		batchInputPanel = new JPanel();
 		batchInputPanel.setLayout(new GridLayoutManager(7, 2, new Insets(0, 0, 0, 0), -1, -1));
 		batchInputPanel.setEnabled(true);
@@ -450,67 +456,65 @@ public class CRLoadImageDialog extends JDialog {
 		imageTable = new ImagePropertyTable();
 	}
 
-	public void fillListWithFiles(final File[] files) {
+	public void fillListWithFiles(final Vector<File> files) {
 		ImagePropertyTable theTable = (ImagePropertyTable) imageTable;
 
-		if (files.length > 0) {
-			for (File file : files) {
-				String s = file.getAbsolutePath();
+		for (File file : files) {
+			String s = file.getAbsolutePath();
 
-				String ext = FileUtility.getExtension(file);
-				if (ext.equalsIgnoreCase("jp2")) { // jpeg2000
-					List<String> xmlPayloads = J2KUtils.getXMLPayloads(file);
+			String ext = FileUtility.getExtension(file);
+			if (ext.equalsIgnoreCase("jp2")) { // jpeg2000
+				List<String> xmlPayloads = J2KUtils.getXMLPayloads(file);
 
-					// FIXME
-					if ((xmlPayloads == null) || (xmlPayloads.size() == 0)) {
-						theTable.addImagePath(s);
-						continue;
-					}
-
-					for (String xml : xmlPayloads) {
-						// see if it's core section image spec related
-						if (FeedUtils.isValidSyndEntry(xml)) {
-							try {
-								file.toURI().toURL().toString();
-							} catch (MalformedURLException e) {
-								e.printStackTrace();
-							}
-
-							float dpix = 254;
-							float dpiy = 254;
-							float depth = 0;
-							float length = 1;
-							String orientation = ImagePropertyTableModel.HORIZONTAL;
-
-							CoreModule module1 = FeedUtils.getCoreModule(xml);
-							if (module1 == null) {
-								System.err.println(file + " has no CoreModule");
-							} else {
-								depth = (float) module1.getDepth();
-								length = (float) module1.getLength();
-							}
-
-							ImageModule module2 = FeedUtils.getImageModule(xml);
-							if (module2 == null) {
-								System.err.println(file + " has no ImageModule");
-							} else {
-								dpix = (float) module2.getDPIX();
-								dpiy = (float) module2.getDPIY();
-								orientation = module2.getOrientation();
-							}
-
-							theTable.addImageAndProperties(s, orientation, length, dpix, dpiy, depth);
-
-							System.out.println(s + " added");
-
-							break;
-						} else {
-							System.out.println("Not feed entry");
-						}
-					}
-				} else {
+				// FIXME
+				if ((xmlPayloads == null) || (xmlPayloads.size() == 0)) {
 					theTable.addImagePath(s);
+					continue;
 				}
+
+				for (String xml : xmlPayloads) {
+					// see if it's core section image spec related
+					if (FeedUtils.isValidSyndEntry(xml)) {
+						try {
+							file.toURI().toURL().toString();
+						} catch (MalformedURLException e) {
+							e.printStackTrace();
+						}
+
+						float dpix = 254;
+						float dpiy = 254;
+						float depth = 0;
+						float length = 1;
+						String orientation = ImagePropertyTableModel.HORIZONTAL;
+
+						CoreModule module1 = FeedUtils.getCoreModule(xml);
+						if (module1 == null) {
+							System.err.println(file + " has no CoreModule");
+						} else {
+							depth = (float) module1.getDepth();
+							length = (float) module1.getLength();
+						}
+
+						ImageModule module2 = FeedUtils.getImageModule(xml);
+						if (module2 == null) {
+							System.err.println(file + " has no ImageModule");
+						} else {
+							dpix = (float) module2.getDPIX();
+							dpiy = (float) module2.getDPIY();
+							orientation = module2.getOrientation();
+						}
+
+						theTable.addImageAndProperties(s, orientation, length, dpix, dpiy, depth);
+
+						System.out.println(s + " added");
+
+						break;
+					} else {
+						System.out.println("Not feed entry");
+					}
+				}
+			} else {
+				theTable.addImagePath(s);
 			}
 		}
 
@@ -583,62 +587,9 @@ public class CRLoadImageDialog extends JDialog {
 					continue;
 				}
 
-				SceneGraph.lock();
-				{
-					// check currnet section depth
-					// If not zero, leave it as is
-					// Otherwize, set depth by property dlg
-					CRDefaultListModel tmodel = app.getTrackListModel();
-					TrackSceneNode tnode = (TrackSceneNode) tmodel.elementAt(trackIdx);
-					String secname = filename.substring(0, filename.lastIndexOf('.'));
-					CoreSection cs = tnode.getCoreSection(secname);
-					int track = tnode.getId();
-
-					boolean isVertical = orientation.toLowerCase().equals("vertical");
-					SceneGraph.setSectionOrientation(track, secId, isVertical);
-
-					if (cs == null) {
-						return;
-					}
-
-					if (cs.getDepth() == 0) {
-						SceneGraph.positionSection(track, secId, depth * 100.0f / 2.54f * SceneGraph.getCanvasDPIX(0), 0);
-						cs.setDepth(SceneGraph.getSectionDepth(track, secId));
-					}
-
-					// Determine DPI
-					if ((dpix > 0) && (dpiy > 0)) { // use DPI if available
-						SceneGraph.setSectionDPI(track, secId, dpix, dpiy);
-					} else if (length != 0) { // use Length & image size
-						float dpi = ImagePropertyTable.DEFAULT_DPI;
-
-						int imageId = SceneGraph.getImageIdForSection(track, secId);
-
-						float imageWidth = SceneGraph.getImageWidth(imageId);
-						float imageHeight = SceneGraph.getImageHeight(imageId);
-
-						float lengthInPixel;
-						if (orientation.toLowerCase().equals("horizontal")) {
-							lengthInPixel = imageWidth;
-						} else {
-							lengthInPixel = imageHeight;
-						}
-
-						dpi = (float) (lengthInPixel / (length * 100 / 2.54));
-
-						SceneGraph.setSectionDPI(track, secId, dpi, dpi);
-					} else { // use default_dpi
-						SceneGraph.setSectionDPI(track, secId, ImagePropertyTable.DEFAULT_DPI, ImagePropertyTable.DEFAULT_DPI);
-					}
-
-					SceneGraph.bringSectionToFront(track, secId);
-
-					boolean imageLock = app.preferences.lockCoreSectionImage;
-					SceneGraph.markSectionImmovable(track, secId, imageLock);
-				}
-				SceneGraph.unlock();
-
-				app.updateGLWindows();
+				CRDefaultListModel tmodel = app.getTrackListModel();
+				TrackSceneNode tnode = (TrackSceneNode) tmodel.elementAt(trackIdx);
+				FileUtility.setSectionImageProperties( tnode, secId, length, depth, dpix, dpiy, orientation );
 			}
 
 			progress.setValue(imageTable.getRowCount());
@@ -882,83 +833,18 @@ public class CRLoadImageDialog extends JDialog {
 	}
 
 	private void selectAndLoadImagesToList() {
-		ExampleFileFilter imageFileFilter = new ExampleFileFilter();
-		imageFileFilter.setDescription("Images");
-		imageFileFilter.addExtension("jpg");
-		imageFileFilter.addExtension("jpeg");
-		imageFileFilter.addExtension("png");
-		imageFileFilter.addExtension("tif");
-		imageFileFilter.addExtension("tiff");
-		imageFileFilter.addExtension("bmp");
-		imageFileFilter.addExtension("jp2"); // jpeg2000
-
-		// 2/2/2012 brg: Sorting filenames properly, i.e. [file1, file2, file3, file20], not [file1, file2, file20, file3],
-		// is tricky. Ended up with a mixed solution: using a funky JFileChooser subclass trick on Windows to override the
-		// sort algorithm, and Quaqua on Mac. (The subclass trick works on Mac too, but the dialog looks unacceptably
-		// strange while Quaqua's looks very nice.)
-		JFileChooser chooser = null;
-		LookAndFeel oldLAF = null;
+		final Vector<File> selectedFiles = FileUtility.loadLocalImages(this);
 		
-		final boolean MAC_OS_X = System.getProperty("os.name").toLowerCase().startsWith("mac os x");
-		if ( MAC_OS_X )
-		{
-			// 2/2/2012 brg: On Mac, use Quaqua file chooser to sort image files
-			// properly: 
-			oldLAF = UIManager.getLookAndFeel();
+		filesButton.setEnabled(false);
+		buttonOK.setEnabled(false);
 
-			try {
-				UIManager.setLookAndFeel("ch.randelshofer.quaqua.QuaquaLookAndFeel");
-			} catch (ClassNotFoundException cnfe) {
-				try {
-					UIManager.setLookAndFeel("ch.randelshofer.quaqua.QuaquaLookAndFeel15");
-				} catch (Exception e) {
-					System.out.println("Couldn't set Quaqua LAF - Java 1.5 or 1.6 required");
-				}
-			} catch (Exception e) { System.out.println("Couldn't set Quaqua LAF"); }
+		SwingUtilities.invokeLater(new Runnable() {
+			public void run() {
+				fillListWithFiles(selectedFiles);
 
-			chooser = new JFileChooser();
-		}
-		else // Windows
-		{
-			chooser = new LoadImageChooser();
-		}
-		
-		chooser.setDialogTitle("Load image file(s)");
-		chooser.setCurrentDirectory(new File(CRPreferences.getCurrentDir()));
-		chooser.resetChoosableFileFilters();
-		chooser.setFileFilter(imageFileFilter);
-		chooser.setMultiSelectionEnabled(true);
-		int returnVal = chooser.showOpenDialog(this);
-
-		if ( MAC_OS_X ) // restore original look and feel
-		{
-			try {
-				UIManager.setLookAndFeel( oldLAF );
-			} catch (UnsupportedLookAndFeelException e) {
-				System.out.println("Couldn't restore original LAF");
+				filesButton.setEnabled(true);
+				buttonOK.setEnabled(true);
 			}
-		}
-		
-		if (returnVal == JFileChooser.APPROVE_OPTION) {
-			final File[] selectedFiles = chooser.getSelectedFiles();
-
-			filesButton.setEnabled(false);
-			buttonOK.setEnabled(false);
-
-			SwingUtilities.invokeLater(new Runnable() {
-				public void run() {
-					fillListWithFiles(selectedFiles);
-
-					filesButton.setEnabled(true);
-					buttonOK.setEnabled(true);
-				}
-			});
-
-			if (selectedFiles.length != 0) {
-				CRPreferences.setCurrentDir(selectedFiles[0].getParent());
-			}
-		}
-
-		chooser.setMultiSelectionEnabled(false);
+		});
 	}
 }

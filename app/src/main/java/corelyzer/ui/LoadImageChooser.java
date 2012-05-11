@@ -35,7 +35,7 @@ public class LoadImageChooser extends JFileChooser {
 		// @Override
 		public void sort(Vector<? extends File> v) {
 			// override sort to use my own sorting method
-			Collections.sort(v, new AlphanumComparator());
+			Collections.sort(v, new AlphanumComparator.FileAlphanumComparator());
 		}
 	}
 
