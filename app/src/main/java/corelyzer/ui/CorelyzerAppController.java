@@ -104,11 +104,6 @@ public class CorelyzerAppController implements ActionListener {
 	// private BonjourManager bonjourManager;
 	private ControlServerApplication remoteControlServer;
 	
-	// image file loading error codes, corresponding to those in scenegraph.cpp
-	final static int FILE_READ_ERROR = -1;
-	final static int FILE_DOES_NOT_EXIST = -2;
-	final static int FILE_IS_EMPTY = -3;
-
 	public CorelyzerAppController() {
 		super();
 	}
@@ -1132,117 +1127,30 @@ public class CorelyzerAppController implements ActionListener {
 		return dsId;
 	}
 
-	public int loadImage(final File filename, final String URL) {
-		return this.loadImage(filename, URL, null);
+	public int loadImage(final File file, final String URL) {
+		return this.loadImage(file, URL, null);
 	}
 
-	public int loadImage(final File filename, final String URL, String aName) {
-		if (aName == null || aName.equals("")) {
+	public int loadImage(final File file, final String URL, String sectionName) {
+		if (sectionName == null || sectionName.equals("")) {
 			// let's use filename only w/o extension
-			String str = filename.getName();
+			String str = file.getName();
 			int idx = str.lastIndexOf('.');
 			str = str.substring(0, idx);
-			aName = str;
+			sectionName = str;
 		}
 
 		// Get TrackSceneNode with its name
 		CRDefaultListModel trackListModel = listModels.getListModel(CRListModels.TRACK);
-		CRDefaultListModel sectionsListModel = listModels.getListModel(CRListModels.SECTION);
-
 		int selectedIndex = view.trackList.getSelectedIndex(); // FIXME -1?
-		TrackSceneNode t = (TrackSceneNode) trackListModel.elementAt(selectedIndex);
+		TrackSceneNode destTrack = (TrackSceneNode) trackListModel.elementAt(selectedIndex);
 
-		if (t == null) {
+		if (destTrack == null) {
 			return -1;
 		}
 
-		// load the file, build the textures, build the model,
-		// add to scene
-
-		// 2-steps image loading snippet
-		int secid = -1;
-		int id;
-		SceneGraph.imageLock();
-		{
-			int genblockStatus = SceneGraph.genTextureBlocks(filename.toString());
-
-			if (genblockStatus < 0)
-			{
-				String msg = null;
-				if (genblockStatus == FILE_READ_ERROR)
-					msg = "Unknown file format: '" + filename + "'";
-				else if (genblockStatus == FILE_DOES_NOT_EXIST)
-					msg = "File could not be found: '" + filename + "'";
-				else if (genblockStatus == FILE_IS_EMPTY)
-					msg = "File contains no data: '" + filename + "'";
-				else
-					msg = "File could not be opened, unrecognized error: '" + filename + "'";
-				
-				JOptionPane.showMessageDialog(view.getMainFrame(), msg);
-				System.err.println("---> [INFO] Generate texture failed!");
-
-				SceneGraph.imageUnlock();
-				return -1;
-			}
-
-			SceneGraph.lock();
-			{
-				id = SceneGraph.loadImage(filename.toString());
-			}
-			SceneGraph.unlock();
-		}
-		SceneGraph.imageUnlock();
-
-		// Section: place holder
-		CoreSection sec = t.getCoreSection(aName);
-		if (sec == null) {
-			// need to creat new section
-			secid = SceneGraph.addSectionToTrack(t.getId(), sectionsListModel.size()); // fixme
-
-			if (secid != -1) {
-				SceneGraph.setSectionName(t.getId(), secid, aName);
-
-				sec = new CoreSection(aName, secid);
-				t.addCoreSection(sec);
-			} else {
-				return -1;
-			}
-		}
-
-		if (URL == null) {
-			SceneGraph.setImageURL(id, "unknown");
-		} else {
-			SceneGraph.setImageURL(id, URL);
-		}
-
-		// Image part
-		if (id != -1) {
-			secid = sec.getId();
-			SceneGraph.addSectionImageToTrack(t.getId(), secid, id);
-
-			CoreSectionImage node = new CoreSectionImage(t, filename.toString(), secid, aName);
-			t.addChild(node, secid, id);
-			t.Update();
-			cg.notifyListeners();
-
-			// broadcast the event to plugins
-
-			String message = "";
-			message = message + SceneGraph.getImageName(id);
-			message = message + "\t" + SceneGraph.getImageURL(id);
-			pluginManager.broadcastEventToPlugins(CorelyzerPluginEvent.IMAGE_LOADED, message);
-
-			message = "";
-			message = message + t.getId();
-			message = message + "\t" + SceneGraph.getSectionSourceImage(t.getId(), secid);
-			message = message + "\t" + SceneGraph.getSectionXPos(t.getId(), secid) / SceneGraph.getCanvasDPIX(0);
-			message = message + "\t" + SceneGraph.getSectionYPos(t.getId(), secid) / SceneGraph.getCanvasDPIY(0);
-
-			pluginManager.broadcastEventToPlugins(CorelyzerPluginEvent.SECTION_CREATED, message);
-
-		}
-
-		return secid;
+		final int sectionId = FileUtility.loadImageFile( file, URL, sectionName, destTrack );
+		return sectionId;
 	}
 
 	// ---------------------------------------------------------------
@@ -1252,6 +1160,19 @@ public class CorelyzerAppController implements ActionListener {
 		dialog.pack();
 		dialog.setLocationRelativeTo(view.getMainFrame());
 		dialog.setVisible(true);
+	}
+
+	// ---------------------------------------------------------------
+
+	public void autoLoadImageAction() {
+		final Vector<File> selectedFiles = FileUtility.loadLocalImages(view.getMainFrame());
+		if ( selectedFiles.size() > 0 )
+		{
+			CRAutoLoadImageDialog dialog = new CRAutoLoadImageDialog(view.getMainFrame(), selectedFiles);
+			dialog.pack();
+			dialog.setLocationRelativeTo(view.getMainFrame());
+			dialog.setVisible(true);
+		}
 	}
 
 	// --------------------------------------------------------------

@@ -64,6 +64,9 @@ import corelyzer.graphics.SceneGraph;
 import corelyzer.helper.ExampleFileFilter;
 import corelyzer.io.OutputWriter;
 
+// 5/4/2012 brg: This class appears to be unused. Probably a good thing since it's the only
+// class that uses SceneGraph.getNumSections(), which doesn't work correctly.
+
 /**
  * This class is used to help the user generate annotation output html of
  * section

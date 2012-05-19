@@ -25,6 +25,8 @@
  *****************************************************************************/
 
 #include <string>
+#include <algorithm>
+
 #include "canvas.h"
 #include "graph.h"
 #include "trackscene.h"
@@ -813,6 +815,27 @@ void set_render_mode(int m)
     renderMode = m;
 }
 
+static bool sort_by_depth( CoreSection *cs1, CoreSection *cs2 )
+{
+	return ( cs1->depth <= cs2->depth );
+}
+
+// Return (in outVec) all non-NULL elements of track->modelvec for specified track,
+// whose validity should be verified by caller
+static void get_clean_model_vector(const int trackid, std::vector<CoreSection *> & outVec)
+{
+	TrackSceneNode *track = get_scene_track(trackid);
+	
+	// create vector of all non-NULL elements in track->modelvec
+	std::vector<CoreSection *>::iterator modelIt;
+	for ( modelIt = track->modelvec.begin(); modelIt != track->modelvec.end(); modelIt++ )
+	{
+		if ( *modelIt != NULL )
+			outVec.push_back(*modelIt);
+	}
+}
+
+// Offset odd sections in specified track along non-depth axis
 void stagger_track_sections(const int trackid, const bool stagger)
 {
 	if (!is_track(trackid))
@@ -822,18 +845,20 @@ void stagger_track_sections(const int trackid, const bool stagger)
 	}
 	
 	TrackSceneNode *track = get_scene_track(trackid);
-	const int numSections = track->modelvec.size();
+
+	// Stagger in depth order: because track->modelvec isn't necessarily in depth order
+	// (e.g. when a non-last section is deleted and re-added), need to sort ourselves.
+	std::vector<CoreSection *> depthSortedVec;
+	get_clean_model_vector(trackid, depthSortedVec);
+	sort( depthSortedVec.begin(), depthSortedVec.end(), sort_by_depth );
+	
 	bool sectionWasOffset = false;
-	for (int i = 0; i < numSections; i++)
+	const int numSections = depthSortedVec.size();
+	for ( int i = 1; i < depthSortedVec.size(); i++ )
 	{
 		if (i % 2 != 0) // offset odd sections
 		{
-			CoreSection *cs = get_track_section(track, i);
-			if (!cs)
-			{
-				printf("stagger_track_sections() failed: invalid section %d\n", i);
-				return;
-			}
+			CoreSection *cs = depthSortedVec[i];
 			
 			// offset by height (non-depth axis) of core section
 			float dpix, dpiy;
@@ -852,6 +877,7 @@ void stagger_track_sections(const int trackid, const bool stagger)
 		track->staggered = stagger;
 }
 
+// Trim visible interval of all sections in specified track
 void trim_sections(const int trackid, const float trim, const bool fromBottom)
 {
 	if (!is_track(trackid))
@@ -859,17 +885,13 @@ void trim_sections(const int trackid, const float trim, const bool fromBottom)
 		printf("trim_sections() failed: invalid track %d\n", trackid);
 		return;
 	}
-	
-	TrackSceneNode *track = get_scene_track(trackid);
-	const int numSections = track->modelvec.size();
-	for ( int i = 0; i < numSections; i++ )
+
+	std::vector<CoreSection *> cleanModelVec;
+	get_clean_model_vector( trackid, cleanModelVec );
+	std::vector<CoreSection *>::iterator modelIt;
+	for ( modelIt = cleanModelVec.begin(); modelIt != cleanModelVec.end(); modelIt++ )
 	{
-		CoreSection *cs = get_track_section(track, i);
-		if (!cs)
-		{
-			printf("stagger_track_sections() failed: invalid section %d\n", i);
-			return;
-		}
+		CoreSection *cs = *modelIt;
 		
 		if ( fromBottom )
 			cs->intervalBottom -= trim;
@@ -896,6 +918,7 @@ void trim_sections(const int trackid, const float trim, const bool fromBottom)
 	}
 }
 
+// Remove gaps between sections in specified track
 void stack_sections(const int trackid)
 {
 	if (!is_track(trackid))
@@ -905,14 +928,21 @@ void stack_sections(const int trackid)
 	}
 	
 	TrackSceneNode *track = get_scene_track(trackid);
-	const int numSections = track->modelvec.size();
 
-	for (int i = 1; i < numSections; i++)
+	// Stack in depth order: because track->modelvec isn't necessarily in depth order
+	// (e.g. when a non-last section is deleted and re-added), need to sort ourselves.
+	std::vector<CoreSection *> depthSortedVec;
+	get_clean_model_vector(trackid, depthSortedVec);
+	sort( depthSortedVec.begin(), depthSortedVec.end(), sort_by_depth );
+	
+	const int numSections = depthSortedVec.size();
+
+	printf( "Stacking %d sections of track %s\n", numSections, track->name );
+	std::vector<CoreSection *>::iterator modelIt;
+	for ( modelIt = depthSortedVec.begin(); modelIt + 1 != depthSortedVec.end(); modelIt++ )
 	{
-		CoreSection *cs1 = get_track_section(track, i - 1);
-		CoreSection *cs2 = get_track_section(track, i);
-		if (!cs1) {	printf("stack_sections() failed: invalid first section %d\n", i - 1); return; }
-		if (!cs2) {	printf("stack_sections() failed: invalid second section %d\n", i); return; }
+		CoreSection *cs1 = *modelIt;
+		CoreSection *cs2 = *(modelIt + 1);
 
 		// convert depth axis of section 1 to pixels
 		float dpix, dpiy;

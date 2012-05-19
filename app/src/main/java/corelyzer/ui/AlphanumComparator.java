@@ -25,7 +25,10 @@
 package corelyzer.ui;
 
 import java.io.File;
+import java.util.Arrays;
 import java.util.Comparator;
+
+import corelyzer.data.*;
 
 /**
  * This is an updated version with enhancements made by Daniel Migowski,
@@ -40,15 +43,55 @@ import java.util.Comparator;
  *   Use the static "sort" method from the java.util.Collections class:
  *   Collections.sort(your list, new AlphanumComparator());
  */
-public class AlphanumComparator implements Comparator<File>
+
+public class AlphanumComparator
 {
-    private final boolean isDigit(char ch)
+	public static void main(String[] args)
+	{
+		String[] tosort = { "berry", "apple", "[nosort]", "currant", "barf", "pants", "[nosort]", "doofus", "candy" };
+		//AlphanumComparator ac = new AlphanumComparator();
+		Arrays.sort( tosort, new AlphanumComparator.StringAlphanumComparator() );
+		for ( String s : tosort )
+			System.out.println(s);
+	}
+	
+	// 4/30/2012 brg: Seems silly to declare these tiny wrapper classes in their own files.
+	// Outside of declaring a "AlphanumComparable" interface with a single "useThisStringForComparison()"
+	// method, I can't think of another way to use AlphanumComparator to sort strings without declaring
+	// unique classes for each type you want to sort. (And in the interface case you'd still need to
+	// extend API classes like File in order to implement the interface.)  There must be a better way!
+	public static class FileAlphanumComparator implements Comparator<File>
+	{
+		public int compare(File f1, File f2)
+		{
+			return AlphanumComparator.compare( f1.getName(), f2.getName() );
+		}
+	}
+	
+	public static class StringAlphanumComparator implements Comparator<String>
+	{
+		public int compare(String s1, String s2)
+		{
+			return AlphanumComparator.compare( s1, s2 );
+		}
+	}
+	
+	public static class TSLEAlphanumComparator implements Comparator<TrackSectionListElement>
+	{
+		public int compare(TrackSectionListElement t1, TrackSectionListElement t2)
+		{
+			return AlphanumComparator.compare( t1.getName(), t2.getName() );
+		}
+	}
+
+	// BaseAlphanumComparator methods
+	private static final boolean isDigit(char ch)
     {
         return ch >= 48 && ch <= 57;
     }
 
     /** Length of string is passed in for improved efficiency (only need to calculate it once) **/
-    private final String getChunk(String s, int slength, int marker)
+    private static final String getChunk(String s, int slength, int marker)
     {
         StringBuilder chunk = new StringBuilder();
         char c = s.charAt(marker);
@@ -79,12 +122,10 @@ public class AlphanumComparator implements Comparator<File>
         return chunk.toString();
     }
 
-    public int compare(File f1, File f2)
+    public static int compare(String s1, String s2)
     {
         int thisMarker = 0;
         int thatMarker = 0;
-        String s1 = f1.getName();
-        String s2 = f2.getName();
         int s1Length = s1.length();
         int s2Length = s2.length();
 

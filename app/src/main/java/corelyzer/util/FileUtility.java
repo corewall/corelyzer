@@ -25,6 +25,7 @@
 
 package corelyzer.util;
 
+import java.awt.Component;
 import java.awt.Dialog;
 import java.awt.FileDialog;
 import java.awt.Frame;
@@ -36,24 +37,45 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.channels.FileChannel;
+import java.util.Arrays;
+import java.util.StringTokenizer;
 import java.util.Vector;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
+import javax.swing.LookAndFeel;
+import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
 
 import com.jtechlabs.ui.widget.directorychooser.JDirectoryChooser;
 
 import corelyzer.data.CRPreferences;
+import corelyzer.data.CoreSection;
+import corelyzer.data.CoreSectionImage;
+import corelyzer.data.ImagePropertyTable;
+import corelyzer.data.TrackSceneNode;
+import corelyzer.data.coregraph.CoreGraph;
+import corelyzer.data.lists.CRDefaultListModel;
+import corelyzer.graphics.SceneGraph;
 import corelyzer.helper.ExampleFileFilter;
 import corelyzer.helper.FilenameExtensionFilter;
+import corelyzer.plugin.CorelyzerPluginEvent;
+import corelyzer.plugin.CorelyzerPluginManager;
 import corelyzer.ui.CorelyzerApp;
+import corelyzer.ui.LoadImageChooser;
 
 public class FileUtility {
 
 	final public static int LOAD = 0;
-
 	final public static int SAVE = 1;
+	
+	// image file loading error codes, corresponding to those in scenegraph.cpp
+	final public static int FILE_READ_ERROR = -1;
+	final public static int FILE_DOES_NOT_EXIST = -2;
+	final public static int FILE_IS_EMPTY = -3;
 
 	static public boolean copyFile(final String src, final String dst) {
 		try {
@@ -398,6 +420,18 @@ public class FileUtility {
 			System.err.println("Runtime exec in FileUtility#showFileInFinder: " + ioe);
 		}
 	}
+	
+	// 5/2/2012 brg: TODO replace the many duplicated extension stripping lines throughout the source
+	// with this routine!
+	static public String stripExtension(final String filename) {
+		final int dotIndex = filename.lastIndexOf('.');
+		if ( dotIndex >= 0 )
+		{
+			return filename.substring( 0, dotIndex );
+		}
+		
+		return filename;
+	}
 
 	static public void unzip(final File zipFile, final String targetDir) {
 		boolean MAC_OS_X = System.getProperty("os.name").toLowerCase().startsWith("mac os x");
@@ -437,5 +471,274 @@ public class FileUtility {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+	
+	// "Full Track ID" means expedition + [optional LacCore lake/year ID] + site/hole.
+	// Currently only looking for IODP and LacCore-style section image naming.
+	// - IODP expeditions are always numeric, LacCore are always alphabetic.
+	// - IODP names have three delimiters (usually hyphens but we also look for underscores),
+	// LacCore have four. (If Archive (A)/Working (W) half is indicated in the name, four
+	// and five delimiters, respectively.)
+	public static String parseFullTrackID(final String filename)
+	{
+		// 5/11/2012 brg: TODO inelegant code - just find the most frequently encountered delimiter and use it.
+		final String strippedFilename = stripExtension(filename);
+		StringTokenizer hyphenTokenizer = new StringTokenizer(strippedFilename, "-");
+		StringTokenizer uscoreTokenizer = new StringTokenizer(strippedFilename, "_");
+
+		final int hyphenTokenCount = hyphenTokenizer.countTokens();
+		final int uscoreTokenCount = uscoreTokenizer.countTokens();
+		if ( hyphenTokenCount < 3 && uscoreTokenCount < 3 ) {
+			System.out.println("too few tokens in " + filename + " to determine section image file naming convention");
+			return null;
+		}
+		
+		// on the off-chance there are three or more of both delimiters...
+		if ( hyphenTokenCount >= 3 && uscoreTokenCount >= 3 ) {
+			System.out.println("so many delimiters in " + filename + "! unable to determine section image file naming convention");
+			return null;
+		}
+				
+		final boolean useHyphen = ( hyphenTokenCount > uscoreTokenCount );
+		StringTokenizer theTokenizer = useHyphen ? hyphenTokenizer : uscoreTokenizer;
+		final char theDelimiter = useHyphen ? '-' : '_';
+		
+		// for now, rely only on expedition name to determine type
+		final String expeditionToken = theTokenizer.nextToken();
+		final boolean isIODP = Character.isDigit( expeditionToken.charAt(0) );
+		
+		String lakeYearToken = null;
+		if ( !isIODP ) // skip LacCore lake/year token
+			lakeYearToken = theTokenizer.nextToken();
+		
+		// next token indicates site and track/hole, e.g. U1363C = site U1363, track/hole C
+		String siteTrackToken = theTokenizer.nextToken();
+		
+		String fullTrackID = expeditionToken + theDelimiter + ( isIODP ? "" : lakeYearToken + theDelimiter ) + siteTrackToken;
+		
+		return fullTrackID;
+	}
+
+	// 4/26/2012 brg: Extracted for general image loading use: returns null if user cancels
+	// out of dialog, client is responsible for checking this. (Better to have Vector<File> as an
+	// output parameter and return boolean indicating dialog confirm/cancel status instead?)
+	public static Vector<File> loadLocalImages(Component parent) {
+		ExampleFileFilter imageFileFilter = new ExampleFileFilter();
+		imageFileFilter.setDescription("Images");
+		imageFileFilter.addExtension("jpg");
+		imageFileFilter.addExtension("jpeg");
+		imageFileFilter.addExtension("png");
+		imageFileFilter.addExtension("tif");
+		imageFileFilter.addExtension("tiff");
+		imageFileFilter.addExtension("bmp");
+		imageFileFilter.addExtension("jp2"); // jpeg2000
+
+		// 2/2/2012 brg: Sorting filenames properly, i.e. [file1, file2, file3, file20], not [file1, file2, file20, file3],
+		// is tricky. Ended up with a mixed solution: using a funky JFileChooser subclass trick on Windows to override the
+		// sort algorithm, and Quaqua on Mac. (The subclass trick works on Mac too, but the dialog looks unacceptably
+		// strange while Quaqua's looks very nice.)
+		JFileChooser chooser = null;
+		LookAndFeel oldLAF = null;
+		
+		final boolean MAC_OS_X = System.getProperty("os.name").toLowerCase().startsWith("mac os x");
+		if ( MAC_OS_X )
+		{
+			// 2/2/2012 brg: On Mac, use Quaqua file chooser to sort image files
+			// properly: 
+			oldLAF = UIManager.getLookAndFeel();
+
+			try {
+				UIManager.setLookAndFeel("ch.randelshofer.quaqua.QuaquaLookAndFeel");
+			} catch (ClassNotFoundException cnfe) {
+				try {
+					UIManager.setLookAndFeel("ch.randelshofer.quaqua.QuaquaLookAndFeel15");
+				} catch (Exception e) {
+					System.out.println("Couldn't set Quaqua LAF - Java 1.5 or 1.6 required");
+				}
+			} catch (Exception e) { System.out.println("Couldn't set Quaqua LAF"); }
+
+			chooser = new JFileChooser();
+		}
+		else // Windows
+		{
+			chooser = new LoadImageChooser();
+		}
+		
+		chooser.setDialogTitle("Load image file(s)");
+		chooser.setCurrentDirectory(new File(CRPreferences.getCurrentDir()));
+		chooser.resetChoosableFileFilters();
+		chooser.setFileFilter(imageFileFilter);
+		chooser.setMultiSelectionEnabled(true);
+		int returnVal = chooser.showOpenDialog(parent);
+
+		if ( MAC_OS_X ) // restore original look and feel
+		{
+			try {
+				UIManager.setLookAndFeel( oldLAF );
+			} catch (UnsupportedLookAndFeelException e) {
+				System.out.println("Couldn't restore original LAF");
+			}
+		}
+		
+		File[] selectedFiles = null;
+		if (returnVal == JFileChooser.APPROVE_OPTION) {
+			selectedFiles = chooser.getSelectedFiles();
+			if (selectedFiles.length != 0) {
+				CRPreferences.setCurrentDir(selectedFiles[0].getParent());
+			}
+		}
+
+		chooser.setMultiSelectionEnabled(false);
+		
+		Vector<File> selectedFilesVec = new Vector<File>();
+		if ( selectedFiles != null )
+			selectedFilesVec = new Vector<File>( Arrays.asList( selectedFiles ));
+
+		return selectedFilesVec;
+	}
+	
+	public static int loadImageFile( File imageFile, String URL, String sectionName, TrackSceneNode destTrack )
+	{
+		return loadImageFile( imageFile, URL, sectionName, destTrack, -1 /* add section to end */ );
+	}
+	
+	public static int loadImageFile( File imageFile, String URL, String sectionName, TrackSceneNode destTrack, final int insertIndex )
+	{
+		// load the file, build the textures, build the model,
+		// add to scene
+
+		// 2-steps image loading snippet
+		int sectionId = -1;
+		int imageId;
+		SceneGraph.imageLock();
+		{
+			final int genblockStatus = SceneGraph.genTextureBlocks( imageFile.toString() );
+			if ( genblockStatus < 0 )
+			{
+				String msg = null;
+				if (genblockStatus == FILE_READ_ERROR)
+					msg = "Unknown file format: '" + imageFile + "'";
+				else if (genblockStatus == FILE_DOES_NOT_EXIST)
+					msg = "File could not be found: '" + imageFile + "'";
+				else if (genblockStatus == FILE_IS_EMPTY)
+					msg = "File contains no data: '" + imageFile + "'";
+				else
+					msg = "File could not be opened, unrecognized error: '" + imageFile + "'";
+				
+				JOptionPane.showMessageDialog(CorelyzerApp.getApp().getMainFrame(), msg);
+				System.err.println("---> [INFO] Generate texture failed!");
+
+				SceneGraph.imageUnlock();
+				return -1;
+			}
+
+			SceneGraph.lock();
+			{
+				imageId = SceneGraph.loadImage(imageFile.toString());
+			}
+			SceneGraph.unlock();
+		}
+		SceneGraph.imageUnlock();
+
+		// Section: place holder
+		CoreSection sec = destTrack.getCoreSection(sectionName);
+		if (sec == null) {
+			// create and append new section
+			sectionId = SceneGraph.addSectionToTrack( destTrack.getId(), destTrack.getNumCores() );
+
+			if (sectionId != -1) {
+				SceneGraph.setSectionName(destTrack.getId(), sectionId, sectionName);
+
+				sec = new CoreSection(sectionName, sectionId);
+				destTrack.addCoreSection(sec, insertIndex);
+			} else {
+				return -1;
+			}
+		}
+
+		if (URL == null) {
+			SceneGraph.setImageURL(imageId, "unknown");
+		} else {
+			SceneGraph.setImageURL(imageId, URL);
+		}
+
+		// Image part
+		if (imageId != -1) {
+			sectionId = sec.getId();
+			SceneGraph.addSectionImageToTrack(destTrack.getId(), sectionId, imageId);
+
+			CoreSectionImage node = new CoreSectionImage(destTrack, imageFile.toString(), sectionId, sectionName);
+			destTrack.addChild(node, sectionId, imageId);
+			destTrack.Update();
+			CoreGraph.getInstance().notifyListeners();
+
+			// broadcast the event to plugins
+			final CorelyzerPluginManager pluginManager = CorelyzerApp.getApp().getPluginManager();
+			String message = SceneGraph.getImageName(imageId) + "\t" + SceneGraph.getImageURL(imageId);
+			pluginManager.broadcastEventToPlugins(CorelyzerPluginEvent.IMAGE_LOADED, message);
+
+			message = destTrack.getId() + "\t" + SceneGraph.getSectionSourceImage(destTrack.getId(), sectionId);
+			message += "\t" + SceneGraph.getSectionXPos(destTrack.getId(), sectionId) / SceneGraph.getCanvasDPIX(0);
+			message += "\t" + SceneGraph.getSectionYPos(destTrack.getId(), sectionId) / SceneGraph.getCanvasDPIY(0);
+			pluginManager.broadcastEventToPlugins(CorelyzerPluginEvent.SECTION_CREATED, message);
+		}
+		
+		return sectionId;
+	}
+	
+	// 5/11/2012 brg: TODO doesn't really belong in FileUtility - new utility class for "core management"?
+	public static void setSectionImageProperties( TrackSceneNode track, final int sectionId,
+			final float length, final float depth, final float dpix, final float dpiy, final String orientation )
+	{
+		SceneGraph.lock();
+		{
+			CoreSection cs = track.getCoreSection(sectionId);
+			final int trackId = track.getId();
+
+			boolean isVertical = orientation.toLowerCase().equals("vertical");
+			SceneGraph.setSectionOrientation(trackId, sectionId, isVertical);
+
+			if (cs == null) {
+				return;
+			}
+
+			if (cs.getDepth() == 0) {
+				SceneGraph.positionSection(trackId, sectionId, depth * 100.0f / 2.54f * SceneGraph.getCanvasDPIX(0), 0);
+				cs.setDepth(SceneGraph.getSectionDepth(trackId, sectionId));
+			}
+
+			// Determine DPI
+			if ((dpix > 0) && (dpiy > 0)) { // use DPI if available
+				SceneGraph.setSectionDPI(trackId, sectionId, dpix, dpiy);
+			} else if (length != 0) { // use Length & image size
+				float dpi = ImagePropertyTable.DEFAULT_DPI;
+
+				int imageId = SceneGraph.getImageIdForSection(trackId, sectionId);
+
+				float imageWidth = SceneGraph.getImageWidth(imageId);
+				float imageHeight = SceneGraph.getImageHeight(imageId);
+
+				float lengthInPixel;
+				if (orientation.toLowerCase().equals("horizontal")) {
+					lengthInPixel = imageWidth;
+				} else {
+					lengthInPixel = imageHeight;
+				}
+
+				dpi = (float) (lengthInPixel / (length * 100 / 2.54));
+
+				SceneGraph.setSectionDPI(trackId, sectionId, dpi, dpi);
+			} else { // use default_dpi
+				SceneGraph.setSectionDPI(trackId, sectionId, ImagePropertyTable.DEFAULT_DPI, ImagePropertyTable.DEFAULT_DPI);
+			}
+
+			SceneGraph.bringSectionToFront(trackId, sectionId);
+
+			boolean imageLock = CorelyzerApp.getApp().preferences().lockCoreSectionImage;
+			SceneGraph.markSectionImmovable(trackId, sectionId, imageLock);
+		}
+		SceneGraph.unlock();
+
+		CorelyzerApp.getApp().updateGLWindows();
 	}
 }
