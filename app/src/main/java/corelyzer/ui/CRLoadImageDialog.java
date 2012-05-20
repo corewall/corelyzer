@@ -57,7 +57,6 @@ import corelyzer.data.CRPreferences;
 import corelyzer.data.CoreSection;
 import corelyzer.data.ImagePropertyTable;
 import corelyzer.data.ImagePropertyTableModel;
-import corelyzer.data.SectionImageProperties;
 import corelyzer.data.TrackSceneNode;
 import corelyzer.data.lists.CRDefaultListModel;
 import corelyzer.graphics.SceneGraph;
@@ -573,23 +572,29 @@ public class CRLoadImageDialog extends JDialog {
 				progress.setString(fn);
 
 				File f = new File(filepath);
-				String url;
-				int secId;
+				String url, sectionName = "";
+				int nativeSectionId;
 				try {
+					// let's use filename only w/o extension
+					String str = f.getName();
+					int idx = str.lastIndexOf('.');
+					str = str.substring(0, idx);
+					sectionName = str;
+					
 					url = f.toURI().toURL().toString();
-					secId = app.loadImage(f, url);
+					nativeSectionId = app.loadImage(f, url, sectionName);
 				} catch (MalformedURLException e) {
-					secId = -1;
+					nativeSectionId = -1;
 					e.printStackTrace();
 				}
 
-				if (secId < 0) {
+				if (nativeSectionId < 0) {
 					continue;
 				}
 
 				CRDefaultListModel tmodel = app.getTrackListModel();
 				TrackSceneNode tnode = (TrackSceneNode) tmodel.elementAt(trackIdx);
-				FileUtility.setSectionImageProperties( tnode, secId, length, depth, dpix, dpiy, orientation );
+				FileUtility.setSectionImageProperties( tnode, sectionName, nativeSectionId, length, depth, dpix, dpiy, orientation );
 			}
 
 			progress.setValue(imageTable.getRowCount());

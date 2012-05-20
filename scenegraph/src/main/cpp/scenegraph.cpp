@@ -1604,6 +1604,22 @@ JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_getImageWidth
     if( !is_texset(imageId)) return 0;
     return get_texset_src_width(imageId);
 }
+	
+
+/*
+ * Class:     SceneGraph
+ * Method:    getImageDepthPix
+ * Signature: (Ljava/lang/String;Z)I
+ */
+JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_getImageDepthPix
+(JNIEnv *jenv, jclass jcls, jstring imageFilename, jboolean isVertical)
+{
+	const int fileNameLen = jenv->GetStringLength( imageFilename );
+    char *fileName = (char*) malloc( fileNameLen * sizeof(char) + 1 );
+    jenv->GetStringUTFRegion( imageFilename, 0, fileNameLen, fileName );
+	
+	return get_image_depth_pix( fileName, isVertical );
+}
 
 
 /*

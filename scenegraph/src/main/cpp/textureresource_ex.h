@@ -74,6 +74,7 @@ enum {
     GREY,
 };
 
+// 4/5/2012 brg: clarification: a default block is a 512x512 *square of pixels*, not 512 bytes.
 #define DEFAULT_BLK_SIZE 512
  
 typedef struct MultiLevelTextureSetEX_s {
@@ -147,5 +148,6 @@ char* get_texset_url              (int set);
 texBlock* get_tex_block         (int set, int level, int col, int row);
 void      bind_texblock         (int set, int level, int col, int row);
 
+int get_image_depth_pix( char *fileName, bool isVertical );
 
 #endif

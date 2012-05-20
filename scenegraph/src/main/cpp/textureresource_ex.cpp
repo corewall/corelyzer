@@ -819,6 +819,33 @@ char* generateBlockDirString(string basedir, string fname)
 //====================================================================
 // Load JPEG file 
 //====================================================================
+
+// 5/16/2012 brg: Intended to grab image width/height data without actually loading
+// the pixel data as in genTextureBlocks(), which takes too much time to be practical.
+void read_jpeg_dimensions(FILE *filePtr, int &width, int &height)
+{
+    jpeg_decompress_struct cinfo;
+    jpeg_error_mgr jerr;
+	
+    cinfo.err = jpeg_std_error(&jerr);
+	
+    // setup decompression and I/O
+    jpeg_create_decompress( &cinfo );
+    jpeg_stdio_src( &cinfo, filePtr );
+    jpeg_read_header( &cinfo, TRUE );
+	
+    jpeg_start_decompress( &cinfo );
+	
+	width = cinfo.output_width;
+    height = cinfo.output_height;
+	
+	// Because we aren't actually reading any scanlines, can't call
+	// jpeg_finish_decompress() or we'll crash
+	//	jpeg_finish_decompress( &cinfo );
+
+	jpeg_destroy_decompress( &cinfo );
+}
+
 MultiLevelTextureSetEX* create_texset_from_jpeg(const char* filename, int nlevels, int blksize)
 {
     // For measure time
@@ -1041,6 +1068,28 @@ MultiLevelTextureSetEX* create_texset_from_jpeg(const char* filename, int nlevel
 // Load PNG file
 //====================================================================
 
+// 5/16/2012 brg: Intended to grab image width/height data without actually loading
+// the pixel data as in genTextureBlocks(), which takes too much time to be practical.
+bool read_png_dimensions(FILE* filePtr, int &width, int &height)
+{
+    png_structp png_ptr;
+    png_infop   info_ptr;
+    
+    png_ptr = png_create_read_struct( PNG_LIBPNG_VER_STRING, NULL, NULL, NULL );
+    if ( !png_ptr ) return false;
+	
+    info_ptr = png_create_info_struct(png_ptr);
+    if ( !info_ptr ) return false;
+	
+    png_init_io( png_ptr, filePtr );
+	png_read_info( png_ptr, info_ptr );
+	
+	width = (int)png_get_image_width( png_ptr, info_ptr );
+    height = (int)png_get_image_height( png_ptr, info_ptr );
+	
+	return true;
+}
+
 MultiLevelTextureSetEX* create_texset_from_png(const char* filename, int nlevels, int blksize)
 {
 #ifdef OPT
@@ -1241,12 +1290,11 @@ MultiLevelTextureSetEX* create_texset_from_png(const char* filename, int nlevels
 //====================================================================
 // Load BMP file
 //====================================================================
-#ifndef _WINGDI_H
-typedef unsigned char  BYTE;
-typedef unsigned short WORD;
-typedef unsigned int   DWORD;
-typedef unsigned long  QWORD;
-#endif
+
+// prefixed with BMP to avoid collisions with standard Windows typedefs
+typedef unsigned char  BMP_BYTE;
+typedef unsigned short BMP_WORD;
+typedef unsigned int   BMP_DWORD;
 
 bool IsBigEndian()
 {
@@ -1256,37 +1304,122 @@ bool IsBigEndian()
     return false;
 }
 
-WORD Flip(WORD in)
+BMP_WORD Flip(BMP_WORD in)
 {
     return( (in >> 8) | (in << 8) );
 }
 
-DWORD Flip(DWORD in)
+BMP_DWORD Flip(BMP_DWORD in)
 {
     return ( ((in & 0xFF000000) >> 24) | ((in & 0x000000FF) << 24) |
              ((in & 0x00FF0000) >> 8 ) | ((in & 0x0000FF00) << 8 ));
 }
 
 struct BMPHeader {
-    WORD  sig;
-    DWORD filesize;
-    DWORD reserved;
-    DWORD dataoffset;
+    BMP_WORD  sig;
+    BMP_DWORD filesize;
+    BMP_DWORD reserved;
+    BMP_DWORD dataoffset;
 };
 
 struct BMPInfoHeader {
-	DWORD infoheadersize;
-	DWORD bmpwidth;
-	DWORD bmpheight;
-	WORD  planes;
-	WORD  bpp;
-	DWORD compression;
-	DWORD compressedimgsize;
-	DWORD hppm; //horizontal pixels/meter
-	DWORD vppm; //vertical pixels/meter
-	DWORD numcolorsused;
-	DWORD numimportantcolors;
+	BMP_DWORD infoheadersize;
+	BMP_DWORD bmpwidth;
+	BMP_DWORD bmpheight;
+	BMP_WORD  planes;
+	BMP_WORD  bpp;
+	BMP_DWORD compression;
+	BMP_DWORD compressedimgsize;
+	BMP_DWORD hppm; //horizontal pixels/meter
+	BMP_DWORD vppm; //vertical pixels/meter
+	BMP_DWORD numcolorsused;
+	BMP_DWORD numimportantcolors;
 };
+
+// 5/16/2012 brg: Intended to grab image width/height data without actually loading
+// the pixel data as in genTextureBlocks(), which takes too much time to be practical.
+bool read_bmp_header( FILE *filePtr, BMPHeader &header, BMPInfoHeader &infoHeader )
+{
+	// Ensure typedef sizes are as expected. BMP_DWORD used to be typedef'd as an unsigned long, which is
+	// 8 bytes when compiled for an 64-bit environment, not 4 as is assumed in the BMP reading logic.
+	if ( sizeof(BMP_DWORD) != 4 || sizeof(BMP_WORD) != 2 || sizeof(BMP_BYTE) != 1 )
+	{
+		printf("Unexpected typedef sizing!\nDWORD size = %d (expected 4), BMP_WORD size = %d (2), BMP_BYTE size = %d (1)\n",
+			   sizeof(BMP_DWORD), sizeof(BMP_WORD), sizeof(BMP_BYTE));
+		fclose(filePtr);
+		return false;
+	}
+    
+	fread((char*) &(header.sig), sizeof(BMP_WORD), 1, filePtr);
+    if( IsBigEndian() && header.sig != 0x424D )
+    {
+        printf("BMP file signature wrong!\n");
+        fclose(filePtr);
+        return false;
+    }
+    else if( !IsBigEndian() && header.sig != 0x4D42 )
+    {
+        printf("BMP file signature wrong!\n");
+        fclose(filePtr);
+        return false;
+    }
+	
+	fread(&(header.filesize),   sizeof(BMP_DWORD), 1, filePtr);
+    fread(&(header.reserved),   sizeof(BMP_DWORD), 1, filePtr);
+    fread(&(header.dataoffset), sizeof(BMP_DWORD), 1, filePtr);
+	
+    if( IsBigEndian() )
+    {
+        header.sig        = Flip(header.sig);
+        header.filesize   = Flip(header.filesize);
+        header.reserved   = Flip(header.reserved);
+        header.dataoffset = Flip(header.dataoffset);
+    }
+	
+    fread(&(infoHeader.infoheadersize),     sizeof(BMP_DWORD), 1, filePtr);
+    fread(&(infoHeader.bmpwidth),           sizeof(BMP_DWORD), 1, filePtr);
+    fread(&(infoHeader.bmpheight),          sizeof(BMP_DWORD), 1, filePtr);
+    fread(&(infoHeader.planes),             sizeof(BMP_WORD),  1, filePtr);
+    fread(&(infoHeader.bpp),                sizeof(BMP_WORD),  1, filePtr);
+    fread(&(infoHeader.compression),        sizeof(BMP_DWORD), 1, filePtr);
+    fread(&(infoHeader.compressedimgsize),  sizeof(BMP_DWORD), 1, filePtr);
+    fread(&(infoHeader.hppm),               sizeof(BMP_DWORD), 1, filePtr);
+    fread(&(infoHeader.vppm),               sizeof(BMP_DWORD), 1, filePtr);
+    fread(&(infoHeader.numcolorsused),      sizeof(BMP_DWORD), 1, filePtr);
+    fread(&(infoHeader.numimportantcolors), sizeof(BMP_DWORD), 1, filePtr);
+	
+    if( IsBigEndian() )
+    {
+        infoHeader.infoheadersize     = Flip( infoHeader.infoheadersize );
+        infoHeader.bmpwidth           = Flip( infoHeader.bmpwidth );
+        infoHeader.bmpheight          = Flip( infoHeader.bmpheight );
+        infoHeader.planes             = Flip( infoHeader.planes );
+        infoHeader.bpp                = Flip( infoHeader.bpp );
+        infoHeader.compression        = Flip( infoHeader.compression );
+        infoHeader.compressedimgsize  = Flip( infoHeader.compressedimgsize );
+        infoHeader.hppm               = Flip( infoHeader.hppm );
+        infoHeader.vppm               = Flip( infoHeader.vppm );
+        infoHeader.numcolorsused      = Flip( infoHeader.numcolorsused );
+        infoHeader.numimportantcolors = Flip( infoHeader.numimportantcolors );
+    }
+	
+    // for now, don't bother supporting RLE compression or less than 24 bpp
+	if ( infoHeader.compression != 0 )
+    {
+        printf("Not supporting compressed bitmaps for now.\n");
+        fclose(filePtr);
+        return false;
+    }
+    
+	if ( infoHeader.bpp != 24 )
+    {
+        printf("Not supporting BMP files less than true color. %d\n", infoHeader.bpp);
+        fclose(filePtr);
+        return false;
+    }
+	
+	return true;
+}
 
 MultiLevelTextureSetEX* create_texset_from_bmp(const char* filename, int nlevels, int blksize)
 {
@@ -1308,84 +1441,10 @@ MultiLevelTextureSetEX* create_texset_from_bmp(const char* filename, int nlevels
     double time1 = aTime();
 #endif
 
-	// Ensure typedef sizes are as expected. DWORD used to be typedef'd as an unsigned long, which is
-	// 8 bytes when compiled for an 64-bit environment, not 4 as is assumed in the BMP reading logic.
-	if ( sizeof(DWORD) != 4 || sizeof(WORD) != 2 || sizeof(BYTE) != 1 )
-	{
-		printf("Unexpected typedef sizing!\nDWORD size = %d (expected 4), WORD size = %d (2), BYTE size = %d (1)\n",
-			   sizeof(DWORD), sizeof(WORD), sizeof(BYTE));
-		fclose(fptr);
-		return NULL;
-	}
-    
 	BMPHeader header;
-    fread((char*) &(header.sig), sizeof(WORD), 1, fptr);
-    if( IsBigEndian() && header.sig != 0x424D )
-    {
-        printf("BMP file signature wrong!\n");
-        fclose(fptr);
-        return NULL; //-1;
-    }
-    else if( !IsBigEndian() && header.sig != 0x4D42 )
-    {
-        printf("BMP file signature wrong!\n");
-        fclose(fptr);
-        return NULL; //-1;
-    }
-
-	fread(&(header.filesize),   sizeof(DWORD), 1, fptr);
-    fread(&(header.reserved),   sizeof(DWORD), 1, fptr);
-    fread(&(header.dataoffset), sizeof(DWORD), 1, fptr);
-	
-    if( IsBigEndian() )
-    {
-        header.sig        = Flip(header.sig);
-        header.filesize   = Flip(header.filesize);
-        header.reserved   = Flip(header.reserved);
-        header.dataoffset = Flip(header.dataoffset);
-    }
-
-    BMPInfoHeader infoheader;
-    fread(&(infoheader.infoheadersize),     sizeof(DWORD), 1, fptr);
-    fread(&(infoheader.bmpwidth),           sizeof(DWORD), 1, fptr);
-    fread(&(infoheader.bmpheight),          sizeof(DWORD), 1, fptr);
-    fread(&(infoheader.planes),             sizeof(WORD),  1, fptr);
-    fread(&(infoheader.bpp),                sizeof(WORD),  1, fptr);
-    fread(&(infoheader.compression),        sizeof(DWORD), 1, fptr);
-    fread(&(infoheader.compressedimgsize),  sizeof(DWORD), 1, fptr);
-    fread(&(infoheader.hppm),               sizeof(DWORD), 1, fptr);
-    fread(&(infoheader.vppm),               sizeof(DWORD), 1, fptr);
-    fread(&(infoheader.numcolorsused),      sizeof(DWORD), 1, fptr);
-    fread(&(infoheader.numimportantcolors), sizeof(DWORD), 1, fptr);
-
-    if( IsBigEndian() )
-    {
-        infoheader.infoheadersize     = Flip( infoheader.infoheadersize );
-        infoheader.bmpwidth           = Flip( infoheader.bmpwidth );
-        infoheader.bmpheight          = Flip( infoheader.bmpheight );
-        infoheader.planes             = Flip( infoheader.planes );
-        infoheader.bpp                = Flip( infoheader.bpp );
-        infoheader.compression        = Flip( infoheader.compression );
-        infoheader.compressedimgsize  = Flip( infoheader.compressedimgsize );
-        infoheader.hppm               = Flip( infoheader.hppm );
-        infoheader.vppm               = Flip( infoheader.vppm );
-        infoheader.numcolorsused      = Flip( infoheader.numcolorsused );
-        infoheader.numimportantcolors = Flip( infoheader.numimportantcolors );
-    }
-	
-    // for now, don't bother supporting RLE compression or less than 24 bpp
-	if( infoheader.compression != 0 )
-    {
-        printf("Not supporting compressed bitmaps for now.\n");
-        fclose(fptr);
-        return NULL; //-1;
-    }
-    if( infoheader.bpp != 24 )
-    {
-        printf("Not supporting BMP files less than true color. %d\n", infoheader.bpp);
-        fclose(fptr);
-        return NULL; //-1;
-    }
+	BMPInfoHeader infoheader;
+	if ( !read_bmp_header( fptr, header, infoheader ))
+		return NULL;
 
     // create texture set struct and init basic info
     // name, block directory, block sizes
@@ -1481,6 +1540,15 @@ MultiLevelTextureSetEX* create_texset_from_bmp(const char* filename, int nlevels
 //====================================================================
 // Load TIFF file
 //====================================================================
+
+// 5/16/2012 brg: Intended to grab image width/height data without actually loading
+// the pixel data as in genTextureBlocks(), which takes too much time to be practical.
+void read_tiff_dimensions( TIFF * const tiff, uint32 &width, uint32 &height )
+{
+    TIFFGetField( tiff, TIFFTAG_IMAGEWIDTH, &width );
+    TIFFGetField( tiff, TIFFTAG_IMAGELENGTH, &height );
+}
+
 MultiLevelTextureSetEX* create_texset_from_tiff(const char* filename, int nlevels, int blksize)
 {
 #ifdef OPT
@@ -1524,9 +1592,10 @@ MultiLevelTextureSetEX* create_texset_from_tiff(const char* filename, int nlevel
 
 
     // image dimensions
+	read_tiff_dimensions( tif, w, h );
 
-    TIFFGetField(tif,TIFFTAG_IMAGEWIDTH, &w);
-    TIFFGetField(tif,TIFFTAG_IMAGELENGTH, &h);
+//    TIFFGetField(tif,TIFFTAG_IMAGEWIDTH, &w);
+//    TIFFGetField(tif,TIFFTAG_IMAGELENGTH, &h);
 
     texset->src_w = (int) w;
     texset->src_h = (int) h;
@@ -2261,4 +2330,72 @@ void bind_texblock( int set, int level, int col, int row)
 #endif
 
     glBindTexture(GL_TEXTURE_2D, t->tex[level][id].texId);
+}
+
+//=======================================================================
+// 5/16/2012 brg: Return number of pixels along image file's depth axis.
+// Intended for use in the process of positioning section images slated for
+// loading. Loading the image through genTextureBlocks() and grabbing its
+// dimensions then takes far too long to be practical for use in this
+// context.
+int get_image_depth_pix(char *fileName, bool isVertical)
+{
+	int depthPix = 0, width = 0, height = 0;
+    
+	if (!fileName) return 0;
+	string fname(fileName);
+	replace_windows_seperators(fname);
+	FILE* fptr = fopen(fname.c_str(),"rb");
+	if (!fptr)
+	{
+		printf("Can't open file %s\n", fileName);
+		return 0;
+	}
+	
+	if ( strstr(fileName,".JPEG") || strstr(fileName,".jpeg") ||
+	   strstr(fileName,".JPG")  || strstr(fileName,".jpg") )
+    {
+		read_jpeg_dimensions( fptr, width, height );
+    }
+    else if ( strstr(fileName,".PNG") || strstr(fileName,".png"))
+    {
+        const bool success = read_png_dimensions( fptr, width, height );
+		if ( !success )	return 0;
+    }
+    else if ( strstr(fileName, ".BMP") || strstr(fileName, ".bmp"))
+    {
+		BMPHeader header;
+		BMPInfoHeader infoHeader;
+		const bool success = read_bmp_header( fptr, header, infoHeader );
+		if ( !success ) return 0;
+
+		width = infoHeader.bmpwidth;
+		height = infoHeader.bmpheight;
+    }
+    else if ( strstr(fileName,".TIFF") || strstr(fileName,".tiff") ||
+			strstr(fileName,".TIF")  || strstr(fileName,".tif") )
+    {
+		fclose( fptr ); // TIFF library has its own file opening routine
+		fptr = NULL;
+		
+		TIFF *tiff = TIFFOpen( fname.c_str(), "r" );
+		uint32 tiffWidth = 0, tiffHeight = 0;
+		read_tiff_dimensions( tiff, tiffWidth, tiffHeight );
+		width = (int)tiffWidth;
+		height = (int)tiffHeight;
+    }
+    else
+    {
+        printf("Could not get dimensions of image %s, unsupported format\n", fileName);
+        free(fileName);
+		return 0;
+    }
+	
+	free(fileName);
+	if ( fptr )
+		fclose( fptr );
+	
+	depthPix = isVertical ? height : width;
+	
+	return depthPix;
 }

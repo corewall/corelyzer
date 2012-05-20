@@ -25,6 +25,7 @@
 package corelyzer.ui;
 
 import java.awt.Component;
+import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.BufferedInputStream;
@@ -1168,9 +1169,15 @@ public class CorelyzerAppController implements ActionListener {
 		final Vector<File> selectedFiles = FileUtility.loadLocalImages(view.getMainFrame());
 		if ( selectedFiles.size() > 0 )
 		{
-			CRAutoLoadImageDialog dialog = new CRAutoLoadImageDialog(view.getMainFrame(), selectedFiles);
+			CRLoadImageWizard dialog = new CRLoadImageWizard(view.getMainFrame(), selectedFiles);
 			dialog.pack();
+			dialog.setModal(true);
+			
+			// because property page of dialog is rather tall, set y position near top of screen
 			dialog.setLocationRelativeTo(view.getMainFrame());
+			Point loc = dialog.getLocation();
+			dialog.setLocation( loc.x, 50 );
+			
 			dialog.setVisible(true);
 		}
 	}
