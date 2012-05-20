@@ -46,7 +46,7 @@ public class ImagePropertyTable extends JTable {
 	private static final long serialVersionUID = -6893081336980390952L;
 	final public static float DEFAULT_DPI = 254.0f;
 	final public static float DEFAULT_DEPTH = 0.0f;
-	final public static float DEFAULT_LENGTH = 1.0f;
+	final public static float DEFAULT_LENGTH = 1.5f;
 	float current_depth = 0.0f;
 
 	public ImagePropertyTableModel model;
@@ -247,6 +247,10 @@ public class ImagePropertyTable extends JTable {
 			length = DEFAULT_LENGTH;
 			depth = DEFAULT_DEPTH;
 			dpix = dpiy = DEFAULT_DPI;
+		}
+		
+		public String toString() {
+			return orientation + ", length " + length + ", depth " + depth + ", DPIx " + dpix + ", DPIy " + dpiy;
 		}
 	}
 }

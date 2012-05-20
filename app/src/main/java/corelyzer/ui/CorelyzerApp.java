@@ -1342,7 +1342,6 @@ public class CorelyzerApp extends WindowAdapter implements MouseListener, Startu
 		JMenu loadImageMenu = new JMenu("Load Images");
 		loadImageMenuItem = new JMenuItem("Open Local Image Files...", KeyEvent.VK_M);
 		loadImageMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_M, MENU_MASK));
-		loadImageMenuItem.setEnabled(false);
 		loadImageMenuItem.addActionListener(new ActionListener() {
 			public void actionPerformed(final ActionEvent event) {
 				controller.loadImageAction();
@@ -1351,11 +1350,11 @@ public class CorelyzerApp extends WindowAdapter implements MouseListener, Startu
 		loadImageMenu.add(loadImageMenuItem);
 		
 		// "Auto-load" 4/25/2012 brg
-		JMenuItem autoLoadImageMenuItem = new JMenuItem("Auto Open Local Image Files...");
+		JMenuItem autoLoadImageMenuItem = new JMenuItem("Open Image Listing...");
 		autoLoadImageMenuItem.setEnabled(true);
 		autoLoadImageMenuItem.addActionListener(new ActionListener() {
 			public void actionPerformed(final ActionEvent event) {
-				controller.autoLoadImageAction();
+				controller.loadImageListingAction();
 			}
 		});
 		loadImageMenu.add(autoLoadImageMenuItem);

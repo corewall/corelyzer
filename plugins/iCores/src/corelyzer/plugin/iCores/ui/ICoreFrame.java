@@ -444,7 +444,7 @@ public class ICoreFrame extends JFrame implements SubscribeHandler, ProgressHand
     }
 
     private void onClose() {
-        // Save feed configs to files
+    	// Save feed configs to files
         List<SyndEntry> entries = new ArrayList<SyndEntry>();
 
         List<SyndCategory> categories = new ArrayList<SyndCategory>();
@@ -454,31 +454,38 @@ public class ICoreFrame extends JFrame implements SubscribeHandler, ProgressHand
         SyndContentImpl content = new SyndContentImpl();
         content.setValue("Local subscription saved in iCores");
 
-        if (subscriptionCategory.getChildren() == null) return;
-        for (FeedTreeNode node : subscriptionCategory.getChildren()) {
-            SyndEntry entry = new SyndEntryImpl();
-            SyndFeed feed = node.getFeed();
-            if (feed == null) continue;
-
-            entry.setTitle(feed.getTitle());
-            entry.setAuthor(feed.getAuthor());
-            entry.setLink(node.getUrl()); // feed.getLink());
-            entry.setCategories(categories);
-            entry.setPublishedDate(new Date());
-            entry.setDescription(content);
-
-            System.out.println("---> Saving Feed: '" + entry.getTitle() + "'");
-
-            entries.add(entry);
+        // 5/15/2012 brg: Can't assume subscriptionCategory is non-null - I'm not sure how, but test
+        // machines can lose the Subscriptions tree entry, in which case a NullPointerException is thrown
+        // without this check - that prevents the quit/exit confirm dialog in CorelyzerAppController.quit()
+        // from being popped, leading to user confusion.
+        if ( subscriptionCategory != null )
+        {
+        	if (subscriptionCategory.getChildren() == null) return;
+	        for (FeedTreeNode node : subscriptionCategory.getChildren()) {
+	            SyndEntry entry = new SyndEntryImpl();
+	            SyndFeed feed = node.getFeed();
+	            if (feed == null) continue;
+	
+	            entry.setTitle(feed.getTitle());
+	            entry.setAuthor(feed.getAuthor());
+	            entry.setLink(node.getUrl()); // feed.getLink());
+	            entry.setCategories(categories);
+	            entry.setPublishedDate(new Date());
+	            entry.setDescription(content);
+	
+	            System.out.println("---> Saving Feed: '" + entry.getTitle() + "'");
+	
+	            entries.add(entry);
+	        }
+	
+	        SyndFeed subsFeed = subscriptionCategory.getFeed();
+	        subsFeed.setPublishedDate(new Date());
+	        subsFeed.setEntries(entries);
+	
+	        System.out.println("---> Saved " + entries.size() +
+	                " subscriptions on close");
+	        ROMEUtils.writeFeed(subsFeed, this.subscriptionsFilename);
         }
-
-        SyndFeed subsFeed = subscriptionCategory.getFeed();
-        subsFeed.setPublishedDate(new Date());
-        subsFeed.setEntries(entries);
-
-        System.out.println("---> Saved " + entries.size() +
-                " subscriptions on close");
-        ROMEUtils.writeFeed(subsFeed, this.subscriptionsFilename);
     }
 
     public FeedTreeNode getSubscriptionNode(String url) {

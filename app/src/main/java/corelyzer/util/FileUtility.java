@@ -687,33 +687,33 @@ public class FileUtility {
 	}
 	
 	// 5/11/2012 brg: TODO doesn't really belong in FileUtility - new utility class for "core management"?
-	public static void setSectionImageProperties( TrackSceneNode track, final int sectionId,
+	public static void setSectionImageProperties( TrackSceneNode track, final String sectionName, final int nativeSectionId,
 			final float length, final float depth, final float dpix, final float dpiy, final String orientation )
 	{
 		SceneGraph.lock();
 		{
-			CoreSection cs = track.getCoreSection(sectionId);
+			CoreSection cs = track.getCoreSection(sectionName);
 			final int trackId = track.getId();
 
 			boolean isVertical = orientation.toLowerCase().equals("vertical");
-			SceneGraph.setSectionOrientation(trackId, sectionId, isVertical);
+			SceneGraph.setSectionOrientation(trackId, nativeSectionId, isVertical);
 
 			if (cs == null) {
 				return;
 			}
 
 			if (cs.getDepth() == 0) {
-				SceneGraph.positionSection(trackId, sectionId, depth * 100.0f / 2.54f * SceneGraph.getCanvasDPIX(0), 0);
-				cs.setDepth(SceneGraph.getSectionDepth(trackId, sectionId));
+				SceneGraph.positionSection(trackId, nativeSectionId, depth * 100.0f / 2.54f * SceneGraph.getCanvasDPIX(0), 0);
+				cs.setDepth(SceneGraph.getSectionDepth(trackId, nativeSectionId));
 			}
 
 			// Determine DPI
 			if ((dpix > 0) && (dpiy > 0)) { // use DPI if available
-				SceneGraph.setSectionDPI(trackId, sectionId, dpix, dpiy);
+				SceneGraph.setSectionDPI(trackId, nativeSectionId, dpix, dpiy);
 			} else if (length != 0) { // use Length & image size
 				float dpi = ImagePropertyTable.DEFAULT_DPI;
 
-				int imageId = SceneGraph.getImageIdForSection(trackId, sectionId);
+				int imageId = SceneGraph.getImageIdForSection(trackId, nativeSectionId);
 
 				float imageWidth = SceneGraph.getImageWidth(imageId);
 				float imageHeight = SceneGraph.getImageHeight(imageId);
@@ -727,15 +727,15 @@ public class FileUtility {
 
 				dpi = (float) (lengthInPixel / (length * 100 / 2.54));
 
-				SceneGraph.setSectionDPI(trackId, sectionId, dpi, dpi);
+				SceneGraph.setSectionDPI(trackId, nativeSectionId, dpi, dpi);
 			} else { // use default_dpi
-				SceneGraph.setSectionDPI(trackId, sectionId, ImagePropertyTable.DEFAULT_DPI, ImagePropertyTable.DEFAULT_DPI);
+				SceneGraph.setSectionDPI(trackId, nativeSectionId, ImagePropertyTable.DEFAULT_DPI, ImagePropertyTable.DEFAULT_DPI);
 			}
 
-			SceneGraph.bringSectionToFront(trackId, sectionId);
+			SceneGraph.bringSectionToFront(trackId, nativeSectionId);
 
 			boolean imageLock = CorelyzerApp.getApp().preferences().lockCoreSectionImage;
-			SceneGraph.markSectionImmovable(trackId, sectionId, imageLock);
+			SceneGraph.markSectionImmovable(trackId, nativeSectionId, imageLock);
 		}
 		SceneGraph.unlock();
 

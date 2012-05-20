@@ -25,6 +25,7 @@
 package corelyzer.ui;
 
 import java.awt.Component;
+import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.BufferedInputStream;
@@ -339,7 +340,6 @@ public class CorelyzerAppController implements ActionListener {
 		TrackSceneNode t = new TrackSceneNode(trackName, id);
 		cg.addTrack(s, t);
 
-		view.loadImageMenuItem.setEnabled(true);
 		view.sessionList.setSelectedIndex(cg.getCurrentSessionIdx());
 		view.trackList.setSelectedIndex(cg.getCurrentTrackIdx());
 
@@ -1156,23 +1156,29 @@ public class CorelyzerAppController implements ActionListener {
 	// ---------------------------------------------------------------
 
 	public void loadImageAction() {
-		CRLoadImageDialog dialog = new CRLoadImageDialog(view.getMainFrame());
-		dialog.pack();
-		dialog.setLocationRelativeTo(view.getMainFrame());
-		dialog.setVisible(true);
+		final Vector<File> selectedFiles = FileUtility.loadLocalImages(view.getMainFrame());
+		if ( selectedFiles.size() > 0 )
+		{
+			CRLoadImageWizard dialog = new CRLoadImageWizard(view.getMainFrame(), selectedFiles);
+			dialog.pack();
+			dialog.setModal(true);
+			
+			// because property page of dialog is rather tall, set y position near top of screen
+			dialog.setLocationRelativeTo(view.getMainFrame());
+			Point loc = dialog.getLocation();
+			dialog.setLocation( loc.x, 50 );
+			
+			dialog.setVisible(true);
+		}
 	}
 
 	// ---------------------------------------------------------------
 
-	public void autoLoadImageAction() {
-		final Vector<File> selectedFiles = FileUtility.loadLocalImages(view.getMainFrame());
-		if ( selectedFiles.size() > 0 )
-		{
-			CRAutoLoadImageDialog dialog = new CRAutoLoadImageDialog(view.getMainFrame(), selectedFiles);
-			dialog.pack();
-			dialog.setLocationRelativeTo(view.getMainFrame());
-			dialog.setVisible(true);
-		}
+	public void loadImageListingAction() {
+		CRLoadImageListingDialog dialog = new CRLoadImageListingDialog(view.getMainFrame());
+		dialog.pack();
+		dialog.setLocationRelativeTo(view.getMainFrame());
+		dialog.setVisible(true);
 	}
 
 	// --------------------------------------------------------------

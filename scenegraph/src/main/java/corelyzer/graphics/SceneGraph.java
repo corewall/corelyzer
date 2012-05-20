@@ -697,6 +697,16 @@ public class SceneGraph {
 	public native static int getImageWidth(int image);
 
 	/**
+	 * Access method. Get pixel count along image's depth axis without
+	 * loading pixel data
+	 * 
+	 * @param image
+	 *            Core section image ID
+	 * @return Image's width
+	 */
+	public native static int getImageDepthPix(String imageFilename, boolean isVertical);
+	
+	/**
      */
 	// public native static float getLineGraphColorComponent(int track,
 	// int section,
