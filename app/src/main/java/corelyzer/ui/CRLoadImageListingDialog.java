@@ -25,7 +25,6 @@
 
 package corelyzer.ui;
 
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Frame;
 import java.awt.Insets;
@@ -53,27 +52,25 @@ import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
 
-import corelyzer.data.CRPreferences;
-import corelyzer.data.CoreSection;
 import corelyzer.data.ImagePropertyTable;
 import corelyzer.data.ImagePropertyTableModel;
+import corelyzer.data.Session;
 import corelyzer.data.TrackSceneNode;
+import corelyzer.data.coregraph.CoreGraph;
 import corelyzer.data.lists.CRDefaultListModel;
-import corelyzer.graphics.SceneGraph;
-import corelyzer.helper.ExampleFileFilter;
 import corelyzer.util.FeedUtils;
 import corelyzer.util.FileUtility;
 import corelyzer.util.core.CoreModule;
 import corelyzer.util.image.ImageModule;
 
-public class CRLoadImageDialog extends JDialog {
+public class CRLoadImageListingDialog extends JDialog {
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 627120465409891512L;
 
 	public static void main(final String[] args) {
-		CRLoadImageDialog dialog = new CRLoadImageDialog(null);
+		CRLoadImageListingDialog dialog = new CRLoadImageListingDialog(null);
 		dialog.pack();
 		dialog.setVisible(true);
 		System.exit(0);
@@ -106,7 +103,7 @@ public class CRLoadImageDialog extends JDialog {
 	private JTextField depthIncField;
 	private JButton applyButton;
 
-	public CRLoadImageDialog(final Frame owner) {
+	public CRLoadImageListingDialog(final Frame owner) {
 		super(owner);
 		$$$setupUI$$$();
 		setTitle("Load Images");
@@ -295,7 +292,7 @@ public class CRLoadImageDialog extends JDialog {
 				| GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null,
 				new Dimension(122, 33), null, 0, false));
 		saveButton = new JButton();
-		saveButton.setEnabled(true);
+		saveButton.setEnabled(false); // only enabled when list has at least one row
 		saveButton.setText("Save the Image Listing");
 		panel8.add(saveButton, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL,
 				GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
@@ -518,6 +515,9 @@ public class CRLoadImageDialog extends JDialog {
 		}
 
 		imageTable.updateUI();
+		
+		if ( imageTable.getModel().getRowCount() > 0 )
+			saveButton.setEnabled(true);
 	}
 
 	private boolean isValidFloat(final String s) {
@@ -658,6 +658,12 @@ public class CRLoadImageDialog extends JDialog {
 	}
 
 	private void onOK() {
+		// create default session and track if necessary
+		Session curSession = CoreGraph.getInstance().getCurrentSession();
+		if ( curSession == null || ( curSession != null && curSession.getNumberOfTracks() == 0 )) {
+			CorelyzerApp.getApp().createTrack("New Track");
+		}
+		
 		Runnable loading = new Runnable() {
 			public void run() {
 				loadImagesWithProperties();
@@ -671,19 +677,24 @@ public class CRLoadImageDialog extends JDialog {
 	private void onReset() {
 		((ImagePropertyTable) imageTable).clearTable();
 		imageTable.updateUI();
+		
+		saveButton.setEnabled(false);
 	}
 
 	private void saveTableToCSVFile(final String delimiter) {
 		// save current image list with each values to csv file
 		// firt check if there is image file in the list
 		int nFiles = imageTable.getRowCount();
+
+		// 5/20/2012 brg: Save button now disables when the list is empty, leaving this
+		// check in on the off-chance that logic can be subverted somehow...
 		if (nFiles == 0) {
 			JOptionPane.showMessageDialog(this, "Empty List!");
 			return;
 		}
 
 		// show up general info message
-		JOptionPane.showMessageDialog(this, "Save Image List File\n\n" + "Only support Comma Delimited File (.csv)\n"
+		JOptionPane.showMessageDialog(this, "Save Image Listing File\n\n" + "only supports Comma Delimited Files (.csv)\n"
 				+ "File will inlcude below values in each line.\n" + "filename, orientation, length, dpix, dpiy, depth");
 
 		// String saveFile = FileUtility.selectASingleFile(this,
@@ -737,8 +748,8 @@ public class CRLoadImageDialog extends JDialog {
 			bw.close();
 			fw.close();
 
-			// show up success message
-			JOptionPane.showMessageDialog(this, "Saving done successfully!");
+			// show success message
+			JOptionPane.showMessageDialog(this, "Saved successfully!");
 
 		} catch (IOException e) {
 			String mesg = "IOException in writing CSV file " + selectedFile;
@@ -753,7 +764,7 @@ public class CRLoadImageDialog extends JDialog {
 	// filename, orientation, length, dpix, dpiy, depth
 	private void selectAndLoadCSVFileToList(final String delimiter) {
 		// show up general info message
-		JOptionPane.showMessageDialog(this, "Open Image List File\n\n" + "Only support Comma Delimited File (.csv)\n"
+		JOptionPane.showMessageDialog(this, "Open Image Listing File\n\n" + "Only supports Comma Delimited Files (.csv)\n"
 				+ "File must follow below format in each line.\n" + "filename, orientation, length, dpix, dpiy, depth");
 
 		// String aFileStr = FileUtility.selectASingleFile(this,
@@ -835,6 +846,9 @@ public class CRLoadImageDialog extends JDialog {
 		}
 
 		imageTable.updateUI();
+		
+		if ( imageTable.getModel().getRowCount() > 0 )
+			saveButton.setEnabled(true);
 	}
 
 	private void selectAndLoadImagesToList() {

@@ -340,7 +340,6 @@ public class CorelyzerAppController implements ActionListener {
 		TrackSceneNode t = new TrackSceneNode(trackName, id);
 		cg.addTrack(s, t);
 
-		view.loadImageMenuItem.setEnabled(true);
 		view.sessionList.setSelectedIndex(cg.getCurrentSessionIdx());
 		view.trackList.setSelectedIndex(cg.getCurrentTrackIdx());
 
@@ -1157,15 +1156,6 @@ public class CorelyzerAppController implements ActionListener {
 	// ---------------------------------------------------------------
 
 	public void loadImageAction() {
-		CRLoadImageDialog dialog = new CRLoadImageDialog(view.getMainFrame());
-		dialog.pack();
-		dialog.setLocationRelativeTo(view.getMainFrame());
-		dialog.setVisible(true);
-	}
-
-	// ---------------------------------------------------------------
-
-	public void autoLoadImageAction() {
 		final Vector<File> selectedFiles = FileUtility.loadLocalImages(view.getMainFrame());
 		if ( selectedFiles.size() > 0 )
 		{
@@ -1180,6 +1170,15 @@ public class CorelyzerAppController implements ActionListener {
 			
 			dialog.setVisible(true);
 		}
+	}
+
+	// ---------------------------------------------------------------
+
+	public void loadImageListingAction() {
+		CRLoadImageListingDialog dialog = new CRLoadImageListingDialog(view.getMainFrame());
+		dialog.pack();
+		dialog.setLocationRelativeTo(view.getMainFrame());
+		dialog.setVisible(true);
 	}
 
 	// --------------------------------------------------------------
