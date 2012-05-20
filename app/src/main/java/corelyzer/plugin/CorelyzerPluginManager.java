@@ -206,10 +206,18 @@ public class CorelyzerPluginManager {
 
 				if (p.init(CorelyzerApp.getApp().getMainFrame())) {
 					pluginClassNames.add(pluginName);
-					p.getFrame().setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
+					
+					final boolean pluginReplacesMainFrame = p.isWantToReplaceMainFrame();
+					
+					// 5/15/2012 brg: When user canceled out of quit/exit confirm dialog in 
+					// CorelyzerAppController.quit(), mainFrame became hidden. This fixes that.  
+					if ( pluginReplacesMainFrame )
+						p.getFrame().setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
+					else
+						p.getFrame().setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
 
 					CorelyzerApp app = CorelyzerApp.getApp();
-					if (app != null && app.getPluginUIIndex() == -1 && p.isWantToReplaceMainFrame()) {
+					if (app != null && app.getPluginUIIndex() == -1 && pluginReplacesMainFrame) {
 
 						// find the index
 						for (int i = 0; i < this.startupArgs.length; i++) {
