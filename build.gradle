@@ -1,5 +1,5 @@
 allprojects {
-	version = '1.4.4_beta'
+	version = '1.4.5_beta'
 	group = 'org.corewall'
 }
 
@@ -115,6 +115,22 @@ task 'package-win'(dependsOn: ['package-check', 'create-win-dist']) << {
 		from file('scenegraph/dist').listFiles().findAll { it.name.endsWith('.dll') }
 	}
 
+	// copy help and resources
+	copy {
+		into 'dist/win/Corelyzer/help'
+		from file('packages/base/help')
+	}
+	copy {
+		into 'dist/win/Corelyzer/resources'
+		from file('packages/base/resources')
+	}
+
+	// copy plugins
+	copy {
+		into 'dist/win/Corelyzer/plugins'
+		from file('plugins').listFiles().findAll { it.name.endsWith('.jar') }
+	}
+
 	// create our zip file
 	ant.zip(basedir: file("dist/win"), destfile: file("dist/win/Corelyzer-${version}.zip"), includes: "Corelyzer/**")
 
@@ -130,12 +146,6 @@ task 'create-win-dist' << {
 		copy {
 			into winDist
 			from 'packages/win'
-		}
-
-		// copy the base resources and help files
-		copy {
-			into winDist
-			from 'packages/base'
 		}
 	}
 }
