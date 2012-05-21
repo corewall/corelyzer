@@ -1648,7 +1648,7 @@ JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_addSectionToTrack // f
 
     if(!is_track(default_track_scene,track))
     {
-        printf("ERROR: %d is not a track\n", track);
+        printf("ERROR: %d is not a track\n", (int)track);
         return -1;
     }
 
@@ -1730,7 +1730,7 @@ JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_addSectionImageToTrack
 
     if(!is_track(default_track_scene,track))
     {
-        printf("ERROR: %d is not a track\n", track);
+        printf("ERROR: %d is not a track\n", (int)track);
         return -1;
     }
 
@@ -1738,7 +1738,7 @@ JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_addSectionImageToTrack
 
     if(!is_texset(image))
     {
-        printf("ERROR: %d is not an image\n", image);
+        printf("ERROR: %d is not an image\n", (int)image);
         return -1;
     }
 
@@ -1750,7 +1750,7 @@ JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_addSectionImageToTrack
 
     if(!section)
     {
-        printf("ERROR: Could not make a section model from image %d\n", image);
+        printf("ERROR: Could not make a section model from image %d\n", (int)image);
         return -1;
     }
 
@@ -2343,7 +2343,7 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setSectionDPI
     cs = get_track_section(t,section);
     if(!cs)
     {
-        printf("ERROR: Track %d\tSection %d\n", track, section);
+        printf("ERROR: Track %d\tSection %d\n", (int)track, (int)section);
         return;
     }
 
@@ -2962,7 +2962,7 @@ JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_addLineGraphToSection
         // fixme
         printf("\nERROR: addLineGraph Fail!\n");
         printf("trackId: %d, sectionId: %d, datasetId: %d, tableId: %d, fieldId: %d\n",
-                jtrack, jsection, jdataset, jtable, jfield);
+                (int)jtrack, (int)jsection, (int)jdataset, (int)jtable, (int)jfield);
     }
 
     return gid;
@@ -2980,7 +2980,7 @@ JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_removeLineGraphFromSec
 
     if( gid == -1 )
     {
-        printf("\nERROR: removeLineGraph Fail! graphId: %d\n", graphid);
+        printf("\nERROR: removeLineGraph Fail! graphId: %d\n", (int)graphid);
     }
 
     return gid;
@@ -5308,7 +5308,10 @@ int duplicateSection(int trackId, int sectionId, int newTrackId)
     newSection->draw_vert_line = cs->draw_vert_line;
     newSection->vert_line_x = cs->vert_line_x;
     newSection->movable = cs->movable;
-    newSection->name = "Splited"; // fixme input var
+
+	newSection->name = NULL;
+	set_section_name( newSection, "Split" );
+
     newSection->width = cs->width;
     newSection->height = cs->height;
     newSection->depth = cs->depth;

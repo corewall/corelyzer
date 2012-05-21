@@ -302,6 +302,8 @@ public class ImageSplitDialog extends JDialog {
 
 			CoreSection sec = new CoreSection(name, newSectionId);
 			t.addCoreSection(sec);
+			
+			SceneGraph.setSectionName( trackId, newSectionId, name );
 
 			String imageFilePath = SceneGraph.getImageName(imageId);
 			CoreSectionImage node = new CoreSectionImage(t, imageFilePath, imageId, name);
