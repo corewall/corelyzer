@@ -138,8 +138,11 @@ void free_section_model(CoreSection* ptr)
 		dec_texset_ref_count(ptr->src);
 	}
 
-	delete [] ptr->highlight_color;
-	
+	if ( ptr->highlight_color )
+		delete[] ptr->highlight_color;
+	if ( ptr->name )
+		delete[] ptr->name;
+
     delete ptr;
 }
 
@@ -950,12 +953,17 @@ void  set_section_annotation_focus (CoreSection* ptr, int annoId, bool value)
 }
 
 //================================================================
-void  set_section_name(CoreSection* ptr, char* name)
+void set_section_name(CoreSection* ptr, const char* name)
 {
-	if(!ptr || !name) return;
+	if (!ptr || !name) return;
 	
-	ptr->name = new char[ strlen(name) + 1];
-    strcpy(ptr->name,name);
+	if ( ptr->name != NULL ) // release existing name
+	{
+		delete[] ptr->name;
+	}
+	
+	ptr->name = new char[ strlen(name) + 1 ];
+    strcpy( ptr->name, name );
 }
 
 char* get_section_name(CoreSection* ptr)

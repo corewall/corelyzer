@@ -1344,7 +1344,7 @@ bool read_bmp_header( FILE *filePtr, BMPHeader &header, BMPInfoHeader &infoHeade
 	// 8 bytes when compiled for an 64-bit environment, not 4 as is assumed in the BMP reading logic.
 	if ( sizeof(BMP_DWORD) != 4 || sizeof(BMP_WORD) != 2 || sizeof(BMP_BYTE) != 1 )
 	{
-		printf("Unexpected typedef sizing!\nDWORD size = %d (expected 4), BMP_WORD size = %d (2), BMP_BYTE size = %d (1)\n",
+		printf("Unexpected typedef sizing!\nDWORD size = %ld (expected 4), BMP_WORD size = %ld (2), BMP_BYTE size = %ld (1)\n",
 			   sizeof(BMP_DWORD), sizeof(BMP_WORD), sizeof(BMP_BYTE));
 		fclose(filePtr);
 		return false;

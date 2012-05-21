@@ -109,7 +109,7 @@ int   create_section_annotation(CoreSection* ptr, int group, int type, float x, 
 void  free_section_annotation   (CoreSection* ptr, int annoId);
 bool  is_section_annotation     (CoreSection* ptr, int annoId);
 void  set_section_annotation_focus (CoreSection* ptr, int annoId, bool value);
-void  set_section_name			(CoreSection* ptr, char* name);
+void  set_section_name			(CoreSection* ptr, const char * name);
 
 char* get_section_name				(CoreSection* ptr);
 void  set_section_annotation_width  (CoreSection* ptr, int annoId, float w);

@@ -118,7 +118,7 @@ void aLog(char* format,...)
 	fflush(stderr);
 }
 
-void aError(char* format,...)
+void aError(const char* format,...)
 {
 	va_list vl;
 	char line[2048];
