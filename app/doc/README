@@ -1,0 +1,46 @@
+--- How to Generate Corelyzer Help Files ---
+
+The help files included with Corelyzer are generated using:
+
+http://docbook.sourceforge.net/
+- DocBook XSL stylesheets.
+
+http://xmlsoft.org/xslt/index.html
+- The xsltproc command-line utility (part of the XSLT C library).
+If you're running a recent version of Mac OS X, you're in luck,
+it's likely already installed.
+
+http://javahelp.java.net/
+- The JavaHelp system, required to generate the search database.
+
+app/doc/corelyzer.xml
+- The "source" file that contains help text and defines help structure.
+
+
+To generate help files:
+
+1. Create HTML and JavaHelp files with the following command (in app/doc):
+
+   xsltproc --stringparam section.autolabel 1 \
+            --stringparam section.label.includes.component.label 1 \
+            --stringparam suppress.navigation 0 \
+            [DocBook root]/javahelp/javahelp.xsl corelyzer.xml
+
+The stringparams assign section numbers, prefix those sections nubmers with
+the chapter, and include the Prev/Next navigation header/footer, respectively.
+
+app/doc should now contain several HTML files and the following JavaHelp files:
+    jhelpidx.xml jhelpmap.jhm jhelpset.hs jhelptoc.xml
+
+
+2. Create the JavaHelp search database (in app/doc):
+
+   [JavaHelp root]/javahelp/bin/jhindexer *.html
+
+app/doc should now contain a directory called JavaHelpSearch.
+
+
+3. Copy the contents of app/doc (sans README and corelyzer.xml) to 
+packages/base/help, repackage the app, and bask in the helpfulness.
+
+- Brian Grivna, June 21, 2012
