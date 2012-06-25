@@ -313,7 +313,11 @@ public class CRPreferences {
 		defaultValues.put("sessionSharing.serverAddress", "corewalldb.evl.uic.edu");
 		defaultValues.put("sessionSharing.serverPort", "16688");
 
-		defaultValues.put("ui.canvas.alwaysBelow", "true");
+		// 6/21/2012 brg: Default "Canvas Always at Below" to false. When true, it brings
+		// all applications' windows to the front when the toolbar or mainFrame is activated,
+		// behavior that most users find incredibly annoying.
+		defaultValues.put("ui.canvas.alwaysBelow", "false");
+
 		defaultValues.put("ui.verticalDepthScroll", "false");
 	}
 

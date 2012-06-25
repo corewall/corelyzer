@@ -60,7 +60,7 @@ ActionListener {
     JDialog dialog;
     protected static final String EDIT = "edit";
 	
-    public ColorEditor() {
+    public ColorEditor(final Component parent) {
         //Set up the editor (from the table's point of view),
         //which is a button.
         //This button brings up the color chooser dialog,
@@ -72,7 +72,7 @@ ActionListener {
 		
         //Set up the dialog that the button brings up.
         colorChooser = new JColorChooser();
-        dialog = JColorChooser.createDialog(button,
+        dialog = JColorChooser.createDialog(parent,
 											"Pick a Color",
 											true,  //modal
 											colorChooser,
