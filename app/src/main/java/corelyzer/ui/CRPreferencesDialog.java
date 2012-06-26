@@ -84,8 +84,6 @@ public class CRPreferencesDialog extends JDialog implements ChangeListener, Wind
 	private JPanel displayPanel;
 	private JPanel descriptionPane;
 	private JCheckBox autoZoomCheckBox;
-	private JCheckBox autoScaleGraphCheckBox;
-	private JCheckBox autoScaleAnnotationCheckBox;
 	private JRadioButton horiDepthRadioButton;
 	private JRadioButton vertDepthRadioButton;
 	private JTextField serverAddressTextField;
@@ -199,22 +197,6 @@ public class CRPreferencesDialog extends JDialog implements ChangeListener, Wind
 		autoZoomCheckBox.addActionListener(new ActionListener() {
 			public void actionPerformed(final ActionEvent event) {
 				prefs.setAutoZoom(autoZoomCheckBox.isSelected());
-			}
-		});
-
-		autoScaleGraphCheckBox.addActionListener(new ActionListener() {
-			public void actionPerformed(final ActionEvent event) {
-				boolean isChecked = autoScaleGraphCheckBox.isSelected();
-				prefs.setAutoScaleGraph(isChecked);
-				SceneGraph.setGraphAutoScale(isChecked);
-			}
-		});
-
-		autoScaleAnnotationCheckBox.addActionListener(new ActionListener() {
-			public void actionPerformed(final ActionEvent event) {
-				boolean isChecked = autoScaleAnnotationCheckBox.isSelected();
-				prefs.setAutoScaleMarker(isChecked);
-				SceneGraph.setMarkerAutoScale(isChecked);
 			}
 		});
 
@@ -379,26 +361,29 @@ public class CRPreferencesDialog extends JDialog implements ChangeListener, Wind
 		stageTab.addTab("Display", displayPanel);
 		displayPanel.setBorder(BorderFactory.createTitledBorder(""));
 		final JPanel panel7 = new JPanel();
-		panel7.setLayout(new GridLayoutManager(13, 1, new Insets(0, 0, 0, 0), -1, -1));
+		panel7.setLayout(new GridLayoutManager(11, 1, new Insets(0, 0, 0, 0), -1, -1));
 		stageTab.addTab("User Interface", panel7);
 		panel7.setBorder(BorderFactory.createTitledBorder(""));
 		lockCoreSectionImage = new JCheckBox();
-		lockCoreSectionImage.setText("Lock core section image?");
+		lockCoreSectionImage.setText("Fix depth of core section images after loading");
+		lockCoreSectionImage.setToolTipText("Images loaded while this option is enabled cannot be slid along the depth axis");
 		panel7.add(lockCoreSectionImage, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE,
 				GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
 		useQuaqua = new JCheckBox();
 		useQuaqua.setEnabled(false);
-		useQuaqua.setText("Use Quaqua?");
+		useQuaqua.setText("Use Quaqua look and feel (useful on pre-10.4 Macs)");
+		useQuaqua.setToolTipText("The Quaqua look and feel may make user interface elements (e.g. buttons) look more 'Mac-like' in older versions of OS X. " +
+				"In modern versions of OS X, it doesn't appear to make a significant difference.");
 		panel7.add(useQuaqua, new GridConstraints(2, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK
 				| GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
 		autoCheckVersion = new JCheckBox();
 		autoCheckVersion.setSelected(true);
-		autoCheckVersion.setText("Auto check version in startup?");
+		autoCheckVersion.setText("Automatically check for updates on startup");
 		panel7.add(autoCheckVersion, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE,
 				GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
 		final JPanel panel8 = new JPanel();
 		panel8.setLayout(new GridLayoutManager(4, 3, new Insets(0, 0, 0, 0), -1, -1));
-		panel7.add(panel8, new GridConstraints(12, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK
+		panel7.add(panel8, new GridConstraints(10, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK
 				| GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
 		panel8.setBorder(BorderFactory.createTitledBorder("Canvas Grid"));
 		check_gridEnabled = new JCheckBox();
@@ -450,7 +435,7 @@ public class CRPreferencesDialog extends JDialog implements ChangeListener, Wind
 				GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
 		final JPanel panel9 = new JPanel();
 		panel9.setLayout(new GridLayoutManager(2, 2, new Insets(0, 0, 0, 0), -1, -1));
-		panel7.add(panel9, new GridConstraints(11, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK
+		panel7.add(panel9, new GridConstraints(9, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK
 				| GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
 		canvasBackgroundColorButton = new JButton();
 		canvasBackgroundColorButton.setText("Canvas background color");
@@ -465,24 +450,15 @@ public class CRPreferencesDialog extends JDialog implements ChangeListener, Wind
 				GridConstraints.SIZEPOLICY_WANT_GROW, null, new Dimension(98, 14), null, 0, false));
 		autoZoomCheckBox = new JCheckBox();
 		autoZoomCheckBox.setSelected(true);
-		autoZoomCheckBox.setText("Double clicks to zoom to section?");
+		autoZoomCheckBox.setText("Double-clicking section name zooms to that section");
+		autoZoomCheckBox.setToolTipText("Double-clicking section name (in the session window) shows the entire section at the " +
+					"highest zoom level that can accommodate it.");
 		panel7.add(autoZoomCheckBox, new GridConstraints(3, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE,
-				GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-		autoScaleGraphCheckBox = new JCheckBox();
-		autoScaleGraphCheckBox.setEnabled(false);
-		autoScaleGraphCheckBox.setSelected(false);
-		autoScaleGraphCheckBox.setText("Graph auto-scale?");
-		panel7.add(autoScaleGraphCheckBox, new GridConstraints(4, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE,
-				GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-		autoScaleAnnotationCheckBox = new JCheckBox();
-		autoScaleAnnotationCheckBox.setEnabled(false);
-		autoScaleAnnotationCheckBox.setSelected(false);
-		autoScaleAnnotationCheckBox.setText("Annotation icon auto-scale?");
-		panel7.add(autoScaleAnnotationCheckBox, new GridConstraints(5, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE,
 				GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
 		final JPanel panel10 = new JPanel();
 		panel10.setLayout(new GridLayoutManager(1, 3, new Insets(0, 0, 0, 0), -1, -1));
-		panel7.add(panel10, new GridConstraints(10, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK
+
+		panel7.add(panel10, new GridConstraints(8, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK
 				| GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
 		horiDepthRadioButton = new JRadioButton();
 		horiDepthRadioButton.setSelected(true);
@@ -498,22 +474,27 @@ public class CRPreferencesDialog extends JDialog implements ChangeListener, Wind
 				GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
 		showOriginAxisCheckbox = new JCheckBox();
 		showOriginAxisCheckbox.setSelected(true);
-		showOriginAxisCheckbox.setText("Show origin axis?");
-		panel7.add(showOriginAxisCheckbox, new GridConstraints(6, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE,
+		showOriginAxisCheckbox.setText("Show crosshair at origin");
+		panel7.add(showOriginAxisCheckbox, new GridConstraints(4, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE,
 				GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
 		showCoreSectionLabelCheckbox = new JCheckBox();
 		showCoreSectionLabelCheckbox.setSelected(true);
-		showCoreSectionLabelCheckbox.setText("Show section labels?");
-		panel7.add(showCoreSectionLabelCheckbox, new GridConstraints(7, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE,
+		showCoreSectionLabelCheckbox.setText("Label dummy sections");
+		showCoreSectionLabelCheckbox.setToolTipText("Show section labels for dummy sections (those with plotted data but no image)");
+		panel7.add(showCoreSectionLabelCheckbox, new GridConstraints(5, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE,
 				GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
 		canvasAlwaysAtBelowCheckBox = new JCheckBox();
 		canvasAlwaysAtBelowCheckBox.setSelected(true);
-		canvasAlwaysAtBelowCheckBox.setText("Canvas Always at Below?");
-		panel7.add(canvasAlwaysAtBelowCheckBox, new GridConstraints(8, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE,
+		canvasAlwaysAtBelowCheckBox.setText("Canvas always draws below external application windows");
+		canvasAlwaysAtBelowCheckBox.setToolTipText("Windows of non-Corelyzer applications will draw on top of the visualization canvas. " +
+				"It's generally better to disable this option.");
+		panel7.add(canvasAlwaysAtBelowCheckBox, new GridConstraints(6, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE,
 				GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
 		depthScrollCheckbox = new JCheckBox();
-		depthScrollCheckbox.setText("Depth-scroll in vertical depth mode?");
-		panel7.add(depthScrollCheckbox, new GridConstraints(9, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE,
+		depthScrollCheckbox.setText("Scroll wheel/gesture zooms in Vertical depth mode");
+		depthScrollCheckbox.setToolTipText("In Vertical depth mode, scroll wheel or trackpad gesture will zoom when this option is enabled. " +
+				"If disabled, it will pan the canvas on the depth axis.");
+		panel7.add(depthScrollCheckbox, new GridConstraints(7, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE,
 				GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
 		final JPanel panel11 = new JPanel();
 		panel11.setLayout(new GridLayoutManager(2, 4, new Insets(0, 0, 0, 0), -1, -1));
@@ -804,13 +785,19 @@ public class CRPreferencesDialog extends JDialog implements ChangeListener, Wind
 		this.prefs.isInited = true;
 		// collect info in the UIs
 		// Dirs
-		String sp = System.getProperty("file.separator");
+		final String sp = System.getProperty("file.separator");
 		if (!field_imgblock.getText().equals("")) {
-			this.prefs.texBlock_Directory = this.field_imgblock.getText() + sp;
+			String imageBlockPath = this.field_imgblock.getText();
+			if ( !imageBlockPath.endsWith( sp ) )
+				imageBlockPath += sp;
+			this.prefs.texBlock_Directory = imageBlockPath;
 		}
 
 		if (!field_download.getText().equals("")) {
-			this.prefs.download_Directory = this.field_download.getText() + sp;
+			String downloadPath = this.field_download.getText();
+			if ( !downloadPath.endsWith( sp ) )
+				downloadPath += sp;
+			this.prefs.download_Directory = downloadPath;
 		}
 
 		// Display
@@ -987,10 +974,6 @@ public class CRPreferencesDialog extends JDialog implements ChangeListener, Wind
 
 		// autoZoom
 		this.autoZoomCheckBox.setSelected(prefs.isAutoZoom());
-
-		// autoScales
-		this.autoScaleGraphCheckBox.setSelected(prefs.isAutoScaleGraph());
-		this.autoScaleAnnotationCheckBox.setSelected(prefs.isAutoScaleMarker());
 
 		// depth orientation
 		boolean depthOrientation = SceneGraph.getDepthOrientation();

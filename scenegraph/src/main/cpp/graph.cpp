@@ -48,7 +48,6 @@ static bool isCollapse = false;
 static float graphScaleLimit = 1000.0f;
 static float graphScale  = DEFAULT_GRAPH_SCALE;
 // static float _graphScale = DEFAULT_GRAPH_SCALE;
-// static bool  graphAutoScale = true;
 //======================================================================
 bool is_graph(int gid)
 {
@@ -1285,51 +1284,9 @@ void setCollapse(bool aBool)
 void setGraphScale(float s)
 {
     graphScale *= s;
-/*
-    float scale = _graphScale * s;
-    graphScale = scale;
-
-    if(scale > graphScaleLimit)
-    {
-        _graphScale = graphScaleLimit;
-    }
-    else if(scale < DEFAULT_GRAPH_SCALE)
-    {
-        _graphScale = DEFAULT_GRAPH_SCALE;
-    }
-    else
-    {
-        _graphScale = scale;
-    }
-    graphScale = isGraphAutoScale() ? _graphScale : DEFAULT_GRAPH_SCALE;
-*/
 }
 
 float getGraphScale()
 {
-    // return isGraphAutoScale() ? _graphScale : graphScale;
     return graphScale;
-}
-
-// deprecated
-void  setGraphAutoScale(bool b)
-{
-    /*
-    graphAutoScale = b;
-
-    if(b)
-    {
-        graphScale = _graphScale;
-    }
-    else
-    {
-        graphScale = DEFAULT_GRAPH_SCALE;
-    }
-    */
-}
-
-bool  isGraphAutoScale()
-{
-    // return graphAutoScale;
-    return false;
 }

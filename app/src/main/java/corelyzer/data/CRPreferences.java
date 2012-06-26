@@ -123,12 +123,6 @@ public class CRPreferences {
 	// auto zoom when double clicked sections
 	boolean autoZoom = true;
 
-	// auto scale graph height
-	boolean autoScaleGraph = true;
-
-	// auto scale marker size
-	boolean autoScaleMarker = true;
-
 	int refreshInterval = 10;
 
 	public CRPreferences() {
@@ -244,9 +238,6 @@ public class CRPreferences {
 
 		// autozoom
 		this.autoZoom = p.isAutoZoom();
-
-		this.autoScaleGraph = p.isAutoScaleGraph();
-		this.autoScaleMarker = p.isAutoScaleMarker();
 	}
 
 	public void applyUIConfig() {
@@ -259,10 +250,6 @@ public class CRPreferences {
 		}
 
 		SceneGraph.setBackgroundColor(bgcolor[0], bgcolor[1], bgcolor[2]);
-
-		// auto scale
-		SceneGraph.setGraphAutoScale(this.autoScaleGraph);
-		SceneGraph.setMarkerAutoScale(this.autoScaleMarker);
 
 		// show origin or section labels
 		Boolean showOrigin = Boolean.parseBoolean(this.prefs.get("ui.showOrigin", "true"));
@@ -319,14 +306,6 @@ public class CRPreferences {
 		defaultValues.put("ui.canvas.alwaysBelow", "false");
 
 		defaultValues.put("ui.verticalDepthScroll", "false");
-	}
-
-	public boolean isAutoScaleGraph() {
-		return autoScaleGraph;
-	}
-
-	public boolean isAutoScaleMarker() {
-		return autoScaleMarker;
 	}
 
 	public boolean isAutoZoom() {
@@ -508,10 +487,6 @@ public class CRPreferences {
 					bgcolor[2] = Float.parseFloat(toks[1].trim());
 				} else if (toks[0].trim().equalsIgnoreCase("autozoom")) {
 					this.setAutoZoom(Boolean.parseBoolean(toks[1].trim()));
-				} else if (toks[0].trim().equalsIgnoreCase("autoscalegraph")) {
-					this.setAutoScaleGraph(Boolean.parseBoolean(toks[1].trim()));
-				} else if (toks[0].trim().equalsIgnoreCase("autoscalemarker")) {
-					this.setAutoScaleMarker(Boolean.parseBoolean(toks[1].trim()));
 				} else if (toks[0].trim().equalsIgnoreCase("enableGrid")) {
 					this.grid_show = toks[1].trim().equalsIgnoreCase("true");
 					// now let's read values for grid configuration.
@@ -680,12 +655,6 @@ public class CRPreferences {
 			line = "autoZoom = " + this.autoZoom + "\n";
 			fw.write(line, 0, line.length());
 
-			line = "autoScaleGraph = " + this.autoScaleGraph + "\n";
-			fw.write(line, 0, line.length());
-
-			line = "autoScaleMarker = " + this.autoScaleMarker + "\n";
-			fw.write(line, 0, line.length());
-
 			// grid stuff
 			line = "enableGrid = " + this.grid_show + "\n";
 			fw.write(line, 0, line.length());
@@ -730,8 +699,6 @@ public class CRPreferences {
 			prefs.putFloat("ui.canvas_bgcolor_b", this.bgcolor[2]);
 
 			prefs.putBoolean("ui.autoZoom", this.autoZoom);
-			prefs.putBoolean("ui.autoScaleGraph", this.autoScaleGraph);
-			prefs.putBoolean("ui.autoScaleMarker", this.autoScaleMarker);
 
 			prefs.putBoolean("ui.enableGrid", this.grid_show);
 			prefs.putInt("ui.grid.type", this.grid_type);
@@ -751,14 +718,6 @@ public class CRPreferences {
 
 	public void setAutoCheckVersion(final boolean b) {
 		autoCheckVersion = b;
-	}
-
-	public void setAutoScaleGraph(final boolean autoScaleGraph) {
-		this.autoScaleGraph = autoScaleGraph;
-	}
-
-	public void setAutoScaleMarker(final boolean autoScaleMarker) {
-		this.autoScaleMarker = autoScaleMarker;
 	}
 
 	public void setAutoZoom(final boolean autoZoom) {

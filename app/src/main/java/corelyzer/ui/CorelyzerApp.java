@@ -69,6 +69,7 @@ import javax.swing.JScrollPane;
 import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
+import javax.swing.ToolTipManager;
 import javax.swing.WindowConstants;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
@@ -383,6 +384,9 @@ public class CorelyzerApp extends WindowAdapter implements MouseListener, Startu
 		}
 		
 		myApp.installPaletteVisibilityManager();
+		
+		// show tooltips for 10 seconds before dismissing - default time seems a bit too short
+		ToolTipManager.sharedInstance().setDismissDelay( 10000 );
 	}
 
 	// Reuse helpAction in main frame and tool palette

@@ -558,8 +558,6 @@ public class SceneGraph {
 
 	public native static int getFreeDrawPluginID(int freeDrawRect);
 
-	public native static boolean getGraphAutoScale();
-
 	/**
 	 * Access method. Get the graph ID about a given data field.
 	 * 
@@ -731,8 +729,6 @@ public class SceneGraph {
 	 * @return graph type: 0, 1, 2 - line, point, crosspoint
 	 */
 	public native static int getLineGraphType(int gid);
-
-	public native static boolean getMarkerAutoScale();
 
 	/**
 	 * Access method. Get number of tables in a dataset.
@@ -1534,9 +1530,6 @@ public class SceneGraph {
 
 	public native static void setFreeDrawVisiblity(int freeDrawRect, boolean flag);
 
-	// graph autoScale
-	public native static void setGraphAutoScale(boolean b);
-
 	public native static void setGraphScale(float scale);
 
 	public native static void setGraphsCollapse(boolean isCollapse);
@@ -1601,9 +1594,6 @@ public class SceneGraph {
 	 *            corelyzer.data.Graph type
 	 */
 	public native static void setLineGraphType(int gid, int type);
-
-	// marker autoScale
-	public native static void setMarkerAutoScale(boolean b);
 
 	public native static void setMarkerScale(float scale);
 

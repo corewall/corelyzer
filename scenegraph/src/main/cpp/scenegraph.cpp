@@ -5140,50 +5140,6 @@ JNIEXPORT jfloatArray JNICALL Java_corelyzer_graphics_SceneGraph_getBackgroundCo
 
 /*
  * Class:     corelyzer_helper_SceneGraph
- * Method:    setMarkerAutoScale
- * Signature: (Z)V
- */
-JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setMarkerAutoScale
-  (JNIEnv * jenv, jclass jcls, jboolean isMarkerAutoScale)
-{
-    setMarkerAutoScale(isMarkerAutoScale);
-}
-
-/*
- * Class:     corelyzer_helper_SceneGraph
- * Method:    getMarkerAutoScale
- * Signature: ()Z
- */
-JNIEXPORT jboolean JNICALL Java_corelyzer_graphics_SceneGraph_getMarkerAutoScale
-  (JNIEnv * jenv, jclass jcls)
-{
-    return isMarkerAutoScale();
-}
-
-/*
- * Class:     corelyzer_helper_SceneGraph
- * Method:    setGraphAutoScale
- * Signature: (Z)V
- */
-JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setGraphAutoScale
-  (JNIEnv * jenv, jclass jcls, jboolean isGraphAutoScale)
-{
-    setGraphAutoScale(isGraphAutoScale);
-}
-
-/*
- * Class:     corelyzer_helper_SceneGraph
- * Method:    getGraphAutoScale
- * Signature: ()Z
- */
-JNIEXPORT jboolean JNICALL Java_corelyzer_graphics_SceneGraph_getGraphAutoScale
-  (JNIEnv * jenv, jclass jcls)
-{
-    return isGraphAutoScale();
-}
-
-/*
- * Class:     corelyzer_helper_SceneGraph
  * Method:    setCrossHair
  * Signature: (Z)V
  */

@@ -193,7 +193,4 @@ void setCollapse(bool aBool);
 void setGraphScale(float s);
 float getGraphScale();
 
-void  setGraphAutoScale(bool b);
-bool  isGraphAutoScale();
-
 #endif
