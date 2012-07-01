@@ -161,30 +161,23 @@ public class CorelyzerAppController implements ActionListener {
 
 			Object[] options = { "No", "Yes" };
 
-			int sel = JOptionPane.showOptionDialog(view.getMainFrame(), "Are you sure want to " + "clean your image texture " + "cache?", "Clear Confirmation",
-					JOptionPane.YES_NO_OPTION, JOptionPane.CANCEL_OPTION, null, options, options[0]);
+			int sel = JOptionPane.showOptionDialog(view.getMainFrame(), "Are you sure want to clear your image texture cache?",
+					"Clear Confirmation", JOptionPane.YES_NO_OPTION, JOptionPane.CANCEL_OPTION, null, options, options[0]);
 
 			if (sel == 1) {
+				System.out.println("-- CRITICAL Section Deleteing " + texDir.getAbsolutePath());
 
-				sel = JOptionPane.showOptionDialog(view.getMainFrame(), "All files in " + texDir.getAbsolutePath() + " will be deleted\n"
-						+ "Are you really sure?", "Clear Confirmation", JOptionPane.YES_NO_OPTION, JOptionPane.CANCEL_OPTION, null, options, options[0]);
+				String[] dirList = texDir.list();
 
-				if (sel == 1) {
+				for (String aDirList : dirList) {
+					String myDirPath = texDir.getAbsolutePath() + "/" + aDirList;
+					File d = new File(myDirPath);
 
-					System.out.println("-- CRITICAL Section Deleteing " + texDir.getAbsolutePath());
-
-					String[] dirList = texDir.list();
-
-					for (String aDirList : dirList) {
-						String myDirPath = texDir.getAbsolutePath() + "/" + aDirList;
-						File d = new File(myDirPath);
-
-						if (d.exists() && d.isDirectory()) {
-							System.out.print("Delete " + d.getAbsolutePath());
-							boolean isSuccess = FileUtility.deleteDir(d);
-							String result = isSuccess ? "SUCCESS" : "FAILED";
-							System.out.print(" : " + result + "\n");
-						}
+					if (d.exists() && d.isDirectory()) {
+						System.out.print("Delete " + d.getAbsolutePath());
+						boolean isSuccess = FileUtility.deleteDir(d);
+						String result = isSuccess ? "SUCCESS" : "FAILED";
+						System.out.print(" : " + result + "\n");
 					}
 				}
 			}
