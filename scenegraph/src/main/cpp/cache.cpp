@@ -59,7 +59,9 @@ map< const void*, list_itr > cache_map;
 typedef map< const void*, list_itr >::iterator table_itr;
 
 //===================================================================
-int max_tex_mem = 268435456; // start off at 256 MB of tex memory
+// brg 6/27/2012 bump max cache memory from 256MB to 768MB - most modern machines
+// have at least 2GB of RAM.  Make this a user-configurable option?
+int max_tex_mem = 1024 * 1024 * 768;
 int cur_tex_mem = 0;         // Start off at 0 MB of tex memory usage
 
 
@@ -406,7 +408,8 @@ void* tex_cache_miss_impl(void *threadarg)
     }
     else
     {
-        src_fmt = GL_COMPRESSED_RGBA_S3TC_DXT5_EXT; // Squish: DXT3, FastDXT: DXT5
+//        src_fmt = GL_COMPRESSED_RGBA_S3TC_DXT5_EXT; // Squish: DXT3, FastDXT: DXT5
+		src_fmt = GL_COMPRESSED_RGBA_S3TC_DXT1_EXT;
         if( replace_id == 0)
         {
             glCompressedTexImage2D( GL_TEXTURE_2D, 0, src_fmt,
