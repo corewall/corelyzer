@@ -150,7 +150,7 @@ public class CorelyzerApp extends WindowAdapter implements MouseListener, Startu
 		File dirs_config = new File(prefs.config_Directory + "/directories.txt");
 
 		if (dirs_config.exists()) {
-			hasDirConf = prefs.readDirectoryConfig(dirs_config);
+			hasDirConf = prefs.readDirectoryConfig( prefs.config_Directory );
 		} else { // no dir setup, so create default ones
 			File cache_dir = new File(prefs.cache_Directory);
 			File imgb_dir = new File(prefs.texBlock_Directory);

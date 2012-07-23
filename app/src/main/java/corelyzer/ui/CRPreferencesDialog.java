@@ -790,6 +790,10 @@ public class CRPreferencesDialog extends JDialog implements ChangeListener, Wind
 			String imageBlockPath = this.field_imgblock.getText();
 			if ( !imageBlockPath.endsWith( sp ) )
 				imageBlockPath += sp;
+			
+			File imageBlockFile = new File( imageBlockPath );
+			if ( !imageBlockFile.exists() )
+				imageBlockFile.mkdir();
 			this.prefs.texBlock_Directory = imageBlockPath;
 		}
 
@@ -797,6 +801,10 @@ public class CRPreferencesDialog extends JDialog implements ChangeListener, Wind
 			String downloadPath = this.field_download.getText();
 			if ( !downloadPath.endsWith( sp ) )
 				downloadPath += sp;
+			
+			File downloadFile = new File( downloadPath );
+			if ( !downloadFile.exists() )
+				downloadFile.mkdir();
 			this.prefs.download_Directory = downloadPath;
 		}
 
