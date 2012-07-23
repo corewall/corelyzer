@@ -94,7 +94,9 @@ char* get_table_name           (int set, int table);
 int   get_table_height         (int set, int table);
 int   get_table_field_count    (int set, int table);
 float get_table_row_depth      (int set, int table, int row);
+float get_table_row_depth_fast (int set, int table, int row);
 float get_table_cell           (int set, int table, int field, int row);
+float get_table_cell_fast      (int set, int table, int field, int row);
 void  set_table_depthunitscale (int set, int table, float scale);
 float get_table_depthunitscale (int set, int table);
 
