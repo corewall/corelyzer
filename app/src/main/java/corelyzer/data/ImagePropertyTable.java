@@ -83,6 +83,8 @@ public class ImagePropertyTable extends JTable {
 		this.setShowGrid(true);
 		this.setShowHorizontalLines(true);
 		this.setShowVerticalLines(true);
+		
+		this.setSelectionMode( ListSelectionModel.MULTIPLE_INTERVAL_SELECTION );
 
 		getTableHeader().resizeAndRepaint();
 	}
@@ -124,9 +126,9 @@ public class ImagePropertyTable extends JTable {
 		current_depth += DEFAULT_LENGTH;
 	}
 
-	public void applyAllDepths(float start, final float inc) {
-		for (int i = 0; i < model.getRowCount(); i++) {
-			model.depthVec.set(i, start);
+	public void applyDepths(float start, final float inc, int[] applyRowIndices) {
+		for ( int rowIndex : applyRowIndices ) {
+			model.depthVec.set(rowIndex, start);
 			start += inc;
 		}
 		updateUI();
@@ -136,16 +138,16 @@ public class ImagePropertyTable extends JTable {
 		System.out.println("hello");
 	}
 	
-	public void applyAllDPIX(final float dpiX) {
-		for (int i = 0; i < this.model.getRowCount(); i++) {
-			model.dpixVec.set(i, dpiX);
+	public void applyDPIX(final float dpiX, int[] applyRowIndices) {
+		for ( int rowIndex : applyRowIndices ) {
+			model.dpixVec.set(rowIndex, dpiX);
 		}
 		updateUI();
 	}
 
-	public void applyAllDPIY(final float dpiY) {
-		for (int i = 0; i < this.model.getRowCount(); i++) {
-			model.dpiyVec.set(i, dpiY);
+	public void applyDPIY(final float dpiY, int[] applyRowIndices) {
+		for ( int rowIndex : applyRowIndices ) {
+			model.dpiyVec.set(rowIndex, dpiY);
 		}
 		updateUI();
 	}
@@ -164,15 +166,15 @@ public class ImagePropertyTable extends JTable {
 	 * return tip; }
 	 */
 
-	public void applyAllLength(final float length) {
-		for (int i = 0; i < model.getRowCount(); i++) {
-			model.lengthVec.set(i, length);
+	public void applyLength(final float length, final int[] applyRowIndices) {
+		for ( int rowIndex : applyRowIndices ) {
+			model.lengthVec.set(rowIndex, length);
 		}
 
 		updateUI();
 	}
 
-	public void applyAllOrientation(final int orientationIdx) {
+	public void applyOrientation(final int orientationIdx, final int[] applyRowIndices) {
 		String orientation = ImagePropertyTableModel.HORIZONTAL;
 		if ( orientationIdx == 1 ) {
 			orientation = ImagePropertyTableModel.VERTICAL;
@@ -180,9 +182,11 @@ public class ImagePropertyTable extends JTable {
 			return; // don't apply "[Blank]", which exists only to exclude orientation from a batch apply
 		}
 
-		for (int i = 0; i < this.model.getRowCount(); i++) {
-			model.orientationVec.set(i, orientation);
+		for ( int rowIndex : applyRowIndices )
+		{
+			model.orientationVec.set( rowIndex, orientation );
 		}
+		
 		updateUI();
 	}
 

@@ -17,7 +17,7 @@ import corelyzer.data.ImagePropertyTable;
 
 public class BatchInputPanel extends JPanel {
 	
-	private ImagePropertyTable imageTable;
+	private ImagePropertyTable imageTable; // table to which batch settings will be applied
 	
 	public JCheckBox useBatchInputCheckbox;
 	public JLabel orientationLabel;
@@ -32,7 +32,7 @@ public class BatchInputPanel extends JPanel {
 	public JTextField startDepthField;
 	public JLabel depthIncLabel;
 	public JTextField depthIncField;
-	public JButton applyButton;
+	public JButton applyToAllButton, applyToSelectedButton;
 	
 	public BatchInputPanel(final ImagePropertyTable imageTable)
 	{
@@ -47,12 +47,24 @@ public class BatchInputPanel extends JPanel {
 			}
 		});
 
-		applyButton.addActionListener(new ActionListener() {
+		applyToAllButton.addActionListener(new ActionListener() {
 			public void actionPerformed(final ActionEvent event) {
-				onApply();
+				onApply( true );
 			}
 		});
 		
+		applyToSelectedButton.addActionListener(new ActionListener() {
+			public void actionPerformed(final ActionEvent event) {
+				onApply( false );
+			}
+		});
+		
+		orientationComboBox.addActionListener( new ActionListener() {
+			public void actionPerformed(final ActionEvent event) {
+				final boolean enableLabel = ( orientationComboBox.getSelectedIndex() != 2 /* [Blank] */);
+					orientationLabel.setEnabled( enableLabel );
+			}
+		});
 		lengthField.getDocument().addDocumentListener( LabelEnablerFactory.create( lengthField, lengthLabel ));
 		dpiXField.getDocument().addDocumentListener( LabelEnablerFactory.create( dpiXField, dpiXLabel ));
 		dpiYField.getDocument().addDocumentListener( LabelEnablerFactory.create( dpiYField, dpiYLabel ));
@@ -88,12 +100,10 @@ public class BatchInputPanel extends JPanel {
 		dpiXField = new JTextField();
 		dpiXField.setEnabled(false);
 		dpiXField.setHorizontalAlignment(11);
-		dpiXField.setText("254");
 		
 		dpiYField = new JTextField();
 		dpiYField.setEnabled(false);
 		dpiYField.setHorizontalAlignment(11);
-		dpiYField.setText("254");
 		
 		batchInputPanel.add(dpiXField, new GridConstraints(2, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL,
 				GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(100, -1), null, 0, false));
@@ -104,28 +114,31 @@ public class BatchInputPanel extends JPanel {
 		startDepthField = new JTextField();
 		startDepthField.setEnabled(false);
 		startDepthField.setHorizontalAlignment(11);
-		startDepthField.setText("0.0");
+
 		batchInputPanel.add(startDepthField, new GridConstraints(4, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL,
 				GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(100, -1), null, 0, false));
 		depthIncField = new JTextField();
 		depthIncField.setEnabled(false);
 		depthIncField.setHorizontalAlignment(11);
-		depthIncField.setText("1.5");
+
 		batchInputPanel.add(depthIncField, new GridConstraints(5, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL,
 				GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(100, -1), null, 0, false));
 		final JPanel applyPanel = new JPanel();
 		applyPanel.setLayout(new GridLayoutManager(1, 2, new Insets(0, 0, 0, 0), -1, -1));
-		batchInputPanel.add(applyPanel, new GridConstraints(6, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH,
+		batchInputPanel.add(applyPanel, new GridConstraints(6, 0, 1, 2, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH,
 				GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK
 						| GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
-		applyButton = new JButton();
-		applyButton.setEnabled(false);
-		applyButton.setText("Apply");
-		applyPanel.add(applyButton, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL,
+		applyToAllButton = new JButton("Apply to All Rows");
+		applyToAllButton.setEnabled(false);
+		applyPanel.add(applyToAllButton, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL,
 				GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-		final Spacer spacer4 = new Spacer();
-		applyPanel.add(spacer4, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL,
-				GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
+		applyToSelectedButton = new JButton("Apply to Selected Rows");
+		applyToSelectedButton.setEnabled(false);
+		applyPanel.add(applyToSelectedButton, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL,
+				GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+//		final Spacer spacer4 = new Spacer();
+//		applyPanel.add(spacer4, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL,
+//				GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
 		orientationComboBox = new JComboBox();
 		orientationComboBox.setEnabled(false);
 		final DefaultComboBoxModel defaultComboBoxModel1 = new DefaultComboBoxModel();
@@ -133,6 +146,8 @@ public class BatchInputPanel extends JPanel {
 		defaultComboBoxModel1.addElement("Vertical");
 		defaultComboBoxModel1.addElement("[Blank]");
 		orientationComboBox.setModel(defaultComboBoxModel1);
+		orientationComboBox.setSelectedIndex( 2 ); // [Blank]
+		
 		batchInputPanel.add(orientationComboBox, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL,
 				GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
 		lengthLabel = new JLabel("Length (meter): ");
@@ -141,7 +156,7 @@ public class BatchInputPanel extends JPanel {
 		lengthField = new JTextField();
 		lengthField.setEnabled(false);
 		lengthField.setHorizontalAlignment(11);
-		lengthField.setText("1.0");
+		
 		batchInputPanel.add(lengthField, new GridConstraints(1, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL,
 				GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
 		orientationLabel = new JLabel("Orientation: ");
@@ -155,27 +170,38 @@ public class BatchInputPanel extends JPanel {
 		onBatch();
 	}
 	
-	private void applyGroupPropToTable() {
+	private void applyGroupPropToTable( final boolean applyToAllRows ) {
+		int[] applyRowIndices = null;
+		if ( applyToAllRows )
+		{
+			applyRowIndices = new int[ imageTable.getRowCount() ];
+			for ( int i = 0; i < applyRowIndices.length; i++ ) { applyRowIndices[i] = i; }
+		}
+		else
+		{
+			applyRowIndices = imageTable.getSelectedRows();
+		}
+		
 		final int orientation = orientationComboBox.getSelectedIndex();
 		if ( orientation < 2 )
-			imageTable.applyAllOrientation( orientation );
+			imageTable.applyOrientation( orientation, applyRowIndices );
 
 		if (!dpiXField.getText().equals(""))
 		{
 			final int dpiX = Integer.valueOf(dpiXField.getText());
-			imageTable.applyAllDPIX(dpiX);
+			imageTable.applyDPIX(dpiX, applyRowIndices );
 		}
 		
 		if (!dpiYField.getText().equals(""))
 		{
 			final int dpiY = Integer.valueOf(dpiYField.getText());
-			imageTable.applyAllDPIY(dpiY);
+			imageTable.applyDPIY(dpiY, applyRowIndices);
 		}
 
 		if (!lengthField.getText().equals(""))
 		{
 			final float length = Float.valueOf(lengthField.getText());
-			imageTable.applyAllLength(length);
+			imageTable.applyLength(length, applyRowIndices);
 		}
 		
 		// depth increment and start depth: both must be populated to apply
@@ -183,7 +209,7 @@ public class BatchInputPanel extends JPanel {
 		{
 			final float depthInc = Float.valueOf(depthIncField.getText());
 			final float depthStart = Float.valueOf(startDepthField.getText());
-			imageTable.applyAllDepths(depthStart, depthInc);
+			imageTable.applyDepths(depthStart, depthInc, applyRowIndices);
 		}
 		else if (!depthIncField.getText().equals("") || !startDepthField.getText().equals(""))
 		{
@@ -192,9 +218,9 @@ public class BatchInputPanel extends JPanel {
 	}
 	
 
-	private void onApply() {
+	private void onApply( boolean applyToAllRows ) {
 		try {
-			applyGroupPropToTable();
+			applyGroupPropToTable( applyToAllRows );
 		} catch (NumberFormatException e) {
 			JOptionPane.showMessageDialog(this, "Invalid value: " + e.getMessage());
 		}
@@ -209,7 +235,8 @@ public class BatchInputPanel extends JPanel {
 		dpiYField.setEnabled(b);
 		startDepthField.setEnabled(b);
 		depthIncField.setEnabled(b);
-		applyButton.setEnabled(b);
+		applyToAllButton.setEnabled(b);
+		applyToSelectedButton.setEnabled(b);
 
 		if (!b)
 		{
