@@ -97,6 +97,10 @@ typedef struct {
     bool  show;
 
 	bool  graphonly;
+	
+	// average depth between first six datapoints, used to reduce number
+	// of points plotted at high zoom levels
+	float data_granularity; // (in cm)
 
 } Graph;
 
@@ -128,6 +132,14 @@ typedef struct {
     float w;
     float h;
 } Box;
+
+struct GraphDebugInfo {
+	bool useScaling;
+	bool useLabels;
+	bool useBorder;
+	bool useScissoring;
+	int scaleFactor;
+};
 
 void  render_graph  (ModelGridsLOD* m, float dpi_x, float dpi_y,
                      int trackId, int sectionId);
@@ -192,5 +204,8 @@ void setCollapse(bool aBool);
 
 void setGraphScale(float s);
 float getGraphScale();
+
+void handle_graph_debug_key(int keyId);
+GraphDebugInfo get_graph_debug_info();
 
 #endif
