@@ -47,12 +47,15 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
 import javax.swing.SwingUtilities;
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
 
 import org.apache.xerces.parsers.DOMParser;
 
 import corelyzer.data.CRPreferences;
 import corelyzer.data.CoreSection;
 import corelyzer.data.CoreSectionImage;
+import corelyzer.data.CorelyzerXMLDataHandler;
 import corelyzer.data.SAXWellLogDataSet;
 import corelyzer.data.Session;
 import corelyzer.data.TrackSceneNode;
@@ -1057,11 +1060,13 @@ public class CorelyzerAppController implements ActionListener {
 
 		// Only check XML now
 		try {
-			DOMParser parser = new DOMParser();
-			parser.setFeature("http://apache.org/xml/features/dom/" + "include-ignorable-whitespace", false);
-			parser.parse(filename.getAbsolutePath());
+			//DOMParser parser = new DOMParser();
+			SAXParser parser = SAXParserFactory.newInstance().newSAXParser();
+			CorelyzerXMLDataHandler handler = new CorelyzerXMLDataHandler();
+			//parser.setFeature("http://apache.org/xml/features/dom/" + "include-ignorable-whitespace", false);
+			parser.parse(filename.getAbsolutePath(), handler);
 		} catch (Exception e) {
-			JOptionPane.showMessageDialog(CorelyzerApp.getApp().getMainFrame(), "Dataset file loading error\n" + e);
+			JOptionPane.showMessageDialog(CorelyzerApp.getApp().getMainFrame(), "Dataset file loading error (usually indicates invalid XML)\n" + e);
 
 			if (pb != null) {
 				SwingUtilities.invokeLater(new Runnable() {
@@ -1078,7 +1083,7 @@ public class CorelyzerAppController implements ActionListener {
 		int dsId = SceneGraph.addDataset(filename.getName());
 
 		// Java side
-		WellLogDataSet dataset;
+		WellLogDataSet dataset = null;
 
 		long before = new Date().getTime();
 		{
@@ -1149,7 +1154,30 @@ public class CorelyzerAppController implements ActionListener {
 	// ---------------------------------------------------------------
 
 	public void loadImageAction() {
-		final Vector<File> selectedFiles = FileUtility.loadLocalImages(view.getMainFrame());
+		Vector<File> selectedFiles = FileUtility.loadLocalImages(view.getMainFrame());
+		
+		// remove any empty files from the list and notify user
+		Vector<File> removedFiles = new Vector<File>();
+		for ( File curFile : selectedFiles )
+		{
+			if ( curFile.length() == 0 )
+				removedFiles.add( curFile );
+		}
+
+		if ( removedFiles.size() > 0 )
+		{
+			String removedFilesStr = new String();
+			for ( File curFile : removedFiles )
+			{
+				selectedFiles.remove( curFile );
+				removedFilesStr += curFile.toString() + "\n";
+			}
+			
+			JOptionPane.showMessageDialog( view.getMainFrame(), "The following " + removedFiles.size() +
+					" files are empty and cannot be loaded:\n" + removedFilesStr );
+		}
+		
+		// if any valid files remain, hand them off to the wizard for loading
 		if ( selectedFiles.size() > 0 )
 		{
 			CRLoadImageWizard dialog = new CRLoadImageWizard(view.getMainFrame(), selectedFiles);
