@@ -1674,7 +1674,8 @@ public class CorelyzerAppController implements ActionListener {
 		s.setLocationRelativeTo(view.getMainFrame());
 		s.setVisible(true);
 
-		boolean[] isSelected = s.getSelectedIndex();
+		final boolean[] isSelected = s.getSelectedIndex();
+		final String suggestedName = s.getSelectedIndexName();
 		s.dispose();
 
 		if (isSelected == null) {
@@ -1684,7 +1685,7 @@ public class CorelyzerAppController implements ActionListener {
 		String selected;
 		if (aFilePath == null || aFilePath.equals("")) {
 			String title = "Save a Session file";
-			selected = FileUtility.selectASingleFile(view.getMainFrame(), title, "cml", FileUtility.SAVE);
+			selected = FileUtility.selectASingleFile(view.getMainFrame(), title, "cml", FileUtility.SAVE, suggestedName);
 		} else {
 			selected = aFilePath;
 		}

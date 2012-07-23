@@ -205,6 +205,26 @@ public class SessionsSelectDialog extends JDialog {
 			return null;
 		}
 	}
+	
+	// returns text of first selected checkbox
+	public String getSelectedIndexName() {
+		String result = null;
+		if ( !this.isCancelled && sessList != null )
+		{
+			CheckBoxList l = (CheckBoxList) sessList;
+
+			for (int i = 0; i < l.getModel().getSize(); i++) {
+				JCheckBox cb = (JCheckBox) l.getModel().getElementAt(i);
+				if ( cb.isSelected() )
+				{
+					result = cb.getText();
+					break;
+				}
+			}
+		}	
+
+		return result;
+	}
 
 	private void onCancel() {
 		this.isCancelled = true;
