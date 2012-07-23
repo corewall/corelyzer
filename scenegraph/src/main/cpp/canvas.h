@@ -207,4 +207,8 @@ void  set_crosshair_label(char *label);
 void  set_canvas_rows_and_columns(int nrow, int ncols);
 
 void  setTieDepth(bool isEnabled, float tieDepth);
+
+void update_fps( const int lastRenderTime );
+float get_fps();
+
 #endif

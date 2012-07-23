@@ -13,6 +13,7 @@ import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
+import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -39,7 +40,7 @@ public class SampleRequestListDialog extends JDialog {
 	private static final long serialVersionUID = -8147115086015596223L;
 
 	public static void main(final String[] args) {
-		SampleRequestListDialog dialog = new SampleRequestListDialog();
+		SampleRequestListDialog dialog = new SampleRequestListDialog( null );
 		dialog.pack();
 		dialog.setVisible(true);
 		// System.exit(0);
@@ -61,7 +62,8 @@ public class SampleRequestListDialog extends JDialog {
 		$$$setupUI$$$();
 	}
 
-	public SampleRequestListDialog() {
+	public SampleRequestListDialog( final JFrame owner ) {
+		super( owner );
 		setTitle("Sample Request List");
 		setContentPane(contentPane);
 		// setModal(true);

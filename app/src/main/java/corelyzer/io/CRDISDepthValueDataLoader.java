@@ -328,7 +328,9 @@ public class CRDISDepthValueDataLoader {
 		 * for(int colNum : vals) { System.out.println("col: " + colNum); }
 		 */
 
-		DataImportWizard.convert(f, outputFile, this.fileSeparator, sectionPrefix, this.dataStartLine, this.dataEndLine, this.labelLine, this.unitLine, null,
+//		DataImportWizard.convert(f, outputFile, this.fileSeparator, sectionPrefix, this.dataStartLine, this.dataEndLine, this.labelLine, this.unitLine, null,
+//				this.depthColumn, vals, DataImportWizard.DepthMode.ACCUM_DEPTH, false, -999.2500f);
+		DataImportWizard.sax_convert(f, outputFile, this.fileSeparator, sectionPrefix, this.dataStartLine, this.dataEndLine, this.labelLine, this.unitLine, null,
 				this.depthColumn, vals, DataImportWizard.DepthMode.ACCUM_DEPTH, false, -999.2500f);
 
 		return outputFile;

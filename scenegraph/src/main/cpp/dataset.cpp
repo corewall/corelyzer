@@ -451,6 +451,14 @@ float get_table_row_depth(int set, int table, int row)
 }
 
 //======================================================================
+// 7/18/2012 brg: See comments on get_table_cell_fast()
+float get_table_row_depth_fast(int set, int table, int row)
+{
+    SectionTable *t = datasetvec[set]->sectionvec[table];
+    return t->depth[row];
+}
+
+//======================================================================
 float get_table_cell(int set, int table, int field, int row)
 {
     if(row < 0 || field < 0)
@@ -499,6 +507,17 @@ float get_table_cell(int set, int table, int field, int row)
 #ifdef DEBUG
     printf("Returning %f\n", t->table[field][row].value);
 #endif
+    return t->table[field][row].value;
+}
+
+//======================================================================
+// 7/18/2012 brg: get_table_cell() above does the same checks in
+// is_table_cell_valid(), which is redundant in the case of render_graph()
+// and slows things down unnecessarily. Adding this validation-free flavor
+// of the routine.
+float get_table_cell_fast(int set, int table, int field, int row)
+{
+    SectionTable* t = datasetvec[set]->sectionvec[table];
     return t->table[field][row].value;
 }
 

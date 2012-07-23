@@ -323,6 +323,33 @@ void render_string(const char* str, int start, int end)
 }
 
 //=======================================================================
+void render_scaled_string(const char* str, int start, int end, float scaling)
+{
+	
+    // make sure we have loaded all the fonts we should have by now
+    //printf("processing font system\n");
+    process_font_load_queue();
+    //printf("queued fonts processed\n");
+    // continue on
+    if(!is_font(current_font)) { return; }
+    CWFont* cwf = fontvec[current_font];
+	
+    glEnable(GL_TEXTURE_2D);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glPushMatrix();
+    {
+        glScalef(scaling * 1.0f, scaling * -1.0f, 1.0f);
+        for(int i = start; i <= end; i++)
+        {
+            glCallLists( 1, GL_UNSIGNED_INT, &(cwf->glyphMap[str[i]]) );
+        }
+    }
+    glPopMatrix();
+    glDisable(GL_BLEND);
+}
+
+//=======================================================================
 void render_string_label(const char* str, int start, int end)
 {
 

@@ -53,7 +53,6 @@ std::vector< AnnotationMarkerType > marker_typevec;
 // Annotation size parameter, bigger DPI, bigger size
 static float markerScale  = DEFAULT_MARKER_SCALE;
 // static float _markerScale = DEFAULT_MARKER_SCALE;
-// static bool  markerAutoScale = true;
 //==========================================================================
 bool is_marker_texture(int id)
 {
@@ -882,36 +881,10 @@ void  set_marker_vertex (AnnotationMarker* m, float ax, float ay,
 
 void setMarkerScale(float s)
 {
-/*
-    _markerScale *= s;
-    markerScale = isMarkerAutoScale() ? _markerScale : DEFAULT_MARKER_SCALE;
-*/
     markerScale *= s;
 }
 
 float getMarkerScale()
 {
     return markerScale;
-}
-
-void  setMarkerAutoScale(bool b)
-{
-/*
-    markerAutoScale = b;
-
-    if(b)
-    {
-        markerScale = _markerScale;
-    }
-    else
-    {
-        markerScale = DEFAULT_MARKER_SCALE;
-    }
-*/
-}
-
-bool  isMarkerAutoScale()
-{
-//    return markerAutoScale;
-    return false;
 }

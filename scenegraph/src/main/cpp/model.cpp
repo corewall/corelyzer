@@ -165,6 +165,14 @@ void render_model_grid(ModelGridsLOD* m, Canvas* c)
     int cols = m->cols[l];
     int rows = m->rows[l];
     ModelNode* grid = m->grid[l];
+	
+	// 6/29/2012 brg: Strangely slow drawing performance led me to discover that the
+	// algorithm below was drawing the same nodes upwards of 30x per render call!
+	// For now, track how many times a node has been drawn, ensuring we only draw it
+	// once. TODO: find flaw in algorithm itself and fix.
+	const int totalNodes = cols * rows;
+	char *nodeDrawCounts = new char[totalNodes];
+	for ( int i = 0; i < totalNodes; i++ ) { nodeDrawCounts[i] = 0; }
 
     float x, y, z;
     get_camera_position( c->camera, &x, &y, &z);
@@ -281,6 +289,11 @@ void render_model_grid(ModelGridsLOD* m, Canvas* c)
             printf("\t!!! Starts at (%.2f, %.2f) to (%.2f, %.2f) !!!\n",
                    n->x, n->y, n->x + n->w, n->y + n->h);
 #endif
+
+			// 6/29/2012 brg: don't draw again if node has already been drawn!
+			nodeDrawCounts[ n->row * cols + n->col ]++;
+			if ( nodeDrawCounts[ n->row * cols + n->col ] > 1 )
+				continue;
             
             bind_texblock( m->src, l, n->col, n->row);
 
@@ -376,9 +389,11 @@ void render_model_grid(ModelGridsLOD* m, Canvas* c)
         } // end switch to process next sub grid or not
         
     } // end while stack not empty
-
-    // go throught the whole grid and draw the outline of the blocks
-    if(getDebug()) {
+	
+	delete[] nodeDrawCounts; // 6/29/2012 brg
+	    
+	// go through the whole grid and draw the outline of the blocks
+    if (getDebug()) {
         int i, j;
 
         glBindTexture(GL_TEXTURE_2D, 0);

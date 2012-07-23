@@ -43,6 +43,7 @@ import javax.swing.JButton;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
+import javax.swing.JFrame;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -271,7 +272,7 @@ public class FreeformAnnotationListDialog extends JDialog {
 	private static final long serialVersionUID = 3989039001984831875L;
 
 	public static void main(final String[] args) {
-		FreeformAnnotationListDialog dialog = new FreeformAnnotationListDialog();
+		FreeformAnnotationListDialog dialog = new FreeformAnnotationListDialog( null );
 		dialog.pack();
 		dialog.setVisible(true);
 	}
@@ -297,7 +298,8 @@ public class FreeformAnnotationListDialog extends JDialog {
 		$$$setupUI$$$();
 	}
 
-	public FreeformAnnotationListDialog() {
+	public FreeformAnnotationListDialog( final JFrame owner ) {
+		super( owner );
 		setTitle("Freeform Annotations");
 		setContentPane(contentPane);
 		getRootPane().setDefaultButton(closeButton);

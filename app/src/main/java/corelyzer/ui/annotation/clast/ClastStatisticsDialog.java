@@ -45,6 +45,7 @@ import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
+import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -86,7 +87,7 @@ public class ClastStatisticsDialog extends JDialog {
 	public static boolean MAC_OS_X = System.getProperty("os.name").toLowerCase().startsWith("mac os x");
 
 	public static void main(final String[] args) {
-		ClastStatisticsDialog dialog = new ClastStatisticsDialog();
+		ClastStatisticsDialog dialog = new ClastStatisticsDialog( null );
 		dialog.pack();
 		dialog.setVisible(true);
 		// System.exit(0);
@@ -110,7 +111,8 @@ public class ClastStatisticsDialog extends JDialog {
 		$$$setupUI$$$();
 	}
 
-	public ClastStatisticsDialog() {
+	public ClastStatisticsDialog( final JFrame owner ) {
+		super( owner );
 		this.setTitle("Clast Info Statistics");
 		setContentPane(contentPane);
 		// setModal(true);

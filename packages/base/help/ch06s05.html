@@ -1,44 +1,46 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>6.5.Â Plot dataset graph</title><meta name="generator" content="DocBook XSL Stylesheets V1.74.0" /><link rel="home" href="index.html" title="Corelyzer User's Manual" /><link rel="up" href="ch06.html" title="ChapterÂ 6.Â Load and Plot Numerical Log Data" /><link rel="prev" href="ch06s04.html" title="6.4.Â Download from IODP-USIO logging database" /><link rel="next" href="ch07.html" title="ChapterÂ 7.Â Interactions" /></head><body><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">6.5.Â Plot dataset graph</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="ch06s04.html">Prev</a>Â </td><th width="60%" align="center">ChapterÂ 6.Â Load and Plot Numerical Log Data</th><td width="20%" align="right">Â <a accesskey="n" href="ch07.html">Next</a></td></tr></table><hr /></div><div class="sect1" lang="en" xml:lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="id462235"></a>6.5.Â Plot dataset graph</h2></div></div></div><p>
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>6.5. Plot dataset graph</title><meta name="generator" content="DocBook XSL Stylesheets V1.77.1"><link rel="home" href="index.html" title="Corelyzer User's Manual"><link rel="up" href="ch06.html" title="Chapter 6. Load and Plot Numerical Log Data"><link rel="prev" href="ch06s04.html" title="6.4. Download from IODP-USIO logging database"><link rel="next" href="ch07.html" title="Chapter 7. Interactions"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">6.5. Plot dataset graph</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="ch06s04.html">Prev</a> </td><th width="60%" align="center">Chapter 6. Load and Plot Numerical Log Data</th><td width="20%" align="right"> <a accesskey="n" href="ch07.html">Next</a></td></tr></table><hr></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="sec.graphing"></a>6.5. Plot dataset graph</h2></div></div></div><p>
         If you have dataset files loaded and tracks created, your main
-        iCores control window should like the following screenshot.
+        iCores control window should resemble that pictured below. To plot data,
+		right-click on the desired data file and choose "Graph...". This opens the Graph dialog.
 
-        </p><div class="figure"><a id="id462245"></a><p class="title"><b>FigureÂ 6.10.Â Main window with dataset loaded</b></p><div class="figure-contents"><div><img src="images/dataplot-1.png" alt="Main window with dataset loaded" /></div></div></div><p><br class="figure-break" />
-      </p><p>
-        Use mouse cursor to right click on the interested data file
-        entry and click on the "Graph..." menu item will bring up the
-        "Graph Dialog" below.
+        </p><div class="figure"><a name="id36160193"></a><p class="title"><b>Figure 6.10. Main window with dataset loaded</b></p><div class="figure-contents"><div><img src="images/dataplot-1.png" alt="Main window with dataset loaded"></div></div></div><p><br class="figure-break">
+		
+		Alternately, you can right-click a section image in the visualization canvas and choose
+		"Graph..." from the menu as seen below:
+		
+		</p><div class="figure"><a name="id36160206"></a><p class="title"><b>Figure 6.11. Opening graph dialog by right-clicking section image</b></p><div class="figure-contents"><div><img src="images/dataplot-1.1.png" alt="Opening graph dialog by right-clicking section image"></div></div></div><p><br class="figure-break">
+		
+		</p><div class="figure"><a name="id36160219"></a><p class="title"><b>Figure 6.12. Graph dialog</b></p><div class="figure-contents"><div><img src="images/dataplot-2.png" alt="Graph dialog"></div></div></div><p><br class="figure-break">
 
-        </p><div class="figure"><a id="id462264"></a><p class="title"><b>FigureÂ 6.11.Â Graph dialog</b></p><div class="figure-contents"><div><img src="images/dataplot-2.png" alt="Graph dialog" /></div></div></div><p><br class="figure-break" />
-      </p><p>
-        You can select section by section and the available data
-        fields will be shown in the "Properties fields" list
-        below. Check on the interested field checkboxes will plot the
-        graph plot in the main visualization area registered to the
-        depths.
-      </p><p>
-        You can also check the "Apply to all sections in this dataset"
-        to apply field selections to all sections in a dataset
-        file. When you select a field, the field's maximum and minimum
-        values will be updated below. You can change the viewing
-        maximum and minimum values to scale the graph plots. You can
-        also change the plot presentation and colors in the options
-        below. If the "Collapse Graphs" option is checked, all checked
-        graph plots will be fit into a single drawing box. Otherwise,
-        each graph plot will be shown in individual box/row in the
-        main visualization area as shown below.
+        Select one or more sections and the available data
+        fields will be shown in the "Properties fields" list. Checking a
+		field's checkbox in the "Show" column will plot that data in the main
+		visualization area. To change the color of plotted data, click the field's
+		color cell and select from the resulting palette. Corelyzer attempts to use
+		the same color across all sections for fields of the same name. The "Data
+		Range" column indicates the min/max range of data across all selected sections.
+	</p><p>
+		Other controls:
+	</p><p>
+        </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>Graph type: Change apperance of graph (points, lines, etc.).</p></li><li class="listitem"><p>Collapse graphs: 	When checked, all selected data fields will be
+			plotted on a single coordinate plane for each section (see example below).</p></li><li class="listitem"><p>Scale min/max: Change the minimum and maximum range of the coordinate plane.</p></li><li class="listitem"><p>Excluded values: When populated, don't graph datapoints that fall within
+				the excluded range. One or both fields can be filled. When multiple sections are
+				selected, the broadest exclusion range will be displayed (that is, the minimum of
+				minimums and maximum of maximums).</p></li><li class="listitem"><p>Leave gaps at excluded values: When checked, the Line and Line &amp; Points graph
+			types will not draw a line connecting points with excluded values between them.</p></li></ul></div><p>
 
-        </p><div class="figure"><a id="id462288"></a><p class="title"><b>FigureÂ 6.12.Â Graph plot without graph collapse</b></p><div class="figure-contents"><div><img src="images/dataplot-3.png" alt="Graph plot without graph collapse" /></div></div></div><p><br class="figure-break" />
-      </p><p>
-        In some cases, you might want to amplify the actual scale of
-        the graph plots when you are looking data plots in great depth
-        range. To increase or decrease the graph (vertical) scale, you
+		</p><div class="figure"><a name="id36160277"></a><p class="title"><b>Figure 6.13. Graph plot with "collapsed" graphs</b></p><div class="figure-contents"><div><img src="images/dataplot-3.png" alt='Graph plot with "collapsed" graphs'></div></div></div><p><br class="figure-break">
+	</p><p>
+		Keyboard Commands:
+	</p><p>
+		In some cases, you may want to expand the vertical size of
+        graph plots, e.g. those with a large depth range. To increase
+		or decrease the graph (vertical) scale, you
         can first click on the visualization canvas area, and then
-        press '[' or ']' to decrease or increase the graph's vertical
-        scale on the screen.
-      </p><p>
+        press '[' or ']' to decrease or increase the graph's size
+        on-screen.
+		
         A screen capture video of these actions can be found in this
-        <a class="ulink" href="http://www.evl.uic.edu/cavern/corewall/documents/movies/6.4-GraphParameters.mov" target="_top">link
-        online (size: 2.0MB)</a>.
-      </p></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="ch06s04.html">Prev</a>Â </td><td width="20%" align="center"><a accesskey="u" href="ch06.html">Up</a></td><td width="40%" align="right">Â <a accesskey="n" href="ch07.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">6.4.Â Download from IODP-USIO logging databaseÂ </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top">Â ChapterÂ 7.Â Interactions</td></tr></table></div></body></html>
+        <a class="ulink" href="http://www.corewall.org/documents/movies/6.4-GraphParameters.mov" target="_top">link
+        online (size: 2.0MB)</a>
+	</p></div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="ch06s04.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="ch06.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="ch07.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">6.4. Download from IODP-USIO logging database </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> Chapter 7. Interactions</td></tr></table></div></body></html>

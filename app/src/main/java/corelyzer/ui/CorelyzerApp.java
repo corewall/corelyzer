@@ -45,6 +45,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.StringTokenizer;
 import java.util.Vector;
 
 import javax.help.CSH;
@@ -69,6 +70,7 @@ import javax.swing.JScrollPane;
 import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
+import javax.swing.ToolTipManager;
 import javax.swing.WindowConstants;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
@@ -114,6 +116,23 @@ public class CorelyzerApp extends WindowAdapter implements MouseListener, Startu
 		}
 	}
 
+	private static void doStartupChecks()
+	{
+		String javaVersion = System.getProperty("java.version");
+		StringTokenizer st = new StringTokenizer( javaVersion, "." );
+		if ( st.countTokens() >= 2 )
+		{
+			final int majorVersion = Integer.parseInt( st.nextToken() );
+			final int minorVersion = Integer.parseInt( st.nextToken() );
+			
+			if ( !MAC_OS_X && majorVersion <= 1 && minorVersion <= 6 )
+			{
+				JOptionPane.showMessageDialog( null, "Detected Java version " + javaVersion + ":\n" +
+						"Java 1.7 or later is recommended for use with this version of Corelyzer." );
+			}
+		}
+	}
+	
 	// ====================================================================
 	private static CRPreferences handlePreferences() {
 		CRPreferences prefs = new CRPreferences();
@@ -149,7 +168,7 @@ public class CorelyzerApp extends WindowAdapter implements MouseListener, Startu
 		File dirs_config = new File(prefs.config_Directory + "/directories.txt");
 
 		if (dirs_config.exists()) {
-			hasDirConf = prefs.readDirectoryConfig(dirs_config);
+			hasDirConf = prefs.readDirectoryConfig( prefs.config_Directory );
 		} else { // no dir setup, so create default ones
 			File cache_dir = new File(prefs.cache_Directory);
 			File imgb_dir = new File(prefs.texBlock_Directory);
@@ -293,13 +312,11 @@ public class CorelyzerApp extends WindowAdapter implements MouseListener, Startu
 	JPopupMenu dataPopupMenu;
 	JMenuItem dataPopupGraphMenuItem;
 	CRToolPalette toolFrame;
+
 	static final int APP_NORMAL_MODE = 0;
 	static final int APP_MEASURE_MODE = 1;
-
 	static final int APP_MARKER_MODE = 2;
-
 	static final int APP_CLAST_MODE = 3;
-
 	static final int APP_CUT_MODE = 4;
 
 	// Returns the single instance of the CorelyzerApp class
@@ -316,6 +333,8 @@ public class CorelyzerApp extends WindowAdapter implements MouseListener, Startu
 	 *			  Plugin names and input session file, if there's any
 	 */
 	public static void main(final String[] args) {
+		doStartupChecks();
+		
 		CRPreferences prefs = handlePreferences();
 
 		// If somehow the user click on 'Cancel' in their first run, just quit.
@@ -383,6 +402,9 @@ public class CorelyzerApp extends WindowAdapter implements MouseListener, Startu
 		}
 		
 		myApp.installPaletteVisibilityManager();
+		
+		// show tooltips for 10 seconds before dismissing - default time seems a bit too short
+		ToolTipManager.sharedInstance().setDismissDelay( 10000 );
 	}
 
 	// Reuse helpAction in main frame and tool palette
@@ -1731,7 +1753,7 @@ public class CorelyzerApp extends WindowAdapter implements MouseListener, Startu
 		JMenuItem freeformsItem = new JMenuItem("Default");
 		freeformsItem.addActionListener(new ActionListener() {
 			public void actionPerformed(final ActionEvent e) {
-				FreeformAnnotationListDialog dlg = new FreeformAnnotationListDialog();
+				FreeformAnnotationListDialog dlg = new FreeformAnnotationListDialog( getApp().getMainFrame() );
 				dlg.pack();
 				dlg.setLocationRelativeTo(getApp().getMainFrame());
 				dlg.onRefresh();
@@ -1745,7 +1767,7 @@ public class CorelyzerApp extends WindowAdapter implements MouseListener, Startu
 		JMenuItem clastListItem = new JMenuItem("Clast");
 		clastListItem.addActionListener(new ActionListener() {
 			public void actionPerformed(final ActionEvent e) {
-				ClastStatisticsDialog dlg = new ClastStatisticsDialog();
+				ClastStatisticsDialog dlg = new ClastStatisticsDialog( getApp().getMainFrame() );
 				dlg.pack();
 				dlg.setLocationRelativeTo(getApp().getMainFrame());
 				dlg.onRefresh();
@@ -1759,7 +1781,7 @@ public class CorelyzerApp extends WindowAdapter implements MouseListener, Startu
 		JMenuItem sampleReqsItem = new JMenuItem("Sample");
 		sampleReqsItem.addActionListener(new ActionListener() {
 			public void actionPerformed(final ActionEvent e) {
-				SampleRequestListDialog dlg = new SampleRequestListDialog();
+				SampleRequestListDialog dlg = new SampleRequestListDialog( getApp().getMainFrame() );
 				dlg.pack();
 				dlg.setLocationRelativeTo(getApp().getMainFrame());
 				dlg.onRefresh();

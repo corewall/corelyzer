@@ -219,6 +219,10 @@ public class FileUtility {
 	}
 
 	public static String selectASingleFile(final Window parent, final String title, final String filterStr, final int mode) {
+		return selectASingleFile( parent, title, filterStr, mode, null );
+	}
+	
+	public static String selectASingleFile(final Window parent, final String title, final String filterStr, final int mode, final String suggestedFilename) {
 		setAlwaysOnTop(false, parent);
 
 		boolean MAC_OS_X = System.getProperty("os.name").toLowerCase().startsWith("mac os x");
@@ -249,6 +253,9 @@ public class FileUtility {
 
 				dlg.setFilenameFilter(filter);
 			}
+			
+			if ( suggestedFilename != null )
+				dlg.setFile( suggestedFilename );
 
 			// parent.setAlwaysOnTop(false);
 			dlg.pack();
@@ -278,6 +285,12 @@ public class FileUtility {
 			JFileChooser chooser = new JFileChooser();
 			chooser.setCurrentDirectory(new File(CRPreferences.getCurrentDir()));
 			chooser.setDialogTitle(title);
+			
+			if ( suggestedFilename != null ) {
+				final File suggestedFile = new File( suggestedFilename );
+				chooser.setSelectedFile( suggestedFile );
+			}
+			
 			chooser.resetChoosableFileFilters();
 
 			if (mode == FileUtility.SAVE) {

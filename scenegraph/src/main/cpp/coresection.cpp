@@ -641,7 +641,7 @@ void render_section_model(CoreSection* ptr, Canvas *c)
                 }
 
                 // make sure our base color is white
-                float opacity = (ptr->highlight) ? 0.3 : 1.0;
+                float opacity = (ptr->highlight) ? 0.9 : 1.0;
                 glColor4f(1, 1, 1, opacity);
 
                 //determine LOD based on the DPI of the image,

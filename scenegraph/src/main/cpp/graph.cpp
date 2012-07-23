@@ -48,7 +48,6 @@ static bool isCollapse = false;
 static float graphScaleLimit = 1000.0f;
 static float graphScale  = DEFAULT_GRAPH_SCALE;
 // static float _graphScale = DEFAULT_GRAPH_SCALE;
-// static bool  graphAutoScale = true;
 //======================================================================
 bool is_graph(int gid)
 {
@@ -136,9 +135,9 @@ int add_line_graph_to_section(int track, int section,
 
 	// calc width in case that coresection only have graph
 	// depth here is inch
-	int rows = get_table_height( dataset, table );
-	float depthunitscale = get_table_depthunitscale(dataset, table);
-	float depth = get_table_row_depth( dataset, table, rows-1);
+	const int rows = get_table_height( dataset, table );
+	const float depthunitscale = get_table_depthunitscale(dataset, table);
+	const float depth = get_table_row_depth( dataset, table, rows-1);
 	g->w = (depth * depthunitscale * INCH_PER_CM);
 	if (cs->src == -1) {
 		cs->width = g->w * CM_PER_INCH;			// cm
@@ -155,6 +154,18 @@ int add_line_graph_to_section(int track, int section,
 	g->exclude_min = FLT_MIN; g->exclude_max = FLT_MAX;
 	
 	g->type	   = GRAPH_LINE;
+	
+	// try to determine granularity of data by averaging difference between first six depths
+	const int endRow = ( 6 > rows ) ? rows : 6;
+	float totalDepth = 0.0f;
+	int ridx = 1;
+	for ( ; ridx < endRow; ridx++ )
+	{
+		totalDepth += ( get_table_row_depth( g->dataset, g->table, ridx ) -
+					    get_table_row_depth( g->dataset, g->table, ridx - 1 ));
+	}
+	float averageInMeters = totalDepth / (float)(ridx - 1);
+	g->data_granularity = averageInMeters * 100.0f;
 
     // find the first open spot and use it
     for( int i = 0; i < graphvec.size(); i++)
@@ -423,6 +434,50 @@ bool exclude_value(const int gid, const float value)
 
 }
 
+static bool useScaling = false;
+static bool useLabels = true;
+static bool useBorder = true;
+static bool useScissoring = false;
+static int scaleFactor = 0;
+
+static const int TOGGLE_SCALING = 1;
+static const int TOGGLE_LABELS = 2;
+static const int TOGGLE_BORDER = 3;
+static const int TOGGLE_SCISSORING = 4;
+
+GraphDebugInfo get_graph_debug_info()
+{
+	GraphDebugInfo gdi;
+	gdi.useScaling = useScaling;
+	gdi.useLabels = useLabels;
+	gdi.useBorder = useBorder;
+	gdi.useScissoring = useScissoring;
+	gdi.scaleFactor = scaleFactor;
+	
+	return gdi;
+}
+
+void handle_graph_debug_key(int keyId)
+{
+	switch (keyId)
+	{
+		case TOGGLE_SCALING:
+			useScaling = !useScaling;
+			break;
+		case TOGGLE_LABELS:
+			useLabels = !useLabels;
+			break;
+		case TOGGLE_BORDER:
+			useBorder = !useBorder;
+			break;
+		case TOGGLE_SCISSORING:
+			useScissoring = !useScissoring;
+			break;
+		default:
+			break;
+	}
+}
+
 void render_graph(Canvas* c, CoreSection* cs, int gid)
 {
     if( !is_graph(gid) )
@@ -443,6 +498,7 @@ void render_graph(Canvas* c, CoreSection* cs, int gid)
     float cd = y + c->coverage_y;  // down
 
     float scale = c->w / c->w0;
+	//printf("orig canvas width %f, cur width %f, scaling %f\n", c->w0, c->w, scale);
 	int stride = 1; // todo adjust according to Z for striding value array
 
     /*
@@ -500,8 +556,16 @@ void render_graph(Canvas* c, CoreSection* cs, int gid)
             glTranslatef( 0.0, (b->y + b->h) * c->dpi_y, 0.0 );
 
             // Leave 2 pixels spacing
-            render_border(b->w * c->dpi_x + 2, b->h * c->dpi_y + 2);
-            render_label(c, cs, gid);
+			if ( useBorder )
+				render_border(b->w * c->dpi_x + 2, b->h * c->dpi_y + 2);
+            if ( useLabels )
+			{
+				// 7/18/2012 brg: at distant zoom levels, labels are illegible and slow
+				// things down significantly if there are many graphs. Only draw if we're
+				// within a reasonable zoom range.
+				if ( c->w / c->w0 < 10.0f /* BRGTODO test this arbitrary value on other systems */)
+					render_label(c, cs, gid);
+			}
             // render_minmax_labels(c, cs, gid);
         }
         glPopMatrix();
@@ -521,61 +585,64 @@ void render_graph(Canvas* c, CoreSection* cs, int gid)
             //         in object coordinate
             GLdouble w1[3];
             GLdouble w2[3];
-            
-            GLint p1, p2;
-            
-            if(get_horizontal_depth()) {
-                // the lower left corner in window space
-                p1 = gluProject(b->x * c->dpi_x,
-                                (b->y + b->h) * c->dpi_y,
-                                0,
-                                mvmat, prjmat, viewport,
-                                w1, w1+1, w1+2);
 
-                // the upper right corner
-                p2 = gluProject((b->w + b->x) * c->dpi_x,
-                                b->y * c->dpi_y,
-                                0,
-                                mvmat, prjmat, viewport,
-                                w2, w2+1, w2+2);            
-            } else {
-                // the lower left corner in window space            
-                p1 = gluProject((b->x + b->w) * c->dpi_x,
-                                (b->y + b->h) * c->dpi_y,
-                                0,
-                                mvmat, prjmat, viewport,
-                                w1, w1+1, w1+2);
+			if ( useScissoring )
+			{
+				GLint p1, p2;
+				
+				if(get_horizontal_depth()) {
+					// the lower left corner in window space
+					p1 = gluProject(b->x * c->dpi_x,
+									(b->y + b->h) * c->dpi_y,
+									0,
+									mvmat, prjmat, viewport,
+									w1, w1+1, w1+2);
 
-                // the upper right corner
-                p2 = gluProject(b->x * c->dpi_x,
-                                b->y * c->dpi_y,
-                                0,
-                                mvmat, prjmat, viewport,
-                                w2, w2+1, w2+2);                        
-            }
+					// the upper right corner
+					p2 = gluProject((b->w + b->x) * c->dpi_x,
+									b->y * c->dpi_y,
+									0,
+									mvmat, prjmat, viewport,
+									w2, w2+1, w2+2);            
+				} else {
+					// the lower left corner in window space            
+					p1 = gluProject((b->x + b->w) * c->dpi_x,
+									(b->y + b->h) * c->dpi_y,
+									0,
+									mvmat, prjmat, viewport,
+									w1, w1+1, w1+2);
 
-            if( p1 == GL_FALSE || p2 == GL_FALSE )
-            {
-                glPopMatrix();
-                delete b;
-                return;
-            }
+					// the upper right corner
+					p2 = gluProject(b->x * c->dpi_x,
+									b->y * c->dpi_y,
+									0,
+									mvmat, prjmat, viewport,
+									w2, w2+1, w2+2);                        
+				}
 
-            glPushAttrib( GL_SCISSOR_BIT | GL_CURRENT_BIT );
-            glEnable( GL_SCISSOR_TEST );
+				if( p1 == GL_FALSE || p2 == GL_FALSE )
+				{
+					glPopMatrix();
+					delete b;
+					return;
+				}
+				
+				glPushAttrib( GL_SCISSOR_BIT | GL_CURRENT_BIT );
+				glEnable( GL_SCISSOR_TEST );
 
-            if(w1[1] >= c->h0) {
-                glScissor(0, 0, 0, 0);
-            } else {
-                glScissor( int(w1[0]), int(w1[1]),
-                           int(w2[0] - w1[0]),
-                           int(w2[1] - w1[1]) + 2 ); // 2 more pixels to leave some space
-            }
-            
+				if(w1[1] >= c->h0) {
+					glScissor(0, 0, 0, 0);
+				} else {
+					glScissor( int(w1[0]), int(w1[1]),
+							   int(w2[0] - w1[0]),
+							   int(w2[1] - w1[1]) + 2 ); // 2 more pixels to leave some space
+				}
 #ifdef DEBUG
-            printf("Scissoring from %d, %d by %d x %d\n", int(w1[0]),
-                   int(w1[1]), int(w2[0] - w1[0]), int(w2[1] - w1[1]));
+				printf("Scissoring from %d, %d by %d x %d\n", int(w1[0]),
+					   int(w1[1]), int(w2[0] - w1[0]), int(w2[1] - w1[1]));
 #endif
+			}
+            
             
             // translate wiggle to fit inside border box
             glTranslatef(0, (b->y + b->h) * c->dpi_y,  0);
@@ -591,25 +658,104 @@ void render_graph(Canvas* c, CoreSection* cs, int gid)
             glBindTexture(GL_TEXTURE_2D, 0);
             glColor3f(g->r, g->g, g->b);
 
-			// build vector of all datapoints (including excluded points)
-			std::vector<GraphPoint> points;
-			const int rowCount = get_table_height( g->dataset, g->table );
-			for ( int ridx = 0; ridx < rowCount; ridx++ )
+			if ( useScaling )
 			{
-				const bool isValid = is_table_cell_valid(g->dataset, g->table, g->field, ridx );
+				// get cm width of canvas
+				const float widthInCm = ( c->w / c->dpi_x ) * 2.54f;
 				
-				if ( isValid )
+				// how many datapoints will fit in the canvas' span?
+				const float pointsInSpan = widthInCm / g->data_granularity;
+				
+				// if that number is greater than 5 per physical pixel, scale back
+				const float pointsPerPixel = ( pointsInSpan / c->w0 );
+				scaleFactor = (int)pointsPerPixel / 5;
+			}
+			
+			const int rowCount = get_table_height( g->dataset, g->table );
+			std::vector<GraphPoint> points;
+			if ( useScaling && scaleFactor > 0 ) // scale back # of points drawn to improve performance at distant zooms
+			{
+				// combine 5 points per scale factor
+				const int pointsToAverage = 5 * scaleFactor;
+				
+				if (( pointsToAverage * 2 ) > rowCount )
 				{
-					const float depth = get_table_row_depth( g->dataset, g->table, ridx );
-					const float value = get_table_cell( g->dataset, g->table, g->field, ridx );
-
-					// unitscale is relative to 'cm'
-					const float x_coord = (depth * depthunitscale * INCH_PER_CM);
-					const float y_coord = (value * INCH_PER_CM) * c->dpi_y;
-
-					const bool exclude = exclude_value( gid, value );
+					// if we've averaging points down to two points or less, draw first and last points
+					const float firstDepth = get_table_row_depth( g->dataset, g->table, 0 );
+					const float firstValue = get_table_cell( g->dataset, g->table, g->field, 0 );
+					const float lastDepth = get_table_row_depth( g->dataset, g->table, rowCount - 1 );
+					const float lastValue = get_table_cell( g->dataset, g->table, g->field, rowCount - 1 );
 					
-					points.push_back( GraphPoint( x_coord, y_coord, exclude ));
+					const float firstX = (firstDepth * depthunitscale * INCH_PER_CM);
+					const float firstY = (firstValue * INCH_PER_CM) * c->dpi_y;
+					const bool firstExclude = exclude_value( gid, firstValue );
+					
+					const float lastX = (lastDepth * depthunitscale * INCH_PER_CM);
+					const float lastY = (lastValue * INCH_PER_CM) * c->dpi_y;
+					const bool lastExclude = exclude_value( gid, lastValue );
+					
+					points.push_back( GraphPoint( firstX, firstY, firstExclude ));
+					points.push_back( GraphPoint( lastX, lastY, lastExclude ));
+				}
+				else
+				{
+					for ( int ridx = 0; ridx < rowCount; )
+					{
+						if ( is_table_cell_valid( g->dataset, g->table, g->field, ridx ))
+						{
+							const float depth = get_table_row_depth_fast( g->dataset, g->table, ridx );
+							float total = 0.0f, avgValue = 0.0f;
+							int totalSubrows = 0;
+							for ( int sridx = 0; sridx < pointsToAverage; sridx++ )
+							{
+								const int subrowIndex = ridx + sridx;
+								if ( subrowIndex < rowCount )
+								{
+									total += get_table_cell_fast( g->dataset, g->table, g->field, subrowIndex );
+									totalSubrows++;
+								}
+							}
+							
+							if ( totalSubrows > 0 )
+								avgValue = total / (float)totalSubrows;
+
+							// unitscale is relative to 'cm'
+							const float x_coord = (depth * depthunitscale * INCH_PER_CM);
+							const float y_coord = (avgValue * INCH_PER_CM) * c->dpi_y;
+							
+							const bool exclude = exclude_value( gid, avgValue );
+							
+							points.push_back( GraphPoint( x_coord, y_coord, exclude ));
+							
+							ridx += totalSubrows;
+						}
+						else
+						{
+							ridx++;
+						}
+					}
+				}
+			}
+			else // no scaling, draw every point in every graph
+			{
+				for ( int ridx = 0; ridx < rowCount; ridx++ )
+				{
+					const bool isValid = is_table_cell_valid(g->dataset, g->table, g->field, ridx );
+					
+					if ( isValid )
+					{
+						const float depth = get_table_row_depth_fast( g->dataset, g->table, ridx );
+
+						const float value = get_table_cell_fast( g->dataset, g->table, g->field, ridx );
+
+						// unitscale is relative to 'cm'
+						const float x_coord = (depth * depthunitscale * INCH_PER_CM);
+						const float y_coord = (value * INCH_PER_CM) * c->dpi_y;
+
+						const bool exclude = exclude_value( gid, value );
+						
+						points.push_back( GraphPoint( x_coord, y_coord, exclude ));
+					}
 				}
 			}
 
@@ -740,8 +886,11 @@ void render_graph(Canvas* c, CoreSection* cs, int gid)
 				glEnd();
 			}
             
-            glDisable( GL_SCISSOR_TEST );
-            glPopAttrib(); // GL_SCISSOR_BIT | GL_CURRENT_BIT
+			if ( useScissoring )
+			{
+				glDisable( GL_SCISSOR_TEST );
+				glPopAttrib(); // GL_SCISSOR_BIT | GL_CURRENT_BIT
+			}
         }
         glPopMatrix();
         delete b;
@@ -1285,51 +1434,9 @@ void setCollapse(bool aBool)
 void setGraphScale(float s)
 {
     graphScale *= s;
-/*
-    float scale = _graphScale * s;
-    graphScale = scale;
-
-    if(scale > graphScaleLimit)
-    {
-        _graphScale = graphScaleLimit;
-    }
-    else if(scale < DEFAULT_GRAPH_SCALE)
-    {
-        _graphScale = DEFAULT_GRAPH_SCALE;
-    }
-    else
-    {
-        _graphScale = scale;
-    }
-    graphScale = isGraphAutoScale() ? _graphScale : DEFAULT_GRAPH_SCALE;
-*/
 }
 
 float getGraphScale()
 {
-    // return isGraphAutoScale() ? _graphScale : graphScale;
     return graphScale;
-}
-
-// deprecated
-void  setGraphAutoScale(bool b)
-{
-    /*
-    graphAutoScale = b;
-
-    if(b)
-    {
-        graphScale = _graphScale;
-    }
-    else
-    {
-        graphScale = DEFAULT_GRAPH_SCALE;
-    }
-    */
-}
-
-bool  isGraphAutoScale()
-{
-    // return graphAutoScale;
-    return false;
 }

@@ -396,7 +396,7 @@ public class CRGraphDialog extends JFrame {
 		});
 
 		fieldsTable.setDefaultRenderer(Color.class, new ColorRenderer( false ));
-		fieldsTable.setDefaultEditor(Color.class, new ColorEditor());
+		fieldsTable.setDefaultEditor(Color.class, new ColorEditor( this ));
 		fieldsTable.setShowHorizontalLines(true);
 		fieldsTable.getModel().addTableModelListener( new TableModelListener() {
 			public void tableChanged( TableModelEvent event ) {

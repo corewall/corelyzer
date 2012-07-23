@@ -53,6 +53,7 @@ public class CRPreferences {
 
 	// FIXME change default thumbnail URL to some place local
 	public static String defaultThumbnailURL = "http://www.evl.uic.edu/cavern/corewall/iCores/feeds/thumbnail.png";
+	public static String directoryConfigFileName = "directories148.txt";
 
 	public boolean isInited = false;
 
@@ -123,12 +124,6 @@ public class CRPreferences {
 	// auto zoom when double clicked sections
 	boolean autoZoom = true;
 
-	// auto scale graph height
-	boolean autoScaleGraph = true;
-
-	// auto scale marker size
-	boolean autoScaleMarker = true;
-
 	int refreshInterval = 10;
 
 	public CRPreferences() {
@@ -156,7 +151,7 @@ public class CRPreferences {
 		annotation_Directory = datastore_Directory + sp + "Annotations";
 
 		cache_Directory = datastore_Directory + sp + "Caches";
-		texBlock_Directory = cache_Directory + sp + "imgblocks";
+		texBlock_Directory = cache_Directory + sp + "imgblocks_dxt1";
 		download_Directory = cache_Directory + sp + "downloads";
 		tmp_Directory = cache_Directory + sp + "tmp";
 
@@ -244,9 +239,6 @@ public class CRPreferences {
 
 		// autozoom
 		this.autoZoom = p.isAutoZoom();
-
-		this.autoScaleGraph = p.isAutoScaleGraph();
-		this.autoScaleMarker = p.isAutoScaleMarker();
 	}
 
 	public void applyUIConfig() {
@@ -259,10 +251,6 @@ public class CRPreferences {
 		}
 
 		SceneGraph.setBackgroundColor(bgcolor[0], bgcolor[1], bgcolor[2]);
-
-		// auto scale
-		SceneGraph.setGraphAutoScale(this.autoScaleGraph);
-		SceneGraph.setMarkerAutoScale(this.autoScaleMarker);
 
 		// show origin or section labels
 		Boolean showOrigin = Boolean.parseBoolean(this.prefs.get("ui.showOrigin", "true"));
@@ -313,85 +301,80 @@ public class CRPreferences {
 		defaultValues.put("sessionSharing.serverAddress", "corewalldb.evl.uic.edu");
 		defaultValues.put("sessionSharing.serverPort", "16688");
 
-		defaultValues.put("ui.canvas.alwaysBelow", "true");
+		// 6/21/2012 brg: Default "Canvas Always at Below" to false. When true, it brings
+		// all applications' windows to the front when the toolbar or mainFrame is activated,
+		// behavior that most users find incredibly annoying.
+		defaultValues.put("ui.canvas.alwaysBelow", "false");
+
 		defaultValues.put("ui.verticalDepthScroll", "false");
-	}
-
-	public boolean isAutoScaleGraph() {
-		return autoScaleGraph;
-	}
-
-	public boolean isAutoScaleMarker() {
-		return autoScaleMarker;
 	}
 
 	public boolean isAutoZoom() {
 		return autoZoom;
 	}
 
-	public boolean readDirectoryConfig(final File aFile) {
-		String sp = System.getProperty("file.separator");
-
-		try {
-			FileReader fr = new FileReader(aFile);
-			BufferedReader br = new BufferedReader(fr);
-
-			String path = br.readLine(); // 1st line: text block dir
-			File f = new File(path);
-			if (f.exists()) {
-				String abspath = f.getCanonicalPath();
-
-				if (!abspath.endsWith(sp)) {
-					abspath += sp;
-				}
-
-				this.texBlock_Directory = abspath;
-				SceneGraph.setTexBlockDirectory(abspath);
-			} else {
-				br.close();
-				fr.close();
-				return false; // hasDirs = false;
-			}
-
-			path = br.readLine(); // 2nd line: download dir
-			f = new File(path);
-			if (f.exists()) {
-				String abspath = f.getCanonicalPath();
-
-				if (!abspath.endsWith(sp)) {
-					abspath += sp;
-				}
-
-				this.download_Directory = abspath;
-			} else {
-				br.close();
-				fr.close();
-				return false; // hasDirs = false;
-			}
-
+	private boolean loadDirectoryConfigSettings( final File configFile, final boolean updateTo148 )
+	{
+		boolean success = false;
+		
+		try { 
+			BufferedReader br = new BufferedReader( new FileReader( configFile ));
+			String sp = System.getProperty("file.separator");
+			String texCachePath = br.readLine();
+			String downloadPath = br.readLine();
 			br.close();
-			fr.close();
-
-			// Upgrade from previous configs, add 'tmp' dir
-			File cache_dir = new File(this.cache_Directory);
-			File tmp_dir = new File(this.tmp_Directory);
-
-			if (!cache_dir.exists()) {
-				System.out.println("-- [INFO] Create cache dir: " + cache_dir);
-				cache_dir.mkdir();
+			
+			if ( updateTo148 )
+			{
+				if ( texCachePath.endsWith( sp ))
+					texCachePath = texCachePath.substring(0, texCachePath.length() - 1) + ( "_dxt1" + sp );
+				else
+					texCachePath += ( "_dxt1" + sp );
 			}
+			if ( !texCachePath.endsWith( sp ))
+				texCachePath += sp;
+			File texCacheFile = new File( texCachePath );
+			if ( !texCacheFile.exists() )
+				texCacheFile.mkdir();
 
-			if (!tmp_dir.exists()) {
-				System.out.println("-- [INFO] Create temp dir: " + tmp_dir);
-				tmp_dir.mkdir();
-			}
-
-			return true;
+			if ( !downloadPath.endsWith( sp ))
+				downloadPath += sp;
+			File downloadFile = new File( downloadPath );
+			if ( !downloadFile.exists() )
+				downloadFile.mkdir();
+			
+			this.texBlock_Directory = texCachePath;
+			SceneGraph.setTexBlockDirectory(texCachePath);
+			
+			this.download_Directory = downloadPath;
+			
+			success = true;
 		} catch (Exception e) {
 			e.printStackTrace();
-			return false;
 		}
-
+		
+		return success;
+	}
+	
+	public boolean readDirectoryConfig( final String configParentDirPath )
+	{
+		boolean success = false;
+		try {
+			String sp = System.getProperty("file.separator");
+			File configFile = new File( configParentDirPath + sp + "directories148.txt" );
+			if ( configFile.exists() )
+				success = this.loadDirectoryConfigSettings( configFile, false );
+			else
+			{
+				configFile = new File( configParentDirPath + sp + "directories.txt" );
+				if ( configFile.exists() )
+					success = this.loadDirectoryConfigSettings( configFile, true );
+			}
+		} catch ( Exception e ) {
+			e.printStackTrace();
+		}
+		
+		return success;
 	}
 
 	public boolean readDisplayConfig(final File aFile) {
@@ -504,10 +487,6 @@ public class CRPreferences {
 					bgcolor[2] = Float.parseFloat(toks[1].trim());
 				} else if (toks[0].trim().equalsIgnoreCase("autozoom")) {
 					this.setAutoZoom(Boolean.parseBoolean(toks[1].trim()));
-				} else if (toks[0].trim().equalsIgnoreCase("autoscalegraph")) {
-					this.setAutoScaleGraph(Boolean.parseBoolean(toks[1].trim()));
-				} else if (toks[0].trim().equalsIgnoreCase("autoscalemarker")) {
-					this.setAutoScaleMarker(Boolean.parseBoolean(toks[1].trim()));
 				} else if (toks[0].trim().equalsIgnoreCase("enableGrid")) {
 					this.grid_show = toks[1].trim().equalsIgnoreCase("true");
 					// now let's read values for grid configuration.
@@ -560,7 +539,7 @@ public class CRPreferences {
 	private void saveDirectoryConfig() {
 		try {
 			// Store off the default tex block directory
-			File f = new File(this.config_Directory + "/directories.txt");
+			File f = new File(this.config_Directory + "/" + this.directoryConfigFileName);
 			FileWriter fw = new FileWriter(f);
 			// String tbdir =
 			// corelyzer.helper.SceneGraph.getTexBlockDirectory();
@@ -676,12 +655,6 @@ public class CRPreferences {
 			line = "autoZoom = " + this.autoZoom + "\n";
 			fw.write(line, 0, line.length());
 
-			line = "autoScaleGraph = " + this.autoScaleGraph + "\n";
-			fw.write(line, 0, line.length());
-
-			line = "autoScaleMarker = " + this.autoScaleMarker + "\n";
-			fw.write(line, 0, line.length());
-
 			// grid stuff
 			line = "enableGrid = " + this.grid_show + "\n";
 			fw.write(line, 0, line.length());
@@ -726,8 +699,6 @@ public class CRPreferences {
 			prefs.putFloat("ui.canvas_bgcolor_b", this.bgcolor[2]);
 
 			prefs.putBoolean("ui.autoZoom", this.autoZoom);
-			prefs.putBoolean("ui.autoScaleGraph", this.autoScaleGraph);
-			prefs.putBoolean("ui.autoScaleMarker", this.autoScaleMarker);
 
 			prefs.putBoolean("ui.enableGrid", this.grid_show);
 			prefs.putInt("ui.grid.type", this.grid_type);
@@ -747,14 +718,6 @@ public class CRPreferences {
 
 	public void setAutoCheckVersion(final boolean b) {
 		autoCheckVersion = b;
-	}
-
-	public void setAutoScaleGraph(final boolean autoScaleGraph) {
-		this.autoScaleGraph = autoScaleGraph;
-	}
-
-	public void setAutoScaleMarker(final boolean autoScaleMarker) {
-		this.autoScaleMarker = autoScaleMarker;
 	}
 
 	public void setAutoZoom(final boolean autoZoom) {

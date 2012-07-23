@@ -133,7 +133,4 @@ void  set_marker_vertex (AnnotationMarker* m, float ax, float ay,
 
 void  setMarkerScale(float s);
 float getMarkerScale();
-
-void  setMarkerAutoScale(bool b);
-bool  isMarkerAutoScale();
 #endif

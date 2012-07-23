@@ -42,6 +42,7 @@ const char* get_font_name       ();
 int         get_char_escapement (char c);
 
 void        render_string       (const char* str, int start, int end);
+void		render_scaled_string(const char* str, int start, int end, float scaling);
 void        render_string_label (const char* str, int start, int end);
 void        render_string_shadowed (const char* str, int start, int end, 
 									float* color=NULL, float offset = 3.0f);

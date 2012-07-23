@@ -503,6 +503,19 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_destroyCanvases
 	update_center_point();
 }
 
+
+/*
+ * Class:     SceneGraph
+ * Method:    debugKey
+ * Signature: (I)V
+ */
+JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_debugKey
+	(JNIEnv *jenv, jclass jcls, jint keyId)
+{
+	handle_graph_debug_key(keyId);
+}
+
+	
 /*
  * Class:     SceneGraph
  * Method:    render
@@ -5136,50 +5149,6 @@ JNIEXPORT jfloatArray JNICALL Java_corelyzer_graphics_SceneGraph_getBackgroundCo
     jenv->SetFloatArrayRegion(retArray, 0, 3, aColor);
     
     return retArray;
-}
-
-/*
- * Class:     corelyzer_helper_SceneGraph
- * Method:    setMarkerAutoScale
- * Signature: (Z)V
- */
-JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setMarkerAutoScale
-  (JNIEnv * jenv, jclass jcls, jboolean isMarkerAutoScale)
-{
-    setMarkerAutoScale(isMarkerAutoScale);
-}
-
-/*
- * Class:     corelyzer_helper_SceneGraph
- * Method:    getMarkerAutoScale
- * Signature: ()Z
- */
-JNIEXPORT jboolean JNICALL Java_corelyzer_graphics_SceneGraph_getMarkerAutoScale
-  (JNIEnv * jenv, jclass jcls)
-{
-    return isMarkerAutoScale();
-}
-
-/*
- * Class:     corelyzer_helper_SceneGraph
- * Method:    setGraphAutoScale
- * Signature: (Z)V
- */
-JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setGraphAutoScale
-  (JNIEnv * jenv, jclass jcls, jboolean isGraphAutoScale)
-{
-    setGraphAutoScale(isGraphAutoScale);
-}
-
-/*
- * Class:     corelyzer_helper_SceneGraph
- * Method:    getGraphAutoScale
- * Signature: ()Z
- */
-JNIEXPORT jboolean JNICALL Java_corelyzer_graphics_SceneGraph_getGraphAutoScale
-  (JNIEnv * jenv, jclass jcls)
-{
-    return isGraphAutoScale();
 }
 
 /*

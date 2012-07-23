@@ -84,24 +84,8 @@ public class CRLoadImageListingDialog extends JDialog {
 	private JButton saveButton;
 	private JButton resetButton;
 	private JButton helpButton;
-	private JTable imageTable;
-
-	// 5/7/2012 brg: TODO use extracted BatchInputPanel class
-	private JPanel batchInputPanel;
-	private JCheckBox useBatchInputCheckbox;
-	private JLabel orientationLabel;
-	private JComboBox orientationComboBox;
-	private JLabel lengthLabel;
-	private JTextField lengthField;
-	private JLabel dpiXLabel;
-	private JTextField dpiXField;
-	private JLabel dpiYLabel;
-	private JTextField dpiYField;
-	private JLabel startDepthLabel;
-	private JTextField startDepthField;
-	private JLabel depthIncLabel;
-	private JTextField depthIncField;
-	private JButton applyButton;
+	private ImagePropertyTable imageTable;
+	private BatchInputPanel batchPanel;
 
 	public CRLoadImageListingDialog(final Frame owner) {
 		super(owner);
@@ -157,58 +141,14 @@ public class CRLoadImageListingDialog extends JDialog {
 				onReset();
 			}
 		});
-		applyButton.addActionListener(new ActionListener() {
-			public void actionPerformed(final ActionEvent event) {
-				onApply();
-			}
-		});
+
 		helpButton.addActionListener(new ActionListener() {
 			public void actionPerformed(final ActionEvent event) {
 				onHelp();
 			}
 		});
-
-		useBatchInputCheckbox.addActionListener(new ActionListener() {
-			public void actionPerformed(final ActionEvent event) {
-				onBatch();
-			}
-		});
+	}
 		
-		// batch label enabling/disabling based on field contents
-		orientationComboBox.addActionListener(new ActionListener() {
-			public void actionPerformed(final ActionEvent event) {
-				if (orientationComboBox.getSelectedIndex() == 2) // [Blank]
-					orientationLabel.setEnabled(false);
-				else
-					orientationLabel.setEnabled(true);
-			}
-		});
-		lengthField.getDocument().addDocumentListener( LabelEnablerFactory.create( lengthField, lengthLabel ));
-		dpiXField.getDocument().addDocumentListener( LabelEnablerFactory.create( dpiXField, dpiXLabel ));
-		dpiYField.getDocument().addDocumentListener( LabelEnablerFactory.create( dpiYField, dpiYLabel ));
-		startDepthField.getDocument().addDocumentListener( LabelEnablerFactory.create( startDepthField, startDepthLabel ));
-		depthIncField.getDocument().addDocumentListener( LabelEnablerFactory.create( depthIncField, depthIncLabel ));
-	}
-	
-	private static class LabelEnablerFactory {
-		public static DocumentListener create(final JTextField field, final JLabel label)
-		{
-			DocumentListener dl = new DocumentListener() {
-				public void insertUpdate(DocumentEvent e) { doUpdate(); }
-				public void removeUpdate(DocumentEvent e) {	doUpdate(); }
-				public void changedUpdate(DocumentEvent e) { }
-				
-				private void doUpdate()
-				{
-					final boolean populated = !field.getText().equals("");
-					label.setEnabled(populated);
-				}
-			};
-			
-			return dl;
-		}
-	}
-	
 	/**
 	 * @noinspection ALL
 	 */
@@ -315,137 +255,10 @@ public class CRLoadImageListingDialog extends JDialog {
 						| GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
 		scrollPane1.setViewportView(imageTable);
 
-		
-		
-		batchInputPanel = new JPanel();
-		batchInputPanel.setLayout(new GridLayoutManager(7, 2, new Insets(0, 0, 0, 0), -1, -1));
-		batchInputPanel.setEnabled(true);
-		panel3.add(batchInputPanel, new GridConstraints(2, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH,
+		batchPanel = new BatchInputPanel(imageTable);
+		panel3.add(batchPanel, new GridConstraints(2, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH,
 				GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK
-						| GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
-		batchInputPanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), null));
-		final Spacer spacer3 = new Spacer();
-		batchInputPanel.add(spacer3, new GridConstraints(6, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1,
-				GridConstraints.SIZEPOLICY_WANT_GROW, null, new Dimension(195, 14), null, 0, false));
-		dpiXLabel = new JLabel("DPI X: ");
-		batchInputPanel.add(dpiXLabel, new GridConstraints(2, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED,
-				GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(195, 16), null, 0, false));
-		dpiYLabel = new JLabel("DPI Y: ");
-		batchInputPanel.add(dpiYLabel, new GridConstraints(3, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED,
-				GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(195, 16), null, 0, false));
-		startDepthLabel = new JLabel("Start Depth (meter): ");
-		batchInputPanel.add(startDepthLabel, new GridConstraints(4, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED,
-				GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(195, 16), null, 0, false));
-		depthIncLabel = new JLabel("Depth Increment (meter): ");
-		batchInputPanel.add(depthIncLabel, new GridConstraints(5, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED,
-				GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(195, 16), null, 0, false));
-		
-		dpiXField = new JTextField();
-		dpiXField.setEnabled(false);
-		dpiXField.setHorizontalAlignment(11);
-		dpiXField.setText("254");
-		
-		dpiYField = new JTextField();
-		dpiYField.setEnabled(false);
-		dpiYField.setHorizontalAlignment(11);
-		dpiYField.setText("254");
-		
-		batchInputPanel.add(dpiXField, new GridConstraints(2, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL,
-				GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(100, -1), null, 0, false));
-		
-		batchInputPanel.add(dpiYField, new GridConstraints(3, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL,
-				GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(100, -1), null, 0, false));
-		
-		startDepthField = new JTextField();
-		startDepthField.setEnabled(false);
-		startDepthField.setHorizontalAlignment(11);
-		startDepthField.setText("0.0");
-		batchInputPanel.add(startDepthField, new GridConstraints(4, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL,
-				GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(100, -1), null, 0, false));
-		depthIncField = new JTextField();
-		depthIncField.setEnabled(false);
-		depthIncField.setHorizontalAlignment(11);
-		depthIncField.setText("1.5");
-		batchInputPanel.add(depthIncField, new GridConstraints(5, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL,
-				GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(100, -1), null, 0, false));
-		final JPanel panel11 = new JPanel();
-		panel11.setLayout(new GridLayoutManager(1, 2, new Insets(0, 0, 0, 0), -1, -1));
-		batchInputPanel.add(panel11, new GridConstraints(6, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH,
-				GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK
-						| GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
-		applyButton = new JButton();
-		applyButton.setEnabled(false);
-		applyButton.setText("Apply");
-		panel11.add(applyButton, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL,
-				GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-		final Spacer spacer4 = new Spacer();
-		panel11.add(spacer4, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL,
-				GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
-		orientationComboBox = new JComboBox();
-		orientationComboBox.setEnabled(false);
-		final DefaultComboBoxModel defaultComboBoxModel1 = new DefaultComboBoxModel();
-		defaultComboBoxModel1.addElement("Horizontal");
-		defaultComboBoxModel1.addElement("Vertical");
-		defaultComboBoxModel1.addElement("[Blank]");
-		orientationComboBox.setModel(defaultComboBoxModel1);
-		batchInputPanel.add(orientationComboBox, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL,
-				GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-		lengthLabel = new JLabel("Length (meter): ");
-		batchInputPanel.add(lengthLabel, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED,
-				GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-		lengthField = new JTextField();
-		lengthField.setEnabled(false);
-		lengthField.setHorizontalAlignment(11);
-		lengthField.setText("1.0");
-		batchInputPanel.add(lengthField, new GridConstraints(1, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL,
-				GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
-		orientationLabel = new JLabel("Orientation: ");
-		batchInputPanel.add(orientationLabel, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED,
-				GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(195, 16), null, 0, false));
-		useBatchInputCheckbox = new JCheckBox();
-		useBatchInputCheckbox.setText("Batch input: blank fields will not be applied");
-		panel3.add(useBatchInputCheckbox, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE,
-				GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-		
-		onBatch();
-	}
-
-	private void applyGroupPropToTable() {
-		ImagePropertyTable theTable = (ImagePropertyTable) imageTable;
-		
-		final int orientation = orientationComboBox.getSelectedIndex();
-		if ( orientation < 2 )
-			theTable.applyAllOrientation( orientation );
-
-		if (!dpiXField.getText().equals(""))
-		{
-			final int dpiX = Integer.valueOf(dpiXField.getText());
-			theTable.applyAllDPIX(dpiX);
-		}
-		
-		if (!dpiYField.getText().equals(""))
-		{
-			final int dpiY = Integer.valueOf(dpiYField.getText());
-			theTable.applyAllDPIY(dpiY);
-		}
-
-		if (!lengthField.getText().equals(""))
-		{
-			final float length = Float.valueOf(lengthField.getText());
-			theTable.applyAllLength(length);
-		}
-		
-		// depth increment and start depth: both must be populated to apply
-		if (!depthIncField.getText().equals("") && !startDepthField.getText().equals(""))
-		{
-			final float depthInc = Float.valueOf(depthIncField.getText());
-			final float depthStart = Float.valueOf(startDepthField.getText());
-			theTable.applyAllDepths(depthStart, depthInc);
-		}
-		else if (!depthIncField.getText().equals("") || !startDepthField.getText().equals(""))
-		{
-			JOptionPane.showMessageDialog(this, "Both Start Depth and Depth Increment must be populated to apply values in Depth column");
-		}
+				| GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
 	}
 
 	private void createUIComponents() {
@@ -520,24 +333,6 @@ public class CRLoadImageListingDialog extends JDialog {
 			saveButton.setEnabled(true);
 	}
 
-	private boolean isValidFloat(final String s) {
-		try {
-			Float.parseFloat(s);
-			return true;
-		} catch (NumberFormatException e) {
-			return false;
-		}
-	}
-
-	private boolean isValidInt(final String s) {
-		try {
-			Integer.parseInt(s);
-			return true;
-		} catch (NumberFormatException e) {
-			return false;
-		}
-	}
-
 	private void loadImagesWithProperties() {
 		CorelyzerApp app = CorelyzerApp.getApp();
 
@@ -601,45 +396,6 @@ public class CRLoadImageListingDialog extends JDialog {
 			progress.setString("All images loaded");
 			progress.setValue(0);
 			// progress.dispose();
-		}
-	}
-
-	private void onApply() {
-		try {
-			applyGroupPropToTable();
-		} catch (NumberFormatException e) {
-			JOptionPane.showMessageDialog(this, "Invalid value: " + e.getMessage());
-		}
-	}
-
-	private void onBatch() {
-		final boolean b = useBatchInputCheckbox.isSelected();
-
-		orientationComboBox.setEnabled(b);
-		lengthField.setEnabled(b);
-		dpiXField.setEnabled(b);
-		dpiYField.setEnabled(b);
-		startDepthField.setEnabled(b);
-		depthIncField.setEnabled(b);
-		applyButton.setEnabled(b);
-
-		if (!b)
-		{
-			orientationLabel.setEnabled(b);
-			lengthLabel.setEnabled(b);
-			dpiXLabel.setEnabled(b);
-			dpiYLabel.setEnabled(b);
-			startDepthLabel.setEnabled(b);
-			depthIncLabel.setEnabled(b);
-		}
-		else
-		{
-			orientationLabel.setEnabled( orientationComboBox.getSelectedIndex() != 2 ); // [Blank]
-			lengthLabel.setEnabled(!lengthField.getText().equals(""));
-			dpiXLabel.setEnabled(!dpiXField.getText().equals(""));
-			dpiYLabel.setEnabled(!dpiYField.getText().equals(""));
-			startDepthLabel.setEnabled(!startDepthField.getText().equals(""));
-			depthIncLabel.setEnabled(!depthIncField.getText().equals(""));
 		}
 	}
 

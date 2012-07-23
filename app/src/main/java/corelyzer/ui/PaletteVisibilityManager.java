@@ -31,10 +31,12 @@ class PaletteVisibilityManager extends WindowAdapter
 		
 		if ( showWindows )
 		{
+			final boolean showMainFrame = CorelyzerApp.getApp().getToolFrame().isAppFrameSelected();
+			
 			JFrame mainFrame = CorelyzerApp.getApp().getMainFrame();
 			JFrame toolbar = CorelyzerApp.getApp().getToolFrame();
 
-			if (!mainFrame.isVisible())
+			if (!mainFrame.isVisible() && showMainFrame)
 				mainFrame.setVisible(true);
 			if (!toolbar.isVisible())
 				toolbar.setVisible(true);

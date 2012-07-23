@@ -32,6 +32,7 @@ import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.BufferedReader;
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -59,6 +60,10 @@ import org.apache.xerces.dom.DocumentImpl;
 import org.apache.xml.serialize.OutputFormat;
 import org.apache.xml.serialize.XMLSerializer;
 import org.w3c.dom.Element;
+
+import javax.xml.stream.XMLOutputFactory;
+import javax.xml.stream.XMLStreamWriter;
+import com.sun.xml.internal.txw2.output.IndentingXMLStreamWriter;
 
 import corelyzer.helper.ExampleFileFilter;
 
@@ -145,6 +150,233 @@ public class DataImportWizard extends JDialog implements ActionListener, ChangeL
 		convert(null, fin, fout, fs, prefix, start, end, label, unit, name, depth, vals, dm, useCustomizedSectionName, ignoreValue);
 	}
 
+	public static void sax_convert(final File fin, final File fout, final String fs, final String prefix, final int start, final int end, final int label,
+			final int unit, final String name, final int depth, final Vector<Integer> vals, final DepthMode dm, final boolean useCustomizedSectionName,
+			final float ignoreValue)
+	{
+		sax_convert(null, fin, fout, fs, prefix, start, end, label, unit, name, depth, vals, dm, useCustomizedSectionName, ignoreValue);
+	}
+	
+	private static void writeNewSection( IndentingXMLStreamWriter ixmlWriter, final float depthOffset, final String currentSection, 
+			final String depthUnit,	final Vector<Integer> vals, final String[] units, final String[] labels)
+	{
+		try { 
+			ixmlWriter.writeStartElement("section");
+			
+			ixmlWriter.writeAttribute("offset", Float.toString(depthOffset));
+			
+			ixmlWriter.writeStartElement("id");
+			ixmlWriter.writeCharacters(currentSection);
+			ixmlWriter.writeEndElement();
+
+			ixmlWriter.writeStartElement("depth_unit");
+			ixmlWriter.writeCharacters( depthUnit );
+			ixmlWriter.writeEndElement();
+			
+			// add fields block
+			for (int i = 0; i < vals.size(); i++) {
+				ixmlWriter.writeEmptyElement("field");
+
+				int val_idx = vals.elementAt(i);
+				String _unit = val_idx < units.length ? units[val_idx].trim() : "";
+				ixmlWriter.writeAttribute("localid", String.valueOf(i));
+				ixmlWriter.writeAttribute("name", labels[val_idx].trim());
+				ixmlWriter.writeAttribute("units", _unit);
+			}
+		} catch (Exception e) {
+			System.out.println("Exception in writeNewSection: " + e.getMessage());
+		}
+	}
+	
+	private static void writeDepthAndSensors( IndentingXMLStreamWriter ixmlWriter, final String depth, final Vector<Integer> vals,
+			final String[] tuples, final float ignoreValue )
+	{
+		try {
+			ixmlWriter.writeStartElement("depth");
+			ixmlWriter.writeCharacters(depth);
+			ixmlWriter.writeEndElement(); // <depth>
+	
+			for (int i = 0; i < vals.size(); i++) {
+				String value = tuples[vals.elementAt(i)].trim();
+	
+				if (value.equals("")) {
+					System.out.println("---> Ignore empty " + "value string.");
+					// continue;
+				} else {
+					float floatValue;
+	
+					if (value.contains(",")) {
+						value = value.replace(",", ".");
+					}
+	
+					try {
+						floatValue = Float.valueOf(value);
+					} catch (NumberFormatException e) {
+						// Not a number should just ignore it
+						System.err.println("---> Ignore malformed " + "numbers: " + value);
+						floatValue = Float.NaN;
+					}
+	
+					// Ignore NaN and the ignoreValue match
+					if (floatValue == ignoreValue) {
+						continue;
+					}
+	
+					ixmlWriter.writeStartElement("sensor");
+					ixmlWriter.writeAttribute("id", "" + i);
+					ixmlWriter.writeCharacters(value);
+					ixmlWriter.writeEndElement(); // <sensor>
+				}
+			}
+		} catch (Exception e) {
+			System.out.println("Exception in writeDepthAndSensors(): " + e.getMessage());
+		}
+	}
+	
+	public static void sax_convert(final JDialog owner, final File fin, final File fout, final String fs, final String prefix, final int start, final int end,
+			final int label, final int unit, final String name, final int depth, final Vector<Integer> vals, final DepthMode dm,
+			final boolean useCustomizedSectionName, final float ignoreValue) {
+		System.out.println("Converting...");
+
+		// ProgressDialog progress = new ProgressDialog();
+		CorelyzerApp app = CorelyzerApp.getApp();
+		JProgressBar progress = app.getProgressUI();
+		progress.setString("Converting data");
+		progress.setValue(0);
+		progress.setMaximum(end);
+		progress.setString("");
+		// progress.setVisible(true);
+
+		// prepare XML writer
+		
+		XMLStreamWriter baseXmlWriter = null;
+		IndentingXMLStreamWriter ixmlWriter = null;
+		try {
+			FileOutputStream fos = new FileOutputStream( fout );
+			BufferedOutputStream bos = new BufferedOutputStream( fos );
+			baseXmlWriter = XMLOutputFactory.newInstance().createXMLStreamWriter( bos, "utf-8" );
+			ixmlWriter = new IndentingXMLStreamWriter( baseXmlWriter );
+		} catch ( Exception e ) {
+			System.out.println("Exception converting raw data file to XML: " + e.getMessage() );
+		}
+
+		// line counter
+		int lineCount = 0;
+		boolean needNewSection = true;
+
+		// Vars for auto-section-definition
+		int currentSectionSeqNumber = -1;
+		int currentSectionSamplesCount = 0;
+		float currentSectionDepthOffset = 0.0f;
+
+		try {
+			ixmlWriter.writeStartDocument("utf-8", "1.0");
+			ixmlWriter.writeStartElement("corewall_data");
+
+			// read input file line by line
+			BufferedReader reader = new BufferedReader(new FileReader(fin));
+
+			String curInputLine;
+			String[] labels = {};
+			String[] units = {};
+			String currentSection = "";
+
+			while ((curInputLine = reader.readLine()) != null) {
+				progress.setValue(lineCount);
+
+				// Put it this way in case someone doesn't have a unit line,
+				// he/she will use the label line directly
+				if (lineCount == unit) { // unit
+					units = curInputLine.split(fs);
+				}
+				if (lineCount == label) { // label
+					labels = curInputLine.split(fs);
+				}
+				
+				if (lineCount >= start && lineCount <= end)
+				{
+					String[] tuples = curInputLine.split(fs);
+					String depth_value = tuples[depth].trim();
+					if (depth_value.contains(",")) {
+						depth_value = depth_value.replace(",", ".");
+					}
+
+					if (dm == DepthMode.ACCUM_DEPTH) {
+						if ( needNewSection )
+							currentSectionDepthOffset = Float.valueOf(depth_value);
+						
+						float sectionDepth = Float.valueOf(depth_value) - currentSectionDepthOffset;
+						depth_value = String.valueOf(sectionDepth);
+					}
+
+					if ( needNewSection )
+					{	
+						System.out.println("---> New section at line #" + lineCount);
+
+						if (useCustomizedSectionName) {
+							currentSection = compositeSectionName(prefix, curInputLine, fs, name);
+						} else {
+							currentSectionSeqNumber++;
+							currentSection = prefix + "-" + currentSectionSeqNumber;
+							currentSectionSamplesCount = 0;
+						}
+
+						final String depthUnit = units[depth].trim();
+						writeNewSection( ixmlWriter, currentSectionDepthOffset, currentSection, depthUnit, vals, units, labels );
+						
+						needNewSection = false;
+					}
+
+					writeDepthAndSensors( ixmlWriter, depth_value, vals, tuples, ignoreValue );
+					
+					// time to start a new section?
+					if ( useCustomizedSectionName ) {
+						String mysec = compositeSectionName(prefix, curInputLine, fs, name);
+						needNewSection = !mysec.equals(currentSection);
+					} else {
+						currentSectionSamplesCount++;
+						needNewSection = currentSectionSamplesCount >= maxSamplesPerSection;
+					}
+					
+					// if so, make sure we end the current section
+					if ( needNewSection )
+					{
+						ixmlWriter.writeEndElement(); // <section>
+ 
+						// flush buffered writer periodically or buffer will become ginormous
+						// and cause OutOfMemoryErrors.
+						ixmlWriter.flush();
+					}
+				}
+
+				lineCount++;
+			} // end input file line-reading while loop
+
+			System.out.println("---> " + lineCount + " lines scanned.");
+			progress.setIndeterminate(true);
+			progress.setString("Writing to output file...");
+
+			ixmlWriter.writeEndElement(); // <corelyzer_data>
+			ixmlWriter.writeEndDocument();
+			ixmlWriter.flush();
+			ixmlWriter.close();
+
+			progress.setIndeterminate(false);
+			progress.setString("Writing to output file... done");
+
+		} catch (Exception e) {
+			// System.err.println("Conversion Error! " + e);
+			JOptionPane.showMessageDialog(owner, "Conversion Error!\n" + e);
+			e.printStackTrace();
+		}
+
+		// progress.dispose();
+		progress.setString("Done");
+		progress.setValue(0);
+
+		System.out.println("---> Done!");
+	}
+	
 	public static void convert(final JDialog owner, final File fin, final File fout, final String fs, final String prefix, final int start, final int end,
 			final int label, final int unit, final String name, final int depth, final Vector<Integer> vals, final DepthMode dm,
 			final boolean useCustomizedSectionName, final float ignoreValue) {
@@ -284,7 +516,7 @@ public class DataImportWizard extends JDialog implements ActionListener, ChangeL
 							depth_e.setTextContent(depth_value);
 							section_e.appendChild(depth_e);
 
-							// sensors
+							// sensors - brg DUPLICATION
 							for (int i = 0; i < vals.size(); i++) {
 								String value = tuples[vals.elementAt(i)].trim();
 
@@ -355,7 +587,7 @@ public class DataImportWizard extends JDialog implements ActionListener, ChangeL
 								depth_e.setTextContent(depth_value);
 								section_e.appendChild(depth_e);
 
-								// sensors
+								// sensors - brg DUPLICATION
 								for (int i = 0; i < vals.size(); i++) {
 
 									// Give a special value for missing cells?
@@ -415,6 +647,7 @@ public class DataImportWizard extends JDialog implements ActionListener, ChangeL
 								}
 
 								System.out.println("---> Another New section [" + currentSection + " created from the last entry of " + "last section");
+								System.out.println("Java VM Heap Size: " + (int)(Runtime.getRuntime().totalMemory() / 1024) + "kB");
 
 								// add id block
 								Element id_e = doc.createElement("id");

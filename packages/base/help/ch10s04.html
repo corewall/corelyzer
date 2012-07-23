@@ -1,7 +1,5 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>10.4.¬†Administrator commands</title><meta name="generator" content="DocBook XSL Stylesheets V1.74.0" /><link rel="home" href="index.html" title="Corelyzer User's Manual" /><link rel="up" href="ch10.html" title="Chapter¬†10.¬†Corelyzer server and plugin clients" /><link rel="prev" href="ch10s03.html" title="10.3.¬†Running the administration client" /><link rel="next" href="ch10s05.html" title="10.5.¬†Admin commands reference table" /></head><body><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">10.4.¬†Administrator commands</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="ch10s03.html">Prev</a>¬†</td><th width="60%" align="center">Chapter¬†10.¬†Corelyzer server and plugin clients</th><td width="20%" align="right">¬†<a accesskey="n" href="ch10s05.html">Next</a></td></tr></table><hr /></div><div class="sect1" lang="en" xml:lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="id462932"></a>10.4.¬†Administrator commands</h2></div></div></div><p>
-        </p><div class="itemizedlist"><ul type="disc"><li><p>
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>10.4.†Administrator commands</title><meta name="generator" content="DocBook XSL Stylesheets V1.77.1"><link rel="home" href="index.html" title="Corelyzer User's Manual"><link rel="up" href="ch10.html" title="Chapter†10.†Corelyzer server and plugin clients"><link rel="prev" href="ch10s03.html" title="10.3.†Running the administration client"><link rel="next" href="ch10s05.html" title="10.5.†Admin commands reference table"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">10.4.†Administrator commands</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="ch10s03.html">Prev</a>†</td><th width="60%" align="center">Chapter†10.†Corelyzer server and plugin clients</th><td width="20%" align="right">†<a accesskey="n" href="ch10s05.html">Next</a></td></tr></table><hr></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="id36160944"></a>10.4.†Administrator commands</h2></div></div></div><p>
+        </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>
               Command: "new-section". Arguments: "Section name", "Starting depth" in
               meters" and "Length in meters".
             </p><p>
@@ -11,7 +9,7 @@
               image entries.  This is also used so that when a new
               data comes in, there are correlations to depth intervals
               and section names.
-            </p></li><li><p>
+            </p></li><li class="listitem"><p>
               Command: "new-missing-section". Arguments: "Section name
               prefix", "Starting depth in meters" and "Length in meters".
             </p><p>
@@ -19,9 +17,9 @@
               the server that a new missing core sections exists.
               Effectively creating empty slots of split-core image and
               whole-core image entries.  Using command like
-              ‚Äúnew-missing-section and001 0.0 1.5‚Äù will create a new
-              section with section name ‚Äúand001_0.0-1.5-missing‚Äù.
-            </p></li><li><p>
+              &#8220;new-missing-section and001 0.0 1.5&#8221; will create a new
+              section with section name &#8220;and001_0.0-1.5-missing&#8221;.
+            </p></li><li class="listitem"><p>
               Command: "new-split-core". Arguments: "The URL to the
               image file", "The name of the section the image comes
               from", "The DPI (dots-per-inch) of the image in X
@@ -33,7 +31,7 @@
               was created from the core section.  This will let the
               server then notify the clients that the image exists and
               is available for download and viewing in Corelyzer.
-            </p></li><li><p>
+            </p></li><li class="listitem"><p>
               Command: "new-missing-split-core". Arguments: "The section name of missing split core"
             </p><p>
               Purpose: The purpose of this command is to assign a
@@ -42,8 +40,8 @@
               need to access the data and whole core images. The
               missing section name convention will be like
               &lt;prefix&gt;_&lt;start_depth&gt;-&lt;end_depth&gt;, eg:
-              ‚Äúand001_186.7-187.5‚Äù.
-            </p></li><li><p>
+              &#8220;and001_186.7-187.5&#8221;.
+            </p></li><li class="listitem"><p>
               Command: "new-whole-core". Arguments: "The URL to the
               image file", "The name of the section the image comes
               from" and "The DPI (dots-per-inch) of the image".
@@ -54,7 +52,7 @@
               was created from the core section.  This will let the
               server then notify the clients that the image exists and
               is available for download and viewing in Corelyzer.
-            </p></li><li><p>
+            </p></li><li class="listitem"><p>
               Command: "new-dataset". Arguments: "Data file to parse"
               and "The name of the dataset to append/overwrite".
             </p><p>
@@ -84,14 +82,14 @@
               tab-delimited file without changing previous rows then
               the overwrite will effectively be doing nothing for
               previously created tables.
-            </p></li><li><p>
+            </p></li><li class="listitem"><p>
               Command: "list-sections". Arguments: None
             </p><p>
               Purpose: The purpose of this command is to list the
               existing sections known to the server.  Returned is a
               listing of section names, their depth and length in
               meters.  The output is displayed to the command-line.
-            </p></li><li><p>
+            </p></li><li class="listitem"><p>
               Command: "list-datasets". Arugments: None
             </p><p>
               Purpose: The purpose of this command is to display
@@ -99,7 +97,7 @@
               of the datasets followed by the attributes in the
               dataset and their respective minimum and maximum values
               within the whole dataset.
-            </p></li><li><p>
+            </p></li><li class="listitem"><p>
               Command: "list-tables". Arguments: "The name of the
               dataset"
             </p><p>
@@ -107,7 +105,7 @@
               within a given dataset.  This is useful if you do not
               know if a given section is covered by a dataset because
               the names of the tables are the names of the sections.
-            </p></li><li><p>
+            </p></li><li class="listitem"><p>
               Command: "list-table-data". Arguments: "The name of the
               dataset" and "The name of the section/table to view"
             </p><p>
@@ -116,22 +114,22 @@
               tab-delimited form with the first line as the header
               followed by lines of numerical values.  Table cells that
               are invalid will appear blank.
-            </p></li><li><p>
+            </p></li><li class="listitem"><p>
               Command: "run-backup". Arguments:	None
             </p><p>
               Purpose: The server runs backups automatically if the
               last backup has occurred more than 24 hours ago.  This
-              command forces the current day‚Äôs backup to occur.
-            </p></li><li><p>
+              command forces the current day&#8217;s backup to occur.
+            </p></li><li class="listitem"><p>
               Command: "logout". Arguments: None
             </p><p>
               Purpose: This command allows the administrator to logout
               and ends the client program.
-            </p></li><li><p>
+            </p></li><li class="listitem"><p>
               Command: "server-shutdown". Arguments: None
             </p><p>
               Purpose: This command allows the server to properly
               shutdown.
             </p></li></ul></div><p>
 
-      </p></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="ch10s03.html">Prev</a>¬†</td><td width="20%" align="center"><a accesskey="u" href="ch10.html">Up</a></td><td width="40%" align="right">¬†<a accesskey="n" href="ch10s05.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">10.3.¬†Running the administration client¬†</td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top">¬†10.5.¬†Admin commands reference table</td></tr></table></div></body></html>
+      </p></div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="ch10s03.html">Prev</a>†</td><td width="20%" align="center"><a accesskey="u" href="ch10.html">Up</a></td><td width="40%" align="right">†<a accesskey="n" href="ch10s05.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">10.3.†Running the administration client†</td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top">†10.5.†Admin commands reference table</td></tr></table></div></body></html>
