@@ -43,7 +43,7 @@ public class CRLoadImageWizard extends JDialog {
 	private TrackSectionListModel trackSectionModel;
 	private Vector<File> newFiles;
 	
-	private static String UNRECOGNIZED_SECTIONS_TRACK = "Unrecognized Sections";
+	public static String UNRECOGNIZED_SECTIONS_TRACK = "Unrecognized Sections";
 
 	public CRLoadImageWizard(final Frame owner, final Vector<File> newFiles) {
 		super(owner);
@@ -249,7 +249,7 @@ public class CRLoadImageWizard extends JDialog {
 		// Sections whose names can't be parsed properly are added to an "unrecognized" track so the user can
 		// position them manually if desired.
 		Vector<TrackSectionListElement> unrecognizedSectionsVec = new Vector<TrackSectionListElement>();
-		unrecognizedSectionsVec.add( new TrackSectionListElement( UNRECOGNIZED_SECTIONS_TRACK, true, true ));
+		unrecognizedSectionsVec.add( new TrackSectionListElement( UNRECOGNIZED_SECTIONS_TRACK, false /* prevent renaming */, true ));
 		for ( File curFile : cleanedNewFiles )
 		{
 			final String strippedFilename = FileUtility.stripExtension( curFile.getName() );
@@ -298,7 +298,11 @@ public class CRLoadImageWizard extends JDialog {
 		// finally, add unrecognized sections vector if it contains any sections (remember that the first element
 		// represents the track).
 		if ( unrecognizedSectionsVec.size() > 1 )
+		{
 			tsVec.add( unrecognizedSectionsVec );
+			JOptionPane.showMessageDialog( this, "One or more images could not be auto-sorted. They have been added to the Unrecognized Sections" +
+					"\nlist and should be moved. Images remaining in Unrecognized Sections will not be loaded." );
+		}
 		
 		trackSectionModel = new TrackSectionListModel( tsVec );
 	}
@@ -344,8 +348,8 @@ public class CRLoadImageWizard extends JDialog {
 							
 							final ImagePropertyTable.ImageProperties imageProps = sectionElt.getImageProperties();
 							boolean isVertical = imageProps.orientation.equals("Vertical");
-							System.out.println(imageFile.getName() + " depth pixels = " + 
-									SceneGraph.getImageDepthPix( imageFile.toString(), isVertical ));
+							//System.out.println(imageFile.getName() + " depth pixels = " + 
+							//		SceneGraph.getImageDepthPix( imageFile.toString(), isVertical ));
 							
 							final int insertIndex = eltIndex - 1;
 							final int sectionId = FileUtility.loadImageFile( imageFile, null, sectionElt.getName(), curTrack, insertIndex );
@@ -494,8 +498,6 @@ class SectionListPane extends JPanel implements ListSelectionListener {
 		// returning true, second time false. No idea why, but there's no need to do things twice.
 		if ( !e.getValueIsAdjusting() )
 		{
-			// assume single index for now
-			//final int curSelIndex = trackSectionList.getSelectedIndex();
 			final int[] selectedIndices = trackSectionList.getSelectedIndices();
 			
 			int trackCount = 0, newTrackCount = 0, newSectionCount = 0, oldSectionCount = 0;
@@ -704,7 +706,7 @@ class ImagePropertiesPane extends JPanel {
 
 		JScrollPane scrollPane = new JScrollPane();
 		scrollPane.setViewportView( imageTable );
-		this.add( scrollPane, "height 400::, growx");
+		this.add( scrollPane, "height 200:400:, growx");
 		
 		batchPanel = new BatchInputPanel( imageTable );
 		this.add( batchPanel, "growx" );
@@ -896,10 +898,17 @@ class TrackSectionListCellRenderer extends DefaultListCellRenderer {
 		{
 			// Wrap tracks in text, and add distinct background color so they're more easily
 			// distinguishable from sections.
-			final String trackName = "[Track: " + tsle.getName() + "]";
+			final boolean isUnrecognizedTrack = tsle.getName().equals( CRLoadImageWizard.UNRECOGNIZED_SECTIONS_TRACK );
+			
+			final String trackName = isUnrecognizedTrack ? tsle.getName() : ( "[Track: " + tsle.getName() + "]" );
 			label.setText( trackName );
+
 			if ( !isSelected )
-				label.setBackground( new Color( 245, 245, 220 )); // Beige
+			{
+				// Red for Unrecognized Sections "track", beige for regular tracks
+				Color bgColor = isUnrecognizedTrack ? new Color( 255, 102, 102 ) : new Color( 245, 245, 220 );  
+				label.setBackground( bgColor );	
+			}
 		}
 		
 		return label;
