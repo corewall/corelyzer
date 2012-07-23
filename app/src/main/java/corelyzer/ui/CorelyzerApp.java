@@ -1753,7 +1753,7 @@ public class CorelyzerApp extends WindowAdapter implements MouseListener, Startu
 		JMenuItem freeformsItem = new JMenuItem("Default");
 		freeformsItem.addActionListener(new ActionListener() {
 			public void actionPerformed(final ActionEvent e) {
-				FreeformAnnotationListDialog dlg = new FreeformAnnotationListDialog();
+				FreeformAnnotationListDialog dlg = new FreeformAnnotationListDialog( getApp().getMainFrame() );
 				dlg.pack();
 				dlg.setLocationRelativeTo(getApp().getMainFrame());
 				dlg.onRefresh();
@@ -1767,7 +1767,7 @@ public class CorelyzerApp extends WindowAdapter implements MouseListener, Startu
 		JMenuItem clastListItem = new JMenuItem("Clast");
 		clastListItem.addActionListener(new ActionListener() {
 			public void actionPerformed(final ActionEvent e) {
-				ClastStatisticsDialog dlg = new ClastStatisticsDialog();
+				ClastStatisticsDialog dlg = new ClastStatisticsDialog( getApp().getMainFrame() );
 				dlg.pack();
 				dlg.setLocationRelativeTo(getApp().getMainFrame());
 				dlg.onRefresh();
@@ -1781,7 +1781,7 @@ public class CorelyzerApp extends WindowAdapter implements MouseListener, Startu
 		JMenuItem sampleReqsItem = new JMenuItem("Sample");
 		sampleReqsItem.addActionListener(new ActionListener() {
 			public void actionPerformed(final ActionEvent e) {
-				SampleRequestListDialog dlg = new SampleRequestListDialog();
+				SampleRequestListDialog dlg = new SampleRequestListDialog( getApp().getMainFrame() );
 				dlg.pack();
 				dlg.setLocationRelativeTo(getApp().getMainFrame());
 				dlg.onRefresh();

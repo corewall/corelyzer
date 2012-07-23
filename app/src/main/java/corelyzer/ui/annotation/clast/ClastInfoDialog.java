@@ -766,7 +766,7 @@ public class ClastInfoDialog extends AbstractAnnotationDialog implements ActionL
 	public void actionPerformed(final ActionEvent actionEvent) {
 		this.onSave();
 
-		ClastStatisticsDialog collectInfo = new ClastStatisticsDialog();
+		ClastStatisticsDialog collectInfo = new ClastStatisticsDialog( CorelyzerApp.getApp().getMainFrame() );
 		collectInfo.setLocationRelativeTo(this);
 		collectInfo.pack();
 		collectInfo.onRefresh();
