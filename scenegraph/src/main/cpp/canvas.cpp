@@ -27,6 +27,7 @@
 #include "common.h"
 #include "canvas.h"
 #include "camera.h"
+#include "graph.h"
 #include "trackscene.h"
 #include "freedraw.h"
 #include "fontsys.h"
@@ -75,6 +76,10 @@ static bool showOrigin = true;
 // Tie depth used for FineTune operation
 static bool showTieDepth = false;
 static float tieDepth = 0.0f;
+
+// frames per second
+static float framesPerSecond = 0.0f;
+
 //====================================================================
 void load_gl_extensions()
 {
@@ -463,6 +468,8 @@ void render_onscreen(Canvas* c, int id)
 
 void render_canvas(int id)
 {
+	const int startRenderTime = clock();
+	
 	// check opengl extensions if we haven't already
     if( checked_extensions == false )
     {
@@ -618,8 +625,9 @@ void render_canvas(int id)
     printf("exiting render_canvas\n");
 #endif
 
-
     current_canvas = -1;
+	
+	update_fps( clock() - startRenderTime );
 
 } // end render_canvas
 
@@ -1373,18 +1381,32 @@ void render_scale(Canvas* c)
         glPopMatrix();
         free(buf);
 
-        // draw the current texture memory usage
-        if(getDebug()) {
+		// Display cache memory, FPS and other debug information
+        if( getDebug() ) {
             glPushMatrix();
             {
                 char *buf = (char *) malloc(sizeof(char) * 128);
                 {
                     memset(buf, 0, 128);
-                    sprintf(buf,"Current Mem Usage %d bytes", get_cur_texmem_usage());
+					const int texmem_usage_kb = get_cur_texmem_usage() / 1024;
+					const float texmem_usage_pct = 100.0f * ( get_cur_texmem_usage() / (float)( get_max_texmem_usage() ));
+                    sprintf( buf, "Image cache: %d KB (%.1f%% full)", texmem_usage_kb, texmem_usage_pct );
                     glTranslatef(x, y, 0);
                     glScalef(scale, scale, 1.0);
                     glTranslatef(0, CHAR_HEIGHT, 0);
-                    render_string(buf, 0, strlen(buf) - 1);
+					render_scaled_string(buf, 0, strlen(buf) - 1, 0.5f);
+
+					// FPS
+					sprintf(buf, "%.1f frames/sec", get_fps());
+					glTranslatef(0, CHAR_HEIGHT / 2, 0);
+					render_scaled_string(buf, 0, strlen(buf) - 1, 0.5f);
+					
+					// graph info
+					GraphDebugInfo gdi = get_graph_debug_info();
+					sprintf(buf, "scaling (factor %d): %d, labels: %d, border: %d, scissor: %d", gdi.scaleFactor,
+							gdi.useScaling ? 1 : 0, gdi.useLabels ? 1 : 0, gdi.useBorder ? 1 : 0, gdi.useScissoring ? 1 : 0);
+					glTranslatef(0, CHAR_HEIGHT / 2, 0);
+					render_scaled_string(buf, 0, strlen(buf) - 1, 0.5f);
                 }
                 free(buf);
             }
@@ -1897,4 +1919,35 @@ void  setTieDepth(bool isEnabled, float depth)
 {
     showTieDepth = isEnabled;
     tieDepth = depth; 
+}
+
+float get_fps()
+{
+	return framesPerSecond;
+}
+
+// Track and average the last five render times for a pseudo frames/second.
+// Time is tracked separately for each canvas, add times until a complete
+// render of all canvases is complete, then update FPS.
+void update_fps( const int lastRenderTime )
+{
+	static const int NUM_RENDERS = 5;
+	static int lastRenders[NUM_RENDERS] = { 0, 0, 0, 0, 0 };
+	static int canvasRenders = 0, totalRenders = 0;
+	
+	if ( canvasRenders == 0 )
+		lastRenders[ totalRenders % NUM_RENDERS ] = 0;
+	lastRenders[ totalRenders % NUM_RENDERS ] += lastRenderTime;
+	canvasRenders++;
+	
+	if ( canvasRenders % num_canvases() == 0 )
+	{
+		int totalTime = 0;
+		for ( int i = 0; i < NUM_RENDERS; i++ ) { totalTime += lastRenders[i]; }
+		const float avgSecPerFrame = ( totalTime / (float)NUM_RENDERS ) / CLOCKS_PER_SEC;
+		framesPerSecond = 1.0f / avgSecPerFrame;
+
+		canvasRenders = 0;
+		totalRenders++;
+	}
 }

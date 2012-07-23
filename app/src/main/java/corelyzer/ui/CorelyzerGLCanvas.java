@@ -997,6 +997,17 @@ public class CorelyzerGLCanvas implements GLEventListener, MouseListener, MouseW
 									// scenegraph
 			boolean b = SceneGraph.getDebug();
 			SceneGraph.setDebug(!b);
+		} else if ( key == 'Q' || key == 'W' || key == 'E' || key == 'R') {
+			int keyId = 0;
+			if ( key == 'Q' )
+				keyId = 1; // scaling
+			if ( key == 'W' )
+				keyId = 2; // labels
+			if ( key == 'E' )
+				keyId = 3; // border
+			else if ( key == 'R' )
+				keyId = 4; // scissoring
+			SceneGraph.debugKey( keyId );
 		} else { // pan
 			float movX = 0.0f;
 			float movY = 0.0f;

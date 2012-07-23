@@ -503,6 +503,19 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_destroyCanvases
 	update_center_point();
 }
 
+
+/*
+ * Class:     SceneGraph
+ * Method:    debugKey
+ * Signature: (I)V
+ */
+JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_debugKey
+	(JNIEnv *jenv, jclass jcls, jint keyId)
+{
+	handle_graph_debug_key(keyId);
+}
+
+	
 /*
  * Class:     SceneGraph
  * Method:    render

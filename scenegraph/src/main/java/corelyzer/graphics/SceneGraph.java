@@ -529,6 +529,8 @@ public class SceneGraph {
 	public native static String getDatasetURL(int set);
 
 	public native static boolean getDebug();
+	
+	public native static void debugKey( int keyId );
 
 	public native static boolean getDepthOrientation();
 
