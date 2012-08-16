@@ -53,6 +53,7 @@ float get_scene_center_x();
 float get_scene_center_y();
 void  translate_scene_center(float dx, float dy);
 void  update_center_point();
+void scale_scene( float ds );
 char* default_block_dir = NULL;
 int duplicateSection(int trackId, int sectionId, int newTrackId);
 
@@ -305,85 +306,11 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_panScene
  * Signature: (F)V
  */
 JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_scaleScene
-  (JNIEnv *jenv, jclass jcls, jfloat ds)
+(JNIEnv *jenv, jclass jcls, jfloat ds)
 {
-    // limit min/max zoom level
-    if(ds == 0.0f)
-    {
-        ds = 1.0f;
-    }
-    
-    float _allScale = allScale * ds;
-
-    if(_allScale < MIN_SCALE || _allScale > MAX_SCALE)
-    {
-        return;
-    }
-    else
-    {
-        allScale = _allScale;
-    }
-
-    float cx, cy;
-    float lx, ly, lz;
-    float w, h;
-    int id;
-
-    cx = get_scene_center_x();
-    cy = get_scene_center_y();
-
-    // for each canvas, scale it's distance from the center point
-    // and scale the dimensions of the canvas
-    for( id = 0; id < num_canvases(); ++id)
-    {
-        int camera;
-        if( !is_canvas(id) )
-        {
-            continue;
-        }
-
-        camera = get_canvas_camera(id);
-
-        if( !is_camera(camera) )
-        {
-            continue;
-        }
-
-        get_camera_position(camera,&lx,&ly,&lz);
-        get_canvas_dimensions(id,&w,&h);
-
-        float dx, dy;
-        dx = lx - cx;
-        dy = ly - cy;
-        dy *= ds;
-        dx *= ds;
-        
-#ifdef DEBUG
-        printf("Moving canvas %d, from %.2f, %.2f to %.2f, %.2f\n",
-               id, lx, ly, dx + cx, dy + cy);
-#endif
-
-        position_camera(camera, dx + cx, dy + cy, lz);
-        
-        lx = (lx + w) - cx;
-        ly = (ly + h) - cy;
-        lx = lx * ds;
-        ly = ly * ds;
-
-#ifdef DEBUG
-        printf("Resizing canvas %d, from %.2f x %.2f to %.2f x %.2f\n",
-               id, w, h, lx - dx, ly - dy);
-#endif
-
-        set_canvas_dimensions(id, lx - dx, ly - dy);
-    }
-
-    // update marker scale
-    // setMarkerScale(ds);
-    // update graph scale
-    // setGraphScale(ds);
+	scale_scene( ds );
 }
-
+	
 /*
  * Class:     SceneGraph
  * Method:    positionScene
@@ -5155,6 +5082,86 @@ void perform_pick(int canvas, float _x, float _y)
 
     free(order);
     
+}
+
+//=======================================================================
+void scale_scene( float ds )
+{
+	// limit min/max zoom level
+	if (ds == 0.0f)
+	{
+        ds = 1.0f;
+    }
+    
+    float _allScale = allScale * ds;
+	
+    if(_allScale < MIN_SCALE || _allScale > MAX_SCALE)
+    {
+        return;
+    }
+    else
+    {
+        allScale = _allScale;
+    }
+	
+    float cx, cy;
+    float lx, ly, lz;
+    float w, h;
+    int id;
+	
+    cx = get_scene_center_x();
+    cy = get_scene_center_y();
+	
+    // for each canvas, scale it's distance from the center point
+    // and scale the dimensions of the canvas
+    for( id = 0; id < num_canvases(); ++id)
+    {
+        int camera;
+        if( !is_canvas(id) )
+        {
+            continue;
+        }
+		
+        camera = get_canvas_camera(id);
+		
+        if( !is_camera(camera) )
+        {
+            continue;
+        }
+		
+        get_camera_position(camera,&lx,&ly,&lz);
+        get_canvas_dimensions(id,&w,&h);
+		
+        float dx, dy;
+        dx = lx - cx;
+        dy = ly - cy;
+        dy *= ds;
+        dx *= ds;
+        
+#ifdef DEBUG
+        printf("Moving canvas %d, from %.2f, %.2f to %.2f, %.2f\n",
+               id, lx, ly, dx + cx, dy + cy);
+#endif
+		
+        position_camera(camera, dx + cx, dy + cy, lz);
+        
+        lx = (lx + w) - cx;
+        ly = (ly + h) - cy;
+        lx = lx * ds;
+        ly = ly * ds;
+		
+#ifdef DEBUG
+        printf("Resizing canvas %d, from %.2f x %.2f to %.2f x %.2f\n",
+               id, w, h, lx - dx, ly - dy);
+#endif
+		
+        set_canvas_dimensions(id, lx - dx, ly - dy);
+    }
+	
+    // update marker scale
+    // setMarkerScale(ds);
+    // update graph scale
+    // setGraphScale(ds);
 }
 
 /*
