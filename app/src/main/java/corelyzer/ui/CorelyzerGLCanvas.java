@@ -136,8 +136,11 @@ public class CorelyzerGLCanvas implements GLEventListener, MouseListener, MouseW
 	JMenuItem propertyMenuItem;
 	JMenuItem splitMenuItem;
 
-	// Section-based items' indices {Graph, Property, Split, Delete, Stagger, Trim, Stack}
-	static int[] sectionBasedPopupMenuItemIndices = { 7, 8, 9, 10, 11, 12, 13 };
+	// 8/2/2012 brg: TODO Index-based approach isn't ideal when inserting (rather than appending)
+	// menu items - keep references to JMenuItems instead?
+	// Section-based items' indices:
+	// {Lock Section, Lock Section Graph, [separator], Graph, Property, Split, Delete, Stagger, Trim, Stack}
+	static int[] sectionBasedPopupMenuItemIndices = { 7, 8, 10, 11, 12, 13, 14, 15, 16 };
 
 	// For track depth fine tune action called from remote control server
 	private static boolean isFineTune = false;
@@ -443,6 +446,22 @@ public class CorelyzerGLCanvas implements GLEventListener, MouseListener, MouseW
 			}
 		});
 		this.scenePopupMenu.add(exportTrackMenuItem);
+		
+		JMenuItem lockSectionMenuItem = new JCheckBoxMenuItem("Lock Section");
+		lockSectionMenuItem.addActionListener( new ActionListener() {
+			public void actionPerformed(final ActionEvent actionEvent) {
+				AbstractButton b = (AbstractButton)actionEvent.getSource();
+				doLockSection( b.getModel().isSelected() );
+			}
+		});
+		
+		JMenuItem lockSectionGraphMenuItem = new JCheckBoxMenuItem("Lock Section Graphs");
+		lockSectionGraphMenuItem.addActionListener( new ActionListener() {
+			public void actionPerformed(final ActionEvent actionEvent) {
+				AbstractButton b = (AbstractButton)actionEvent.getSource();
+				doLockSectionGraph( b.getModel().isSelected() );
+			}
+		});
 
 		JMenuItem graphMenuItem = new JMenuItem("Graph...");
 		graphMenuItem.addActionListener(new ActionListener() {
@@ -506,6 +525,9 @@ public class CorelyzerGLCanvas implements GLEventListener, MouseListener, MouseW
 			}
 		});
 
+		this.scenePopupMenu.addSeparator();
+		this.scenePopupMenu.add(lockSectionMenuItem);
+		this.scenePopupMenu.add(lockSectionGraphMenuItem);
 		this.scenePopupMenu.addSeparator();
 		this.scenePopupMenu.add(graphMenuItem);
 		this.scenePopupMenu.add(splitMenuItem);
@@ -621,6 +643,20 @@ public class CorelyzerGLCanvas implements GLEventListener, MouseListener, MouseW
 		if (app != null) {
 			app.getController().exportSelectedTrack(this.canvas);
 		}
+	}
+	
+	private void doLockSection(final boolean lock) {
+		CorelyzerApp app = CorelyzerApp.getApp();
+		if ( app != null ) {
+			SceneGraph.setSectionMovable( selectedTrack, selectedTrackSection, !lock );
+		}
+	}
+	
+	private void doLockSectionGraph(final boolean lock) {
+		CorelyzerApp app = CorelyzerApp.getApp();
+		if ( app != null ) {
+			SceneGraph.setSectionGraphMovable( selectedTrack, selectedTrackSection, !lock );
+		}		
 	}
 
 	private void doGraphDialog() {
@@ -1660,8 +1696,16 @@ public class CorelyzerGLCanvas implements GLEventListener, MouseListener, MouseW
 			
 			// 2/5/2012 brg: check Stagger Sections menu item if necessary
 			final boolean trackIsStaggered = SceneGraph.trackIsStaggered(selectedTrack);
-			AbstractButton ab = (AbstractButton)this.scenePopupMenu.getComponent(11);
+			AbstractButton ab = (AbstractButton)this.scenePopupMenu.getComponent(14);
 			ab.getModel().setSelected(trackIsStaggered);
+			
+			// check section and graph lock menu items
+			final boolean sectionIsLocked = !SceneGraph.isSectionMovable(selectedTrack, selectedTrackSection);
+			ab = (AbstractButton)this.scenePopupMenu.getComponent(7);
+			ab.getModel().setSelected(sectionIsLocked);
+			final boolean sectionGraphIsLocked = !SceneGraph.isSectionGraphMovable(selectedTrack, selectedTrackSection);
+			ab = (AbstractButton)this.scenePopupMenu.getComponent(8);
+			ab.getModel().setSelected(sectionGraphIsLocked);
 
 			CoreSectionImage csImg = cs.getCoreSectionImage();
 			if (csImg != null && csImg.getId() != -1) {

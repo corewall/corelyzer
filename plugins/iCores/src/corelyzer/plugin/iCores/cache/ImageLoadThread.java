@@ -127,7 +127,7 @@ public class ImageLoadThread extends Thread {
                 SceneGraph.setSectionDPI(entry.trackId, secId,
                                          entry.dpi_x, entry.dpi_y);
                 SceneGraph.bringSectionToFront(entry.trackId, secId);
-                SceneGraph.markSectionImmovable(entry.trackId, secId, true);
+                SceneGraph.setSectionMovable(entry.trackId, secId, false);
 
                 // TODO append annotations if there's any
             }

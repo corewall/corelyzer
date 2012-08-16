@@ -1911,7 +1911,7 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_moveSectionGraph
     cs = get_track_section(t,section);
     
     if(!cs) return;
-    if(!cs->movable) return;
+    if(!cs->graphMovable) return;
 
 #ifdef DEBUG
     printf("Updating section position from %f, %f to %f, %f\n",
@@ -2540,10 +2540,10 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_pushSectionToEnd
 
 /*
  * Class:     SceneGraph
- * Method:    markSectionImmovable
+ * Method:    setSectionMovable
  * Signature: (IIB)V
  */
-JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_markSectionImmovable
+JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setSectionMovable
   (JNIEnv *jenv, jclass jcls, jint track, jint section, jboolean flag)
 {
     TrackSceneNode* t;
@@ -2552,15 +2552,15 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_markSectionImmovable
     cs = get_track_section(t,section);
     if(!cs) return;
   
-    cs->movable = !flag; // fixme double negative?
+    cs->movable = flag;
 }
 
 /*
  * Class:     SceneGraph
- * Method:    isSectionImmovable
+ * Method:    isSectionMovable
  * Signature: (II)Z
  */
-JNIEXPORT jboolean JNICALL Java_corelyzer_graphics_SceneGraph_isSectionImmovable
+JNIEXPORT jboolean JNICALL Java_corelyzer_graphics_SceneGraph_isSectionMovable
   (JNIEnv *jenv, jclass jcls, jint track, jint section)
 {
     TrackSceneNode* t;
@@ -2569,12 +2569,46 @@ JNIEXPORT jboolean JNICALL Java_corelyzer_graphics_SceneGraph_isSectionImmovable
     cs = get_track_section(t,section);
     if(!cs) return false;
 
-    return !cs->movable; // fixme double negative?
+    return cs->movable;
+}
+
+/*
+ * Class:     SceneGraph
+ * Method:    setSectionGraphMovable
+ * Signature: (IIB)V
+ */
+JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setSectionGraphMovable
+   (JNIEnv *jenv, jclass jcls, jint track, jint section, jboolean flag)
+{
+	TrackSceneNode* t;
+	CoreSection* cs;
+	t  = get_scene_track(default_track_scene, track);
+	cs = get_track_section(t,section);
+	if(!cs) return;
+	
+	cs->graphMovable = flag;
+}
+
+/*
+ * Class:     SceneGraph
+ * Method:    isSectionGraphMovable
+ * Signature: (II)Z
+ */
+JNIEXPORT jboolean JNICALL Java_corelyzer_graphics_SceneGraph_isSectionGraphMovable
+   (JNIEnv *jenv, jclass jcls, jint track, jint section)
+{
+	TrackSceneNode* t;
+	CoreSection* cs;
+	t  = get_scene_track(default_track_scene, track);
+	cs = get_track_section(t,section);
+	if(!cs) return false;
+	
+	return cs->graphMovable;
 }
 
 /*
  * Class:     corelyzer_helper_SceneGraph
- * Method:    markTrackImmovable
+ * Method:    markTrackMovable
  * Signature: (IZ)V
  */
 JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setTrackMovable
