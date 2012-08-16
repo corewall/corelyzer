@@ -609,7 +609,6 @@ public class CRGraphDialog extends JFrame {
 	}
 
 	private void onFieldsTableChanged(final TableModelEvent event) {
-		System.out.println("onFieldsTableChanged():");
 		final int row = event.getFirstRow();
 		final int col = event.getColumn();
 		

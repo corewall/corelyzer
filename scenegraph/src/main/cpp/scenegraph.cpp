@@ -439,7 +439,8 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_destroyCanvases
 JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_debugKey
 	(JNIEnv *jenv, jclass jcls, jint keyId)
 {
-	handle_graph_debug_key(keyId);
+	// 8/16/2012 brg: Leaving around as mechanism to pass keystrokes to
+	// scenegraph for debugging purposes.
 }
 
 	
