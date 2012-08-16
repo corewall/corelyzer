@@ -83,10 +83,10 @@
 #define CANVAS_CLAST        3
 #define CANVAS_CUT          4
 
-typedef struct Point_s {
+struct sgPoint {
     float x;
     float y;
-} Point;
+};
 
 typedef struct Canvas_s {
     int    camera;
@@ -131,8 +131,8 @@ typedef struct Canvas_s {
     float  b;
 
 	int    clastMode;
-    Point  clastPoint1;
-    Point  clastPoint2;
+    sgPoint  clastPoint1;
+    sgPoint  clastPoint2;
 } Canvas;
 
 int   create_canvas      ( float x, float y, float w, float h, float dpix, 
