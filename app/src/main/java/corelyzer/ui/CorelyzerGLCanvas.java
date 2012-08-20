@@ -625,7 +625,7 @@ public class CorelyzerGLCanvas implements GLEventListener, MouseListener, MouseW
 	
 	private void doTrimSections()
 	{
-		TrimDialog td = new TrimDialog(this.canvas, selectedTrack);
+		TrimDialog td = new TrimDialog(this.canvas, selectedTrack, selectedTrackSection);
 		td.pack();
 		td.setLocationRelativeTo(null);
 		td.setVisible(true);
@@ -633,7 +633,7 @@ public class CorelyzerGLCanvas implements GLEventListener, MouseListener, MouseW
 	
 	private void doStackSections()
 	{
-		SceneGraph.stackSections(selectedTrack);
+		SceneGraph.stackSections(selectedTrack, selectedTrackSection);
 		CorelyzerApp.getApp().updateGLWindows();
 	}
 

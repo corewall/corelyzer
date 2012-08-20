@@ -98,9 +98,10 @@ bool get_remote_controlled();
 void reset_default_track_ypos();
 void stagger_track_sections(const int trackid, const bool stagger);
 
-void trim_sections(const int trackid, const float trim, const bool fromBottom);
+void trim_sections(const int trackid, const int sectionid, const float trim,
+				   const bool fromBottom, const bool trimSelAndDeeper);
 
-void stack_sections(const int trackid);
+void stack_sections(const int trackid, const int sectionid);
 
 #endif
 

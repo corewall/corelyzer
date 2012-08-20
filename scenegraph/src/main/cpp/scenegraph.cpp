@@ -5399,23 +5399,24 @@ JNIEXPORT jboolean JNICALL Java_corelyzer_graphics_SceneGraph_trackIsStaggered
 /*
  * Class:     corelyzer_helper_SceneGraph
  * Method:    trimSections
- * Signature: (IFZ)V
+ * Signature: (IIFZZ)V
  */
 JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_trimSections
-(JNIEnv * jenv, jclass jcls, jint trackId, jfloat trim, jboolean fromBottom)
+(JNIEnv * jenv, jclass jcls, jint trackId, jint sectionId, jfloat trim,
+ jboolean fromBottom, jboolean trimSelAndDeeper)
 {
-    trim_sections(trackId, trim, fromBottom);
+    trim_sections(trackId, sectionId, trim, fromBottom, trimSelAndDeeper);
 }
 
 /*
  * Class:     corelyzer_helper_SceneGraph
  * Method:    stackSections
- * Signature: (I)V
+ * Signature: (II)V
  */
 JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_stackSections
-(JNIEnv * jenv, jclass jcls, jint trackId)
+(JNIEnv * jenv, jclass jcls, jint trackId, jint sectionId)
 {
-    stack_sections(trackId);
+    stack_sections(trackId, sectionId);
 }
 
 /*
