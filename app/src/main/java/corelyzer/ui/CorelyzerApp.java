@@ -1965,7 +1965,16 @@ public class CorelyzerApp extends WindowAdapter implements MouseListener, Startu
 				controller.showGraphDialog();
 			}
 		});
+		
+		JMenuItem dataPopupDeleteMenuItem = new JMenuItem("Delete");
+		dataPopupDeleteMenuItem.addActionListener(new ActionListener() {
+			public void actionPerformed(final ActionEvent event) {
+				controller.deleteDataset();
+			}
+		});
+		
 		dataPopupMenu.add(dataPopupGraphMenuItem);
+		dataPopupMenu.add(dataPopupDeleteMenuItem);
 	}
 
 	private void setupUI() {

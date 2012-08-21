@@ -147,6 +147,7 @@ void  render_border (float width, float height);
 int   add_line_graph_to_section      (int track, int section,
                                       int dataset, int table, int field);
 
+void  remove_dataset_graphs( const int dataset );
 int   remove_line_graph_from_section (int track, int section,
                                       int dataset, int table, int field);
 int   remove_line_graph_from_section (int gid);

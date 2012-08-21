@@ -24,12 +24,56 @@
  *
  *****************************************************************************/
 
-#include "dataset.h"
 #include <string>
 #include <vector>
 
+#include "dataset.h"
+#include "graph.h"
+
 //======================================================================
 std::vector< Dataset* > datasetvec;
+
+//======================================================================
+SectionTable::SectionTable(const char *name)
+{
+	if ( name )
+	{
+		this->name = new char[strlen(name) + 1];
+	    strcpy(this->name, name);
+	}
+	else
+	{
+		printf("Unexpected - no given name for new SectionTable, using dummy\n");
+		const char *dummyName = "unnamed section table";
+		this->name = new char[strlen(dummyName) + 1];
+		strcpy(this->name, dummyName);
+	}
+
+    numberOfRows = 0;
+    numberOfFields = 0;
+	depthUnitScale = 0.0f;
+    offset = 0.0f;
+	
+    depth = NULL;
+	min = NULL;
+	max = NULL;
+	fieldNames = NULL;
+	table = NULL;
+}
+
+SectionTable::~SectionTable()
+{
+	if ( name ) delete[] name;
+	if ( depth ) delete[] depth;
+	if ( min ) delete[] min;
+	if ( max ) delete[] max;
+	
+	for ( int i = 0; i < numberOfFields; i++ )
+	{
+		if ( fieldNames[i] ) delete[] fieldNames[i];
+		if ( table[i] ) delete[] table[i];
+	}
+}
 
 //======================================================================
 int create_dataset(const char* name)
@@ -67,61 +111,27 @@ int create_dataset(const char* name)
     return (datasetvec.size() - 1);
 }
 
-void free_dataset(int datasetId)
+//======================================================================
+void free_dataset(const int datasetId)
 {
-    Dataset* d = datasetvec[datasetId];
-    if(!d) return;
+	Dataset* d = datasetvec[datasetId];
+    if (!d) return;
+	
+	// remove graphs that use this dataset
+	remove_dataset_graphs( datasetId );
+	
+	// free SectionTable memory
+	std::vector< SectionTable* >::iterator stitr = d->sectionvec.begin();
+	while ( stitr != d->sectionvec.end() )
+	{
+		if ( *stitr ) delete *stitr;
+		stitr++;
+	}
 
     d->sectionvec.clear();
     
     delete datasetvec[datasetId];
     datasetvec[datasetId] = NULL;
-
-    // TODO Right now there might be memory leaks here
-    /*
-        typedef struct {
-            bool  valid;
-            float value;
-        } Cell;
-
-        typedef struct {
-            char* name;
-            int numberOfRows;
-            int numberOfFields;
-            float depthUnitScale;
-            float offset;
-
-            float* depth;
-            float* min;
-            float* max;
-            char** fieldNames;
-            Cell **table;
-        } SectionTable;
-
-        typedef struct {
-            char* name;
-            char* url;
-            std::vector< SectionTable* > sectionvec;
-        } Dataset;
-
-    */
-
-
-    /*
-    while(still_have_sectiontable)
-    {
-        free(table->name);
-        free(table->depth);
-        free(table->min);
-        free(table->max);
-        free(table->fieldnames);
-
-        loop { free(table->tables); };
-    }
-    free(d->name);
-    free(d->url);
-
-    */
 }
 
 //======================================================================
@@ -153,23 +163,14 @@ char* get_dataset_name(int set)
 //======================================================================
 int create_table(int set, const char* name)
 {
-    if(!is_dataset(set)) return -1;
-    if(!name) return -1;
+    if (!is_dataset(set)) return -1;
+    if (!name) return -1;
 
-    SectionTable* t = new SectionTable();
+    SectionTable* t = new SectionTable( name );
 
-    t->name = new char[strlen(name) + 1];
-    strcpy(t->name,name);
-    t->table = NULL;
-    t->depth = NULL;
-    t->numberOfRows   = 0;
-    t->numberOfFields = 0;
-    t->offset = 0.0f;
-
-    int i;
-    for( i = 0; i < datasetvec[set]->sectionvec.size(); i++)
+    for ( int i = 0; i < datasetvec[set]->sectionvec.size(); i++ )
     {
-        if( datasetvec[set]->sectionvec[i] == NULL)
+        if ( datasetvec[set]->sectionvec[i] == NULL)
         {
             datasetvec[set]->sectionvec[i] = t;
             return i;
@@ -375,42 +376,40 @@ void set_field_min_max(int set, int table, int field, float min, float max)
 //======================================================================
 bool add_new_field_to_table(int set, int table, const char* name) 
 {
-    if(!is_table(set,table)) return false;
+	// 8/20/2012 brg: TODO deleting old tables and creating new ones every time
+	// we add a field? std::vector would be a better choice.
+	
+	if(!is_table(set,table)) return false;
     if(!name) return false;
 
     SectionTable* t = datasetvec[set]->sectionvec[table];
 
-    Cell* col = new Cell[t->numberOfRows];
-    int i;
+	// allocate new arrays one component larger than original arrays
+	// to create space for new field name and data
+    char **newnames = new char*[ t->numberOfFields + 1 ];
+    Cell **newtable = new Cell*[ t->numberOfFields + 1 ];
 
-    for( i = 0; i < t->numberOfRows; i++) 
-    {
-        col[i].valid = false;
-        col[i].value = 0.0f;
-    }
-
-    char **newnames = new char*[ t->numberOfFields + 1];
-    Cell **newtable = new Cell*[ t->numberOfFields + 1];
-
-    for( i = 0; i < t->numberOfFields; i++) 
+	// copy contents of original arrays into new arrays
+    for ( int i = 0; i < t->numberOfFields; i++ )
     {
         newtable[i] = t->table[i];
         newnames[i] = t->fieldNames[i];
     }
 
-    newtable[ t->numberOfFields + 1] = col;
-    newnames[ t->numberOfFields + 1] = new char[strlen(name) + 1];
-    strcpy( newnames[ t->numberOfFields + 1], name );
+	// add new field name and data to new arrays
+    Cell* col = new Cell[t->numberOfRows];
+    newtable[ t->numberOfFields + 1 ] = col;
+    newnames[ t->numberOfFields + 1 ] = new char[ strlen(name) + 1 ];
+    strcpy( newnames[ t->numberOfFields + 1 ], name );
 
-    Cell **oldt = t->table;
-    char **oldn = newnames;
+	// free original arrays
+    delete[] t->table;
+    delete[] newnames;
 
+	// update pointers to new arrays
     t->table = newtable;
     t->fieldNames = newnames;
     t->numberOfFields = t->numberOfFields + 1;
-
-    delete [] oldt;
-    delete [] oldn;
 
     return true;
 }

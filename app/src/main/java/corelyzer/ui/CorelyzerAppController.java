@@ -1941,6 +1941,21 @@ public class CorelyzerAppController implements ActionListener {
 		graphDialog.setSize(480, 500);
 		graphDialog.setVisible(true);
 	}
+	
+	public void deleteDataset()
+	{
+		Session session = view.getSelectedSession();
+		WellLogDataSet dataset = cg.getCurrentDataset();
+		final int result = JOptionPane.showConfirmDialog(view.getMainFrame(),
+				"Are you sure you want to remove dataset " + dataset.getSourceFilename() + " from the session?",
+				"Delete Dataset", JOptionPane.YES_NO_OPTION);
+		
+		if ( result == JOptionPane.YES_OPTION )
+		{
+			deleteDataset( session, dataset );
+			cg.removeDataset( session, dataset );
+		}
+	}
 
 	public void startup() {
 		pluginManager.startup();

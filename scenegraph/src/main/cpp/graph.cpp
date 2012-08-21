@@ -189,6 +189,17 @@ int add_line_graph_to_section(int track, int section,
 }
 
 //======================================================================
+// Remove all graphs for the specified dataset
+void remove_dataset_graphs( const int dataset )
+{
+	for ( int gid = 0; gid < graphvec.size(); gid++ )
+	{
+		if ( graphvec[gid] && graphvec[gid]->dataset == dataset )
+			remove_line_graph_from_section( gid );
+	}
+}
+
+//======================================================================
 int remove_line_graph_from_section(int track, int section,
                                    int dataset, int table, int field)
 {

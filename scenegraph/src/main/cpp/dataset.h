@@ -40,13 +40,18 @@
 // Each Scene has multiple datasets(xml file),
 // Each dataset has multiple SectionTables
 
-typedef struct {
+struct Cell {
     bool  valid;
     float value;
-} Cell;
+	
+	Cell() : valid(false), value(0.0f) { }
+};
 
-typedef struct {
-    char* name;
+struct SectionTable {
+	SectionTable(const char *name);
+	~SectionTable();
+    
+	char* name;
     int numberOfRows;
     int numberOfFields;
     float depthUnitScale;
@@ -57,7 +62,7 @@ typedef struct {
     float* max;
     char** fieldNames;
     Cell **table;
-} SectionTable;
+};
 
 typedef struct {
     char* name;
@@ -69,7 +74,7 @@ typedef struct {
 
 
 int   create_dataset   (const char* name);
-void  free_dataset(int datasetId);
+void  free_dataset(const int datasetId);
 void  set_dataset_url  (int set, const char* url);
 char* get_dataset_url  (int set);
 char* get_dataset_name (int set);
