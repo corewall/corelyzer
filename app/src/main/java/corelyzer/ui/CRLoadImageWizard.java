@@ -79,6 +79,29 @@ public class CRLoadImageWizard extends JDialog {
 		repaint();
 	}
 	
+	// For each new section, set its ImageProperties.dpix, .dpiy, and .orientation
+	// fields so its length and depth can be calculated in ImagePropertiesPane.
+	private void setNewSectionsDPIAndOrientation()
+	{
+		final float dpix = sectionListPane.getDPIX();
+		final float dpiy = sectionListPane.getDPIY();
+		final String orientation = sectionListPane.getOrientation();
+		
+		for ( Vector<TrackSectionListElement> track : trackSectionModel.getTrackSectionVector() )
+		{
+			for ( int secIndex = 1; secIndex < track.size(); secIndex++ )
+			{
+				TrackSectionListElement section = track.elementAt( secIndex );
+				if ( section.isNew() )
+				{
+					section.getImageProperties().dpix = dpix;
+					section.getImageProperties().dpiy = dpiy;
+					section.getImageProperties().orientation = orientation;
+				}
+			}
+		}
+	}
+	
 	private void onNext()
 	{
 		if ( !sectionListPane.validateDPIFields( this ))
@@ -88,21 +111,11 @@ public class CRLoadImageWizard extends JDialog {
 		{
 			// User may modify values in properties pane, then return to previous pane -
 			// Make sure we don't overwrite potential edits by initializing again!
-			initializeSectionImageProperties();
+			setNewSectionsDPIAndOrientation();
+			imagePropertiesPane.updateSectionProperties();
 			firstOpenOfPropertiesPane = false;
 		}
-		
-		// create vector of new sections and hand off to image properties dialog
-		Vector<TrackSectionListElement> newSections = new Vector<TrackSectionListElement>();
-		for ( Vector<TrackSectionListElement> track : trackSectionModel.getTrackSectionVector() ) {
-			for ( TrackSectionListElement section : track ) {
-				if ( section.isNewSection() ) {
-					newSections.add( section );
-				}
-			}
-		}
-		
-		imagePropertiesPane.setNewSections( newSections );
+
 		activePane = imagePropertiesPane;
 
 		updateUI();
@@ -110,13 +123,13 @@ public class CRLoadImageWizard extends JDialog {
 		
 	private void onPrevious()
 	{
-		imagePropertiesPane.updateSectionProperties();
+		imagePropertiesPane.saveSectionProperties();
 		activePane = sectionListPane;
 		updateUI();
 	}
 	
 	private void onFinish() { 
-		imagePropertiesPane.updateSectionProperties();
+		imagePropertiesPane.saveSectionProperties();
 		Runnable loading = new Runnable() {
 			public void run() {
 				onConfirmLoad();
@@ -131,9 +144,8 @@ public class CRLoadImageWizard extends JDialog {
 	private void setupUI()
 	{
 		sectionListPane = new SectionListPane( trackSectionModel );
-		imagePropertiesPane = new ImagePropertiesPane();
-		
-		//contentPane = new JPanel( new MigLayout( "filly, wrap 1, debug" ));
+		imagePropertiesPane = new ImagePropertiesPane( trackSectionModel );
+
 		contentPane = new JPanel( new MigLayout( "filly, wrap 1", "[]15[]", "[c,grow 100,fill][c,grow 0,fill]"));
 		
 		cancelButton = new JButton("Cancel");
@@ -717,36 +729,50 @@ class SectionListPane extends JPanel implements ListSelectionListener {
 	}
 }
 
-class ImagePropertiesPane extends JPanel {
+class ImagePropertiesPane extends JPanel implements TableModelListener {
 	
 	ImagePropertyTable imageTable;
 	BatchInputPanel batchPanel;
+	TrackSectionListModel trackSectionModel;
+
+	// Stores references only to newly-added sections in the trackSectionModel - simplifies
+	// saving data from imageTable back to trackSectionModel.
 	Vector<TrackSectionListElement> newSections;
 	
-	public ImagePropertiesPane()
+	public ImagePropertiesPane( TrackSectionListModel trackSectionModel )
 	{
 		super( new MigLayout( "wrap 1, fillx" ));
-		
 		setupUI();
+		
+		newSections = new Vector<TrackSectionListElement>();
+		this.trackSectionModel = trackSectionModel;
 	}
-	
-	public void setNewSections( Vector<TrackSectionListElement> newSections )
+		
+	// load properties into table
+	private void loadSectionProperties()
 	{
-		this.newSections = newSections;
-
-		// load section properties into table
+		newSections.clear();
 		imageTable.clearTable();
-		for ( TrackSectionListElement section : newSections )
+
+		for ( Vector<TrackSectionListElement> track : trackSectionModel.getTrackSectionVector() )
 		{
-			ImagePropertyTable.ImageProperties props = section.getImageProperties();
-			imageTable.addImageAndProperties( section.getName(), props.orientation, props.length, props.dpix, props.dpiy, props.depth );
+			for ( int secIndex = 1; secIndex < track.size(); secIndex++ )
+			{
+				TrackSectionListElement section = track.elementAt( secIndex );
+				if ( section.isNew() )
+				{
+					ImagePropertyTable.ImageProperties props = section.getImageProperties();
+					imageTable.addImageAndProperties( section.getName(), props.orientation, props.length, props.dpix, props.dpiy, props.depth );
+					newSections.add( section );
+				}
+			}
 		}
 	}
 	
-	// sync table values with section properties
-	public void updateSectionProperties()
+	// save table's values to section properties
+	public void saveSectionProperties()
 	{
-		for (int i = 0; i < imageTable.getRowCount(); i++) {
+		for ( int i = 0; i < imageTable.getRowCount(); i++ ) {
 			TrackSectionListElement section = newSections.elementAt( i );
 			
 			section.getImageProperties().orientation = (String) imageTable.model.getValueAt(i, 1);
@@ -769,7 +795,79 @@ class ImagePropertiesPane extends JPanel {
 		this.add( batchPanel, "growx" );
 		
 		imageTable.updateUI();
-	}	
+		imageTable.model.addTableModelListener( this );
+	}
+	
+	public void tableChanged( TableModelEvent e )
+	{
+		System.out.println("tableChanged()");
+		if ( e.getType() == TableModelEvent.UPDATE )
+		{
+			System.out.println("udpated row " + e.getFirstRow() + ", column " + e.getColumn());
+			saveSectionProperties();
+			updateSectionProperties(); // rebuild table based on new DPI values
+		}
+	}
+	
+	// Calculate depth and length for new sections based on their DPI and orientation values
+	// and the depth/length of existing sections in each track.
+	public void updateSectionProperties()
+	{
+		for ( Vector<TrackSectionListElement> track : trackSectionModel.getTrackSectionVector() )
+		{
+			float curDepth = 0.0f;
+			for ( int secIndex = 1; secIndex < track.size(); secIndex++ )
+			{
+				TrackSectionListElement section = track.elementAt( secIndex );
+				if ( !section.isNew() ) {
+					curDepth = section.getImageProperties().depth + section.getImageProperties().length;
+				} else {
+					// new section, default length and depth - DPI X/Y and orientation should
+					// be valid values passed in from SectionListPane DPI/orientation fields
+					section.getImageProperties().depth = curDepth;
+					section.getImageProperties().length = 1.5f; // meters
+					
+					// attempt to determine section's actual length
+					File imageFile = section.getImageFile();
+					if ( imageFile != null ) {
+						final boolean isVertical = section.getImageProperties().orientation.equals("Vertical");
+						final float depthDPI = isVertical ? section.getImageProperties().dpiy :
+							section.getImageProperties().dpix;
+						final int lengthInPix = SceneGraph.getImageDepthPix( imageFile.toString(), isVertical );
+						section.getImageProperties().length = (( lengthInPix / depthDPI ) * 2.54f ) / 100.0f;
+					} else {
+						System.out.println("New section has null imageFile");
+					}
+					
+					curDepth += section.getImageProperties().length;
+					
+					// if necessary, push subsequent pre-existing sections deeper to create space
+					// TODO: only push if there isn't sufficient space for the new core to be
+					// added without overlapping.
+					boolean firstSubSec = true;
+					float depthOffset = 0.0f;
+					for ( int subSecIndex = secIndex + 1; subSecIndex < track.size(); subSecIndex++ ) {
+						TrackSectionListElement subSection = track.elementAt( subSecIndex );
+						if ( !subSection.isNew() )
+						{
+							if ( firstSubSec )
+							{
+								depthOffset = curDepth - subSection.getImageProperties().depth;
+								subSection.getImageProperties().depth = curDepth;
+								firstSubSec = false;
+							}
+							else
+							{
+								subSection.getImageProperties().depth += depthOffset;
+							}
+						}
+					}
+				}
+			}
+		}
+		
+		loadSectionProperties();
+	}
 }
 
 
