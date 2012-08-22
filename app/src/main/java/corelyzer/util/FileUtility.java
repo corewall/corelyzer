@@ -748,7 +748,7 @@ public class FileUtility {
 			SceneGraph.bringSectionToFront(trackId, nativeSectionId);
 
 			boolean imageLock = CorelyzerApp.getApp().preferences().lockCoreSectionImage;
-			SceneGraph.markSectionImmovable(trackId, nativeSectionId, imageLock);
+			SceneGraph.setSectionMovable(trackId, nativeSectionId, !imageLock);
 		}
 		SceneGraph.unlock();
 

@@ -573,7 +573,8 @@ void render_canvas(int id)
             }
             free(label);
             
-            glLineWidth(5);
+			glBindTexture( GL_TEXTURE_2D, 0 );
+			glLineWidth(5);
             glBegin(GL_LINES);
             {
                 glColor3f(1, 0, 0);
@@ -1400,14 +1401,7 @@ void render_scale(Canvas* c)
 					sprintf(buf, "%.1f frames/sec", get_fps());
 					glTranslatef(0, CHAR_HEIGHT / 2, 0);
 					render_scaled_string(buf, 0, strlen(buf) - 1, 0.5f);
-					
-					// graph info
-					GraphDebugInfo gdi = get_graph_debug_info();
-					sprintf(buf, "scaling (factor %d): %d, labels: %d, border: %d, scissor: %d", gdi.scaleFactor,
-							gdi.useScaling ? 1 : 0, gdi.useLabels ? 1 : 0, gdi.useBorder ? 1 : 0, gdi.useScissoring ? 1 : 0);
-					glTranslatef(0, CHAR_HEIGHT / 2, 0);
-					render_scaled_string(buf, 0, strlen(buf) - 1, 0.5f);
-                }
+				}
                 free(buf);
             }
             glPopMatrix();

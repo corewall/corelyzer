@@ -53,6 +53,7 @@ float get_scene_center_x();
 float get_scene_center_y();
 void  translate_scene_center(float dx, float dy);
 void  update_center_point();
+void scale_scene( float ds );
 char* default_block_dir = NULL;
 int duplicateSection(int trackId, int sectionId, int newTrackId);
 
@@ -305,85 +306,11 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_panScene
  * Signature: (F)V
  */
 JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_scaleScene
-  (JNIEnv *jenv, jclass jcls, jfloat ds)
+(JNIEnv *jenv, jclass jcls, jfloat ds)
 {
-    // limit min/max zoom level
-    if(ds == 0.0f)
-    {
-        ds = 1.0f;
-    }
-    
-    float _allScale = allScale * ds;
-
-    if(_allScale < MIN_SCALE || _allScale > MAX_SCALE)
-    {
-        return;
-    }
-    else
-    {
-        allScale = _allScale;
-    }
-
-    float cx, cy;
-    float lx, ly, lz;
-    float w, h;
-    int id;
-
-    cx = get_scene_center_x();
-    cy = get_scene_center_y();
-
-    // for each canvas, scale it's distance from the center point
-    // and scale the dimensions of the canvas
-    for( id = 0; id < num_canvases(); ++id)
-    {
-        int camera;
-        if( !is_canvas(id) )
-        {
-            continue;
-        }
-
-        camera = get_canvas_camera(id);
-
-        if( !is_camera(camera) )
-        {
-            continue;
-        }
-
-        get_camera_position(camera,&lx,&ly,&lz);
-        get_canvas_dimensions(id,&w,&h);
-
-        float dx, dy;
-        dx = lx - cx;
-        dy = ly - cy;
-        dy *= ds;
-        dx *= ds;
-        
-#ifdef DEBUG
-        printf("Moving canvas %d, from %.2f, %.2f to %.2f, %.2f\n",
-               id, lx, ly, dx + cx, dy + cy);
-#endif
-
-        position_camera(camera, dx + cx, dy + cy, lz);
-        
-        lx = (lx + w) - cx;
-        ly = (ly + h) - cy;
-        lx = lx * ds;
-        ly = ly * ds;
-
-#ifdef DEBUG
-        printf("Resizing canvas %d, from %.2f x %.2f to %.2f x %.2f\n",
-               id, w, h, lx - dx, ly - dy);
-#endif
-
-        set_canvas_dimensions(id, lx - dx, ly - dy);
-    }
-
-    // update marker scale
-    // setMarkerScale(ds);
-    // update graph scale
-    // setGraphScale(ds);
+	scale_scene( ds );
 }
-
+	
 /*
  * Class:     SceneGraph
  * Method:    positionScene
@@ -512,7 +439,8 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_destroyCanvases
 JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_debugKey
 	(JNIEnv *jenv, jclass jcls, jint keyId)
 {
-	handle_graph_debug_key(keyId);
+	// 8/16/2012 brg: Leaving around as mechanism to pass keystrokes to
+	// scenegraph for debugging purposes.
 }
 
 	
@@ -1911,7 +1839,7 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_moveSectionGraph
     cs = get_track_section(t,section);
     
     if(!cs) return;
-    if(!cs->movable) return;
+    if(!cs->graphMovable) return;
 
 #ifdef DEBUG
     printf("Updating section position from %f, %f to %f, %f\n",
@@ -2540,10 +2468,10 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_pushSectionToEnd
 
 /*
  * Class:     SceneGraph
- * Method:    markSectionImmovable
+ * Method:    setSectionMovable
  * Signature: (IIB)V
  */
-JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_markSectionImmovable
+JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setSectionMovable
   (JNIEnv *jenv, jclass jcls, jint track, jint section, jboolean flag)
 {
     TrackSceneNode* t;
@@ -2552,15 +2480,15 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_markSectionImmovable
     cs = get_track_section(t,section);
     if(!cs) return;
   
-    cs->movable = !flag; // fixme double negative?
+    cs->movable = flag;
 }
 
 /*
  * Class:     SceneGraph
- * Method:    isSectionImmovable
+ * Method:    isSectionMovable
  * Signature: (II)Z
  */
-JNIEXPORT jboolean JNICALL Java_corelyzer_graphics_SceneGraph_isSectionImmovable
+JNIEXPORT jboolean JNICALL Java_corelyzer_graphics_SceneGraph_isSectionMovable
   (JNIEnv *jenv, jclass jcls, jint track, jint section)
 {
     TrackSceneNode* t;
@@ -2569,12 +2497,46 @@ JNIEXPORT jboolean JNICALL Java_corelyzer_graphics_SceneGraph_isSectionImmovable
     cs = get_track_section(t,section);
     if(!cs) return false;
 
-    return !cs->movable; // fixme double negative?
+    return cs->movable;
+}
+
+/*
+ * Class:     SceneGraph
+ * Method:    setSectionGraphMovable
+ * Signature: (IIB)V
+ */
+JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setSectionGraphMovable
+   (JNIEnv *jenv, jclass jcls, jint track, jint section, jboolean flag)
+{
+	TrackSceneNode* t;
+	CoreSection* cs;
+	t  = get_scene_track(default_track_scene, track);
+	cs = get_track_section(t,section);
+	if(!cs) return;
+	
+	cs->graphMovable = flag;
+}
+
+/*
+ * Class:     SceneGraph
+ * Method:    isSectionGraphMovable
+ * Signature: (II)Z
+ */
+JNIEXPORT jboolean JNICALL Java_corelyzer_graphics_SceneGraph_isSectionGraphMovable
+   (JNIEnv *jenv, jclass jcls, jint track, jint section)
+{
+	TrackSceneNode* t;
+	CoreSection* cs;
+	t  = get_scene_track(default_track_scene, track);
+	cs = get_track_section(t,section);
+	if(!cs) return false;
+	
+	return cs->graphMovable;
 }
 
 /*
  * Class:     corelyzer_helper_SceneGraph
- * Method:    markTrackImmovable
+ * Method:    markTrackMovable
  * Signature: (IZ)V
  */
 JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setTrackMovable
@@ -5123,6 +5085,86 @@ void perform_pick(int canvas, float _x, float _y)
     
 }
 
+//=======================================================================
+void scale_scene( float ds )
+{
+	// limit min/max zoom level
+	if (ds == 0.0f)
+	{
+        ds = 1.0f;
+    }
+    
+    float _allScale = allScale * ds;
+	
+    if(_allScale < MIN_SCALE || _allScale > MAX_SCALE)
+    {
+        return;
+    }
+    else
+    {
+        allScale = _allScale;
+    }
+	
+    float cx, cy;
+    float lx, ly, lz;
+    float w, h;
+    int id;
+	
+    cx = get_scene_center_x();
+    cy = get_scene_center_y();
+	
+    // for each canvas, scale it's distance from the center point
+    // and scale the dimensions of the canvas
+    for( id = 0; id < num_canvases(); ++id)
+    {
+        int camera;
+        if( !is_canvas(id) )
+        {
+            continue;
+        }
+		
+        camera = get_canvas_camera(id);
+		
+        if( !is_camera(camera) )
+        {
+            continue;
+        }
+		
+        get_camera_position(camera,&lx,&ly,&lz);
+        get_canvas_dimensions(id,&w,&h);
+		
+        float dx, dy;
+        dx = lx - cx;
+        dy = ly - cy;
+        dy *= ds;
+        dx *= ds;
+        
+#ifdef DEBUG
+        printf("Moving canvas %d, from %.2f, %.2f to %.2f, %.2f\n",
+               id, lx, ly, dx + cx, dy + cy);
+#endif
+		
+        position_camera(camera, dx + cx, dy + cy, lz);
+        
+        lx = (lx + w) - cx;
+        ly = (ly + h) - cy;
+        lx = lx * ds;
+        ly = ly * ds;
+		
+#ifdef DEBUG
+        printf("Resizing canvas %d, from %.2f x %.2f to %.2f x %.2f\n",
+               id, w, h, lx - dx, ly - dy);
+#endif
+		
+        set_canvas_dimensions(id, lx - dx, ly - dy);
+    }
+	
+    // update marker scale
+    // setMarkerScale(ds);
+    // update graph scale
+    // setGraphScale(ds);
+}
+
 /*
  * Class:     corelyzer_helper_SceneGraph
  * Method:    setBackgroundColor
@@ -5357,23 +5399,24 @@ JNIEXPORT jboolean JNICALL Java_corelyzer_graphics_SceneGraph_trackIsStaggered
 /*
  * Class:     corelyzer_helper_SceneGraph
  * Method:    trimSections
- * Signature: (IFZ)V
+ * Signature: (IIFZZ)V
  */
 JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_trimSections
-(JNIEnv * jenv, jclass jcls, jint trackId, jfloat trim, jboolean fromBottom)
+(JNIEnv * jenv, jclass jcls, jint trackId, jint sectionId, jfloat trim,
+ jboolean fromBottom, jboolean trimSelAndDeeper)
 {
-    trim_sections(trackId, trim, fromBottom);
+    trim_sections(trackId, sectionId, trim, fromBottom, trimSelAndDeeper);
 }
 
 /*
  * Class:     corelyzer_helper_SceneGraph
  * Method:    stackSections
- * Signature: (I)V
+ * Signature: (II)V
  */
 JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_stackSections
-(JNIEnv * jenv, jclass jcls, jint trackId)
+(JNIEnv * jenv, jclass jcls, jint trackId, jint sectionId)
 {
-    stack_sections(trackId);
+    stack_sections(trackId, sectionId);
 }
 
 /*

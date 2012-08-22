@@ -66,7 +66,8 @@ typedef struct CoreSection_s {
     bool  highlight;
     GLfloat *highlight_color;
     
-    bool  movable;
+    bool movable;		// if true, section can be moved along depth axis
+	bool graphMovable;	// if true, section graphs can be moved along depth axis
 
     std::vector< CoreAnnotation* > annovec;
     std::vector< int > graphvec;

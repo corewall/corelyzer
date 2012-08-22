@@ -26,6 +26,7 @@
 
 #include <string>
 #include <algorithm>
+#include <float.h>
 
 #include "canvas.h"
 #include "graph.h"
@@ -853,45 +854,93 @@ void stagger_track_sections(const int trackid, const bool stagger)
 	sort( depthSortedVec.begin(), depthSortedVec.end(), sort_by_depth );
 	
 	bool sectionWasOffset = false;
-	const int numSections = depthSortedVec.size();
-	for ( int i = 1; i < depthSortedVec.size(); i++ )
+
+	if ( stagger )
 	{
-		if (i % 2 != 0) // offset odd sections
+		for ( int i = 1; i < depthSortedVec.size(); i++ )
+		{
+			if (i % 2 != 0) // offset odd sections
+			{
+				CoreSection *cs = depthSortedVec[i];
+				
+				// offset by height (non-depth axis) of core section
+				float dpix, dpiy;
+				get_canvas_dpi( 0, &dpix, &dpiy );
+				const float secHeightAxisDPI = ( cs->orientation == LANDSCAPE ? dpiy : dpix );
+				const float secHeight = ( cs->orientation == LANDSCAPE ? cs->height : cs->width );
+				const float secHeightPix = secHeight * INCH_PER_CM * secHeightAxisDPI;
+				const float offset = secHeightPix * -1.0f;
+
+				cs->py += offset;
+				sectionWasOffset = true;
+			}
+		}
+	}
+	else // unstagger
+	{
+		// When unstaggering, need to consider every section in the track as the user
+		// could move already-staggered sections around in such a way that a staggered
+		// section is non-odd in the depth order.
+		
+		// find height of lowest section - remember that y increases as we move "down"
+		// the canvas, so we're actually looking for the largest value.
+		int i = 0;
+		float lowHeight = FLT_MIN;
+		for ( i = 0; i < depthSortedVec.size(); i++ )
 		{
 			CoreSection *cs = depthSortedVec[i];
-			
-			// offset by height (non-depth axis) of core section
-			float dpix, dpiy;
-			get_canvas_dpi( 0, &dpix, &dpiy );
-			const float secHeightAxisDPI = ( cs->orientation == LANDSCAPE ? dpiy : dpix );
-			const float secHeight = ( cs->orientation == LANDSCAPE ? cs->height : cs->width );
-			const float secHeightPix = secHeight * INCH_PER_CM * secHeightAxisDPI;
-			const float offset = secHeightPix * (stagger ? -1.0f : 1.0f);
-
-			cs->py += offset;
+			if ( cs->py > lowHeight )
+				lowHeight = cs->py;
+		}
+		
+		// move all sections to lowest section's height
+		for ( i = 0; i < depthSortedVec.size(); i++ )
+		{
+			CoreSection *cs = depthSortedVec[i];
+			cs->py = lowHeight;
 			sectionWasOffset = true;
 		}
 	}
+
 	
 	if (sectionWasOffset)
 		track->staggered = stagger;
 }
 
-// Trim visible interval of all sections in specified track
-void trim_sections(const int trackid, const float trim, const bool fromBottom)
+// Trim visible interval of selected section (sectionid), or selected section
+// and all deeper sections, in specified track.
+void trim_sections(const int trackid, const int sectionid, const float trim, 
+				   const bool fromBottom, const bool trimSelAndDeeper)
 {
 	if (!is_track(trackid))
 	{
 		printf("trim_sections() failed: invalid track %d\n", trackid);
 		return;
 	}
+	
+	if ( !is_section_model( get_scene_track( trackid ), sectionid ))
+	{
+		printf("trim_sections() failed: invalid section %d\n", sectionid );
+		return;
+	}
 
-	std::vector<CoreSection *> cleanModelVec;
-	get_clean_model_vector( trackid, cleanModelVec );
+	// Trim in depth order: because track->modelvec isn't necessarily in depth order
+	// (e.g. when a non-last section is deleted and re-added), need to sort ourselves.
+	std::vector<CoreSection *> depthSortedVec;
+	get_clean_model_vector( trackid, depthSortedVec );
+	sort( depthSortedVec.begin(), depthSortedVec.end(), sort_by_depth );
+
+	bool startTrimming = false;
 	std::vector<CoreSection *>::iterator modelIt;
-	for ( modelIt = cleanModelVec.begin(); modelIt != cleanModelVec.end(); modelIt++ )
+	for ( modelIt = depthSortedVec.begin(); modelIt != depthSortedVec.end(); modelIt++ )
 	{
 		CoreSection *cs = *modelIt;
+
+		if ( cs->section == sectionid )
+			startTrimming = true;
+		
+		if ( !startTrimming )
+			continue;
 		
 		if ( fromBottom )
 			cs->intervalBottom -= trim;
@@ -915,11 +964,15 @@ void trim_sections(const int trackid, const float trim, const bool fromBottom)
 			else
 				cs->intervalTop -= underage;
 		}
+		
+		if ( !trimSelAndDeeper )
+			break; // only trimming selected section, we're done
 	}
 }
 
-// Remove gaps between sections in specified track
-void stack_sections(const int trackid)
+// Starting from specified section, position all deeper sections such that
+// there are no gaps between them.
+void stack_sections(const int trackid, const int sectionid)
 {
 	if (!is_track(trackid))
 	{
@@ -927,6 +980,12 @@ void stack_sections(const int trackid)
 		return;
 	}
 	
+	if ( !is_section_model( get_scene_track( trackid ), sectionid ))
+	{
+		printf("trim_sections() failed: invalid section %d\n", sectionid );
+		return;
+	}	
+
 	TrackSceneNode *track = get_scene_track(trackid);
 
 	// Stack in depth order: because track->modelvec isn't necessarily in depth order
@@ -939,11 +998,20 @@ void stack_sections(const int trackid)
 
 	printf( "Stacking %d sections of track %s\n", numSections, track->name );
 	std::vector<CoreSection *>::iterator modelIt;
+	bool startStacking = false;
 	for ( modelIt = depthSortedVec.begin(); modelIt + 1 != depthSortedVec.end(); modelIt++ )
 	{
 		CoreSection *cs1 = *modelIt;
 		CoreSection *cs2 = *(modelIt + 1);
 
+		// once we've found the "base" section from which stacking should begin,
+		// set a flag and commence stacking
+		if ( cs1->section == sectionid )
+			startStacking = true;
+		
+		if ( !startStacking )
+			continue;
+		
 		// convert depth axis of section 1 to pixels
 		float dpix, dpiy;
 		get_canvas_dpi( 0, &dpix, &dpiy );

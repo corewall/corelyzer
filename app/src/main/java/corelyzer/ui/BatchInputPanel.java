@@ -180,22 +180,27 @@ public class BatchInputPanel extends JPanel {
 		else
 		{
 			applyRowIndices = imageTable.getSelectedRows();
+			if ( applyRowIndices.length == 0 )
+				return;
 		}
 		
 		final int orientation = orientationComboBox.getSelectedIndex();
 		if ( orientation < 2 )
 			imageTable.applyOrientation( orientation, applyRowIndices );
 
+		boolean dpiValueChanged = false;
 		if (!dpiXField.getText().equals(""))
 		{
 			final int dpiX = Integer.valueOf(dpiXField.getText());
 			imageTable.applyDPIX(dpiX, applyRowIndices );
+			dpiValueChanged = true;
 		}
 		
 		if (!dpiYField.getText().equals(""))
 		{
 			final int dpiY = Integer.valueOf(dpiYField.getText());
 			imageTable.applyDPIY(dpiY, applyRowIndices);
+			dpiValueChanged = true;
 		}
 
 		if (!lengthField.getText().equals(""))
@@ -215,6 +220,9 @@ public class BatchInputPanel extends JPanel {
 		{
 			JOptionPane.showMessageDialog(this, "Both Start Depth and Depth Increment must be populated to apply values in Depth column");
 		}
+		
+		if ( dpiValueChanged )
+			imageTable.model.fireTableDataChanged();
 	}
 	
 

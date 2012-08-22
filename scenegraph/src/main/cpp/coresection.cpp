@@ -70,7 +70,8 @@ void create_section_model(int track, int section, CoreSection*& ptr)
     ptr->py        = 0.0f;
     ptr->draw_vert_line = false;
     ptr->vert_line_x = -1.0f;
-    ptr->movable   = true;
+    ptr->movable = true;
+	ptr->graphMovable = false;
 	ptr->name = NULL;
 	ptr->width = 0;
 	ptr->height = 0;

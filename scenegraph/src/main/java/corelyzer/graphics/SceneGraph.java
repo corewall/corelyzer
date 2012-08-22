@@ -1097,7 +1097,8 @@ public class SceneGraph {
 	 */
 	public native static boolean isLineGraphShown(int gid);
 
-	public native static boolean isSectionImmovable(int track, int section);
+	public native static boolean isSectionMovable(int track, int section);
+	public native static boolean isSectionGraphMovable(int track, int section);
 
 	/**
 	 * Access method. Determine if the specified cell is valid.
@@ -1173,10 +1174,14 @@ public class SceneGraph {
 	// float max);
 
 	/**
-	 * Marks a section as immovable or not. This will nullify any calls to move
-	 * a section when a section is labeled immovable
+	 * Set flag that determines whether or not a section can be moved along depth axis
 	 */
-	public native static void markSectionImmovable(int track, int section, boolean flag);
+	public native static void setSectionMovable(int track, int section, boolean flag);
+
+	/**
+	 * Set flag that determines whether or not a section's graphs can be moved along depth axis
+	 */
+	public native static void setSectionGraphMovable(int track, int section, boolean flag);
 
 	/**
      */
@@ -1767,8 +1772,8 @@ public class SceneGraph {
 
 	public native static boolean trackIsStaggered(int track);
 	public native static void staggerTrackSections(int track, boolean stagger);
-	public native static void trimSections(int track, float trim, boolean fromBottom);
-	public native static void stackSections(int track);
+	public native static void trimSections(int track, int section, float trim, boolean fromBottom, boolean trimSelAndDeeper);
+	public native static void stackSections(int track, int section);
 	
 	/**
 	 * Let's the corelyzer.helper.SceneGraph library know that it's being

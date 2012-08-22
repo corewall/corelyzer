@@ -155,39 +155,48 @@ int add_line_graph_to_section(int track, int section,
 	
 	g->type	   = GRAPH_LINE;
 	
-	// try to determine granularity of data by averaging difference between first six depths
-	const int endRow = ( 6 > rows ) ? rows : 6;
-	float totalDepth = 0.0f;
-	int ridx = 1;
-	for ( ; ridx < endRow; ridx++ )
+	// pre-load all data
+	g->dataTableSize = rows;
+	g->dataTable = new GraphPoint[ g->dataTableSize ];
+	
+	for ( int i = 0; i < g->dataTableSize; i++ )
 	{
-		totalDepth += ( get_table_row_depth( g->dataset, g->table, ridx ) -
-					    get_table_row_depth( g->dataset, g->table, ridx - 1 ));
+		g->dataTable[i].x = get_table_row_depth( g->dataset, g->table, i );
+		g->dataTable[i].y = get_table_cell( g->dataset, g->table, g->field, i );
 	}
-	float averageInMeters = totalDepth / (float)(ridx - 1);
-	g->data_granularity = averageInMeters * 100.0f;
 
-    // find the first open spot and use it
-    for( int i = 0; i < graphvec.size(); i++)
+	// graph initialization complete, now add to graphvec
+
+    // if graphvec has empty slots, use the first one we find...
+    for ( int i = 0; i < graphvec.size(); i++)
     {
-        if( graphvec[i] == NULL)
+        if ( graphvec[i] == NULL)
         {
             graphvec[i] = g;
             // put the graph in the sections graphvec
             cs->graphvec.push_back(i);
             set_graph_slot( i, cs->graphvec.size() - 1);
-
+			
             return i;
         }
     }
-
-    graphvec.push_back(g);
-
-    // put the graph in the sections graphvec
+    // ...otherwise, add to the end of graphvec
+	graphvec.push_back(g);
     cs->graphvec.push_back( graphvec.size() - 1);
     g->slot = cs->graphvec.size() - 1;
 
     return (graphvec.size() - 1);
+}
+
+//======================================================================
+// Remove all graphs for the specified dataset
+void remove_dataset_graphs( const int dataset )
+{
+	for ( int gid = 0; gid < graphvec.size(); gid++ )
+	{
+		if ( graphvec[gid] && graphvec[gid]->dataset == dataset )
+			remove_line_graph_from_section( gid );
+	}
 }
 
 //======================================================================
@@ -210,37 +219,9 @@ int remove_line_graph_from_section(int track, int section,
     // update all the slots of all the other graphs
     int gid = locate_graph(track, section, dataset, table, field);
 
-    if(!is_graph(gid)) return -1;
-
-    std::vector< int >::iterator csitr = cs->graphvec.begin();
-
-    int count = 0;
-    while( csitr != cs->graphvec.end() )
-    {
-        if(*csitr == gid )
-        {
-            cs->graphvec.erase(csitr);
-			break;
-        }
-        csitr++;
-        count++;
-    }
-
-    // update slots
-    int i = 0;
-    for ( csitr = cs->graphvec.begin(); csitr != cs->graphvec.end(); csitr++, i++)
-    {
-        set_graph_slot( *csitr, i);
-    }
-
-    if( graphvec[gid]->label )
-        delete [] graphvec[gid]->label;
-
-    if( graphvec[gid] )
-        delete graphvec[gid];
-    graphvec[gid] = NULL;
+    if (!is_graph(gid)) return -1;
 	
-    return gid;
+	return remove_line_graph_from_section( gid );
 }
 
 //======================================================================
@@ -265,7 +246,7 @@ int remove_line_graph_from_section(int gid)
 	std::vector< int >::iterator csitr = cs->graphvec.begin();
 
     int count = 0;
-    while( csitr != cs->graphvec.end() )
+    while ( csitr != cs->graphvec.end() )
     {
         if(*csitr == gid )
         {
@@ -278,14 +259,18 @@ int remove_line_graph_from_section(int gid)
 
     // update slots
     int i = 0;
-    for( csitr = cs->graphvec.begin();
-         csitr != cs->graphvec.end();
-         csitr++, i++)
+    for ( csitr = cs->graphvec.begin(); csitr != cs->graphvec.end(); csitr++, i++)
     {
-        set_graph_slot( *csitr, i);
+        set_graph_slot( *csitr, i );
     }
 
-    if( graphvec[gid] ) {
+	if ( graphvec[gid]->dataTable )
+		delete[] graphvec[gid]->dataTable;
+    
+	if ( graphvec[gid]->label )
+        delete [] graphvec[gid]->label;
+    
+	if ( graphvec[gid] ) {
         delete graphvec[gid];
     }
     
@@ -316,7 +301,6 @@ int locate_graph(int track, int section, int dataset, int table, int field)
 }
 
 //======================================================================
-
 void render_minmax_labels(Canvas * c, CoreSection* cs, int gid)
 {
     Graph* g = graphvec[gid];
@@ -434,50 +418,6 @@ bool exclude_value(const int gid, const float value)
 
 }
 
-static bool useScaling = false;
-static bool useLabels = true;
-static bool useBorder = true;
-static bool useScissoring = false;
-static int scaleFactor = 0;
-
-static const int TOGGLE_SCALING = 1;
-static const int TOGGLE_LABELS = 2;
-static const int TOGGLE_BORDER = 3;
-static const int TOGGLE_SCISSORING = 4;
-
-GraphDebugInfo get_graph_debug_info()
-{
-	GraphDebugInfo gdi;
-	gdi.useScaling = useScaling;
-	gdi.useLabels = useLabels;
-	gdi.useBorder = useBorder;
-	gdi.useScissoring = useScissoring;
-	gdi.scaleFactor = scaleFactor;
-	
-	return gdi;
-}
-
-void handle_graph_debug_key(int keyId)
-{
-	switch (keyId)
-	{
-		case TOGGLE_SCALING:
-			useScaling = !useScaling;
-			break;
-		case TOGGLE_LABELS:
-			useLabels = !useLabels;
-			break;
-		case TOGGLE_BORDER:
-			useBorder = !useBorder;
-			break;
-		case TOGGLE_SCISSORING:
-			useScissoring = !useScissoring;
-			break;
-		default:
-			break;
-	}
-}
-
 void render_graph(Canvas* c, CoreSection* cs, int gid)
 {
     if( !is_graph(gid) )
@@ -486,7 +426,7 @@ void render_graph(Canvas* c, CoreSection* cs, int gid)
     Graph* g = graphvec[gid];
 
     // now unitscale is relative to 'cm'
-    float depthunitscale = get_table_depthunitscale(g->dataset, g->table);
+    const float depthunitscale = get_table_depthunitscale(g->dataset, g->table);
 
 	// Get camera coverage corners
     float x, y, z;
@@ -498,8 +438,6 @@ void render_graph(Canvas* c, CoreSection* cs, int gid)
     float cd = y + c->coverage_y;  // down
 
     float scale = c->w / c->w0;
-	//printf("orig canvas width %f, cur width %f, scaling %f\n", c->w0, c->w, scale);
-	int stride = 1; // todo adjust according to Z for striding value array
 
     /*
     float depthStart = (2.54f*cl) / (c->dpi_x * 100.0f);
@@ -512,14 +450,14 @@ void render_graph(Canvas* c, CoreSection* cs, int gid)
     printf("-         - Depth:  %.2f - %.2f\n", depthStart, depthEnd);
     */
     
-    if(g->show) 
+    if (g->show) 
     {
-        float fieldRange = (g->max - g->min);
-        float fieldMed = (g->max + g->min)/2.0;
-        float y_scale = (g->h * getGraphScale()) / (fieldRange * INCH_PER_CM);
+        const float fieldRange = (g->max - g->min);
+        const float fieldMed = (g->max + g->min)/2.0;
+        const float y_scale = (g->h * getGraphScale()) / (fieldRange * INCH_PER_CM);
 
         // fit curve into border
-        float y_curv_adjust = (getGraphScale() * g->h * c->dpi_y) / 2.0f;
+        const float y_curv_adjust = (getGraphScale() * g->h * c->dpi_y) / 2.0f;
             
         // this means it's 1x1 pixel image for missing purpose
         // no need to rotate it no matter what
@@ -528,7 +466,6 @@ void render_graph(Canvas* c, CoreSection* cs, int gid)
             cs->orientation = LANDSCAPE;
         }
 
-        // TODO Graph Culling
         // TODO Stride the graph values when camera Z increases
         // TODO Pack the data into vertex array
 
@@ -544,8 +481,7 @@ void render_graph(Canvas* c, CoreSection* cs, int gid)
 
         //Box* b = get_graph_box(cs, gid); // return values' in 'inch'
 		Box* b = get_graph_box(c, cs, gid); // return values' in 'inch'
-		
-        if(!b) return;
+        if (!b) return;
 		
 		// graph offset translation in pixel
 		glTranslatef(cs->graph_offset, 0.0, 0.0);
@@ -556,16 +492,15 @@ void render_graph(Canvas* c, CoreSection* cs, int gid)
             glTranslatef( 0.0, (b->y + b->h) * c->dpi_y, 0.0 );
 
             // Leave 2 pixels spacing
-			if ( useBorder )
-				render_border(b->w * c->dpi_x + 2, b->h * c->dpi_y + 2);
-            if ( useLabels )
-			{
-				// 7/18/2012 brg: at distant zoom levels, labels are illegible and slow
-				// things down significantly if there are many graphs. Only draw if we're
-				// within a reasonable zoom range.
-				if ( c->w / c->w0 < 10.0f /* BRGTODO test this arbitrary value on other systems */)
-					render_label(c, cs, gid);
-			}
+			render_border(b->w * c->dpi_x + 2, b->h * c->dpi_y + 2);
+
+			// 7/18/2012 brg: at distant zoom levels, labels are illegible and slow
+			// things down significantly if there are many graphs. Only draw if we're
+			// within a reasonable zoom range. Experimenting on various display setups
+			// suggests that a scale factor of 10 is a reasonable threshold.
+			if ( c->w / c->w0 < 10.0f )
+				render_label(c, cs, gid);
+
             // render_minmax_labels(c, cs, gid);
         }
         glPopMatrix();
@@ -576,19 +511,21 @@ void render_graph(Canvas* c, CoreSection* cs, int gid)
         // the real graph itself
         glPushMatrix();
         {
-            //---- Build clipping scissor box
-            // Notice: scissor box input values need to be in
-            //         window coordinate
-            // w1, w2: lower_left and upper_right point coordinate
-            //         in window coordinate
-            // p1, p2: lower_left and upper_right point coordinate
-            //         in object coordinate
-            GLdouble w1[3];
-            GLdouble w2[3];
-
-			if ( useScissoring )
+			// 8/14/2012 brg: Clipping every graph is a serious performance hit with many
+			// graphs displayed. Only clip if necessary: when data min or max exceeds the
+			// graph's range.
+			bool clippedGraph = false;
+			if (( g->orig_max > g->max ) || ( g->orig_min < g->min ))
 			{
+				//---- Build clipping scissor box
+				// Notice: scissor box input values need to be in
+				//         window coordinate
+				// w1, w2: lower_left and upper_right point coordinate
+				//         in window coordinate
+				// p1, p2: lower_left and upper_right point coordinate
+				//         in object coordinate
 				GLint p1, p2;
+				GLdouble w1[3], w2[3];
 				
 				if(get_horizontal_depth()) {
 					// the lower left corner in window space
@@ -637,13 +574,14 @@ void render_graph(Canvas* c, CoreSection* cs, int gid)
 							   int(w2[0] - w1[0]),
 							   int(w2[1] - w1[1]) + 2 ); // 2 more pixels to leave some space
 				}
+				
+				clippedGraph = true;
 #ifdef DEBUG
 				printf("Scissoring from %d, %d by %d x %d\n", int(w1[0]),
 					   int(w1[1]), int(w2[0] - w1[0]), int(w2[1] - w1[1]));
 #endif
 			}
-            
-            
+
             // translate wiggle to fit inside border box
             glTranslatef(0, (b->y + b->h) * c->dpi_y,  0);
             glTranslatef(0, -y_curv_adjust, 0);
@@ -657,108 +595,7 @@ void render_graph(Canvas* c, CoreSection* cs, int gid)
             
             glBindTexture(GL_TEXTURE_2D, 0);
             glColor3f(g->r, g->g, g->b);
-
-			if ( useScaling )
-			{
-				// get cm width of canvas
-				const float widthInCm = ( c->w / c->dpi_x ) * 2.54f;
-				
-				// how many datapoints will fit in the canvas' span?
-				const float pointsInSpan = widthInCm / g->data_granularity;
-				
-				// if that number is greater than 5 per physical pixel, scale back
-				const float pointsPerPixel = ( pointsInSpan / c->w0 );
-				scaleFactor = (int)pointsPerPixel / 5;
-			}
 			
-			const int rowCount = get_table_height( g->dataset, g->table );
-			std::vector<GraphPoint> points;
-			if ( useScaling && scaleFactor > 0 ) // scale back # of points drawn to improve performance at distant zooms
-			{
-				// combine 5 points per scale factor
-				const int pointsToAverage = 5 * scaleFactor;
-				
-				if (( pointsToAverage * 2 ) > rowCount )
-				{
-					// if we've averaging points down to two points or less, draw first and last points
-					const float firstDepth = get_table_row_depth( g->dataset, g->table, 0 );
-					const float firstValue = get_table_cell( g->dataset, g->table, g->field, 0 );
-					const float lastDepth = get_table_row_depth( g->dataset, g->table, rowCount - 1 );
-					const float lastValue = get_table_cell( g->dataset, g->table, g->field, rowCount - 1 );
-					
-					const float firstX = (firstDepth * depthunitscale * INCH_PER_CM);
-					const float firstY = (firstValue * INCH_PER_CM) * c->dpi_y;
-					const bool firstExclude = exclude_value( gid, firstValue );
-					
-					const float lastX = (lastDepth * depthunitscale * INCH_PER_CM);
-					const float lastY = (lastValue * INCH_PER_CM) * c->dpi_y;
-					const bool lastExclude = exclude_value( gid, lastValue );
-					
-					points.push_back( GraphPoint( firstX, firstY, firstExclude ));
-					points.push_back( GraphPoint( lastX, lastY, lastExclude ));
-				}
-				else
-				{
-					for ( int ridx = 0; ridx < rowCount; )
-					{
-						if ( is_table_cell_valid( g->dataset, g->table, g->field, ridx ))
-						{
-							const float depth = get_table_row_depth_fast( g->dataset, g->table, ridx );
-							float total = 0.0f, avgValue = 0.0f;
-							int totalSubrows = 0;
-							for ( int sridx = 0; sridx < pointsToAverage; sridx++ )
-							{
-								const int subrowIndex = ridx + sridx;
-								if ( subrowIndex < rowCount )
-								{
-									total += get_table_cell_fast( g->dataset, g->table, g->field, subrowIndex );
-									totalSubrows++;
-								}
-							}
-							
-							if ( totalSubrows > 0 )
-								avgValue = total / (float)totalSubrows;
-
-							// unitscale is relative to 'cm'
-							const float x_coord = (depth * depthunitscale * INCH_PER_CM);
-							const float y_coord = (avgValue * INCH_PER_CM) * c->dpi_y;
-							
-							const bool exclude = exclude_value( gid, avgValue );
-							
-							points.push_back( GraphPoint( x_coord, y_coord, exclude ));
-							
-							ridx += totalSubrows;
-						}
-						else
-						{
-							ridx++;
-						}
-					}
-				}
-			}
-			else // no scaling, draw every point in every graph
-			{
-				for ( int ridx = 0; ridx < rowCount; ridx++ )
-				{
-					const bool isValid = is_table_cell_valid(g->dataset, g->table, g->field, ridx );
-					
-					if ( isValid )
-					{
-						const float depth = get_table_row_depth_fast( g->dataset, g->table, ridx );
-
-						const float value = get_table_cell_fast( g->dataset, g->table, g->field, ridx );
-
-						// unitscale is relative to 'cm'
-						const float x_coord = (depth * depthunitscale * INCH_PER_CM);
-						const float y_coord = (value * INCH_PER_CM) * c->dpi_y;
-
-						const bool exclude = exclude_value( gid, value );
-						
-						points.push_back( GraphPoint( x_coord, y_coord, exclude ));
-					}
-				}
-			}
-
 			if ( g->type == GRAPH_LINE || g->type == GRAPH_LINEPOINT )
 			{
 				// antialias lines
@@ -771,18 +608,19 @@ void render_graph(Canvas* c, CoreSection* cs, int gid)
 				// use thinner line for "Line and Points" graph type
 				const float lineWidth = ( g->type == GRAPH_LINEPOINT ) ? 1.0f : 3.0f;
 				glLineWidth(lineWidth);
-
-				const int numPoints = points.size();
-
+				
 				if ( g->exclude_style == EXCLUDE_STYLE_CONTINUOUS )
 				{
 					glBegin(GL_LINE_STRIP);
 					{
-						// omit excluded points, no gaps between valid datapoints
-						for ( int pidx = 0; pidx < numPoints; pidx++ )
+						for ( int pidx = 0; pidx < g->dataTableSize; pidx++ )
 						{
-							if (!points[pidx].exclude)
-								glVertex2f(points[pidx].x, points[pidx].y);
+							if ( g->dataTable[pidx].exclude ) continue;
+
+							const float x_coord = ( g->dataTable[ pidx ].x * depthunitscale * INCH_PER_CM );
+							const float y_coord = ( g->dataTable[ pidx ].y * INCH_PER_CM ) * c->dpi_y;
+							glVertex2f( x_coord, y_coord );
+
 						}
 					}
 					glEnd();
@@ -792,16 +630,19 @@ void render_graph(Canvas* c, CoreSection* cs, int gid)
 					// draw with gaps between valid datapoints
 					bool isInGLBlock = false;
 					int vertsInStrip = 0;
-					for ( int pidx = 0; pidx < numPoints; pidx++ )
+					for ( int pidx = 0; pidx < g->dataTableSize; pidx++ )
 					{
-						if (!points[pidx].exclude)
+						if ( !g->dataTable[pidx].exclude )
 						{
 							if ( !isInGLBlock )
 							{
 								glBegin(GL_LINE_STRIP);
 								isInGLBlock = true;
 							}
-							glVertex2f(points[pidx].x, points[pidx].y);
+
+							const float x_coord = ( g->dataTable[ pidx ].x * depthunitscale * INCH_PER_CM );
+							const float y_coord = ( g->dataTable[ pidx ].y * INCH_PER_CM ) * c->dpi_y;
+							glVertex2f( x_coord, y_coord );
 							vertsInStrip++;
 						}
 						else
@@ -815,8 +656,11 @@ void render_graph(Canvas* c, CoreSection* cs, int gid)
 								// line can be drawn - draw a point instead
 								if (vertsInStrip == 1)
 								{
+									const float x_coord = ( g->dataTable[ pidx ].x * depthunitscale * INCH_PER_CM );
+									const float y_coord = ( g->dataTable[ pidx ].y * INCH_PER_CM ) * c->dpi_y;
+
 									glBegin(GL_POINTS);
-									glVertex2f(points[pidx - 1].x, points[pidx - 1].y);
+									glVertex2f( x_coord, y_coord );
 									glEnd();
 								}
 								vertsInStrip = 0;
@@ -836,10 +680,14 @@ void render_graph(Canvas* c, CoreSection* cs, int gid)
 
 					glBegin(GL_POINTS);
 					{
-						for ( int pidx = 0; pidx < numPoints; pidx ++ )
+						for ( int pidx = 0; pidx < g->dataTableSize; pidx ++ )
 						{
-							if ( !points[pidx].exclude )
-								glVertex2f( points[pidx].x, points[pidx].y );
+							if ( !g->dataTable[pidx].exclude )
+							{
+								const float x_coord = ( g->dataTable[ pidx ].x * depthunitscale * INCH_PER_CM );
+								const float y_coord = ( g->dataTable[ pidx ].y * INCH_PER_CM ) * c->dpi_y;
+								glVertex2f( x_coord, y_coord );
+							}
 						}
 					}
 					glEnd();
@@ -853,11 +701,14 @@ void render_graph(Canvas* c, CoreSection* cs, int gid)
 				glPointSize(2);
 				glBegin(GL_POINTS);
 				{
-					const int numPoints = points.size();
-					for ( int pidx = 0; pidx < numPoints; pidx++ )
+					for ( int pidx = 0; pidx < g->dataTableSize; pidx++ )
 					{
-						if (!points[pidx].exclude)
-							glVertex2f(points[pidx].x, points[pidx].y);
+						if ( !g->dataTable[pidx].exclude )
+						{
+							const float x_coord = ( g->dataTable[ pidx ].x * depthunitscale * INCH_PER_CM );
+							const float y_coord = ( g->dataTable[ pidx ].y * INCH_PER_CM ) * c->dpi_y;
+							glVertex2f( x_coord, y_coord );
+						}
 					}
 				}
 				glEnd();
@@ -872,21 +723,26 @@ void render_graph(Canvas* c, CoreSection* cs, int gid)
 				// printf("graph depthunitscale: %f\n", depthunitscale);
 				glBegin(GL_LINES);
 				{
-					const int numPoints = points.size();
-					for ( int pidx = 0; pidx < numPoints; pidx++ )
+					for ( int pidx = 0; pidx < g->dataTableSize; pidx++ )
 					{
+						if ( g->dataTable[pidx].exclude )
+							continue;
+						
+						const float x_coord = ( g->dataTable[ pidx ].x * depthunitscale * INCH_PER_CM );
+						const float y_coord = ( g->dataTable[ pidx ].y * INCH_PER_CM ) * c->dpi_y;
+
 						// vertical segment
-						glVertex2f( points[pidx].x, points[pidx].y + halfy );
-						glVertex2f( points[pidx].x, points[pidx].y - halfy );
+						glVertex2f( x_coord, y_coord + halfy );
+						glVertex2f( x_coord, y_coord - halfy );
 						// horizontal segment
-						glVertex2f( points[pidx].x + halfx, points[pidx].y );
-						glVertex2f( points[pidx].x - halfx, points[pidx].y );
+						glVertex2f( x_coord + halfx, y_coord );
+						glVertex2f( x_coord - halfx, y_coord );
 					}
 				}
 				glEnd();
 			}
             
-			if ( useScissoring )
+			if ( clippedGraph )
 			{
 				glDisable( GL_SCISSOR_TEST );
 				glPopAttrib(); // GL_SCISSOR_BIT | GL_CURRENT_BIT
@@ -1160,6 +1016,11 @@ void set_line_graph_exclude_range(const int gid, const float min, const float ma
 	
     set_exclude_min(gid, min);
     set_exclude_max(gid, max);
+	
+	// update excluded state for all points in graph
+	Graph *curGraph = graphvec[gid];
+	for ( int i = 0; i < curGraph->dataTableSize; i++ )
+		curGraph->dataTable[i].exclude = exclude_value( gid, curGraph->dataTable[i].y );
 }
 
 //======================================================================

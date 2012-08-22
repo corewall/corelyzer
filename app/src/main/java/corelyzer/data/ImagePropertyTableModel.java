@@ -100,10 +100,12 @@ public class ImagePropertyTableModel extends AbstractTableModel {
 
 			case 3:
 				dpixVec.setElementAt(Float.parseFloat(value.toString()), row);
+				fireTableDataChanged();
 				break;
 
 			case 4:
 				dpiyVec.setElementAt(Float.parseFloat(value.toString()), row);
+				fireTableDataChanged();
 				break;
 
 			case 5:

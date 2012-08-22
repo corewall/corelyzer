@@ -60,7 +60,16 @@
 #define EXCLUDE_STYLE_CONTINUOUS 0
 #define EXCLUDE_STYLE_SHOWGAPS   1
 
-typedef struct {
+struct GraphPoint {
+	float x;
+	float y;
+	bool exclude;
+	
+	GraphPoint() : x(0.0f), y(0.0f), exclude(false) { }
+	GraphPoint( const float x, const float y, const bool exclude ) : x(x), y(y), exclude(exclude) { }
+};
+
+struct Graph {
     int   scene;
     int   track;
     int   section;
@@ -98,21 +107,8 @@ typedef struct {
 
 	bool  graphonly;
 	
-	// average depth between first six datapoints, used to reduce number
-	// of points plotted at high zoom levels
-	float data_granularity; // (in cm)
-
-} Graph;
-
-struct GraphPoint {
-	float x;
-	float y;
-	bool exclude;
-	
-	GraphPoint() : x(0.0f), y(0.0f), exclude(false) { }
-	GraphPoint( const float x, const float y, const bool exclude ) {
-		this->x = x; this->y = y; this->exclude = exclude;
-	}
+	GraphPoint *dataTable;
+	int dataTableSize;
 };
 
 enum GraphPointShape {
@@ -123,7 +119,7 @@ enum GraphPointShape {
 	GPS_X = 5
 };
 
-typedef struct {
+struct Box {
     // upper left object coordinate
     float x;
     float y;
@@ -131,7 +127,7 @@ typedef struct {
     // width and height
     float w;
     float h;
-} Box;
+};
 
 struct GraphDebugInfo {
 	bool useScaling;
@@ -151,6 +147,7 @@ void  render_border (float width, float height);
 int   add_line_graph_to_section      (int track, int section,
                                       int dataset, int table, int field);
 
+void  remove_dataset_graphs( const int dataset );
 int   remove_line_graph_from_section (int track, int section,
                                       int dataset, int table, int field);
 int   remove_line_graph_from_section (int gid);
@@ -204,8 +201,4 @@ void setCollapse(bool aBool);
 
 void setGraphScale(float s);
 float getGraphScale();
-
-void handle_graph_debug_key(int keyId);
-GraphDebugInfo get_graph_debug_info();
-
 #endif

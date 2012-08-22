@@ -22,7 +22,7 @@ public class TrimDialog extends JDialog
 			e.printStackTrace();
 		}
 		
-		TrimDialog dialog = new TrimDialog(null, 0);
+		TrimDialog dialog = new TrimDialog(null, 0, 0);
 		dialog.pack();
 		dialog.setLocationRelativeTo(null);
 		dialog.setVisible(true);
@@ -34,14 +34,16 @@ public class TrimDialog extends JDialog
 	private JTextField trimField;
 	private JLabel fromToLabel;
 	private JComboBox beginEndBox;
+	private JComboBox affectedSectionsBox;
 	private JButton applyButton, closeButton;
-	private int selectedTrack = 0;
+	private int selectedTrack = -1, selectedTrackSection = -1;
 	
-	public TrimDialog(final Component parent, final int selectedTrack)
+	public TrimDialog(final Component parent, final int selectedTrack, final int selectedTrackSection)
 	{
 		super();
 		
-		this.selectedTrack = selectedTrack; 
+		this.selectedTrack = selectedTrack;
+		this.selectedTrackSection = selectedTrackSection;
 		
 		initUI();
 		
@@ -72,12 +74,18 @@ public class TrimDialog extends JDialog
 		
 		beginEndBox = new JComboBox();
 		final DefaultComboBoxModel beginEndModel = new DefaultComboBoxModel();
-		beginEndModel.addElement("bottom");
-		beginEndModel.addElement("top");
+		beginEndModel.addElement("bottom of");
+		beginEndModel.addElement("top of");
 		beginEndBox.setModel(beginEndModel);
 		beginEndBox.addActionListener(new ActionListener() { 
 			public void actionPerformed(ActionEvent e) { updateTrimField();	}
 		});
+		
+		affectedSectionsBox = new JComboBox();
+		final DefaultComboBoxModel affectedSectionsModel = new DefaultComboBoxModel();
+		affectedSectionsModel.addElement("selected and deeper sections");
+		affectedSectionsModel.addElement("selected section only");
+		affectedSectionsBox.setModel(affectedSectionsModel);
 		
 		closeButton = new JButton("Close");
 		closeButton.addActionListener(new ActionListener() {
@@ -93,7 +101,7 @@ public class TrimDialog extends JDialog
 		contentPane.add(trimField, "wmin 50");
 		contentPane.add(fromToLabel);
 		contentPane.add(beginEndBox);
-		contentPane.add(new JLabel("of all sections"), "wrap");
+		contentPane.add(affectedSectionsBox, "wrap");
 	
 		contentPane.add(applyButton, "span, split 2, align right");
 		contentPane.add(closeButton, "align right");
@@ -164,9 +172,10 @@ public class TrimDialog extends JDialog
 		}
 		
 		final boolean fromBottom = ( beginEndBox.getSelectedIndex() == 0 ); // "bottom"
+		final boolean trimSelAndDeeper = ( affectedSectionsBox.getSelectedIndex() == 0 ); // "selected and deeper sections"
 		if ( trimTypeBox.getSelectedIndex() == 1 ) // if adding, swap trim sign
 			trim = -trim;
-		SceneGraph.trimSections(this.selectedTrack, trim, fromBottom);
+		SceneGraph.trimSections(this.selectedTrack, this.selectedTrackSection, trim, fromBottom, trimSelAndDeeper);
 		CorelyzerApp.getApp().updateGLWindows();
 	}
 }
