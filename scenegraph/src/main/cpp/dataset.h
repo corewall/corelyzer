@@ -111,6 +111,7 @@ float get_field_max         (int set, int table, int field);
 float get_field_range       (int set, int table, int field);
 float get_table_offset      (int set, int table);
 bool  is_table_cell_valid   (int set, int table, int field, int row);
+bool is_table_cell_valid_fast(int set, int table, int field, int row);
     
 int           get_dataset (const char* name);
 Dataset*      get_dataset (int set);
