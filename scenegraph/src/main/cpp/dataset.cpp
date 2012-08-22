@@ -537,6 +537,16 @@ bool is_table_cell_valid(int set, int table, int field, int row)
 }
 
 //======================================================================
+// 8/22/2012 brg: Assume the parameters we pass in are valid for
+// performance's sake. Validation is important, but I think we're
+// doing it to excess thoughout the graphing code at the expense of
+// performance. TODO
+bool is_table_cell_valid_fast(int set, int table, int field, int row)
+{
+	return datasetvec[set]->sectionvec[table]->table[field][row].valid;
+}
+
+//======================================================================
 int get_dataset(const char* name)
 {
     for( int i = 0; i < datasetvec.size(); i++)

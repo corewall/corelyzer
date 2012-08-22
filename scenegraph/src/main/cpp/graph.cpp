@@ -616,11 +616,11 @@ void render_graph(Canvas* c, CoreSection* cs, int gid)
 						for ( int pidx = 0; pidx < g->dataTableSize; pidx++ )
 						{
 							if ( g->dataTable[pidx].exclude ) continue;
+							if ( !is_table_cell_valid_fast( g->dataset, g->table, g->field, pidx )) continue;
 
 							const float x_coord = ( g->dataTable[ pidx ].x * depthunitscale * INCH_PER_CM );
 							const float y_coord = ( g->dataTable[ pidx ].y * INCH_PER_CM ) * c->dpi_y;
 							glVertex2f( x_coord, y_coord );
-
 						}
 					}
 					glEnd();
@@ -632,7 +632,7 @@ void render_graph(Canvas* c, CoreSection* cs, int gid)
 					int vertsInStrip = 0;
 					for ( int pidx = 0; pidx < g->dataTableSize; pidx++ )
 					{
-						if ( !g->dataTable[pidx].exclude )
+						if ( !g->dataTable[pidx].exclude || !is_table_cell_valid_fast( g->dataset, g->table, g->field, pidx ))
 						{
 							if ( !isInGLBlock )
 							{
@@ -680,14 +680,14 @@ void render_graph(Canvas* c, CoreSection* cs, int gid)
 
 					glBegin(GL_POINTS);
 					{
-						for ( int pidx = 0; pidx < g->dataTableSize; pidx ++ )
+						for ( int pidx = 0; pidx < g->dataTableSize; pidx++ )
 						{
-							if ( !g->dataTable[pidx].exclude )
-							{
-								const float x_coord = ( g->dataTable[ pidx ].x * depthunitscale * INCH_PER_CM );
-								const float y_coord = ( g->dataTable[ pidx ].y * INCH_PER_CM ) * c->dpi_y;
-								glVertex2f( x_coord, y_coord );
-							}
+							if ( g->dataTable[pidx].exclude ) continue;
+							if ( !is_table_cell_valid_fast( g->dataset, g->table, g->field, pidx )) continue;								
+
+							const float x_coord = ( g->dataTable[ pidx ].x * depthunitscale * INCH_PER_CM );
+							const float y_coord = ( g->dataTable[ pidx ].y * INCH_PER_CM ) * c->dpi_y;
+							glVertex2f( x_coord, y_coord );
 						}
 					}
 					glEnd();
@@ -703,12 +703,12 @@ void render_graph(Canvas* c, CoreSection* cs, int gid)
 				{
 					for ( int pidx = 0; pidx < g->dataTableSize; pidx++ )
 					{
-						if ( !g->dataTable[pidx].exclude )
-						{
-							const float x_coord = ( g->dataTable[ pidx ].x * depthunitscale * INCH_PER_CM );
-							const float y_coord = ( g->dataTable[ pidx ].y * INCH_PER_CM ) * c->dpi_y;
-							glVertex2f( x_coord, y_coord );
-						}
+						if ( g->dataTable[pidx].exclude ) continue;
+						if ( !is_table_cell_valid_fast( g->dataset, g->table, g->field, pidx )) continue;
+
+						const float x_coord = ( g->dataTable[ pidx ].x * depthunitscale * INCH_PER_CM );
+						const float y_coord = ( g->dataTable[ pidx ].y * INCH_PER_CM ) * c->dpi_y;
+						glVertex2f( x_coord, y_coord );
 					}
 				}
 				glEnd();
@@ -725,8 +725,8 @@ void render_graph(Canvas* c, CoreSection* cs, int gid)
 				{
 					for ( int pidx = 0; pidx < g->dataTableSize; pidx++ )
 					{
-						if ( g->dataTable[pidx].exclude )
-							continue;
+						if ( g->dataTable[pidx].exclude ) continue;
+						if ( !is_table_cell_valid_fast( g->dataset, g->table, g->field, pidx )) continue;
 						
 						const float x_coord = ( g->dataTable[ pidx ].x * depthunitscale * INCH_PER_CM );
 						const float y_coord = ( g->dataTable[ pidx ].y * INCH_PER_CM ) * c->dpi_y;
