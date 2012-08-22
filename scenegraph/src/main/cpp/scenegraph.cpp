@@ -2557,8 +2557,10 @@ JNIEXPORT jboolean JNICALL Java_corelyzer_graphics_SceneGraph_isTrackMovable
   (JNIEnv * jenv, jclass jcls, jint trackId)
 {
     TrackSceneNode* t = get_scene_track(default_track_scene, trackId);
-    if(t) return t->movable;
-    else true;
+    if ( t )
+		return t->movable;
+
+	return false;
 }
 
 /*
