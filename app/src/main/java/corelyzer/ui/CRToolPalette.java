@@ -240,6 +240,7 @@ public class CRToolPalette extends JFrame implements ActionListener {
 				GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK
 						| GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
 		final JToolBar toolBar1 = new JToolBar();
+		toolBar1.setFloatable(false);
 		toolPane.add(toolBar1, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL,
 				GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(-1, 20), null, 0, false));
 		normalToggleButton = new JToggleButton();
