@@ -136,12 +136,13 @@ void pokeOpjImg(opj_image_t * opjimage)
 #include <setjmp.h>
 
 #include "textureresource_ex.h"
+#include "util.h"
 #include "utility.h"
 #include "cache.h"
 #include "canvas.h"
 
 #include <squish.h>
-#include <util.h>
+
 
 #ifdef USE_FASTDXT
 #include "libdxt.h"

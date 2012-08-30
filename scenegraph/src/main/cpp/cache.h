@@ -46,7 +46,7 @@
 
 
 //#include <baseimghandler.h>
-#include <textureresource_ex.h>
+#include "textureresource_ex.h"
 
 
 typedef struct TexCacheEntry_s {

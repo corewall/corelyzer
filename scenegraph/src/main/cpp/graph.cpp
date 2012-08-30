@@ -38,9 +38,10 @@
 #endif
 
 #include "fontsys.h"
+#include "util.h"
 #include <float.h>
 #include <math.h>
-#include <util.h>
+
 
 //======================================================================
 std::vector< Graph* > graphvec;
