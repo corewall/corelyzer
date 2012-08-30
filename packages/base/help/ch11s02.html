@@ -1,18 +1,18 @@
-<html><head><meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>11.2. Interaction flow</title><meta name="generator" content="DocBook XSL Stylesheets V1.77.1"><link rel="home" href="index.html" title="Corelyzer User's Manual"><link rel="up" href="ch11.html" title="Chapter 11. Fine tune with Correlator"><link rel="prev" href="ch11.html" title="Chapter 11. Fine tune with Correlator"><link rel="next" href="ch12.html" title="Chapter 12. Frequently Asked Questions (FAQ)"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">11.2. Interaction flow</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="ch11.html">Prev</a> </td><th width="60%" align="center">Chapter 11. Fine tune with Correlator</th><td width="20%" align="right"> <a accesskey="n" href="ch12.html">Next</a></td></tr></table><hr></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="id36161553"></a>11.2. Interaction flow</h2></div></div></div><p>
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>11.2. Interaction flow</title><meta name="generator" content="DocBook XSL Stylesheets V1.76.1"><link rel="home" href="index.html" title="Corelyzer User's Manual"><link rel="up" href="ch11.html" title="Chapter 11. Fine tune with Correlator"><link rel="prev" href="ch11.html" title="Chapter 11. Fine tune with Correlator"><link rel="next" href="ch12.html" title="Chapter 12. Frequently Asked Questions (FAQ)"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="sect1" title="11.2. Interaction flow"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="id36152277"></a>11.2. Interaction flow</h2></div></div></div><p>
         In the following section, we will show step-by-step how to
         connect to Corelyzer from Correlator to use available core
         images assisting choosing tie points in creating affine tables.
-      </p><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a name="id36161563"></a>11.2.1. Start Corelyzer</h3></div></div></div><p>
+      </p><div class="sect2" title="11.2.1. Start Corelyzer"><div class="titlepage"><div><div><h3 class="title"><a name="id36152288"></a>11.2.1. Start Corelyzer</h3></div></div></div><p>
           Double click on the Corelyzer icon to start Corelyzer. You might
           want to properly setup the visualization area of Corelyzer if
           you do not want it overlaps with Correlator's data plot
           window. Please refer to Corelyzer Display Configuration
           section for setting up Corelyzer visualization area.
-        </p></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a name="id36161576"></a>11.2.2. Start Correlator</h3></div></div></div><p>
+        </p></div><div class="sect2" title="11.2.2. Start Correlator"><div class="titlepage"><div><div><h3 class="title"><a name="id36152300"></a>11.2.2. Start Correlator</h3></div></div></div><p>
           Double click on the Correlator icon to start
           Correlator. Please refer to Correlator documentation for start
           using Correlator.
-        </p></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a name="id36161587"></a>11.2.3. Load log data tables and image list table</h3></div></div></div><p>
+        </p></div><div class="sect2" title="11.2.3. Load log data tables and image list table"><div class="titlepage"><div><div><h3 class="title"><a name="id36152311"></a>11.2.3. Load log data tables and image list table</h3></div></div></div><p>
           Before using the fine tune function, you have to make sure you
           have loaded both the data table and the image table of the
           cores. Please refer to Correlator document on "How to load
@@ -20,44 +20,44 @@
         </p><p>
           In the following example, 3 data files (Bulk Density GRA) and
           a image list data file are loaded into Correlator's Data Manager.
-        </p><div class="figure"><a name="id36161602"></a><p class="title"><b>Figure 11.1. Example data and image list files are loaded in Data
-          Manager in Correlator</b></p><div class="figure-contents"><div><img src="images/finetune-1.png" alt="Example data and image list files are loaded in Data Manager in Correlator"></div></div></div><br class="figure-break"><div class="figure"><a name="id36161616"></a><p class="title"><b>Figure 11.2. The log data file format loaded in Correlator</b></p><div class="figure-contents"><div><img src="images/finetune-2.png" alt="The log data file format loaded in Correlator"></div></div></div><br class="figure-break"><div class="figure"><a name="id36161628"></a><p class="title"><b>Figure 11.3. The image list file format loaded in Correlator</b></p><div class="figure-contents"><div><img src="images/finetune-3.png" alt="The image list file format loaded in Correlator"></div></div></div><br class="figure-break"></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a name="id36161641"></a>11.2.4. Load log data into Correlator plotting area</h3></div></div></div><p>
+        </p><div class="figure"><a name="id36152327"></a><p class="title"><b>Figure 11.1. Example data and image list files are loaded in Data
+          Manager in Correlator</b></p><div class="figure-contents"><div><img src="images/finetune-1.png" alt="Example data and image list files are loaded in Data Manager in Correlator"></div></div></div><br class="figure-break"><div class="figure"><a name="id36152340"></a><p class="title"><b>Figure 11.2. The log data file format loaded in Correlator</b></p><div class="figure-contents"><div><img src="images/finetune-2.png" alt="The log data file format loaded in Correlator"></div></div></div><br class="figure-break"><div class="figure"><a name="id36152352"></a><p class="title"><b>Figure 11.3. The image list file format loaded in Correlator</b></p><div class="figure-contents"><div><img src="images/finetune-3.png" alt="The image list file format loaded in Correlator"></div></div></div><br class="figure-break"></div><div class="sect2" title="11.2.4. Load log data into Correlator plotting area"><div class="titlepage"><div><div><h3 class="title"><a name="id36152365"></a>11.2.4. Load log data into Correlator plotting area</h3></div></div></div><p>
           Right click on the log data entries and select "Load" to load
           the data into the plotting area in the Correlator.
-        </p><div class="figure"><a name="id36161651"></a><p class="title"><b>Figure 11.4. Right click on the data entries and click on the "Load"
+        </p><div class="figure"><a name="id36152375"></a><p class="title"><b>Figure 11.4. Right click on the data entries and click on the "Load"
           to load the log data into the plotting area of
           Correlator</b></p><div class="figure-contents"><div><img src="images/finetune-4.png" alt='Right click on the data entries and click on the "Load" to load the log data into the plotting area of Correlator'></div></div></div><br class="figure-break"><p>
           The data will be plotted in the Correlator window. In the
           following screenshot, it shows a 1920x1200 screen with
           Corelyzer showing in the left half and Correlator showing the
           right half with log data loaded and plotted.
-        </p><div class="figure"><a name="id36161670"></a><p class="title"><b>Figure 11.5. Side-by-side Corelyzer and Correlator with log data
-          plotted</b></p><div class="figure-contents"><div><img src="images/finetune-5.png" alt="Side-by-side Corelyzer and Correlator with log data plotted"></div></div></div><br class="figure-break"></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a name="id36161684"></a>11.2.5. Connect to Corelyzer from Correlator</h3></div></div></div><p>
+        </p><div class="figure"><a name="id36152394"></a><p class="title"><b>Figure 11.5. Side-by-side Corelyzer and Correlator with log data
+          plotted</b></p><div class="figure-contents"><div><img src="images/finetune-5.png" alt="Side-by-side Corelyzer and Correlator with log data plotted"></div></div></div><br class="figure-break"></div><div class="sect2" title="11.2.5. Connect to Corelyzer from Correlator"><div class="titlepage"><div><div><h3 class="title"><a name="id36152408"></a>11.2.5. Connect to Corelyzer from Correlator</h3></div></div></div><p>
           Click on the "Connect to Corelyzer" button on the Correlator
           command window as shown in the following screenshot.
-        </p><div class="figure"><a name="id36161694"></a><p class="title"><b>Figure 11.6. "Connect to Corelyzer" button in Correlator command
+        </p><div class="figure"><a name="id36152418"></a><p class="title"><b>Figure 11.6. "Connect to Corelyzer" button in Correlator command
           window</b></p><div class="figure-contents"><div><img src="images/finetune-6.png" alt='"Connect to Corelyzer" button in Correlator command window'></div></div></div><br class="figure-break"><p>
           A confirmation dialog will popup asking whether you want to
           unload previous loaded images in Corelyzer. Click on "YES"
           will unload previous tracks and images in Corelyzer.
-        </p><div class="figure"><a name="id36161712"></a><p class="title"><b>Figure 11.7. Confirmation of unload previously loaded images in
+        </p><div class="figure"><a name="id36152436"></a><p class="title"><b>Figure 11.7. Confirmation of unload previously loaded images in
           Corelyzer</b></p><div class="figure-contents"><div><img src="images/finetune-7.png" alt="Confirmation of unload previously loaded images in Corelyzer"></div></div></div><br class="figure-break"><p>
           After successfully connected, if the user use the scrollbar in
           Correlator to change the viewing depth range, the view range
           will also be updated accordingly in the Corelyzer
           visualization area.
-        </p></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a name="id36161731"></a>11.2.6. Composite depth shifting with core images</h3></div></div></div><p>
+        </p></div><div class="sect2" title="11.2.6. Composite depth shifting with core images"><div class="titlepage"><div><div><h3 class="title"><a name="id36152455"></a>11.2.6. Composite depth shifting with core images</h3></div></div></div><p>
           Core images will be loaded in the Corelyzer side, if the
           connection between Correlator and Corelyzer is established
           during choosing both 2 tie points (red and green points) in
           Correlator. A red horizontal line will appear in the
           Corelyzer as the reference tie depth.
-        </p><div class="figure"><a name="id36161742"></a><p class="title"><b>Figure 11.8. Creating 2 tie points in Correlator</b></p><div class="figure-contents"><div><img src="images/finetune-8.png" alt="Creating 2 tie points in Correlator"></div></div></div><br class="figure-break"><p>
+        </p><div class="figure"><a name="id36152466"></a><p class="title"><b>Figure 11.8. Creating 2 tie points in Correlator</b></p><div class="figure-contents"><div><img src="images/finetune-8.png" alt="Creating 2 tie points in Correlator"></div></div></div><br class="figure-break"><p>
           Dragging the green tie point in Correlator like you always
           do, it will update/shift the core images accordingly like
           the data plots segments. You can use the core image texture
           for correlation reference.
-        </p><div class="figure"><a name="id36161760"></a><p class="title"><b>Figure 11.9. Adjusting tie points also updates core images</b></p><div class="figure-contents"><div><img src="images/finetune-9.png" alt="Adjusting tie points also updates core images"></div></div></div><br class="figure-break"><p>
+        </p><div class="figure"><a name="id36152484"></a><p class="title"><b>Figure 11.9. Adjusting tie points also updates core images</b></p><div class="figure-contents"><div><img src="images/finetune-9.png" alt="Adjusting tie points also updates core images"></div></div></div><br class="figure-break"><p>
           If you right click the (green) tie point and select the
           "Clear" option, the core images will be placed to their
           original position. After your adjustments, right click on
@@ -75,4 +75,4 @@
           session. If you want to keep the arrangements setup on
           screen, you can save the session file as described in the
           "Save and Load Sessions".
-        </p></div></div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="ch11.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="ch11.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="ch12.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Chapter 11. Fine tune with Correlator </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> Chapter 12. Frequently Asked Questions (FAQ)</td></tr></table></div></body></html>
+        </p></div></div></body></html>

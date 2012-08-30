@@ -1,24 +1,21 @@
-<html><head><meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>5.2. Load Images from online services</title><meta name="generator" content="DocBook XSL Stylesheets V1.77.1"><link rel="home" href="index.html" title="Corelyzer User's Manual"><link rel="up" href="ch05.html" title="Chapter 5. Load Images"><link rel="prev" href="ch05.html" title="Chapter 5. Load Images"><link rel="next" href="ch05s03.html" title="5.3. Load Images from CoreCast syndication feeds"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">5.2. Load Images from online services</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="ch05.html">Prev</a> </td><th width="60%" align="center">Chapter 5. Load Images</th><td width="20%" align="right"> <a accesskey="n" href="ch05s03.html">Next</a></td></tr></table><hr></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="id36159310"></a>5.2. Load Images from online services</h2></div></div></div><p>
-        Corelyzer was built-in a simple interface to access online
-        core image services like the IODP Janus
-        database and IODP LIMS service to retrieve the high-resolution
-        core section images.
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>5.2. Load Images from online services</title><meta name="generator" content="DocBook XSL Stylesheets V1.76.1"><link rel="home" href="index.html" title="Corelyzer User's Manual"><link rel="up" href="ch05.html" title="Chapter 5. Load Images"><link rel="prev" href="ch05.html" title="Chapter 5. Load Images"><link rel="next" href="ch05s03.html" title="5.3. Load Images from CoreCast syndication feeds"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="sect1" title="5.2. Load Images from online services"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="id36150010"></a>5.2. Load Images from online services</h2></div></div></div><p>
+        Corelyzer includes a simple interface to retrieve high-resolution
+		core section images from online services like the IODP's Janus
+        database and LIMS service.
       </p><p>
-        In current version, Corelyzer supports 3 online core image
+        Currently, Corelyzer supports three online core image
         services: JANUS database with CHRONOS service, IODP LIMS
-        on-shore database and IODP LIMS on-ship database. For 2 IODP
-        LIMS services, the query web service protocol was used to
-        retrieve core image's metadata.
+        on-shore database, and the IODP LIMS on-ship database. For two IODP
+        LIMS services, the query web service protocol is used to
+        retrieve core images' metadata.
 
-        Corelyzer uses the CHRONOS webservices
+        Corelyzer uses the CHRONOS web service's
         capabilities to access JANUS and retrieve the URLs to the
         images. 
 
-        Corelyzer will
-        rotate the images 90 degrees counter-clockwise, because all
-        the IODP images are vertically oriented, where Corelyzer
-        displays data horizontally. This plugin accuratly position the
-        core sections using CHRONOS
+        Because IODP images are vertically oriented, Corelyzer will
+        rotate the images 90 degrees counter-clockwise. This plugin accurately
+		positions core sections by using the CHRONOS
         web service to access the curated length and top depth (mbsf)
         of each core section image.
       </p><p>
@@ -27,7 +24,7 @@
         item File-&gt;"Show IODP lists..."-&gt;"Image list from services"
         tab. 
         
-        Here are the steps to get image listing and load selected images:
+        In order to get an image listing and load selected images:
 
         </p><div class="orderedlist"><ol class="orderedlist" type="1"><li class="listitem"><p>Select which online service to
           use. Currently CHRONOS, on-shore LIMS and on-ship LIMS
@@ -36,23 +33,22 @@
           available</p></li><li class="listitem"><p>You can optionally input the depth range to
           filter the returned available image section in the result
           table. Depth range should be input as string like "0-20",
-          meaning only list image section of top depth from 0 meter to
-          20 meters (mbsf). The default value 0.0 will list all image sections
-          returned by the online service.</p></li><li class="listitem"><p>Select the images to load</p></li><li class="listitem"><p>Click on the "Load selected image files" button</p></li><li class="listitem"><p>User must wait as image files are
-            retrieved over the web, processed and displayed. A
-            progress bar indicating the status will update during the
-            process in the main window.</p></li></ol></div><p>
+          meaning only image sections with top depth zero to twenty meters (mbsf).
+		  The default value 0.0 will list all image sections
+          returned by the online service.</p></li><li class="listitem"><p>Select the images to load</p></li><li class="listitem"><p>Click on the "Load selected image files" button</p></li><li class="listitem"><p>Image files will then be downloaded, processed, and displayed.
+			A progress bar indicating the status will update during the
+            process in the session/iCores window.</p></li></ol></div><p>
         </p><p>
-          Each loaded image will be loaded and placed in the seesion and track
+          Each loaded image will be placed in the session and track
           named with the combination of "leg", "site", "hole" and
           "core" metadata information from the online core image server.
 
-          </p><div class="figure"><a name="id36159385"></a><p class="title"><b>Figure 5.5. Online core image service query interface</b></p><div class="figure-contents"><div><img src="images/onlineImageService-1.png" alt="Online core image service query interface"></div></div></div><p><br class="figure-break">
+          </p><div class="figure"><a name="id36150077"></a><p class="title"><b>Figure 5.5. Online core image service query interface</b></p><div class="figure-contents"><div><img src="images/onlineImageService-1.png" alt="Online core image service query interface"></div></div></div><p><br class="figure-break">
 
-          </p><div class="figure"><a name="id36159397"></a><p class="title"><b>Figure 5.6. Online core image service query</b></p><div class="figure-contents"><div><img src="images/onlineImageService-2.png" alt="Online core image service query"></div></div></div><p><br class="figure-break">
+          </p><div class="figure"><a name="id36150089"></a><p class="title"><b>Figure 5.6. Online core image service query</b></p><div class="figure-contents"><div><img src="images/onlineImageService-2.png" alt="Online core image service query"></div></div></div><p><br class="figure-break">
 
         </p><p>
           A screen capture video of these actions can be found in this
           <a class="ulink" href="http://www.evl.uic.edu/cavern/corewall/documents/movies/5.2-LoadJanusImages.mov" target="_top">link
           online (size: 1.6MB)</a>.
-        </p></div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="ch05.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="ch05.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="ch05s03.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Chapter 5. Load Images </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> 5.3. Load Images from CoreCast syndication feeds</td></tr></table></div></body></html>
+        </p></div></body></html>

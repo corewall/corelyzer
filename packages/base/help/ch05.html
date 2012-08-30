@@ -1,12 +1,12 @@
-<html><head><meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>Chapter 5. Load Images</title><meta name="generator" content="DocBook XSL Stylesheets V1.77.1"><link rel="home" href="index.html" title="Corelyzer User's Manual"><link rel="up" href="index.html" title="Corelyzer User's Manual"><link rel="prev" href="ch04s03.html" title="4.3. Visualization canvas"><link rel="next" href="ch05s02.html" title="5.2. Load Images from online services"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Chapter 5. Load Images</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="ch04s03.html">Prev</a> </td><th width="60%" align="center"> </th><td width="20%" align="right"> <a accesskey="n" href="ch05s02.html">Next</a></td></tr></table><hr></div><div class="chapter"><div class="titlepage"><div><div><h1 class="title"><a name="id36159146"></a>Chapter 5. Load Images</h1></div></div></div><div class="toc"><p><b>Table of Contents</b></p><dl><dt><span class="sect1"><a href="ch05.html#id36159183">5.1. Load images from local files</a></span></dt><dt><span class="sect1"><a href="ch05s02.html">5.2. Load Images from online services</a></span></dt><dt><span class="sect1"><a href="ch05s03.html">5.3. Load Images from CoreCast syndication feeds</a></span></dt><dd><dl><dt><span class="sect2"><a href="ch05s03.html#id36159431">5.3.1. Subscribe to CoreCast feeds</a></span></dt><dt><span class="sect2"><a href="ch05s03.html#id36159507">5.3.2. Load core images from CoreCast feeds</a></span></dt></dl></dd><dt><span class="sect1"><a href="ch05s04.html">5.4. Load images using IODP-formatted section list</a></span></dt><dt><span class="sect1"><a href="ch05s05.html">5.5. Load FMS images from IODP-USIO logging database</a></span></dt></dl></div><p>
-		Before you begin, note that Corelyzer requires two pieces of data to render section images properly:
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>Chapter 5. Load Images</title><meta name="generator" content="DocBook XSL Stylesheets V1.76.1"><link rel="home" href="index.html" title="Corelyzer User's Manual"><link rel="up" href="index.html" title="Corelyzer User's Manual"><link rel="prev" href="ch04s03.html" title="4.3. Visualization canvas"><link rel="next" href="ch05s02.html" title="5.2. Load Images from online services"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="chapter" title="Chapter 5. Load Images"><div class="titlepage"><div><div><h2 class="title"><a name="id36149849"></a>Chapter 5. Load Images</h2></div></div></div><div class="toc"><p><b>Table of Contents</b></p><dl><dt><span class="sect1"><a href="ch05.html#id36149886">5.1. Load images from local files</a></span></dt><dt><span class="sect1"><a href="ch05s02.html">5.2. Load Images from online services</a></span></dt><dt><span class="sect1"><a href="ch05s03.html">5.3. Load Images from CoreCast syndication feeds</a></span></dt><dd><dl><dt><span class="sect2"><a href="ch05s03.html#id36150124">5.3.1. Subscribe to CoreCast feeds</a></span></dt><dt><span class="sect2"><a href="ch05s03.html#id36150200">5.3.2. Load core images from CoreCast feeds</a></span></dt></dl></dd><dt><span class="sect1"><a href="ch05s04.html">5.4. Load images using IODP-formatted section list</a></span></dt><dt><span class="sect1"><a href="ch05s05.html">5.5. Load FMS images from IODP-USIO logging database</a></span></dt></dl></div><p>
+		Before you proceed, make sure you know the following properties of the images to be loaded:
 
-        </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>Are the images horizontally or vertically oriented? For horizontally
-			oriented images, depth is assumed to increase from left to right. For vertically
-			oriented images, top to bottom.</p></li><li class="listitem"><p>What's their resolution in dots-per-inch (DPI)? This is necessary to
-			draw images at the correct scale.</p></li></ul></div><p>
+        </p><div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem"><p>Orientation: Are the images horizontally or vertically oriented?
+		  For horizontally-oriented images, depth is assumed to increase from left to right.
+		  For vertically-oriented images, top to bottom.</p></li><li class="listitem"><p>Resolution: What's the resolution of the images in dots-per-inch (DPI)?
+		  </p></li></ul></div><p>
 		
-		Knowing these prior to loading will make for a smoother experience!
+		Corelyzer requires these properties to process and render section images at the correct scale.
     </p><p>
 		How do you determine the DPI of your image? This depends on the equipment in which the image was
 		retrieved. Most line-scan cameras that are manufactured
@@ -15,64 +15,78 @@
 		<a class="ulink" href="apas02.html" target="_top">Making Sure the DPI of an Image is Correct</a>. When loading images
 		you can also specify the length of a core section image, from which Corelyzer
 		can calculate the appropriate DPI value.
-	</p><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="id36159183"></a>5.1. Load images from local files</h2></div></div></div><p>
+	</p><div class="sect1" title="5.1. Load images from local files"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="id36149886"></a>5.1. Load images from local files</h2></div></div></div><p>
 			To start the image loading process, select the menu item "File &gt; Load Images &gt; Open
 			Local Image Files...". Choose the files you wish to load in the resulting dialog:
 			
-			</p><div class="figure"><a name="id36159192"></a><p class="title"><b>Figure 5.1. Select image files to load</b></p><div class="figure-contents"><div><img src="images/loadImages-1.png" alt="Select image files to load"></div></div></div><p><br class="figure-break">
+			</p><div class="figure"><a name="id36149895"></a><p class="title"><b>Figure 5.1. Select image files to load</b></p><div class="figure-contents"><div><img src="images/loadImages-1.png" alt="Select image files to load"></div></div></div><p><br class="figure-break">
 		</p><p>
 			By default, Corelyzer displays core imagery by placing section
 			images in horizontal tracks. Each track corresponds to a single hole.
-			After choosing Open, Corelyzer will attempt to organize the selected section images
-			into tracks. The following dialog displays this attempted organization
-			and allows the user to modify it as needed.
+			After images to load are selected, Corelyzer will attempt to organize these images
+			into new and/or existing tracks based on image filenames and existing track names
+			(if present). The following dialog displays the suggested
+			organization and allows the user to modify it as needed.
 			
-			</p><div class="figure"><a name="id36159211"></a><p class="title"><b>Figure 5.2. Arrange loaded image files</b></p><div class="figure-contents"><div><img src="images/loadImages-2.png" alt="Arrange loaded image files"></div></div></div><p><br class="figure-break">
+			</p><div class="figure"><a name="id36149914"></a><p class="title"><b>Figure 5.2. Arrange loaded image files</b></p><div class="figure-contents"><div><img src="images/loadImages-2.png" alt="Arrange loaded image files"></div></div></div><p><br class="figure-break">
 			
-			In Figure 5.2, the seven selected sections have been organized into three tracks.
+			In Figure 5.2, note that the seven loaded sections have been organized into three tracks.
 			Tracks are indicated by "Track" prefixing their name and a beige background.
 			Note that all sections and tracks have a green dot to their left indicating that
-			they've just been loaded or created. Most operations in this dialog apply only to
-			these "new"	tracks and sections. To adjust the structure and arrangement of tracks
-			and sections, use the buttons described below:
+			they've just been loaded (sections) or created (tracks). Most operations in this
+			dialog apply only to these new tracks and sections. To adjust the structure and
+			arrangement of tracks and sections, use the buttons described below:
 			
-			</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>Move Up/Down: Move selected sections up/down within a track or between tracks.</p></li><li class="listitem"><p>Delete: Remove selected section or track from the list. Tracks containing
+			</p><div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem"><p>Move Up/Down: Move selected sections up/down within a track or between tracks.</p></li><li class="listitem"><p>Delete: Remove selected section or track from the list. Tracks containing
 				sections cannot be deleted until emptied.</p></li><li class="listitem"><p>Rename Track: Rename selected track.</p></li><li class="listitem"><p>New Track: Create a new track.</p></li></ul></div><p>
 			
-			Once the arrangement of sections and tracks is satisfactory, click the "Next &gt;" button. The
-			resulting dialog allows the user to set image properties. Corelyzer assumes Horizontal
-			orientation and 254 DPI by default, and attempts to place sections in the same track end-to-end.
+			Once the arrangement of sections and tracks is satisfactory, input your images' DPI values
+			in the DPI X/Y fields.  Because DPI X and DPI Y are almost always the same, the value
+			entered	in the X field will be immediately copied into the Y field if it's blank. Orientation
+			defaults to Horizontal, change it to Vertical if necessary. Now that image properties and 
+			section order have been established, Corelyzer can place sections in appropriate tracks and
+			position them end-to-end. To proceed, click the "Next &gt;" button.
 			
-			</p><div class="figure"><a name="id36159252"></a><p class="title"><b>Figure 5.3. Set image properties</b></p><div class="figure-contents"><div><img src="images/loadImages-3.png" alt="Set image properties"></div></div></div><p><br class="figure-break">
+			The	resulting dialog allows the user to review and modify image properties, if necessary:
 			
-			Values can be modified individually by clicking the cell you wish to change. To modify
-			a value(s) for all sections in the table, use the Batch Input controls below. Check the
-			"Batch input..." checkbox to enable the controls, enter the desired settings, then click
-			the Apply button. Note that batch fields left blank will not modify the corresponding
-			table cells. For instance, suppose your images are 128 DPI and vertically oriented. Choose
-			Vertical in the drop-down box, enter 128 in both X and Y DPI fields, and delete the Length,
-			Start Depth and Depth Increment fields. Click Apply, and only the DPI and Orientation cells
-			will be updated.
-		</p><p>
-		  If you know the
-		  images' orientation, you can also specify that individually in
-		  the image loading dialog shown below.
-		</p><p>
-		  We also have to make sure that your images have the correct
-		  dots-per-inch (DPI). Why does the DPI of the image matter? This
-		  is discussed in detail in the appendix. It basically establish
-		  the correct mapping between the image dimension to the physical
-		  core dimensions. 
-		</p><p>
+			</p><div class="figure"><a name="id36149955"></a><p class="title"><b>Figure 5.3. Set image properties</b></p><div class="figure-contents"><div><img src="images/loadImages-3.png" alt="Set image properties"></div></div></div><p><br class="figure-break">
+			
+			As you can see in the (rightmost) Depth column, the first three sections start from depth
+			zero: each is the first section in a new track.  The last four sections are part of the
+			third track: each is placed	at the bottommost depth of the preceding section.
+
+			</p><p>
+			The section image properties can be modified individually by selecting the cell you wish to change and
+			hitting the Return/Enter key, or by double-cliking the desired cell.  To modify
+			a value(s) for multiple sections, you can use the Batch Input controls below the section
+			property table. Check the "Batch input..." checkbox to enable the controls, and enter
+			the desired settings. If you want to apply these settings to all sections in the table,
+			click the Apply to All Rows button. If you want to apply these settings only to certain
+			sections, select those sections in the section property table, then click the Apply to 
+			Selected Rows button. In both cases, only populated fields will modify the corresponding
+			table cells.
+			</p><p>
+			
+			</p><p>
+			If you modify DPI values on the depth axis (DPI X for horizontal images, DPI Y
+			for vertical), section lengths and depths will be updated automatically so sections
+			in each track are positioned end-to-end when loaded.
+			</p><p>
+
+			</p><p>
 			When you are satisfied with the image properties, click the Finish button.
 			Corelyzer will begin loading images with the specified parameters.
-		</p><p>
+			</p><p>
+		
+			</p><p>
 			Once completed, the visualization window will display core images
-			and the Section listbox in the main iCores control window will update with the image
+			and the Section listbox in the main session/iCores window will update with the image
 			filenames loaded in each track. Notice in the image below that the ruler in the core image
 			closely matches the depth measurements at the bottom of
 			the visualization window. This visual check is an excellent way to confirm the
 			proper DPI values were used.
 			
-			</p><div class="figure"><a name="id36159288"></a><p class="title"><b>Figure 5.4. Visualization canvas with loaded core section image</b></p><div class="figure-contents"><div><img src="images/loadImages-4.png" alt="Visualization canvas with loaded core section image"></div></div></div><p><br class="figure-break">
-		</p></div></div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="ch04s03.html">Prev</a> </td><td width="20%" align="center"> </td><td width="40%" align="right"> <a accesskey="n" href="ch05s02.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">4.3. Visualization canvas </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> 5.2. Load Images from online services</td></tr></table></div></body></html>
+			</p><div class="figure"><a name="id36149995"></a><p class="title"><b>Figure 5.4. Visualization canvas with loaded core section image</b></p><div class="figure-contents"><div><img src="images/loadImages-4.png" alt="Visualization canvas with loaded core section image"></div></div></div><p><br class="figure-break">
+			</p><p>
+
+		</p></div></div></body></html>

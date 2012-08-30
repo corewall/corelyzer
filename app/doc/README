@@ -1,4 +1,5 @@
 --- How to Generate Corelyzer Help Files ---
+Brian Grivna, August 27, 2012
 
 The help files included with Corelyzer are generated using:
 
@@ -14,7 +15,7 @@ http://javahelp.java.net/
 - The JavaHelp system, required to generate the search database.
 
 app/doc/corelyzer.xml
-- The "source" file that contains help text and defines help structure.
+- The "source" file that contains all help text and defines help structure.
 
 
 To generate help files:
@@ -26,8 +27,8 @@ To generate help files:
             --stringparam suppress.navigation 0 \
             [DocBook root]/javahelp/javahelp.xsl corelyzer.xml
 
-The stringparams assign section numbers, prefix those sections nubmers with
-the chapter, and include the Prev/Next navigation header/footer, respectively.
+The stringparams assign section numbers, prefix those section numbers with
+chapter numbers, and include the Prev/Next navigation header/footer, respectively.
 
 app/doc should now contain several HTML files and the following JavaHelp files:
     jhelpidx.xml jhelpmap.jhm jhelpset.hs jhelptoc.xml
@@ -41,6 +42,4 @@ app/doc should now contain a directory called JavaHelpSearch.
 
 
 3. Copy the contents of app/doc (sans README and corelyzer.xml) to 
-packages/base/help, repackage the app, and bask in the helpfulness.
-
-- Brian Grivna, June 21, 2012
+packages/base/help, repackage the app, and bask in the helpfulness!
