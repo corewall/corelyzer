@@ -41,10 +41,10 @@
 // Each dataset has multiple SectionTables
 
 struct Cell {
-    bool  valid;
+    bool  valid, exclude;
     float value;
 	
-	Cell() : valid(false), value(0.0f) { }
+	Cell() : valid(false), exclude(false), value(0.0f) { }
 };
 
 struct SectionTable {

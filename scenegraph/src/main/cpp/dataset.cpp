@@ -231,25 +231,20 @@ int set_table_field_count(int set, int table, int fields)
     // need to make sure it is a table.  Also the depth column should already
     // be made!!!!
 
-    if(!is_table(set,table)) return -1;
+    if (!is_table(set,table)) return -1;
     SectionTable* t = datasetvec[set]->sectionvec[table];
 
-    if( t->depth == NULL || t->numberOfRows <= 0) return -1;
-    if( fields <= 0) return datasetvec[set]->sectionvec[table]->numberOfFields;
+    if ( t->depth == NULL || t->numberOfRows <= 0) return -1;
+    if ( fields <= 0) return datasetvec[set]->sectionvec[table]->numberOfFields;
 
 
-    if( t->numberOfFields > 0 && t->table) return t->numberOfFields;
+    if ( t->numberOfFields > 0 && t->table) return t->numberOfFields;
     
     t->table = new Cell*[fields];
     int i;
-    for( i = 0; i < fields; i++)
+    for ( i = 0; i < fields; i++)
     {
         t->table[i] = new Cell[t->numberOfRows];
-        for( int k = 0; k < t->numberOfRows; k++)
-        {
-            t->table[i][k].value = 0.0f;
-            t->table[i][k].valid = true;
-        }
     }
 
     t->min = new float[fields];

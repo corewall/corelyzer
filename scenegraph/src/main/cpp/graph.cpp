@@ -25,6 +25,7 @@
  *****************************************************************************/
 
 #include "canvas.h"
+#include "dataset.h"
 #include "graph.h"
 #include "textureresource_ex.h"
 #include "trackscene.h"
@@ -155,16 +156,6 @@ int add_line_graph_to_section(int track, int section,
 	
 	g->type	   = GRAPH_LINE;
 	
-	// pre-load all data
-	g->dataTableSize = rows;
-	g->dataTable = new GraphPoint[ g->dataTableSize ];
-	
-	for ( int i = 0; i < g->dataTableSize; i++ )
-	{
-		g->dataTable[i].x = get_table_row_depth( g->dataset, g->table, i );
-		g->dataTable[i].y = get_table_cell( g->dataset, g->table, g->field, i );
-	}
-
 	// graph initialization complete, now add to graphvec
 
     // if graphvec has empty slots, use the first one we find...
@@ -264,9 +255,6 @@ int remove_line_graph_from_section(int gid)
         set_graph_slot( *csitr, i );
     }
 
-	if ( graphvec[gid]->dataTable )
-		delete[] graphvec[gid]->dataTable;
-    
 	if ( graphvec[gid]->label )
         delete [] graphvec[gid]->label;
     
@@ -596,6 +584,9 @@ void render_graph(Canvas* c, CoreSection* cs, int gid)
             glBindTexture(GL_TEXTURE_2D, 0);
             glColor3f(g->r, g->g, g->b);
 			
+			SectionTable *dataTable = get_table( g->dataset, g->table );
+			const int fieldToGraph = g->field;
+			
 			if ( g->type == GRAPH_LINE || g->type == GRAPH_LINEPOINT )
 			{
 				// antialias lines
@@ -613,13 +604,13 @@ void render_graph(Canvas* c, CoreSection* cs, int gid)
 				{
 					glBegin(GL_LINE_STRIP);
 					{
-						for ( int pidx = 0; pidx < g->dataTableSize; pidx++ )
+						for ( int row = 0; row < dataTable->numberOfRows; row++ )
 						{
-							if ( g->dataTable[pidx].exclude ) continue;
-							if ( !is_table_cell_valid_fast( g->dataset, g->table, g->field, pidx )) continue;
-
-							const float x_coord = ( g->dataTable[ pidx ].x * depthunitscale * INCH_PER_CM );
-							const float y_coord = ( g->dataTable[ pidx ].y * INCH_PER_CM ) * c->dpi_y;
+							if ( !dataTable->table[fieldToGraph][row].valid || dataTable->table[fieldToGraph][row].exclude )
+								continue;
+							
+							const float x_coord = ( dataTable->depth[row] * depthunitscale * INCH_PER_CM );
+							const float y_coord = ( dataTable->table[fieldToGraph][row].value * INCH_PER_CM ) * c->dpi_y;
 							glVertex2f( x_coord, y_coord );
 						}
 					}
@@ -630,9 +621,11 @@ void render_graph(Canvas* c, CoreSection* cs, int gid)
 					// draw with gaps between valid datapoints
 					bool isInGLBlock = false;
 					int vertsInStrip = 0;
-					for ( int pidx = 0; pidx < g->dataTableSize; pidx++ )
+					for ( int row = 0; row < dataTable->numberOfRows; row++ )
 					{
-						if ( !g->dataTable[pidx].exclude || !is_table_cell_valid_fast( g->dataset, g->table, g->field, pidx ))
+						if ( !dataTable->table[fieldToGraph][row].valid ) continue;
+						
+						if ( !dataTable->table[fieldToGraph][row].exclude )
 						{
 							if ( !isInGLBlock )
 							{
@@ -640,8 +633,8 @@ void render_graph(Canvas* c, CoreSection* cs, int gid)
 								isInGLBlock = true;
 							}
 
-							const float x_coord = ( g->dataTable[ pidx ].x * depthunitscale * INCH_PER_CM );
-							const float y_coord = ( g->dataTable[ pidx ].y * INCH_PER_CM ) * c->dpi_y;
+							const float x_coord = ( dataTable->depth[row] * depthunitscale * INCH_PER_CM );
+							const float y_coord = ( dataTable->table[fieldToGraph][row].value * INCH_PER_CM ) * c->dpi_y;
 							glVertex2f( x_coord, y_coord );
 							vertsInStrip++;
 						}
@@ -654,11 +647,11 @@ void render_graph(Canvas* c, CoreSection* cs, int gid)
 								
 								// if an excluded point immediately follows a single valid point, no
 								// line can be drawn - draw a point instead
-								if (vertsInStrip == 1)
+								if ( vertsInStrip == 1 )
 								{
-									const float x_coord = ( g->dataTable[ pidx ].x * depthunitscale * INCH_PER_CM );
-									const float y_coord = ( g->dataTable[ pidx ].y * INCH_PER_CM ) * c->dpi_y;
-
+									const float x_coord = ( dataTable->depth[row - 1] * depthunitscale * INCH_PER_CM );
+									const float y_coord = ( dataTable->table[fieldToGraph][row - 1].value * INCH_PER_CM ) * c->dpi_y;
+									
 									glBegin(GL_POINTS);
 									glVertex2f( x_coord, y_coord );
 									glEnd();
@@ -680,13 +673,13 @@ void render_graph(Canvas* c, CoreSection* cs, int gid)
 
 					glBegin(GL_POINTS);
 					{
-						for ( int pidx = 0; pidx < g->dataTableSize; pidx++ )
+						for ( int row = 0; row < dataTable->numberOfRows; row++ )
 						{
-							if ( g->dataTable[pidx].exclude ) continue;
-							if ( !is_table_cell_valid_fast( g->dataset, g->table, g->field, pidx )) continue;								
-
-							const float x_coord = ( g->dataTable[ pidx ].x * depthunitscale * INCH_PER_CM );
-							const float y_coord = ( g->dataTable[ pidx ].y * INCH_PER_CM ) * c->dpi_y;
+							if ( !dataTable->table[fieldToGraph][row].valid || dataTable->table[fieldToGraph][row].exclude )
+								continue;
+							
+							const float x_coord = ( dataTable->depth[row] * depthunitscale * INCH_PER_CM );
+							const float y_coord = ( dataTable->table[fieldToGraph][row].value * INCH_PER_CM ) * c->dpi_y;
 							glVertex2f( x_coord, y_coord );
 						}
 					}
@@ -701,13 +694,13 @@ void render_graph(Canvas* c, CoreSection* cs, int gid)
 				glPointSize(2);
 				glBegin(GL_POINTS);
 				{
-					for ( int pidx = 0; pidx < g->dataTableSize; pidx++ )
+					for ( int row = 0; row < dataTable->numberOfRows; row++ )
 					{
-						if ( g->dataTable[pidx].exclude ) continue;
-						if ( !is_table_cell_valid_fast( g->dataset, g->table, g->field, pidx )) continue;
-
-						const float x_coord = ( g->dataTable[ pidx ].x * depthunitscale * INCH_PER_CM );
-						const float y_coord = ( g->dataTable[ pidx ].y * INCH_PER_CM ) * c->dpi_y;
+						if ( !dataTable->table[fieldToGraph][row].valid || dataTable->table[fieldToGraph][row].exclude )
+							continue;
+						
+						const float x_coord = ( dataTable->depth[row] * depthunitscale * INCH_PER_CM );
+						const float y_coord = ( dataTable->table[fieldToGraph][row].value * INCH_PER_CM ) * c->dpi_y;
 						glVertex2f( x_coord, y_coord );
 					}
 				}
@@ -723,14 +716,14 @@ void render_graph(Canvas* c, CoreSection* cs, int gid)
 				// printf("graph depthunitscale: %f\n", depthunitscale);
 				glBegin(GL_LINES);
 				{
-					for ( int pidx = 0; pidx < g->dataTableSize; pidx++ )
+					for ( int row = 0; row < dataTable->numberOfRows; row++ )
 					{
-						if ( g->dataTable[pidx].exclude ) continue;
-						if ( !is_table_cell_valid_fast( g->dataset, g->table, g->field, pidx )) continue;
+						if ( !dataTable->table[fieldToGraph][row].valid || dataTable->table[fieldToGraph][row].exclude )
+							continue;
 						
-						const float x_coord = ( g->dataTable[ pidx ].x * depthunitscale * INCH_PER_CM );
-						const float y_coord = ( g->dataTable[ pidx ].y * INCH_PER_CM ) * c->dpi_y;
-
+						const float x_coord = ( dataTable->depth[row] * depthunitscale * INCH_PER_CM );
+						const float y_coord = ( dataTable->table[fieldToGraph][row].value * INCH_PER_CM ) * c->dpi_y;
+					
 						// vertical segment
 						glVertex2f( x_coord, y_coord + halfy );
 						glVertex2f( x_coord, y_coord - halfy );
@@ -1018,9 +1011,12 @@ void set_line_graph_exclude_range(const int gid, const float min, const float ma
     set_exclude_max(gid, max);
 	
 	// update excluded state for all points in graph
-	Graph *curGraph = graphvec[gid];
-	for ( int i = 0; i < curGraph->dataTableSize; i++ )
-		curGraph->dataTable[i].exclude = exclude_value( gid, curGraph->dataTable[i].y );
+	SectionTable *table = get_table( graphvec[gid]->dataset, graphvec[gid]->table );
+	const int field = graphvec[gid]->field;
+	for ( int row = 0; row < table->numberOfRows; row++ )
+	{
+		table->table[field][row].exclude = exclude_value( gid, table->table[field][row].value );
+	}
 }
 
 //======================================================================
