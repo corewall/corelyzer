@@ -106,9 +106,6 @@ struct Graph {
     bool  show;
 
 	bool  graphonly;
-	
-	GraphPoint *dataTable;
-	int dataTableSize;
 };
 
 enum GraphPointShape {
