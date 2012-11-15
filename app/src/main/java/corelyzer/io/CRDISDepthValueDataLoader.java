@@ -80,13 +80,6 @@ public class CRDISDepthValueDataLoader {
 	int numOfColumns = 0;
 	int depthColumn = 0;
 
-	// Data properties
-	// Min/max values in all sections/tables
-	Vector<Float> allMinVals;
-	Vector<Float> allMaxVals;
-
-	Vector<Color> colors;
-
 	public CRDISDepthValueDataLoader() {
 		super();
 	}
@@ -96,9 +89,13 @@ public class CRDISDepthValueDataLoader {
 		this.dvFile = f;
 	}
 
-	private void activateGraphs(final TrackSceneNode tnode, final WellLogDataSet ds) {
+	public static void activateGraphs(final TrackSceneNode tnode, final WellLogDataSet ds) {
 		boolean justAppend = false;
 		CoreSection sec;
+		
+		Vector<Float> allMinVals = new Vector<Float>(), allMaxVals = new Vector<Float>();
+		Vector<Color> colors = new Vector<Color>();
+		calcMinMaxColor(ds, allMinVals, allMaxVals, colors);
 
 		for (int i = 0; i < ds.getNumTables(); i++) {
 			WellLogTable wt = ds.getTable(i);
@@ -118,37 +115,8 @@ public class CRDISDepthValueDataLoader {
 				CoreGraph.getInstance().notifyListeners();
 				// newSecCreated = true;
 
-				// If the dataset table contains section depth offset,
-				// use it
-				float unitScale;
-				switch (wt.getDepthUnits()) {
-					case UnitLength.CM:
-						unitScale = 0.01f;
-						break;
-
-					case UnitLength.M:
-						unitScale = 1.0f;
-						break;
-
-					case UnitLength.FOOT:
-						unitScale = 0.3048f;
-						break;
-
-					case UnitLength.INCH:
-						unitScale = 0.0254f;
-						break;
-
-					case UnitLength.MM:
-						unitScale = 0.001f;
-						break;
-
-					case UnitLength.YARD:
-						unitScale = 0.9144f;
-						break;
-
-					default:
-						unitScale = 1.0f;
-				}
+				// If the dataset table contains section depth offset, use it
+				final float unitScale = UnitLength.getUnitScale(wt.getDepthUnits());
 
 				// Figure out the top depth of a section
 				float sectionBeginDepth;
@@ -173,22 +141,18 @@ public class CRDISDepthValueDataLoader {
 				sec.setDepth(SceneGraph.getSectionDepth(tnode.getId(), sec.getId()));
 			}
 
-			// now we have the section, iterate through all fields in the
-			// dataset
+			// now we have the section, iterate through all fields in the dataset
 			for (int j = 0; j < wt.getNumFields(); j++) {
 				// native first, java next for gid
-				int gid = SceneGraph.addLineGraphToSection(tnode.getId(), sec.getId(), ds.getId(), i, j); // i:
-																											// tableIndex,
-																											// j:
-																											// fieldIndex
+				int gid = SceneGraph.addLineGraphToSection(tnode.getId(), sec.getId(), ds.getId(), i, j);
 
 				if (gid == -1) {
 					System.out.println("- DIS gid is -1!!!");
 					continue;
 				}
 
-				SceneGraph.setLineGraphRange(gid, this.allMinVals.elementAt(j), this.allMaxVals.elementAt(j));
-				Color c = this.colors.elementAt(j);
+				SceneGraph.setLineGraphRange(gid, allMinVals.elementAt(j), allMaxVals.elementAt(j));
+				Color c = colors.elementAt(j);
 				SceneGraph.setLineGraphColor(gid, (c.getRed() / 255.0f), (c.getGreen() / 255.0f), (c.getBlue() / 255.0f));
 
 				SceneGraph.setLineGraphType(gid, 0); // 0: default as lines
@@ -204,12 +168,12 @@ public class CRDISDepthValueDataLoader {
 		}
 	}
 
-	private void calcMinMaxColor(final WellLogDataSet ds) {
-		// Allocate
-		this.colors = new Vector<Color>();
-		this.allMinVals = new Vector<Float>();
-		this.allMaxVals = new Vector<Float>();
-
+	private static void calcMinMaxColor(
+			final WellLogDataSet ds,
+			Vector<Float> allMinVals,
+			Vector<Float> allMaxVals,
+			Vector<Color> colors )
+	{
 		if (ds == null) {
 			return;
 		}
@@ -236,14 +200,14 @@ public class CRDISDepthValueDataLoader {
 				}
 			}
 
-			this.allMinVals.add(min);
-			this.allMaxVals.add(max);
+			allMinVals.add(min);
+			allMaxVals.add(max);
 
 			int r = (int) (100 + 0.49803 * generator.nextInt(256));
 			int g = (int) (100 + 0.49803 * generator.nextInt(256));
 			int b = (int) (100 + 0.49803 * generator.nextInt(256));
 
-			this.colors.add(new Color(r, g, b));
+			colors.add(new Color(r, g, b));
 		}
 	}
 
@@ -391,8 +355,7 @@ public class CRDISDepthValueDataLoader {
 			// Activate ALL the graph automatically
 			System.out.println("- DSId before activate: " + dsId);
 
-			this.calcMinMaxColor(ds);
-			this.activateGraphs(tnode, ds);
+			activateGraphs(tnode, ds);
 		} else {
 			System.out.println("- Cannot find dataset in current session.");
 		}

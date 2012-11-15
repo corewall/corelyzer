@@ -54,98 +54,12 @@ public class DISOperationController {
 	static final float DEFAULT_LENGTH = 1.0f;
 	static final float INVALID_DPI = 0.0f;
 
-	// Min/max values in all sections/tables
-	static Vector<Float> allMinVals;
-
-	static Vector<Float> allMaxVals;
-
-	static Vector<Color> colors;
-
-	static void activateGraphs(final TrackSceneNode tnode, final WellLogDataSet ds) {
-		boolean justAppend = false;
-		CoreSection sec;
-
-		for (int i = 0; i < ds.getNumTables(); i++) {
-			WellLogTable wt = ds.getTable(i);
-
-			String tableName = wt.getName();
-			sec = tnode.getCoreSection(tableName);
-
-			if (sec == null) {
-				// need to creat new section
-				int secid = SceneGraph.addSectionToTrack(tnode.getId(), tnode.getNumCores());
-				SceneGraph.setSectionName(tnode.getId(), secid, tableName);
-
-				// property?
-				sec = new CoreSection(tableName, secid);
-				tnode.addCoreSection(sec);
-				CoreGraph.getInstance().notifyListeners();
-
-				// If the dataset table contains section depth offset, use it
-
-				// Figure out the top depth of a section
-				float sectionBeginDepth;
-				float sectionTopDepth = wt.getTopDepth(); // in meters
-				final float unitScale = UnitLength.getUnitScale( wt.getDepthUnits() );
-
-				if (sectionTopDepth != -1) {
-					sectionBeginDepth = sectionTopDepth;
-				} else if (wt.getDepth_offset() != -1) {
-					sectionBeginDepth = wt.getDepth_offset() * unitScale;
-					;
-				} else {
-					justAppend = true;
-					sectionBeginDepth = 0.0f;
-				}
-
-				SceneGraph.positionSection(tnode.getId(), secid, sectionBeginDepth * 100.0f / 2.54f * SceneGraph.getCanvasDPIX(0), 0);
-			}
-
-			// if we created new coresection and add new graph
-			// send section to the end of the track
-			if (justAppend) {
-				SceneGraph.pushSectionToEnd(tnode.getId(), sec.getId());
-				sec.setDepth(SceneGraph.getSectionDepth(tnode.getId(), sec.getId()));
-			}
-
-			// now we have the section, iterate through all fields in the
-			// dataset
-			for (int j = 0; j < wt.getNumFields(); j++) {
-				// native first, java next for gid
-				int gid = SceneGraph.addLineGraphToSection(tnode.getId(), sec.getId(), ds.getId(), i, j); // i:
-																											// tableIndex,
-																											// j:
-																											// fieldIndex
-
-				if (gid == -1) {
-					System.out.println("- DIS gid is -1!!!");
-					continue;
-				}
-
-				SceneGraph.setLineGraphRange(gid, allMinVals.elementAt(j), allMaxVals.elementAt(j));
-				Color c = colors.elementAt(j);
-				SceneGraph.setLineGraphColor(gid, (c.getRed() / 255.0f), (c.getGreen() / 255.0f), (c.getBlue() / 255.0f));
-
-				SceneGraph.setLineGraphType(gid, 0); // 0: default as lines
-
-				String fieldName = wt.getHeader(j + 1);
-				SceneGraph.setLineGraphLabel(gid, fieldName);
-
-				// java side
-				CoreSectionGraph csg = new CoreSectionGraph(ds.getId(), i, j, gid, tnode);
-				csg.setName(tableName);
-				tnode.addCoreSectionGraph(csg, sec.getId(), gid);
-			}
-		}
-	}
-
 	public static void applySelectedDownholeLog(final Window parent, final String logFilePath) {
 		File selectedFile = new File(logFilePath);
 
 		if (selectedFile.exists()) {
 			// Load the DIS data file. And use the 'Hole', 'Expedition' data in
-			// the file to
-			// create session and track names.
+			// the file to create session and track names.
 			CRDISDepthValueDataLoader dvLoader = new CRDISDepthValueDataLoader(selectedFile);
 			dvLoader.load();
 		} else {
@@ -177,21 +91,24 @@ public class DISOperationController {
 				TrackSceneNode t = s.getTrackSceneNodeWithName("MSCL Graph");
 				if (t == null) {
 					int trackId = app.createTrack("MSCL Graph");
-					t = new TrackSceneNode(trackId);
-					t.setName("MSCL Graph");
+					t = s.getTrackSceneNodeWithIndex(trackId);
 				}
 
-				app.loadData(selectedFile, true);
-
-				/*
-				 * WellLogDataSet ds = null; for(WellLogDataSet d :
-				 * s.getDatasets()) { if(d.getId() == dsId) { ds = d; break; } }
-				 * 
-				 * if(dsId >= 0 && ds != null) { // Activate the graphs
-				 * calcMinMaxColor(ds); activateGraphs(t, ds); } else {
-				 * JOptionPane.showMessageDialog(parent,
-				 * "Loading MSCL data failed."); }
-				 */
+				final int datasetId = app.loadData(selectedFile, true);
+				
+				WellLogDataSet ds = null;
+				for (WellLogDataSet d : s.getDatasets()) {
+					if (d.getId() == datasetId) {
+						ds = d;
+						break;
+					}
+				}
+				 
+				if (ds != null) { // Activate the graphs (which also creates sections)
+					CRDISDepthValueDataLoader.activateGraphs(t, ds);
+				} else {
+					JOptionPane.showMessageDialog(parent, "Loading MSCL data failed.");
+				}
 
 				app.updateGLWindows();
 			} else {
@@ -254,49 +171,6 @@ public class DISOperationController {
 			if (app != null) {
 				app.addATaskToExecutor(new LoadDISSectionAction(leg, site, hole, core, section, urlString, depth, length, topOffset, bottomOffset));
 			}
-		}
-	}
-
-	static void calcMinMaxColor(final WellLogDataSet ds) {
-		// Allocate
-		colors = new Vector<Color>();
-		allMinVals = new Vector<Float>();
-		allMaxVals = new Vector<Float>();
-
-		if (ds == null) {
-			return;
-		}
-
-		System.out.println("- Dataset id: " + ds.getId() + " has " + ds.getNumTables() + " tables.");
-		WellLogTable t = ds.getTable(0);
-
-		Random generator = new Random(System.currentTimeMillis());
-
-		// collect fields' all min/max
-		for (int i = 0; i < t.getNumFields(); i++) {
-			float min = 0.0f;
-			float max = 0.0f;
-
-			for (int j = 0; j < ds.getNumTables(); j++) {
-				WellLogTable table = ds.getTable(j);
-
-				if (j == 0) {
-					min = table.getColumnMin(i);
-					max = table.getColumnMax(i);
-				} else {
-					min = min > table.getColumnMin(i) ? table.getColumnMin(i) : min;
-					max = max < table.getColumnMax(i) ? table.getColumnMax(i) : max;
-				}
-			}
-
-			allMinVals.add(min);
-			allMaxVals.add(max);
-
-			int r = (int) (100 + 0.49803 * generator.nextInt(256));
-			int g = (int) (100 + 0.49803 * generator.nextInt(256));
-			int b = (int) (100 + 0.49803 * generator.nextInt(256));
-
-			colors.add(new Color(r, g, b));
 		}
 	}
 }
