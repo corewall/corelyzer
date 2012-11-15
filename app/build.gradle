@@ -39,8 +39,8 @@ dependencies {
 	compile ':clibwrapper_jiio:1.1'
 	compile 'ch.qos.logback:logback-core:0.5'
 	compile 'ch.qos.logback:logback-classic:0.5'
-	compile ':gluegen-rt:2.0rc5'
-	compile ':jogl.all:2.0rc5'
+	compile ':gluegen-rt:'
+	compile ':jogl-all:'
 }
 
 clean.doLast {
