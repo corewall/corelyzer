@@ -7,12 +7,6 @@
     <title>Corelyzer User's Manual</title>
 
     <authorgroup>
-      <author>
-        <firstname>Yu-Chung</firstname>
-        <othername>"Julian"</othername>
-        <surname>Chen</surname>
-        <email id="juliansmail">julian at evl.uic.edu</email>
-      </author>
 	  <author>
 		<firstname>Brian</firstname>
 		<surname>Grivna</surname>
@@ -192,16 +186,9 @@
     <sect1>
       <title>Example Hardware Setups</title>
       <para>
-        The key for CoreWall is large screens and a good graphics card. We
-        would suggest eith the Dell or Apple 30" LCD monitors. And in order to
-        drive each 30" monitor, you will need graphics cards with a
-        "dual-link" DVI port. If you intend to use 2 30" monitors, then you
-        will need "dual-dual-link" ports. Possible selections (but may not
-        limite to) are ATI Radeon X1900 XT and NVIDIA Quadro FX 4500 cards.
+Corelyzer will work on most laptops or desktops built since ~2005, running Mac OS 10.5 or higher or Windows XP or higher, and is compatible with both 32-bit and 64-bit systems. To maximize performance, we suggest prioritizing high-end 3D graphics cards, processor speed, and RAM (in that order). Solid-state drives may offer a further performance boost. Larger monitors give more workspace and a better view, but performance does degrade somewhat as each monitor is added to the system. In multi-panel setups, monitors with thin bezel (border/edge strip) will provide a better experience.
 
-        Following are some CoreWall setups out there. Each contact is
-        listed. If you need more information please contact each indiviuals or
-        Julian Yu-Chung Chen <email id="juliansmail2">julian at evl.uic.edu</email>. 
+Some examples of CoreWall setups are described below. For more information, please contact the people listed.
       </para>
 
       <sect2>
@@ -225,8 +212,8 @@
         <para>
           EVL's CoreWall Hardware Spec: a Dell Pentium 4 XPS PC with 3
           PCI nVidia Quadro FX500 graphics cards. 5 20" ViewSonic LCD
-          Displays. Contact: Julian Yu-Chung Chen<email
-          id="juliansemail">julian at evl.uic.edu</email>
+          Displays. Contact: Andy Johnson<email
+          id="andysemail">ajohnson at uic.edu</email>
         </para>
 
         <figure>
@@ -236,12 +223,10 @@
       </sect2>
 
       <sect2>
-        <title>National Lacustrine Core Repository, University of Minnesota</title>
+        <title>National Lacustrine Core Facility, University of Minnesota</title>
         <para>
-          LacCore's CoreWall Hardware Spec: a PC (customiz-built
-          Reason / Athlon 64 X2 Dual Core Processor 4200+, 2.21GHz,
-          3.25G RAM, 1TB HD) with NVIDIA GeForce 7900 GTX (512MB
-          RAM). 1 30" Dell LCD Display. Contact: Anders Noren <email
+          LacCore's CoreWall Hardware Spec: 
+          Dell Precision T3500 with Intel Xeon W3550 3.0GHz / 8M L3 processor at 4.8 GT/s, 4GB 1066MHz DDR3 SDRAM, dual 768MB NVIDIA Quadro FX1800 graphics cards running 4 x 30-inch Dell displays. WinXP. Contact: Anders Noren <email
           id="andersemail">noren021 at umn.edu</email>
         </para>
 
@@ -292,8 +277,8 @@
         You can download copies of the application for the following
         platforms at the main download page:  
         <ulink
-            url="http://www.evl.uic.edu/cavern/corewall/downloads.php">
-          http://www.evl.uic.edu/cavern/corewall/downloads.php
+            url="http://www.corewall.org/downloads.html">
+          http://www.corewall.org/downloads.html
           </ulink>.
       </para>
     </sect1>
@@ -304,18 +289,9 @@
       <sect2>
         <title>Microsoft Windows Users</title>
         <para>
-          We provide an
-          installer program for Windows users. Please download the
-          installer .exe
-          file from the <ulink
-          url="http://www.evl.uic.edu/cavern/corewall/downloads.php">download
-          page</ulink>, double click the icon and follow the installer
-          instructions. 
-
-          <figure>
-            <title>Corelyzer Windows Installer</title>
-            <graphic fileref="images/windows_install.png" />
-          </figure>
+		  Extract the downloaded .zip archive by right-clicking the
+		  file and select "Extract All...". Extract Corelyzer to the desired
+		  directory and double-click the Corelyzer icon to launch.
         </para>
       </sect2>
 
