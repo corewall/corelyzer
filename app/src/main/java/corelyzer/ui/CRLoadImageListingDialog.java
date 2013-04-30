@@ -337,8 +337,6 @@ public class CRLoadImageListingDialog extends JDialog {
 		CorelyzerApp app = CorelyzerApp.getApp();
 
 		if (app != null) {
-			dispose();
-
 			int trackIdx = app.getSelectedTrackIndex();
 
 			JProgressBar progress = app.getProgressUI();
@@ -351,7 +349,6 @@ public class CRLoadImageListingDialog extends JDialog {
 
 			for (int i = 0; i < imageTable.getRowCount(); i++) {
 				String filepath = theTable.model.filepathVec.elementAt(i);
-				String filename = theTable.model.fileNameVec.elementAt(i);
 				String orientation = (String) theTable.model.getValueAt(i, 1);
 
 				float length = (Float) theTable.model.getValueAt(i, 2);
@@ -427,7 +424,7 @@ public class CRLoadImageListingDialog extends JDialog {
 		};
 		new Thread(loading).start();
 
-		dispose();
+		setVisible(false);
 	}
 
 	private void onReset() {
