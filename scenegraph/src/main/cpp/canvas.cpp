@@ -628,7 +628,9 @@ void render_canvas(int id)
 
     current_canvas = -1;
 	
-	update_fps( clock() - startRenderTime );
+	const int timeDelta = clock() - startRenderTime;
+	if (timeDelta > 0)
+		update_fps( timeDelta );
 
 } // end render_canvas
 
@@ -1388,16 +1390,20 @@ void render_scale(Canvas* c)
             {
                 char *buf = (char *) malloc(sizeof(char) * 128);
                 {
-                    memset(buf, 0, 128);
-					const int texmem_usage_kb = get_cur_texmem_usage() / 1024;
-					const float texmem_usage_pct = 100.0f * ( get_cur_texmem_usage() / (float)( get_max_texmem_usage() ));
-                    sprintf( buf, "Image cache: %d KB (%.1f%% full)", texmem_usage_kb, texmem_usage_pct );
                     glTranslatef(x, y, 0);
                     glScalef(scale, scale, 1.0);
-                    glTranslatef(0, CHAR_HEIGHT, 0);
+
+					memset(buf, 0, 128);
+					sprintf(buf, "DEBUG MODE: Type 'D' (case sensitive) to toggle.");
+					glTranslatef(0, CHAR_HEIGHT / 2, 0);
 					render_scaled_string(buf, 0, strlen(buf) - 1, 0.5f);
 
-					// FPS
+					const int texmem_usage_kb = get_cur_texmem_usage() / 1024;
+					const float texmem_usage_pct = 100.0f * ( get_cur_texmem_usage() / (float)( get_max_texmem_usage() ));
+                    sprintf( buf, "Image Cache: %d KB (%.1f%% full)", texmem_usage_kb, texmem_usage_pct );
+                    glTranslatef(0, CHAR_HEIGHT / 2, 0);
+					render_scaled_string(buf, 0, strlen(buf) - 1, 0.5f);
+
 					sprintf(buf, "%.1f frames/sec", get_fps());
 					glTranslatef(0, CHAR_HEIGHT / 2, 0);
 					render_scaled_string(buf, 0, strlen(buf) - 1, 0.5f);
@@ -1939,6 +1945,7 @@ void update_fps( const int lastRenderTime )
 		int totalTime = 0;
 		for ( int i = 0; i < NUM_RENDERS; i++ ) { totalTime += lastRenders[i]; }
 		const float avgSecPerFrame = ( totalTime / (float)NUM_RENDERS ) / CLOCKS_PER_SEC;
+		//if (avgSecPerFrame > 0.0f)
 		framesPerSecond = 1.0f / avgSecPerFrame;
 
 		canvasRenders = 0;
