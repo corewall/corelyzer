@@ -210,7 +210,7 @@ public class StateLoader {
 	 * @param trackId
 	 *            The track ID that this core section image associated with
 	 */
-	int loadCoreImageXML(final Element e, final int trackId) {
+	int loadCoreImageXML(final Element e, final TrackSceneNode destTrack) {
 		nodecount++;
 		pdlg.setValue(nodecount);
 
@@ -286,7 +286,7 @@ public class StateLoader {
 				if (isDownloaded) {
 					pdlg.setString("Processing " + FileUtility.normalizeFilename(local, 22));
 
-					sectionId = app.loadImage(new File(local), urn, name);
+					sectionId = app.loadImage(new File(local), urn, name, destTrack);
 				} else {
 					String message = "Cannot download image from: \n" + urn;
 					String title = "Download Error";
@@ -332,7 +332,7 @@ public class StateLoader {
 					e1.printStackTrace();
 				}
 
-				sectionId = app.loadImage(fptr, urn, name);
+				sectionId = app.loadImage(fptr, urn, name, destTrack);
 			} else {
 				// 2nd try with the path relative to where the session is
 				File stateFile = new File(stateFilename);
@@ -357,7 +357,7 @@ public class StateLoader {
 						e1.printStackTrace();
 					}
 
-					sectionId = app.loadImage(fptr, urn, name);
+					sectionId = app.loadImage(fptr, urn, name, destTrack);
 				} else {
 					pdlg.setString("Downloading " + FileUtility.normalizeFilename(local, 22));
 
@@ -428,7 +428,7 @@ public class StateLoader {
 							e1.printStackTrace();
 						}
 
-						sectionId = app.loadImage(fptr, urn, name);
+						sectionId = app.loadImage(fptr, urn, name, destTrack);
 					} else {
 						// Prepare local place holder
 						// String filename = (new File(local)).getName();
@@ -452,7 +452,7 @@ public class StateLoader {
 						if (cacheFile.exists()) {
 							pdlg.setString("Processing " + FileUtility.normalizeFilename(cacheFile.getName(), 22));
 
-							sectionId = app.loadImage(cacheFile, urn, name);
+							sectionId = app.loadImage(cacheFile, urn, name, destTrack);
 						} else { // if not, get it from URL
 							boolean isDownloaded;
 
@@ -466,7 +466,7 @@ public class StateLoader {
 							if (isDownloaded) {
 								pdlg.setString("Processing " + FileUtility.normalizeFilename(cacheFile.getName(), 22));
 
-								sectionId = app.loadImage(cacheFile, urn, name);
+								sectionId = app.loadImage(cacheFile, urn, name, destTrack);
 							} else {
 								System.err.println("--- Download CoreImage from " + urn + "failed");
 
@@ -544,6 +544,8 @@ public class StateLoader {
 			dpi_x = dpi_y = dpi;
 		}
 
+		final int trackId = destTrack.getId();
+		
 		// Empty or bad DPIs
 		if (dpi_x <= 0.0f) {
 			try {
@@ -623,14 +625,12 @@ public class StateLoader {
 		SceneGraph.setSectionIntervalBottom(trackId, sectionId, intervalBottom);
 
 		// java side section information
-		TrackSceneNode tnode = cg.getCurrentTrack();
-
-		if (tnode == null) {
+		if (destTrack == null) {
 			System.err.println("--->[WARN] CurrentTrack TrackSceneNode is null, return IGNORE");
 			return IGNORE;
 		}
 
-		CoreSection cs = tnode.getCoreSectionByGID(sectionId);
+		CoreSection cs = destTrack.getCoreSectionByGID(sectionId);
 
 		if (cs != null) {
 			cs.setDepth(SceneGraph.getSectionDepth(trackId, sectionId) / 100.0f);
@@ -657,7 +657,7 @@ public class StateLoader {
 		} else {
 			// assuming app.loadImage() is good. CoreSection cs should have been
 			// created already
-			System.err.println("---> [WARN] CoreSection is null! tnode name: " + tnode.getName() + ", NativeSectionId: " + sectionId);
+			System.err.println("---> [WARN] CoreSection is null! tnode name: " + destTrack.getName() + ", NativeSectionId: " + sectionId);
 		}
 
 		// go through section annotations
@@ -1488,7 +1488,7 @@ public class StateLoader {
 					Session s = new Session(sessionName);
 					cg.addSession(s);
 
-					loadStateXML(e);
+					loadStateXML(e, s);
 				} else if (version >= 1.5) {
 					// e -> holder of Track, should be session in 1.5
 					NodeList list = e.getChildNodes();
@@ -1516,7 +1516,7 @@ public class StateLoader {
 
 						cg.addSession(s);
 
-						loadStateXML(sessionElement);
+						loadStateXML(sessionElement, s);
 					}
 				}
 			} catch (Exception ex) {
@@ -1534,7 +1534,7 @@ public class StateLoader {
 	}
 
 	// Load session state with incoming XML state root element
-	void loadStateXML(final Element xmlRoot) { // xmlRoot -> scene(1.0) or
+	void loadStateXML(final Element xmlRoot, final Session session) { // xmlRoot -> scene(1.0) or
 												// session(1.5)
 		totallength = recursiveTreeSize(xmlRoot);
 		nodecount = 0;
@@ -1567,7 +1567,7 @@ public class StateLoader {
 					if (type.equals("annothread")) {
 						loadAnnotationXML(e, -1, -1);
 					} else if (type.equals("track")) {
-						loadTrackXML(e);
+						loadTrackXML(e, session);
 					}
 				} else {
 					System.err.println("---> [IGNORE] Some tagname I don't know: " + tagname);
@@ -1581,7 +1581,7 @@ public class StateLoader {
 	}
 
 	// Load track information with XML root element
-	void loadTrackXML(final Element e) {
+	void loadTrackXML(final Element e, final Session session) {
 		nodecount++;
 		pdlg.setValue(nodecount);
 
@@ -1623,27 +1623,27 @@ public class StateLoader {
 		float x = Float.valueOf(e.getAttribute("x"));
 		float y = Float.valueOf(e.getAttribute("y"));
 
-		TrackSceneNode t = cg.getCurrentTrack();
+		TrackSceneNode track = session.getTrackSceneNodeWithTrackId(trackId);
 
 		// DIS metadata
 		String disId = e.getAttribute("DISId");
 		if ((disId == null) || disId.equals("")) {
 			disId = "N/A";
 		}
-		t.setDISId(disId);
+		track.setDISId(disId);
 
 		String MCDDepth = e.getAttribute("mcd_depth");
 		if ((MCDDepth == null) || MCDDepth.equals("")) {
-			t.setMCDDepth(-0.0f);
+			track.setMCDDepth(-0.0f);
 		} else {
-			t.setMCDDepth(Float.parseFloat(MCDDepth));
+			track.setMCDDepth(Float.parseFloat(MCDDepth));
 		}
 
 		String topDepth = e.getAttribute("top_depth");
 		if ((topDepth == null) || topDepth.equals("")) {
-			t.setTopDepth(-0.0f);
+			track.setTopDepth(-0.0f);
 		} else {
-			t.setTopDepth(Float.parseFloat(topDepth));
+			track.setTopDepth(Float.parseFloat(topDepth));
 		}
 
 		// Used by DIS import/export
@@ -1651,7 +1651,7 @@ public class StateLoader {
 		if ((length == null) || length.equals("")) {
 			length = "1.0";
 		}
-		t.setLength(Float.parseFloat(length));
+		track.setLength(Float.parseFloat(length));
 
 		// go through annotations && images
 		NodeList list = e.getChildNodes();
@@ -1671,7 +1671,7 @@ public class StateLoader {
 					if (type.equals("annothread")) {
 						loadAnnotationXML(c, trackId, -1);
 					} else if (type.equals("core_section")) {
-						int result = loadCoreImageXML(c, trackId);
+						int result = loadCoreImageXML(c, track);
 						if (result == ABORT) {
 							isAbort = true;
 							break;
@@ -1681,7 +1681,7 @@ public class StateLoader {
 					if (type.equals("annothread")) {
 						loadAnnotationXML(c, trackId, -1);
 					} else if (type.equals("core_section")) {
-						int result = loadCoreImageXML(c, trackId);
+						int result = loadCoreImageXML(c, track);
 						if (result == ABORT) {
 							isAbort = true;
 							break;

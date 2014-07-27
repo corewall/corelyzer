@@ -887,8 +887,12 @@ public class CorelyzerApp extends WindowAdapter implements MouseListener, Startu
 		return controller.loadImage(aFile, url);
 	}
 
-	public int loadImage(final File aFile, final String url, final String aName) {
-		return controller.loadImage(aFile, url, aName);
+	public int loadImage(final File aFile, final String url, final String sectionName) {
+		return controller.loadImage(aFile, url, sectionName);
+	}
+	
+	public int loadImage(final File aFile, final String url, final String sectionName, final TrackSceneNode destTrack) {
+		return controller.loadImage(aFile, url, sectionName, destTrack);
 	}
 
 	public void mouseClicked(final MouseEvent e) {

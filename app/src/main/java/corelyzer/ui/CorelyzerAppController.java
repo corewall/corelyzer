@@ -1130,6 +1130,10 @@ public class CorelyzerAppController implements ActionListener {
 	}
 
 	public int loadImage(final File file, final String URL, String sectionName) {
+		return this.loadImage(file, URL, sectionName, null);
+	}
+
+	public int loadImage(final File file, final String URL, String sectionName, TrackSceneNode destTrack) {
 		if (sectionName == null || sectionName.equals("")) {
 			// let's use filename only w/o extension
 			String str = file.getName();
@@ -1138,10 +1142,11 @@ public class CorelyzerAppController implements ActionListener {
 			sectionName = str;
 		}
 
-		// Get TrackSceneNode with its name
-		CRDefaultListModel trackListModel = listModels.getListModel(CRListModels.TRACK);
-		int selectedIndex = view.trackList.getSelectedIndex(); // FIXME -1?
-		TrackSceneNode destTrack = (TrackSceneNode) trackListModel.elementAt(selectedIndex);
+		if (destTrack == null) { // Get currently-selected track (brgtodo: potentially dangerous)
+			CRDefaultListModel trackListModel = listModels.getListModel(CRListModels.TRACK);
+			int selectedIndex = view.trackList.getSelectedIndex(); // FIXME -1?
+			destTrack = (TrackSceneNode) trackListModel.elementAt(selectedIndex);
+		}
 
 		if (destTrack == null) {
 			return -1;
@@ -1150,7 +1155,7 @@ public class CorelyzerAppController implements ActionListener {
 		final int sectionId = FileUtility.loadImageFile( file, URL, sectionName, destTrack );
 		return sectionId;
 	}
-
+	
 	// ---------------------------------------------------------------
 
 	public void loadImageAction() {
