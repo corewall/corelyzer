@@ -494,40 +494,31 @@ public class FileUtility {
 	// and five delimiters, respectively.)
 	public static String parseFullTrackID(final String filename)
 	{
-		// 5/11/2012 brg: TODO inelegant code - just find the most frequently encountered delimiter and use it.
 		final String strippedFilename = stripExtension(filename);
-		StringTokenizer hyphenTokenizer = new StringTokenizer(strippedFilename, "-");
-		StringTokenizer uscoreTokenizer = new StringTokenizer(strippedFilename, "_");
+		StringTokenizer tokenizer = new StringTokenizer(strippedFilename, "-_");
 
-		final int hyphenTokenCount = hyphenTokenizer.countTokens();
-		final int uscoreTokenCount = uscoreTokenizer.countTokens();
-		if ( hyphenTokenCount < 3 && uscoreTokenCount < 3 ) {
+		final int tokenCount = tokenizer.countTokens();
+		if ( tokenCount < 3 ) {
 			System.out.println("too few tokens in " + filename + " to determine section image file naming convention");
 			return null;
 		}
 		
-		// on the off-chance there are three or more of both delimiters...
-		if ( hyphenTokenCount >= 3 && uscoreTokenCount >= 3 ) {
+		if ( tokenCount > 6 ) { // on the off-chance there's a whole mess of delimiters
 			System.out.println("so many delimiters in " + filename + "! unable to determine section image file naming convention");
 			return null;
 		}
 				
-		final boolean useHyphen = ( hyphenTokenCount > uscoreTokenCount );
-		StringTokenizer theTokenizer = useHyphen ? hyphenTokenizer : uscoreTokenizer;
-		final char theDelimiter = useHyphen ? '-' : '_';
-		
 		// for now, rely only on expedition name to determine type
-		final String expeditionToken = theTokenizer.nextToken();
+		final String expeditionToken = tokenizer.nextToken();
 		final boolean isIODP = Character.isDigit( expeditionToken.charAt(0) );
 		
 		String lakeYearToken = null;
 		if ( !isIODP ) // skip LacCore lake/year token
-			lakeYearToken = theTokenizer.nextToken();
+			lakeYearToken = tokenizer.nextToken();
 		
 		// next token indicates site and track/hole, e.g. U1363C = site U1363, track/hole C
-		String siteTrackToken = theTokenizer.nextToken();
-		
-		String fullTrackID = expeditionToken + theDelimiter + ( isIODP ? "" : lakeYearToken + theDelimiter ) + siteTrackToken;
+		String siteTrackToken = tokenizer.nextToken();
+		String fullTrackID = expeditionToken + "-" + ( isIODP ? "" : lakeYearToken + "-" ) + siteTrackToken;
 		
 		return fullTrackID;
 	}
