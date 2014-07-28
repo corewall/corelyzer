@@ -127,8 +127,6 @@ public class CRPreferences {
 	int refreshInterval = 10;
 
 	public CRPreferences() {
-		super();
-
 		prefs = Preferences.userNodeForPackage(this.getClass());
 		initDefaultValues();
 
@@ -361,11 +359,12 @@ public class CRPreferences {
 		boolean success = false;
 		try {
 			String sp = System.getProperty("file.separator");
-			File configFile = new File( configParentDirPath + sp + "directories148.txt" );
+			File configFile = new File( configParentDirPath + sp + directoryConfigFileName );
 			if ( configFile.exists() )
 				success = this.loadDirectoryConfigSettings( configFile, false );
 			else
 			{
+				// load pre-1.4.8 directories.txt
 				configFile = new File( configParentDirPath + sp + "directories.txt" );
 				if ( configFile.exists() )
 					success = this.loadDirectoryConfigSettings( configFile, true );

@@ -165,7 +165,7 @@ public class CorelyzerApp extends WindowAdapter implements MouseListener, Startu
 		new File(prefs.annotation_Directory + sp + "attachments").mkdir();
 
 		// Load directory config if there is a config file available
-		File dirs_config = new File(prefs.config_Directory + "/directories.txt");
+		File dirs_config = new File(prefs.config_Directory + sp + CRPreferences.directoryConfigFileName);
 
 		if (dirs_config.exists()) {
 			hasDirConf = prefs.readDirectoryConfig( prefs.config_Directory );
