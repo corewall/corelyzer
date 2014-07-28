@@ -478,7 +478,7 @@ public class CRLoadImageWizard extends JDialog {
 
 
 class SectionListPane extends JPanel implements ListSelectionListener {
-	private JButton renameButton, deleteButton, moveUpButton, moveDownButton, newButton;
+	private JButton renameButton, deleteButton, moveUpButton, moveDownButton, moveToTrackButton, newButton;
 	private JScrollPane tslScrollPane;
 	private JComboBox orientationComboBox;
 	private JTextField dpiXField, dpiYField;
@@ -589,9 +589,50 @@ class SectionListPane extends JPanel implements ListSelectionListener {
 		}
 	}
 	
+	private int findTrack(String trackName)
+	{
+		System.out.println("findTrack " + trackName);
+		int result = -1;
+		final int eltCount = trackSectionModel.getSize();
+		for (int index = 0; index < eltCount; index++)
+		{
+			TrackSectionListElement tsle = (TrackSectionListElement)trackSectionModel.getElementAt(index);
+			if (tsle.isTrack()) {
+				System.out.println("found track " + tsle.getName());
+				if (tsle.getName().equals(trackName))
+				{
+					System.out.println("match!");
+					result = index;
+					break;
+				}
+			}
+		}
+		return result;
+	}
+	
+	private String selectTrack()
+	{
+		// build list of track names (gross, but the easiest way to spin through elements...)
+		Vector<Object> trackNames = new Vector<Object>(); 
+		final int eltCount = trackSectionModel.getSize();
+		for (int index = 0; index < eltCount; index++) {
+			TrackSectionListElement tsle = (TrackSectionListElement)trackSectionModel.getElementAt(index);
+			if (tsle.isTrack())
+				trackNames.add(tsle.getName());
+		}
+		
+		Object[] tnArray = trackNames.toArray(); 
+		String result = (String)JOptionPane.showInputDialog(this, "Select a destination track:", "Select Track",
+				JOptionPane.PLAIN_MESSAGE, null, tnArray, tnArray[0]);
+		System.out.println("selected track = " + result);
+		
+		return result;
+	}
+	
 	private void enableSectionButtons( final boolean enable ) {
 		moveUpButton.setEnabled( enable );
 		moveDownButton.setEnabled( enable );
+		moveToTrackButton.setEnabled( enable );
 	}
 	
 	private void enableTrackButtons( final boolean enable ) { renameButton.setEnabled( enable ); }
@@ -668,7 +709,7 @@ class SectionListPane extends JPanel implements ListSelectionListener {
 				trackSectionList.repaint();
 			}
 		});
-		this.add(moveUpButton, "split 5, flowy");
+		this.add(moveUpButton, "split 6, flowy, growx");
 		
 		moveDownButton = new JButton("Move Down");
 		moveDownButton.addActionListener( new ActionListener() {
@@ -678,7 +719,7 @@ class SectionListPane extends JPanel implements ListSelectionListener {
 				for ( int i = selectedIndices.length - 1; i >= 0; i-- ) {
 					final boolean moved = trackSectionModel.moveItemDown( selectedIndices[i] );
 					
-					// When moving down, we try move the bottommost item first. If it can't be moved,
+					// When moving down, try moving the bottom-most item first. If it can't be moved,
 					// nothing above it can be moved either.
 					if ( !moved )
 						return;
@@ -691,7 +732,24 @@ class SectionListPane extends JPanel implements ListSelectionListener {
 				trackSectionList.repaint();
 			}
 		});
-		this.add(moveDownButton);
+		this.add(moveDownButton, "growx");
+		
+		final JPanel thisPanel = this;
+		moveToTrackButton = new JButton("Move to Track...");
+		moveToTrackButton.addActionListener( new ActionListener() {
+			public void actionPerformed(ActionEvent event) {
+				final String destTrack = selectTrack();
+				final int destTrackIndex = findTrack(destTrack);
+				if (destTrackIndex == -1)
+					return;
+				
+				int[] selectedIndices = trackSectionList.getSelectedIndices();
+				for (int i = 0; i < selectedIndices.length; i++) {
+					trackSectionModel.moveToTrack(selectedIndices[i], destTrackIndex);
+				}
+			}
+		});
+		this.add(moveToTrackButton, "growx");
 
 		deleteButton = new JButton("Delete");
 		deleteButton.addActionListener( new ActionListener() {
@@ -708,7 +766,7 @@ class SectionListPane extends JPanel implements ListSelectionListener {
 				trackSectionList.repaint();
 			}
 		});
-		this.add(deleteButton);
+		this.add(deleteButton, "growx");
 		
 		renameButton = new JButton("Rename Track");
 		renameButton.addActionListener( new ActionListener() {
@@ -716,7 +774,7 @@ class SectionListPane extends JPanel implements ListSelectionListener {
 				doRenameTrack();
 			}
 		});
-		this.add(renameButton);
+		this.add(renameButton, "growx");
 		
 		newButton = new JButton("New Track");
 		newButton.addActionListener( new ActionListener() {
@@ -725,7 +783,7 @@ class SectionListPane extends JPanel implements ListSelectionListener {
 				trackSectionList.repaint();
 			}
 		});
-		this.add(newButton);
+		this.add(newButton, "growx");
 	}
 }
 
@@ -1002,6 +1060,16 @@ class TrackSectionListModel extends AbstractListModel
 			fireContentsChanged( this, index, index + 1 );
 
 		return moved;
+	}
+	
+	public boolean moveToTrack(final int index, final int trackIndex)
+	{
+		final Point p = getEltIndex(index);
+		final Point tp = getEltIndex(trackIndex);
+		TrackSectionListElement elt = tsVec.elementAt( p.x ).remove( p.y );
+		tsVec.elementAt(tp.x).add(elt);
+		
+		return true;
 	}
 	
 	public int getNewSectionCount()
