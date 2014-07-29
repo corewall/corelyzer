@@ -27,6 +27,7 @@ package corelyzer.ui;
 import java.io.File;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.Vector;
 
 import corelyzer.data.*;
 
@@ -81,6 +82,13 @@ public class AlphanumComparator
 		public int compare(TrackSectionListElement t1, TrackSectionListElement t2)
 		{
 			return AlphanumComparator.compare( t1.getName(), t2.getName() );
+		}
+	}
+	
+	public static class TrackAlphanumComparator implements Comparator<Vector<TrackSectionListElement>>
+	{
+		public int compare(Vector<TrackSectionListElement> t1, Vector<TrackSectionListElement> t2) {
+			return AlphanumComparator.compare(t1.get(0).getName(), t2.get(0).getName());
 		}
 	}
 

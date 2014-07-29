@@ -293,6 +293,8 @@ public class CRLoadImageWizard extends JDialog {
 				tsVec.add( newTrack );
 				apparentTrack.add( fullTrackID );
 			}
+			
+			Collections.sort(tsVec, new AlphanumComparator.TrackAlphanumComparator());
 		}
 		
 		// now that they won't disrupt sorting, add track elements
@@ -739,14 +741,25 @@ class SectionListPane extends JPanel implements ListSelectionListener {
 		moveToTrackButton.addActionListener( new ActionListener() {
 			public void actionPerformed(ActionEvent event) {
 				final String destTrack = selectTrack();
-				final int destTrackIndex = findTrack(destTrack);
-				if (destTrackIndex == -1)
-					return;
-				
+				int destTrackIndex = -1;
 				int[] selectedIndices = trackSectionList.getSelectedIndices();
+				int[] offsets = new int[selectedIndices.length];
 				for (int i = 0; i < selectedIndices.length; i++) {
-					trackSectionModel.moveToTrack(selectedIndices[i], destTrackIndex);
+					destTrackIndex = findTrack(destTrack);
+					if (destTrackIndex == -1)
+						return;
+
+					// adjust indices if element moved downward in list
+					offsets[i] = trackSectionModel.moveToTrack(selectedIndices[i], destTrackIndex);
+					if (destTrackIndex > selectedIndices[i]) {
+						offsets[i]--;
+						for (int j = i + 1; j < selectedIndices.length; j++)
+							selectedIndices[j]--;
+					}
 				}
+				for (int k = 0; k < offsets.length; k++) { offsets[k] += destTrackIndex; }
+				trackSectionList.setSelectedIndices(offsets);
+				trackSectionList.repaint();
 			}
 		});
 		this.add(moveToTrackButton, "growx");
@@ -1062,14 +1075,15 @@ class TrackSectionListModel extends AbstractListModel
 		return moved;
 	}
 	
-	public boolean moveToTrack(final int index, final int trackIndex)
+	// return index in new track (for updating selection state)
+	public int moveToTrack(final int index, final int trackIndex)
 	{
 		final Point p = getEltIndex(index);
 		final Point tp = getEltIndex(trackIndex);
 		TrackSectionListElement elt = tsVec.elementAt( p.x ).remove( p.y );
 		tsVec.elementAt(tp.x).add(elt);
 		
-		return true;
+		return tsVec.elementAt(tp.x).size() - 1;
 	}
 	
 	public int getNewSectionCount()
