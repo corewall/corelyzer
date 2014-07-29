@@ -593,17 +593,13 @@ class SectionListPane extends JPanel implements ListSelectionListener {
 	
 	private int findTrack(String trackName)
 	{
-		System.out.println("findTrack " + trackName);
 		int result = -1;
 		final int eltCount = trackSectionModel.getSize();
 		for (int index = 0; index < eltCount; index++)
 		{
 			TrackSectionListElement tsle = (TrackSectionListElement)trackSectionModel.getElementAt(index);
 			if (tsle.isTrack()) {
-				System.out.println("found track " + tsle.getName());
-				if (tsle.getName().equals(trackName))
-				{
-					System.out.println("match!");
+				if (tsle.getName().equals(trackName)) {
 					result = index;
 					break;
 				}
@@ -626,7 +622,6 @@ class SectionListPane extends JPanel implements ListSelectionListener {
 		Object[] tnArray = trackNames.toArray(); 
 		String result = (String)JOptionPane.showInputDialog(this, "Select a destination track:", "Select Track",
 				JOptionPane.PLAIN_MESSAGE, null, tnArray, tnArray[0]);
-		System.out.println("selected track = " + result);
 		
 		return result;
 	}
@@ -871,10 +866,8 @@ class ImagePropertiesPane extends JPanel implements TableModelListener {
 	
 	public void tableChanged( TableModelEvent e )
 	{
-		System.out.println("tableChanged()");
 		if ( e.getType() == TableModelEvent.UPDATE )
 		{
-			System.out.println("udpated row " + e.getFirstRow() + ", column " + e.getColumn());
 			saveSectionProperties();
 			updateSectionProperties(); // rebuild table based on new DPI values
 		}
