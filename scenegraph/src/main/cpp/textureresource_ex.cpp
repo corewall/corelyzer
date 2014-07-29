@@ -69,6 +69,8 @@ extern "C" {
 #define strnicmp strncasecmp
 #endif
 
+#define DEBUG 1
+
 // SHA-1 Hash function
 #include "sha1.h"
 
@@ -322,6 +324,8 @@ bool isTextureBlocksExist(const char* filename, const char *blockDir)
 {
     if(!filename || !blockDir) return false;
 
+	printf("isTextureBlocksExist(): %s (block %s)\n", filename, blockDir);
+
     string filenameString(filename);
     string blockDirString(blockDir);
 
@@ -363,16 +367,21 @@ void delete_texset(MultiLevelTextureSetEX *texset)
     }
 }
 
+FILE *loggo = NULL;
+
 void build_tex_blocks(char* pixels, MultiLevelTextureSetEX* set, bool hasDir, int library)
 {
+	if (loggo == NULL)
+		loggo = fopen("loggo.txt", "a+");
+
 #ifdef DEBUG
-    printf("-- Building tex blocks with library (1. Squish, 2. FastDXT) %d\n", library);
+	fprintf(loggo, "-- Building tex blocks with library (1. Squish, 2. FastDXT) %d\n", library);
 #endif
 
     if( !set )
     {
 #ifdef DEBUG
-        printf("- [build_tex_blocks] No set, return.\n");
+	    fprintf(loggo, "- [build_tex_blocks] No set, return.\n");
 #endif
 
         return;
@@ -381,7 +390,7 @@ void build_tex_blocks(char* pixels, MultiLevelTextureSetEX* set, bool hasDir, in
     if( !pixels && !hasDir)
     {
 #ifdef DEBUG
-        printf("- [build_tex_blocks] No pixels, has no dir.\n");
+	    fprintf(loggo, "- [build_tex_blocks] No pixels, has no dir.\n");
 #endif
 
         return;
@@ -444,8 +453,8 @@ void build_tex_blocks(char* pixels, MultiLevelTextureSetEX* set, bool hasDir, in
 #endif
 
 #ifdef DEBUG
-    printf("blksize: %d, components: %d\n", set->blksize, set->components);
-    printf("dxt_size: %d\n", dxt3_size);
+    fprintf(loggo, "blksize: %d, components: %d\n", set->blksize, set->components);
+    fprintf(loggo, "dxt_size: %d\n", dxt3_size);
 #endif    
 
     char* tex_to_file = new char[ dxt3_size ];
@@ -467,11 +476,11 @@ void build_tex_blocks(char* pixels, MultiLevelTextureSetEX* set, bool hasDir, in
     // directories
 
 #ifdef DEBUG
-    printf("Going to generate %d levels\n", set->levels);
+    fprintf(loggo, "Going to generate %d levels\n", set->levels);
     int blockCount = 0;
 
     // The highest level takes 90% of the time
-    printf("-- [OPTIMIZE] Working on %d levels in build_tex_blocks()\n", set->levels);
+    fprintf(loggo, "-- [OPTIMIZE] Working on %d levels in build_tex_blocks()\n", set->levels);
 #endif
 
     for( int k = 0; k < set->levels; ++k)
@@ -490,7 +499,7 @@ void build_tex_blocks(char* pixels, MultiLevelTextureSetEX* set, bool hasDir, in
         set->pyramid_level[k] = level;
 
 #ifdef DEBUG
-        printf("\t### Next Scale %f, Image Size %.2f x %.2f ###\n",
+        fprintf(loggo, "\t### Next Scale %f, Image Size %.2f x %.2f ###\n",
                set->scales[k],
                float(set->src_w) * set->scales[k],
                float(set->src_h) * set->scales[k]);
@@ -505,10 +514,10 @@ void build_tex_blocks(char* pixels, MultiLevelTextureSetEX* set, bool hasDir, in
         set->tex[k]       = new texBlock[ set->cols[k] * set->rows[k] ];
 
 #ifdef DEBUG
-        printf("-- [OPTIMIZE] Level %d, Rows %d, Cols %d ###\n", k, set->rows[k],
+        fprintf(loggo, "-- [OPTIMIZE] Level %d, Rows %d, Cols %d ###\n", k, set->rows[k],
                set->cols[k]);
-        printf("-- [OPTIMIZE] lvl_blksize: %.3f\n", lvl_blksize);
-        printf("-- [OPTIMIZE] set->blksize: %d\n", set->blksize);
+        fprintf(loggo, "-- [OPTIMIZE] lvl_blksize: %.3f\n", lvl_blksize);
+        fprintf(loggo, "-- [OPTIMIZE] set->blksize: %d\n", set->blksize);
 #endif
 
         // go through rows and columns
@@ -546,7 +555,7 @@ void build_tex_blocks(char* pixels, MultiLevelTextureSetEX* set, bool hasDir, in
                 }
 
 #ifdef DEBUG
-                printf("Tex Block (%d, %d) at (%d, %d) covering %d x %d\n",
+                fprintf(loggo, "Tex Block (%d, %d) at (%d, %d) covering %d x %d\n",
                        j, i, real_x, real_y,
                        set->tex[k][id].dataW, set->tex[k][id].dataH);
 #endif
@@ -601,7 +610,7 @@ void build_tex_blocks(char* pixels, MultiLevelTextureSetEX* set, bool hasDir, in
                 if( !fptr )
                 {
 #ifdef DEBUG
-                    printf("Making blockfile %s\n", blockfile_name.c_str());
+                    fprintf(loggo, "Making blockfile %s\n", blockfile_name.c_str());
 #endif
 
                     // get pixels scaled to right size
@@ -618,7 +627,7 @@ void build_tex_blocks(char* pixels, MultiLevelTextureSetEX* set, bool hasDir, in
                         if( !is_s3tc_available() )
                         {
 #ifdef DEBUG
-                            printf("---> [INFO] S3TC DXT3 not available, using raw blocks\n");
+                            fprintf(loggo, "---> [INFO] S3TC DXT3 not available, using raw blocks\n");
 #endif
 
                             fwrite(tex_data, sizeof(char),
@@ -629,7 +638,7 @@ void build_tex_blocks(char* pixels, MultiLevelTextureSetEX* set, bool hasDir, in
                         else
                         {
 #ifdef DEBUG
-                            printf("---> [INFO] Compress with S3TC DXT3 with Squish.\n");
+	                        fprintf(loggo, "---> [INFO] Compress with S3TC DXT3 with ((1. Squish, 2. FastDXT) %d.\n", library);
                             // printf("DXT3 Compression block %d, %d of size: %d, %d\n",
                             //    i, j,
                             //    set->tex[k][id].texW, set->tex[k][id].texH);
@@ -684,7 +693,7 @@ void build_tex_blocks(char* pixels, MultiLevelTextureSetEX* set, bool hasDir, in
                     }
                     else
                     {
-                        printf("ERROR: Couldn't write to blockfile %s\n",
+                        fprintf(loggo,"ERROR: Couldn't write to blockfile %s\n",
                                blockfile_name.c_str());
                     }
                 }
@@ -692,7 +701,7 @@ void build_tex_blocks(char* pixels, MultiLevelTextureSetEX* set, bool hasDir, in
                 {
                     fclose(fptr);
 #ifdef DEBUG
-                    printf("Blockfile %s already exists, using that file\n",
+                    fprintf(loggo,"Blockfile %s already exists, using that file\n",
                            blockfile_name.c_str());
 #endif
                 }
@@ -710,6 +719,11 @@ void build_tex_blocks(char* pixels, MultiLevelTextureSetEX* set, bool hasDir, in
         delete [] tex_rgba;
     if( tex_to_file )
         delete [] tex_to_file;
+
+    if (loggo != NULL) {
+	    fclose(loggo);
+	    loggo = NULL;
+    }
 }
 
 void build_tex_blocks(char* pixels, MultiLevelTextureSetEX* set, bool hasDir)
@@ -2302,8 +2316,8 @@ void bind_texblock( int set, int level, int col, int row)
 {
 
 #ifdef DEBUG
-    printf("Trying to bind texblock in set %d, level %d, col %d, row %d\n",
-        set,level,col,row);
+	//printf("Trying to bind texblock in set %d, level %d, col %d, row %d\n",
+	//    set,level,col,row);
 #endif
 
     if(!is_texset(set)) return;
@@ -2319,7 +2333,7 @@ void bind_texblock( int set, int level, int col, int row)
     if( !is_tex_cache_entry( &(t->tex[level][id])) )
     {
 #ifdef DEBUG
-        printf("Tex Cache Miss\n");
+	    //printf("Tex Cache Miss\n");
 #endif
 
         // TODO Spawn a thread to do IOs?
@@ -2327,7 +2341,7 @@ void bind_texblock( int set, int level, int col, int row)
     }
 
 #ifdef DEBUG
-    printf("Binding texture object %d\n", t->tex[level][id].texId);
+//printf("Binding texture object %d\n", t->tex[level][id].texId);
 #endif
 
     glBindTexture(GL_TEXTURE_2D, t->tex[level][id].texId);
