@@ -40,6 +40,8 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.Attr;
 
 import corelyzer.data.ChatGroup;
 import corelyzer.data.CoreSection;
@@ -123,9 +125,6 @@ public class StateLoader {
 	 *            Core section ID the annotation associated with
 	 */
 	void loadAnnotationXML(final Element e, final int trackId, final int sectionId) {
-		nodecount++;
-		pdlg.setValue(nodecount);
-
 		// check whether this xml support new annotation maker style or not
 		if (e.getAttribute("group").length() != 0) {
 			// new style
@@ -213,6 +212,7 @@ public class StateLoader {
 	int loadCoreImageXML(final Element e, final TrackSceneNode destTrack) {
 		nodecount++;
 		pdlg.setValue(nodecount);
+		final String progressStat = " (" + Integer.toString(nodecount) + "/" + Integer.toString(totallength) + ")"; 
 
 		int sectionId;
 
@@ -269,7 +269,7 @@ public class StateLoader {
 					return result;
 				}
 
-				pdlg.setString("Downloading " + FileUtility.normalizeFilename(local, 22));
+				pdlg.setString("Downloading " + local);
 
 				// If already exist, skip downloading
 				File f = new File(local);
@@ -284,7 +284,7 @@ public class StateLoader {
 				}
 
 				if (isDownloaded) {
-					pdlg.setString("Processing " + FileUtility.normalizeFilename(local, 22));
+					pdlg.setString("Processing " + local + progressStat);
 
 					sectionId = app.loadImage(new File(local), urn, name, destTrack);
 				} else {
@@ -310,7 +310,7 @@ public class StateLoader {
 
 			// 1st try with default local info
 			if (fptr.exists()) {
-				pdlg.setString("Processing " + FileUtility.normalizeFilename(fptr.getName(), 22));
+				pdlg.setString("Processing " + fptr.getName() + progressStat);
 
 				try {
 					URL u = new URL(urn);
@@ -359,7 +359,7 @@ public class StateLoader {
 
 					sectionId = app.loadImage(fptr, urn, name, destTrack);
 				} else {
-					pdlg.setString("Downloading " + FileUtility.normalizeFilename(local, 22));
+					pdlg.setString("Downloading " + local);
 
 					// Tried local & 1-level search in state file dir
 					// file still does not exist, check urn
@@ -450,7 +450,7 @@ public class StateLoader {
 
 						// if already have it, just load
 						if (cacheFile.exists()) {
-							pdlg.setString("Processing " + FileUtility.normalizeFilename(cacheFile.getName(), 22));
+							pdlg.setString("Processing " + cacheFile.getName() + progressStat);
 
 							sectionId = app.loadImage(cacheFile, urn, name, destTrack);
 						} else { // if not, get it from URL
@@ -464,7 +464,7 @@ public class StateLoader {
 							}
 
 							if (isDownloaded) {
-								pdlg.setString("Processing " + FileUtility.normalizeFilename(cacheFile.getName(), 22));
+								pdlg.setString("Processing " + cacheFile.getName() + progressStat);
 
 								sectionId = app.loadImage(cacheFile, urn, name, destTrack);
 							} else {
@@ -708,9 +708,6 @@ public class StateLoader {
 	 *            Root XML element
 	 */
 	int loadDataSetXML(final Element e) {
-		nodecount++;
-		pdlg.setValue(nodecount);
-
 		Session session = cg.getCurrentSession();
 		if (session == null) {
 			session = new Session("Default");
@@ -865,7 +862,7 @@ public class StateLoader {
 			return IGNORE;
 		}
 
-		pdlg.setString("Processing: " + FileUtility.normalizeFilename(filename, 22));
+		pdlg.setString("Processing: " + filename);
 
 		// call corelyzerapp#loadData
 		int dsId = app.loadData(fptr);
@@ -887,9 +884,6 @@ public class StateLoader {
 	 *            Track ID the graph associated with
 	 */
 	void loadGraphXML(final Element e, final int trackId) {
-		nodecount++;
-		pdlg.setValue(nodecount);
-
 		int datasetIndex = -1;
 		int tableIndex = -1;
 		int field = -1;
@@ -1145,9 +1139,6 @@ public class StateLoader {
 	 *            Core section ID the graph associated with (native scene)
 	 */
 	void loadGraphXML(final Element e, final int trackId, final int sectionId) {
-		nodecount++;
-		pdlg.setValue(nodecount);
-
 		int datasetIndex = -1;
 		int tableIndex = -1;
 		int field = -1;
@@ -1423,6 +1414,7 @@ public class StateLoader {
 		}
 
 		setStateFilename(filename);
+		final long startTimeMs = System.currentTimeMillis();
 
 		// Use non-null prefix to overrisde where the files should be
 		if (!prefix.equals("")) {
@@ -1527,7 +1519,8 @@ public class StateLoader {
 			System.err.println("[Error] State file is not specified in StateLoader.");
 		}
 
-		pdlg.setString("Session loaded");
+		final float elapsedTime = (System.currentTimeMillis() - startTimeMs) / 1000.0f;
+		pdlg.setString("Session loaded in " + Float.toString(elapsedTime) + " seconds");
 		pdlg.setValue(0);
 
 		return true;
@@ -1582,9 +1575,6 @@ public class StateLoader {
 
 	// Load track information with XML root element
 	void loadTrackXML(final Element e, final Session session) {
-		nodecount++;
-		pdlg.setValue(nodecount);
-
 		int trackId;
 
 		String name = e.getAttribute("name");
@@ -1708,13 +1698,25 @@ public class StateLoader {
 		SceneGraph.moveTrackAbsY(trackId, y);
 	}
 
+	// used to determine size of progress bar - only count core section images,
+	// since they dominate session loading time
 	int recursiveTreeSize(final Node n) {
-		int total;
+		int total = 0;
 		NodeList list = n.getChildNodes();
-		total = list.getLength();
 
 		for (int i = 0; i < list.getLength(); i++) {
-			total += recursiveTreeSize(list.item(i));
+			Node cn = list.item(i);
+			if (cn.hasAttributes()) {
+				NamedNodeMap attrMap = cn.getAttributes();
+				for (int j = 0; j < attrMap.getLength(); j++) {
+					Attr attr = (Attr)attrMap.item(j);
+					if (attr.getName().equals("type") && attr.getValue().equals("core_section")) {
+						total++;
+						break;
+					}
+				}
+			}
+			total += recursiveTreeSize(cn);
 		}
 
 		return total;
