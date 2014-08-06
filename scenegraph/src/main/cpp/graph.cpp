@@ -475,13 +475,16 @@ void render_graph(Canvas* c, CoreSection* cs, int gid)
 		// graph offset translation in pixel
 		glTranslatef(cs->graph_offset, 0.0, 0.0);
 
-        // render border
+        // render border, label
         glPushMatrix();
         {
-            glTranslatef( 0.0, (b->y + b->h) * c->dpi_y, 0.0 );
+			// draw border and label at the top of the visible core interval, not core-depth 0
+			const float graphStart = cs->intervalTop * INCH_PER_CM * c->dpi_x;
+			glTranslatef( graphStart, (b->y + b->h) * c->dpi_y, 0.0 );
 
-            // Leave 2 pixels spacing
-			render_border(b->w * c->dpi_x + 2, b->h * c->dpi_y + 2);
+            // Leave 2 pixels spacing and adjust width visible interval
+			const float widthAdjust = ((cs->width - cs->intervalBottom) + cs->intervalTop) * INCH_PER_CM * c->dpi_x;
+			render_border(b->w * c->dpi_x - widthAdjust + 2, b->h * c->dpi_y + 2);
 
 			// 7/18/2012 brg: at distant zoom levels, labels are illegible and slow
 			// things down significantly if there are many graphs. Only draw if we're
@@ -607,7 +610,9 @@ void render_graph(Canvas* c, CoreSection* cs, int gid)
 					{
 						for ( int row = 0; row < dataTable->numberOfRows; row++ )
 						{
-							if ( !dataTable->table[fieldToGraph][row].valid || dataTable->table[fieldToGraph][row].exclude )
+							if ( dataTable->depth[row] < cs->intervalTop || dataTable->depth[row] > cs->intervalBottom ||
+								 !dataTable->table[fieldToGraph][row].valid ||
+								 dataTable->table[fieldToGraph][row].exclude )
 								continue;
 							
 							const float x_coord = ( dataTable->depth[row] * depthunitscale * INCH_PER_CM );
@@ -624,7 +629,9 @@ void render_graph(Canvas* c, CoreSection* cs, int gid)
 					int vertsInStrip = 0;
 					for ( int row = 0; row < dataTable->numberOfRows; row++ )
 					{
-						if ( !dataTable->table[fieldToGraph][row].valid ) continue;
+						if ( dataTable->depth[row] < cs->intervalTop || dataTable->depth[row] > cs->intervalBottom ||
+							 !dataTable->table[fieldToGraph][row].valid )
+							continue;
 						
 						if ( !dataTable->table[fieldToGraph][row].exclude )
 						{
@@ -676,7 +683,9 @@ void render_graph(Canvas* c, CoreSection* cs, int gid)
 					{
 						for ( int row = 0; row < dataTable->numberOfRows; row++ )
 						{
-							if ( !dataTable->table[fieldToGraph][row].valid || dataTable->table[fieldToGraph][row].exclude )
+							if ( dataTable->depth[row] < cs->intervalTop || dataTable->depth[row] > cs->intervalBottom ||
+								 !dataTable->table[fieldToGraph][row].valid ||
+								 dataTable->table[fieldToGraph][row].exclude )
 								continue;
 							
 							const float x_coord = ( dataTable->depth[row] * depthunitscale * INCH_PER_CM );
@@ -697,7 +706,9 @@ void render_graph(Canvas* c, CoreSection* cs, int gid)
 				{
 					for ( int row = 0; row < dataTable->numberOfRows; row++ )
 					{
-						if ( !dataTable->table[fieldToGraph][row].valid || dataTable->table[fieldToGraph][row].exclude )
+						if ( dataTable->depth[row] < cs->intervalTop || dataTable->depth[row] > cs->intervalBottom ||
+							 !dataTable->table[fieldToGraph][row].valid ||
+							 dataTable->table[fieldToGraph][row].exclude )
 							continue;
 						
 						const float x_coord = ( dataTable->depth[row] * depthunitscale * INCH_PER_CM );
@@ -719,7 +730,9 @@ void render_graph(Canvas* c, CoreSection* cs, int gid)
 				{
 					for ( int row = 0; row < dataTable->numberOfRows; row++ )
 					{
-						if ( !dataTable->table[fieldToGraph][row].valid || dataTable->table[fieldToGraph][row].exclude )
+						if ( dataTable->depth[row] < cs->intervalTop || dataTable->depth[row] > cs->intervalBottom ||
+							 !dataTable->table[fieldToGraph][row].valid ||
+							 dataTable->table[fieldToGraph][row].exclude )
 							continue;
 						
 						const float x_coord = ( dataTable->depth[row] * depthunitscale * INCH_PER_CM );
