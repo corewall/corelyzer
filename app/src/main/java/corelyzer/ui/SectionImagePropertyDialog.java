@@ -345,17 +345,7 @@ public class SectionImagePropertyDialog extends JDialog {
 
 				// Next and Previous button
 				if (isSingleSection) {
-					if (sectionIndex == 0) { // the first
-						nextButton.setEnabled(true);
-						previousButton.setEnabled(false);
-					} else if (sectionIndex == allSectionIds.length - 1) {// last
-						nextButton.setEnabled(false);
-						previousButton.setEnabled(true);
-					} else {
-						nextButton.setEnabled(true);
-						previousButton.setEnabled(true);
-					}
-
+					enableNextPrev();
 				} else {
 					nextButton.setEnabled(false);
 					previousButton.setEnabled(false);
@@ -930,17 +920,8 @@ public class SectionImagePropertyDialog extends JDialog {
 		if (this.sectionIndex < this.allSectionIds.length) { // first
 			this.sectionId = this.allSectionIds[sectionIndex];
 
-			if (sectionIndex == 0) { // the first
-				this.nextButton.setEnabled(true);
-				this.previousButton.setEnabled(false);
-			} else if (sectionIndex == this.allSectionIds.length - 1) { // last
-				this.nextButton.setEnabled(false);
-				this.previousButton.setEnabled(true);
-			} else {
-				this.nextButton.setEnabled(true);
-				this.previousButton.setEnabled(true);
-			}
-
+			enableNextPrev();
+			
 			String label = this.generateMetaString(trackId, sectionId);
 			setProperties(trackId, sectionId, label);
 
@@ -953,6 +934,19 @@ public class SectionImagePropertyDialog extends JDialog {
 		onApply();
 		dispose();
 	}
+	
+	private void enableNextPrev() {
+		if (this.sectionIndex == 0) { // the first
+			this.nextButton.setEnabled(true);
+			this.previousButton.setEnabled(false);
+		} else if (this.sectionIndex == this.allSectionIds.length - 1) {// last
+			this.nextButton.setEnabled(false);
+			this.previousButton.setEnabled(true);
+		} else {
+			this.nextButton.setEnabled(true);
+			this.previousButton.setEnabled(true);
+		}
+	}
 
 	private void onPrevious() {
 		this.sectionIndex--;
@@ -960,16 +954,7 @@ public class SectionImagePropertyDialog extends JDialog {
 		if (this.sectionIndex >= 0) {
 			this.sectionId = this.allSectionIds[sectionIndex];
 
-			if (sectionIndex == 0) { // the first
-				this.nextButton.setEnabled(true);
-				this.previousButton.setEnabled(false);
-			} else if (sectionIndex == this.allSectionIds.length - 1) {// last
-				this.nextButton.setEnabled(false);
-				this.previousButton.setEnabled(true);
-			} else {
-				this.nextButton.setEnabled(true);
-				this.previousButton.setEnabled(true);
-			}
+			enableNextPrev();
 
 			String label = this.generateMetaString(trackId, sectionId);
 			setProperties(trackId, sectionId, label);
