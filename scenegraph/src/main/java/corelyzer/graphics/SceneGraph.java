@@ -40,6 +40,9 @@ public class SceneGraph {
 	public static boolean VERTICAL = false;
 
 	static {
+		// brg 7/18/2015: uncomment to launch properly in Eclipse on Windows
+		//System.loadLibrary("OpenJPEG");
+		//System.loadLibrary("pthreadVC2");
 		System.loadLibrary("scenegraph");
 	}
 
@@ -1057,6 +1060,7 @@ public class SceneGraph {
 	 *            Core section image ID
 	 */
 	public native static int highlightSection(int track, int section, boolean isOn);
+	public native static int highlightSections(int track, int[] sections);
 
 	public static boolean hitMarker(final int canvasId, final float x, final float y) {
 		return hitMarker(canvasId, focusedTrack, focusedTrackSection, focusedMarker, x, y);
@@ -1207,6 +1211,7 @@ public class SceneGraph {
 	 *            Displacement in Y direction
 	 */
 	public native static void moveSection(int track, int section, float x, float y);
+	public native static void moveSections(int track, int[] sections, float x, float y);
 
 	/**
 	 * Displace a core section graph

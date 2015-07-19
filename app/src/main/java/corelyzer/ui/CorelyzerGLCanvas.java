@@ -37,9 +37,13 @@ import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.io.File;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Vector;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -50,6 +54,7 @@ import javax.swing.AbstractButton;
 import javax.swing.ButtonGroup;
 import javax.swing.ImageIcon;
 import javax.swing.JCheckBoxMenuItem;
+import javax.swing.JList;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
@@ -75,6 +80,8 @@ import corelyzer.ui.annotation.AnnotationUtils;
 import corelyzer.ui.annotation.freeform.CRAnnotationWindow;
 import corelyzer.util.CRUtility;
 import corelyzer.util.PropertyListUtility;
+
+import org.apache.commons.lang3.ArrayUtils;
 
 /**
  * A container class that holds handles to the GLCanvas object, index to the
@@ -543,7 +550,7 @@ public class CorelyzerGLCanvas implements GLEventListener, MouseListener, MouseW
 	// Calls the corelyzer.helper.SceneGraph.performPick method, and then
 	// holds ids of objects picked (e.g. picked tracks, sections, graphs,
 	// markers, etc.)
-	void determineSelectedSceneComponents(final float p[]) {
+	void determineSelectedSceneComponents(final float p[], final MouseEvent event) {
 		SceneGraph.performPick(canvasId, p[0], p[1]);
 		int track, section;
 
@@ -567,7 +574,7 @@ public class CorelyzerGLCanvas implements GLEventListener, MouseListener, MouseW
 			}
 		}
 
-		updateMainFrameListSelection(track, section);
+		updateMainFrameListSelection(track, section, event);
 	}
 
 	/**
@@ -918,7 +925,7 @@ public class CorelyzerGLCanvas implements GLEventListener, MouseListener, MouseW
 		// System.out.println("---- Which is Scene Space: " +
 		// scenePos[0] + ", " + scenePos[1]);
 
-		determineSelectedSceneComponents(scenePos);
+		determineSelectedSceneComponents(scenePos, e);
 
 		this.scenePopupMenu.show(e.getComponent(), p.x, p.y);
 
@@ -1154,9 +1161,6 @@ public class CorelyzerGLCanvas implements GLEventListener, MouseListener, MouseW
 					return;
 				}
 
-				// check if click on markers
-				determineSelectedSceneComponents(scenePos);
-
 				if (selectedFreeDraw > -1) {
 					CorelyzerApp
 							.getApp()
@@ -1307,11 +1311,10 @@ public class CorelyzerGLCanvas implements GLEventListener, MouseListener, MouseW
 						// moving graph instead of whole section
 						SceneGraph.moveSectionGraph(selectedTrack, selectedTrackSection, tX, tY);
 					} else {
-						SceneGraph.moveSection(selectedTrack, selectedTrackSection, tX, tY);
+						SceneGraph.moveSections(selectedTrack, CorelyzerApp.getApp().getSectionList().getSelectedIndices(), tX, tY);
 					}
 
 					// broadcast event to plugins
-
 					String msg = "";
 					msg = msg + selectedTrack + "\t" + selectedTrackSection;
 					msg = msg + "\t" + dX * sx / SceneGraph.getCanvasDPIX(canvasId) + "\t0";
@@ -1412,7 +1415,6 @@ public class CorelyzerGLCanvas implements GLEventListener, MouseListener, MouseW
 	}
 
 	public void mousePressed(final MouseEvent e) {
-		// System.out.println("MOUSE PRESSED EVENT!!!!\n");
 		prePos = e.getPoint();
 		float sp[] = { 0.0f, 0.0f };
 		this.convertMousePointToSceneSpace(prePos, scenePos);
@@ -1458,7 +1460,7 @@ public class CorelyzerGLCanvas implements GLEventListener, MouseListener, MouseW
 				} else if (canvasMode == CorelyzerApp.APP_CLAST_MODE || canvasMode == CorelyzerApp.APP_CUT_MODE)
 
 				{
-					determineSelectedSceneComponents(scenePos);
+					determineSelectedSceneComponents(scenePos, e);
 
 					if (selectedTrackSection != -1) {
 						if (!SceneGraph.getDepthOrientation()) {
@@ -1484,7 +1486,7 @@ public class CorelyzerGLCanvas implements GLEventListener, MouseListener, MouseW
 				// System.out.println("Converted to Scene Space: " +
 				// scenePos[0] + ", " + sp[1]);
 
-				determineSelectedSceneComponents(scenePos);
+				determineSelectedSceneComponents(scenePos, e);
 
 				break;
 			case MouseEvent.BUTTON2:
@@ -1617,8 +1619,19 @@ public class CorelyzerGLCanvas implements GLEventListener, MouseListener, MouseW
 				break;
 		}
 	}
+	
+	// return integer array with values between min and max inclusive
+	private int[] makeRangeArray(final int min, final int max) {
+		int[] result = {};
+		if (min <= max) {
+			final int arraySize = max - min + 1;
+			result = new int[arraySize];
+			for (int i = 0; i < arraySize; i++) { result[i] = i + min; }
+		}
+		return result;
+	}
 
-	private void updateMainFrameListSelection(final int track, final int section) {
+	private void updateMainFrameListSelection(final int track, final int section, final MouseEvent event) {
 		CorelyzerApp app = CorelyzerApp.getApp();
 		if (app == null) {
 			return;
@@ -1656,7 +1669,7 @@ public class CorelyzerGLCanvas implements GLEventListener, MouseListener, MouseW
 			TrackSceneNode tt;
 			CoreSection cs = null;
 
-			for (int i = 0; i < tmodel.size(); i++) {
+			for (int i = 0; i < tmodel.size() && !found; i++) {
 				tt = (TrackSceneNode) tmodel.elementAt(i);
 
 				if (track == tt.getId()) {
@@ -1680,13 +1693,49 @@ public class CorelyzerGLCanvas implements GLEventListener, MouseListener, MouseW
 
 			// update ui
 			CorelyzerApp.getApp().getTrackList().setSelectedIndex(selectedTrackIndex);
-			CorelyzerApp.getApp().getSectionList().setSelectedIndex(selectedTrackSectionIndex);
+			JList secList = CorelyzerApp.getApp().getSectionList();
+			boolean selected = secList.isSelectedIndex(selectedTrackSectionIndex);
+			List<Integer> indices = new ArrayList<Integer>();
+			indices.addAll(Arrays.asList(ArrayUtils.toObject(secList.getSelectedIndices())));
+			if (event.isControlDown()) { // toggle selection
+				if (indices.contains(selectedTrackSectionIndex))
+					indices.remove(new Integer(selectedTrackSectionIndex));
+				else
+					indices.add(selectedTrackSectionIndex);
+				
+				int[] newSelArray = ArrayUtils.toPrimitive(indices.toArray(new Integer[0]));
+				secList.setSelectedIndices(newSelArray);
+			} else if (event.isShiftDown()) { // select range
+				int[] toSel = null;
+				if (indices.size() == 0) {
+					toSel = makeRangeArray(0, selectedTrackSectionIndex);
+				} else {
+					final int minSel = Collections.min(indices);
+					final int maxSel = Collections.max(indices);
+					if (selectedTrackSectionIndex < minSel) {
+						toSel = makeRangeArray(selectedTrackSectionIndex, minSel);
+					} else if (selectedTrackSectionIndex > maxSel) {
+						toSel = makeRangeArray(maxSel, selectedTrackSectionIndex);
+					}
+				}
+				secList.setSelectedIndices(toSel);
+			} else if (!(event.isAltDown() && selected)) {
+				// don't modify selection if Alt is down and section was already
+				// selected...user is presumably trying to move it
+				secList.setSelectedIndex(selectedTrackSectionIndex);
+			}
 
-			String trackName = CorelyzerApp.getApp().getTrackListModel().getElementAt(selectedTrackIndex).toString();
-
-			String secName = CorelyzerApp.getApp().getSectionListModel().getElementAt(selectedTrackSectionIndex).toString();
+			CRDefaultListModel lm = CorelyzerApp.getApp().getSectionListModel();
+			String secName = null;
+			if (lm != null) {
+				Object selSec = lm.getElementAt(selectedTrackSectionIndex);
+				if (selSec != null) {
+					secName = selSec.toString();
+				} else { System.out.println("no object at index"); }
+			} else { System.out.println("no list model"); }
 
 			JMenuItem title = (JMenuItem) this.scenePopupMenu.getComponent(0);
+			String trackName = CorelyzerApp.getApp().getTrackListModel().getElementAt(selectedTrackIndex).toString();
 			title.setText("Track: " + trackName);
 			JMenuItem stitle = (JMenuItem) this.scenePopupMenu.getComponent(1);
 			stitle.setText("Section: " + secName);

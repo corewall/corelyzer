@@ -45,6 +45,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.List;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
@@ -896,7 +897,6 @@ public class CorelyzerApp extends WindowAdapter implements MouseListener, Startu
 	}
 
 	public void mouseClicked(final MouseEvent e) {
-
 		if (e.getClickCount() == 2) { // double clicks
 			Object actionSource = e.getSource();
 
@@ -2029,6 +2029,7 @@ public class CorelyzerApp extends WindowAdapter implements MouseListener, Startu
 				if (idx >= 0) {
 					CoreGraph cg = CoreGraph.getInstance();
 					cg.setCurrentTrackIdx(idx);
+					updateHighlightedSections();
 				}
 			}
 		});
@@ -2043,11 +2044,9 @@ public class CorelyzerApp extends WindowAdapter implements MouseListener, Startu
 		sectionList.setName("SectionList");
 		sectionList.addListSelectionListener(new ListSelectionListener() {
 			public void valueChanged(final ListSelectionEvent event) {
-				int idx = sectionList.getSelectedIndex();
-				if (idx >= 0) {
-					CoreGraph cg = CoreGraph.getInstance();
-					cg.setCurrentSectionIdx(idx);
-				}
+				if (event.getValueIsAdjusting())
+					return;
+				updateHighlightedSections();
 			}
 		});
 		sectionList.addMouseListener(this);
@@ -2193,6 +2192,16 @@ public class CorelyzerApp extends WindowAdapter implements MouseListener, Startu
 		StateLoader stateLoader = new StateLoader();
 		stateLoader.loadState(filename);
 		app.updateGLWindows();
+	}
+	
+	private void updateHighlightedSections() {
+		int[] indices = sectionList.getSelectedIndices();
+		CoreGraph cg = CoreGraph.getInstance();
+		cg.setCurrentSectionIndices(indices);
+		final int trackId = getSelectedTrack().getId();
+		SceneGraph.highlightSections(trackId, indices);
+
+		updateGLWindows();
 	}
 
 	/**
