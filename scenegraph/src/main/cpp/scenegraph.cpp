@@ -1799,7 +1799,7 @@ JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_highlightSections
 		const int secCount = trackToHighlight->modelvec.size();
 		CoreSection *lastSec = NULL;
 		for (int i = 0; i < secCount; i++) {
-			boolean highlight = false;
+			bool highlight = false;
 			for (int j = 0; j < selSecCount && !highlight; j++) { // is section selected?
 				if (selSecs[j] == i) {
 					highlight = true;
