@@ -11,7 +11,7 @@ manifest.mainAttributes(
 
 repositories {
 	mavenCentral()
-	mavenRepo(urls: ['http://download.java.net/maven/2/', 'https://maven.atlassian.com/maven1/maven2'])
+	mavenRepo(url: 'http://download.java.net/maven/2/', artifactUrls: ['https://maven.atlassian.com/maven1/maven2'])
 	flatDir name: 'local', dirs: file('deps')
 }
 
@@ -30,6 +30,7 @@ dependencies {
 	compile 'net.java.dev.swing-layout:swing-layout:1.0.2' // switch to MigLayout?
 	compile 'com.miglayout:miglayout:3.7.4' // brg
 	compile 'net.java.dev.glazedlists:glazedlists_java15:1.8.0' // brg - required by iCores
+	compile 'org.apache.commons:commons-lang3:3.4'
 	compile 'commons-codec:commons-codec:1.2' // remove dependency
 	compile 'install4j:i4jruntime:3.2.4' // do we need this?
 	compile ':jdc:1.0.0' // switch to standard directory chooser?
@@ -39,8 +40,8 @@ dependencies {
 	compile ':clibwrapper_jiio:1.1'
 	compile 'ch.qos.logback:logback-core:0.5'
 	compile 'ch.qos.logback:logback-classic:0.5'
-	compile ':gluegen-rt:'
-	compile ':jogl-all:'
+	compile 'org.jogamp.gluegen:gluegen-rt-main:2.0.2'
+	compile 'org.jogamp.jogl:jogl-all-main:2.0.2'
 }
 
 clean.doLast {
@@ -52,6 +53,6 @@ build.doLast {
 	copy {
 		into file('dist')
 		from configurations.default
-		from configurations.default.allArtifactFiles
+		from configurations.default.allArtifacts.files
 	}
 }
