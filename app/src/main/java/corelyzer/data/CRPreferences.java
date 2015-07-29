@@ -141,13 +141,17 @@ public class CRPreferences {
 			System.err.println("Cannot get app dir and datastore dir!");
 		}
 
-		if (MAC_OS_X || System.getProperty("os.name").equalsIgnoreCase("linux")) {
-			datastore_Directory = System.getProperty("user.home") + sp + "Documents" + sp + "Corelyzer";
-		} else {
-			datastore_Directory = System.getProperty("user.home") + sp + "My Documents" + sp + "Corelyzer";
-		}
-		annotation_Directory = datastore_Directory + sp + "Annotations";
+		// don't assume a "My Documents" directory exists - fall back on user.home if needed
+		final boolean isWindows = !(MAC_OS_X || System.getProperty("os.name").equalsIgnoreCase("linux"));
+		final String homeDir = System.getProperty("user.home");
+		final String engDefaultDataDir = (isWindows ? "Mein " : "") + "Documents" + sp + "Corelyzer";
+		File defaultDataDir = new File(homeDir + sp + engDefaultDataDir);
+		if (!defaultDataDir.exists())
+			defaultDataDir = new File(homeDir);
 
+		datastore_Directory = defaultDataDir.getAbsolutePath();
+
+		annotation_Directory = datastore_Directory + sp + "Annotations";
 		cache_Directory = datastore_Directory + sp + "Caches";
 		texBlock_Directory = cache_Directory + sp + "imgblocks_dxt1";
 		download_Directory = cache_Directory + sp + "downloads";

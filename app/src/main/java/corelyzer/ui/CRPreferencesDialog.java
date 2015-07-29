@@ -27,6 +27,7 @@ import javax.swing.JDialog;
 import javax.swing.JEditorPane;
 import javax.swing.JFormattedTextField;
 import javax.swing.JFrame;
+import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -325,30 +326,27 @@ public class CRPreferencesDialog extends JDialog implements ChangeListener, Wind
 		panel5.setLayout(new GridLayoutManager(1, 3, new Insets(0, 0, 0, 0), -1, -1));
 		panel4.add(panel5, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK
 				| GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
-		final JLabel label1 = new JLabel();
-		label1.setText("Image Block Directory: ");
+		final JLabel label1 = new JLabel("Image Cache: ");
 		panel5.add(label1, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED,
 				GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-		imgBtn = new JButton();
-		imgBtn.setText("Select");
+		imgBtn = new JButton("Select...");
 		panel5.add(imgBtn, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL,
 				GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
 		final Spacer spacer2 = new Spacer();
 		panel5.add(spacer2, new GridConstraints(0, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL,
 				GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
 		field_imgblock = new JTextField();
+		field_imgblock.setEnabled(false);
 		panel4.add(field_imgblock, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL,
 				GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
 		final JPanel panel6 = new JPanel();
 		panel6.setLayout(new GridLayoutManager(1, 3, new Insets(0, 0, 0, 0), -1, -1));
 		panel4.add(panel6, new GridConstraints(2, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK
 				| GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
-		final JLabel label2 = new JLabel();
-		label2.setText("Download Directory: ");
+		final JLabel label2 = new JLabel("Downloads: ");
 		panel6.add(label2, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED,
-				GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(145, 16), null, 0, false));
-		downBtn = new JButton();
-		downBtn.setText("Select");
+				GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false)); // new Dimension(145, 16)
+		downBtn = new JButton("Select...");
 		panel6.add(downBtn, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL,
 				GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
 		final Spacer spacer3 = new Spacer();
@@ -358,6 +356,7 @@ public class CRPreferencesDialog extends JDialog implements ChangeListener, Wind
 		panel4.add(spacer4, new GridConstraints(4, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1,
 				GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
 		field_download = new JTextField();
+		field_download.setEnabled(false);
 		panel4.add(field_download, new GridConstraints(3, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL,
 				GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
 		stageTab.addTab("Display", displayPanel);
@@ -683,20 +682,6 @@ public class CRPreferencesDialog extends JDialog implements ChangeListener, Wind
 		}
 	}
 
-	private void onDownloadDir() {
-		File f = new File(prefs.download_Directory);
-
-		if ((f = JDirectoryChooser.showDialog(this, f)) != null) {
-			String abspath = f.getAbsolutePath();
-
-			if (abspath.equals(this.field_download.getText())) {
-				glchanged = true;
-			}
-
-			this.field_download.setText(abspath);
-		}
-	}
-
 	private void onGridColor() {
 		final ColorChooser chooser = new ColorChooser(this);
 		chooser.setVisible(true);
@@ -731,16 +716,36 @@ public class CRPreferencesDialog extends JDialog implements ChangeListener, Wind
 		}
 	}
 
+	private File chooseDirectory(File currentDir) {
+		File chosenDir = null;
+		JFileChooser fc = new JFileChooser(currentDir);
+		fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+		if (fc.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+			chosenDir = fc.getSelectedFile();
+		}
+		return chosenDir;
+	}
+	
+	private void onDownloadDir() {
+		File f = new File(this.field_download.getText());
+		File newDir = chooseDirectory(f);
+		if (newDir != null) {
+			String abspath = newDir.getAbsolutePath();
+			if (abspath.equals(this.field_download.getText())) {
+				glchanged = true;
+			}
+			this.field_download.setText(abspath);
+		}
+	}
+	
 	private void onImageDir() {
-		File f = new File(prefs.texBlock_Directory);
-
-		if ((f = JDirectoryChooser.showDialog(this, f)) != null) {
-			String abspath = f.getAbsolutePath();
-
+		File f = new File(this.field_imgblock.getText());
+		File newDir = chooseDirectory(f);
+		if (newDir != null) {
+			final String abspath = newDir.getAbsolutePath();
 			if (abspath.equals(this.field_imgblock.getText())) {
 				glchanged = true;
 			}
-
 			this.field_imgblock.setText(abspath);
 		}
 	}
