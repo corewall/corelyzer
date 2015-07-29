@@ -993,11 +993,11 @@ public class DataImportWizard extends JDialog implements ActionListener, ChangeL
 		p.add(toDefineSectionName);
 		p.add(new JLabel(""));
 
-		p.add(prefix_label);
-		p.add(name_prefix);
-
 		p.add(name_label);
 		p.add(name_column);
+		
+		p.add(prefix_label);
+		p.add(name_prefix);
 
 		return p;
 	}
@@ -1188,10 +1188,6 @@ public class DataImportWizard extends JDialog implements ActionListener, ChangeL
 	public void setInputFile(final File f) {
 		this.inputFile = f;
 		loadInputFile(this.inputFile);
-
-		String filename = f.getName();
-		String prefix = filename.split("_")[0];
-		this.name_prefix.setText(prefix);
 	}
 
 	public void setInputFile(final String f) {
