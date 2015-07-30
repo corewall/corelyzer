@@ -283,7 +283,7 @@ public class ChronosJanusPlugin extends CorelyzerPlugin
     public void loadImages() {
         try {
             CorelyzerApp app = CorelyzerApp.getApp();
-            final int [] indices = queryResultList.getSelectedIndices();
+            final int [] indices = queryResultList.getCheckedIndices();
             if (indices.length <= 0) return;
 
             System.out.println("Selected " + indices.length + " cores\n");

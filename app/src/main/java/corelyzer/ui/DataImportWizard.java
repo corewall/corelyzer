@@ -31,6 +31,8 @@ import java.awt.Frame;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.io.BufferedReader;
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -53,8 +55,13 @@ import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
+import javax.swing.ListSelectionModel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+
+import net.miginfocom.swing.MigLayout;
 
 import org.apache.xerces.dom.DocumentImpl;
 import org.apache.xml.serialize.OutputFormat;
@@ -78,11 +85,27 @@ import corelyzer.helper.ExampleFileFilter;
  **/
 public class DataImportWizard extends JDialog implements ActionListener, ChangeListener {
 	public static enum DepthMode {
-		SECTION_DEPTH, ACCUM_DEPTH
+		SECTION_DEPTH, ACCUM_DEPTH;
+		
+		public String toString() {
+			if (this.ordinal() == 0)
+				return "Section Depth";
+			else
+				return "Accumulated Depth";
+		}
 	}
 
 	public static enum FieldSeparator {
-		COMMA, TAB, SPACE
+		COMMA, TAB, SPACE;
+		
+		public String toString() {
+			if (this.ordinal() == 0)
+				return "Comma";
+			else if (this.ordinal() == 1)
+				return "Tab";
+			else // (this.ordinal() == 2)
+				return "Space";
+		}
 	}
 
 	public static enum RunMode {
@@ -790,7 +813,7 @@ public class DataImportWizard extends JDialog implements ActionListener, ChangeL
 	public static void main(final String[] args) {
 		DataImportWizard wiz = new DataImportWizard(null);
 		wiz.setRunningMode(RunMode.STANDALONE);
-
+		
 		if (args.length < 1) {
 			System.out.println("Usage: java corelyzer.ui.DataImportWizard <input>.");
 			System.exit(0);
@@ -806,36 +829,28 @@ public class DataImportWizard extends JDialog implements ActionListener, ChangeL
 
 	// Running mode information
 	RunMode mode = RunMode.CORELYZER;
-	// stage information
-	int number_of_stages = 5;
 
+	// stage information - brg 7/31/2015 "stages" are tabs, vars used for Back/Next button handling
+	int number_of_stages = 2;
 	int current_stage = 0;
 
-	JButton nextBtn;
-	JButton backBtn;
-	JButton cancelBtn;
+	JButton nextBtn, backBtn, cancelBtn;
 	JTabbedPane stageTab;
 	LineNumberedPaper fileContent;
 	/**
-	 * Parse information Parse file 'inputFile', using 'delimitnator'. Data
+	 * Parse information Parse file 'inputFile', using specified delimiter. Data
 	 * starts from 'start_row' to 'end_row'. Use 'label_row' as the labels for
 	 * columns, 'unit_row' for units. 'sectionname_column' will be used as name
 	 * of the sections, and 'sectiondepth_column' will be used as the depth
 	 * value of the core section. Vector 'dataColumns' will be checked columns
 	 * to get data values.
 	 */
-	JLabel fileLabel;
+	JLabel fileLabel, sectionNamePreview;
 	JTextField start_number, end_number, ignore_values;
 	JTextField label_number, unit_number;
 
 	JTextField name_prefix, name_column, depth_column;
-	JComboBox fsComboBox;
-
-	JComboBox depthModeComboBox;
-
-	JCheckBox toDefineSectionName;
-
-	JCheckBox isIgnoreValues;
+	JComboBox fsComboBox, depthModeComboBox;
 
 	CheckBoxList columnList;
 
@@ -887,7 +902,7 @@ public class DataImportWizard extends JDialog implements ActionListener, ChangeL
 		} else if (command.equals("Finish")) {
 			System.out.println("---> Finish: start convert, save, load data");
 			onFinish();
-		} else if (command.equals("File...")) {
+		} else if (command.equals("Select...")) {
 			JFileChooser chooser = new JFileChooser();
 			chooser.setDialogTitle("Select import file");
 			chooser.setMultiSelectionEnabled(false);
@@ -901,144 +916,175 @@ public class DataImportWizard extends JDialog implements ActionListener, ChangeL
 			System.err.println("WARNING: Action Command not Found " + command);
 		}
 	}
-
-	// stage 0
-	private JPanel create_init_panel() {
-		JPanel p = new JPanel(new GridLayout(2, 2));
-
-		fileLabel = new JLabel("File Name");
-		JButton fileBtn = new JButton("File...");
+	
+	private int getDataStartLine() {
+		int result = -1;
+		try {
+			int start = Integer.parseInt(this.start_number.getText());
+			result = start;
+		} catch (NumberFormatException e) {}
+		return result;
+	}
+	
+	// return contents at specified line number (1-based)
+	private String getInputFileLine(final int lineNumber) {
+		String line = null;
+		int curNum = 1;
+		try {
+			BufferedReader br = new BufferedReader(new FileReader(this.inputFile));
+			String curLine = "";
+			while (curLine != null) {
+				curLine = br.readLine();
+				if (curNum == lineNumber)
+					break;
+				curNum++;
+			}
+			line = curLine;
+		} catch (IOException e) {
+			
+		}
+		
+		return line;
+	}
+	
+	private void updateSectionNamePreview() {
+		String previewStr = "[can't create preview]";
+		final int startLine = getDataStartLine();
+		if (startLine != -1) {
+			String prefix = name_prefix.getText();
+			String line = getInputFileLine(startLine);
+			String fs = getFieldSeparatorChar();
+			String pattern = name_column.getText();
+			String compName = compositeSectionName(prefix, line, fs, pattern);
+			if (compName.length() > 0)
+				previewStr = compName;
+		}
+		sectionNamePreview.setText(previewStr);
+	}
+	
+	private JPanel createImportParamPanel() {
+		JPanel panel = new JPanel(new MigLayout("","[grow]",""));
+		
+		// File Import Parameters Panel
+		JPanel fipp = new JPanel(new MigLayout("", "[][]20[]push[][]"));
+		fipp.setBorder(BorderFactory.createTitledBorder("File Import Parameters"));
+		fileLabel = new JLabel("[File Name]");
+		JButton fileBtn = new JButton("Select...");
 		fileBtn.addActionListener(this);
-
-		JLabel fs_label = new JLabel("Field separator: ");
-		// fs_string = new JTextField(",");
 
 		this.fsComboBox = new JComboBox();
 		fsComboBox.setEditable(false);
 		for (FieldSeparator fs : FieldSeparator.values()) {
 			fsComboBox.addItem(fs);
 		}
+		
+		fipp.add(new JLabel("Selected File: "));
+		fipp.add(fileLabel);
+		fipp.add(fileBtn);
+		fipp.add(new JLabel("Field Delimiter: "));
+		fipp.add(fsComboBox);
+		
+		panel.add(fipp, "wrap, growx");
+		
+		// Data Import Parameters Panel
+		JPanel dipp = new JPanel(new MigLayout("", "[][grow]15[][grow]", ""));
+		dipp.setBorder(BorderFactory.createTitledBorder("Data Import Parameters"));
+		
+		// data start/end
+		start_number = new JTextField("3");
+		end_number = new JTextField();
+		dipp.add(new JLabel("Data Start Line: "));
+		dipp.add(start_number, "growx");
+		dipp.add(new JLabel("Data End Line: "));
+		dipp.add(end_number, "growx, wrap");		
 
-		p.add(fileLabel);
-		p.add(fileBtn);
-		p.setBorder(BorderFactory.createTitledBorder("Input file name and field separator"));
+		// label, units
+		label_number = new JTextField("1");
+		unit_number = new JTextField("2");
+		dipp.add(new JLabel("Fields Line: "));
+		dipp.add(label_number, "growx");
+		dipp.add(new JLabel("Units Line: "));
+		dipp.add(unit_number, "growx, wrap");
 
-		p.add(fs_label);
-		p.add(fsComboBox);
-		// p.add(fs_string);
-
-		return p;
-	}
-
-	// stage 2
-	private JPanel create_label_unit_panel() {
-		JPanel p = new JPanel(new GridLayout(2, 2));
-		p.setBorder(BorderFactory.createTitledBorder("Label  and Unit Row"));
-
-		JLabel label_label = new JLabel("Fields Label Line Number: ");
-		JLabel unit_label = new JLabel("Unit Label Line Number: ");
-
-		label_number = new JTextField("4");
-		unit_number = new JTextField("5");
-
-		p.add(label_label);
-		p.add(label_number);
-		p.add(unit_label);
-		p.add(unit_number);
-
-		return p;
-	}
-
-	// stage 3
-	private JPanel create_name_depth_panel() {
-		JPanel p = new JPanel(new GridLayout(5, 2));
-		p.setBorder(BorderFactory.createTitledBorder("Name and Depth Column"));
-
-		final JLabel prefix_label = new JLabel("Section Prefix: ");
-		prefix_label.setEnabled(false);
-		final JLabel name_label = new JLabel("Name Column Number:  ");
-		name_label.setEnabled(false);
-		final JLabel depth_label = new JLabel("Depth Column Number: ");
-		final JLabel depthMode_label = new JLabel("Depth Mode");
-
-		depth_column = new JTextField("1");
+		// depth, section name column, prefix
+		depth_column = new JTextField("2");
 		depthModeComboBox = new JComboBox();
 		for (DepthMode dm : DepthMode.values()) {
 			depthModeComboBox.addItem(dm);
 		}
-
-		name_prefix = new JTextField();
-		name_prefix.setEnabled(false);
-		name_column = new JTextField("");
-		name_column.setEnabled(false);
-
-		toDefineSectionName = new JCheckBox("Customize Section Name?");
-		toDefineSectionName.addActionListener(new ActionListener() {
-			public void actionPerformed(final ActionEvent e) {
-				boolean isChecked = toDefineSectionName.isSelected();
-
-				name_prefix.setEnabled(isChecked);
-				name_column.setEnabled(isChecked);
-				prefix_label.setEnabled(isChecked);
-				name_label.setEnabled(isChecked);
-			}
-		});
-
-		p.add(depth_label);
-		p.add(depth_column);
-
-		p.add(depthMode_label);
-		p.add(depthModeComboBox);
-
-		p.add(toDefineSectionName);
-		p.add(new JLabel(""));
-
-		p.add(name_label);
-		p.add(name_column);
+		dipp.add(new JLabel("Depth Column: "));
+		dipp.add(depth_column, "growx");
+		dipp.add(new JLabel("Depth Mode: "));
+		dipp.add(depthModeComboBox, "growx, wrap");
 		
-		p.add(prefix_label);
-		p.add(name_prefix);
-
-		return p;
-	}
-
-	// --------------------------------------------------------------------------
-
-	// stage 1
-	private JPanel create_range_panel() {
-		JPanel p = new JPanel(new GridLayout(3, 2));
-		p.setBorder(BorderFactory.createTitledBorder("Start Row and End Row"));
-
-		JLabel start_label = new JLabel("Start Line Number: ");
-		JLabel end_label = new JLabel("End Line Number: ");
-
-		start_number = new JTextField("7");
-		end_number = new JTextField("17");
+		// value to ignore
+		dipp.add(new JLabel("Exclude Specific Value: "), "span 4, split 2");
 		ignore_values = new JTextField("");
-		ignore_values.setEnabled(false);
+		dipp.add(ignore_values, "growx");
 
-		isIgnoreValues = new JCheckBox("Ignore some bad value?");
-		isIgnoreValues.addActionListener(new ActionListener() {
-			public void actionPerformed(final ActionEvent e) {
-				boolean isChecked = isIgnoreValues.isSelected();
-				ignore_values.setEnabled(isChecked);
+		panel.add(dipp, "wrap, growx");
+		
+		// Section Name subpanel
+		JPanel snpp = new JPanel(new MigLayout("", "[][grow]15[][grow]", ""));
+		snpp.setBorder(BorderFactory.createTitledBorder("Section Name"));
+		
+		final String snht = new String("<html>If your data includes a column with full section names, " +
+				"enter the column number in the Column/Pattern field. " +
+				"If components of the section name are in separate columns, " +
+				"they can be flexibly combined by entering a pattern of column numbers " +
+				"and separators. This pattern will be applied per-row. " +
+				"The contents of the Prefix field, if any, will be prepended with a trailing hyphen.<br/>" +
+				"Examples:<ul><li>  1,-,2 with no Prefix: '[col1]-[col2]'</li>" +
+				"<li>3,2,-,4  with Prefix BOB: 'BOB-[col3][col2]-[col4]'</li>" +
+				"<li>7,@@@,1,2,3 with Prefix hello: 'hello-[col7]@@@[col1][col2][col3]'</li></ul></html>");
+		final JLabel sectionNameHelpText = new JLabel(snht);
+		snpp.add(sectionNameHelpText, "span");
+		
+		final JLabel name_label = new JLabel("Column/Pattern: ");
+		name_column = new JTextField("1");
+		
+		final JLabel prefix_label = new JLabel("Prefix: ");
+		name_prefix = new JTextField();
+		
+		DocumentListener dl = new DocumentListener() {
+			public void changedUpdate(DocumentEvent e) { updateSectionNamePreview(); }
+			public void insertUpdate(DocumentEvent e) { updateSectionNamePreview(); }
+			public void removeUpdate(DocumentEvent e) {updateSectionNamePreview(); }
+		};
+		
+		name_column.getDocument().addDocumentListener(dl);
+		name_prefix.getDocument().addDocumentListener(dl);
+
+		snpp.add(name_label);
+		snpp.add(name_column, "growx");
+		snpp.add(prefix_label);
+		snpp.add(name_prefix, "growx, wrap");
+		
+		// 7/30/2015 brgtodo: somehow, updating the section name preview text affects the
+		// spacing/sizing of name_prefix and name_column above, despite being in a subpanel
+		// that the parent panel (snpp) should theoretically(?) treat as a single cell.
+		// Minor issue, tabling for now.
+		JPanel previewPanel = new JPanel(new MigLayout("", "[grow][][r]", ""));
+		previewPanel.setBorder(BorderFactory.createTitledBorder("Section Name Preview"));
+		sectionNamePreview = new JLabel();
+		previewPanel.add(sectionNamePreview);
+		JButton updatePreview = new JButton("Update Preview");
+		updatePreview.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				updateSectionNamePreview();
 			}
 		});
-
-		p.add(start_label);
-		p.add(start_number);
-		p.add(end_label);
-		p.add(end_number);
-		p.add(isIgnoreValues);
-		p.add(ignore_values);
-
-		return p;
+		previewPanel.add(updatePreview);
+		snpp.add(previewPanel, "span, growx, wrap, gaptop 10");
+		
+		panel.add(snpp, "growx, wrap");
+		
+		return panel;
 	}
 
-	// stage 4
-	private JPanel create_select_column_pane() {
+	private JPanel createFieldSelectionPanel() {
 		JPanel p = new JPanel(new BorderLayout());
-		p.setBorder(BorderFactory.createTitledBorder("Pick Value Columns"));
+		p.setBorder(BorderFactory.createTitledBorder("Select Data Columns for Import"));
 
 		columnListModel = new Vector<JCheckBox>();
 		columnList = new CheckBoxList();
@@ -1050,40 +1096,35 @@ public class DataImportWizard extends JDialog implements ActionListener, ChangeL
 		return p;
 	}
 
-	private JPanel create_stage(final int i) {
-		JPanel p = new JPanel();
-
-		switch (i) {
-			case 0:
-				return create_init_panel();
-			case 1:
-				return create_range_panel();
-			case 2:
-				return create_label_unit_panel();
-			case 3:
-				return create_name_depth_panel();
-			case 4:
-				return create_select_column_pane();
-			default:
-				System.err.println("create_stage: parameter out of range " + i);
-		}
-
-		return p;
-	}
-
 	private void loadInputFile(final File f) {
 		if (f.exists()) {
 			try {
 				FileReader fr = new FileReader(f);
 				this.fileContent.read(fr, null);
 				this.fileLabel.setText(f.getName());
-				this.end_number.setText(String.valueOf(this.fileContent.getLineCount() - 1));
+				this.end_number.setText(String.valueOf(this.fileContent.getLineCount()));
+				updateSectionNamePreview();
 			} catch (FileNotFoundException ex) {
 				System.err.println("Error: File not found " + f);
 			} catch (IOException ex) {
 				System.err.println("Error: IO Exception " + f);
 			}
 		}
+	}
+	
+	private String getFieldSeparatorChar() {
+		String fs = "";
+		FieldSeparator fSeparator = (FieldSeparator) fsComboBox.getSelectedItem();
+		if (fSeparator == FieldSeparator.COMMA) {
+			fs = ",";
+		} else if (fSeparator == FieldSeparator.TAB) {
+			fs = "\t";
+		} else if (fSeparator == FieldSeparator.SPACE) {
+			fs = " ";
+		} else {
+			fs = " ";
+		}
+		return fs;
 	}
 
 	private void onFinish() {
@@ -1119,20 +1160,6 @@ public class DataImportWizard extends JDialog implements ActionListener, ChangeL
 			}
 		}
 
-		// String fs = fs_string.getText();
-		String fs;
-		FieldSeparator fSeparator = (FieldSeparator) fsComboBox.getSelectedItem();
-
-		if (fSeparator == FieldSeparator.COMMA) {
-			fs = ",";
-		} else if (fSeparator == FieldSeparator.TAB) {
-			fs = "\t";
-		} else if (fSeparator == FieldSeparator.SPACE) {
-			fs = " ";
-		} else {
-			fs = " ";
-		}
-
 		try {
 			// Users assume line/column numbers starts from '1' instead of '0'
 			int start = Integer.parseInt(this.start_number.getText()) - 1;
@@ -1140,17 +1167,17 @@ public class DataImportWizard extends JDialog implements ActionListener, ChangeL
 			int label = Integer.parseInt(this.label_number.getText()) - 1;
 			int unit = Integer.parseInt(this.unit_number.getText()) - 1;
 
+			final String fs = getFieldSeparatorChar();
 			String prefix = name_prefix.getText();
 			String name = name_column.getText();
 			int depth = Integer.parseInt(this.depth_column.getText()) - 1;
 
-			boolean useCustomizedSectionName = toDefineSectionName.isSelected();
+			boolean useCustomizedSectionName = (prefix.length() > 0 || name.length() > 0);
 			DepthMode dm = (DepthMode) depthModeComboBox.getSelectedItem();
 
 			float ignoreValue;
-			if (this.isIgnoreValues.isSelected()) {
-				String inputText = ignore_values.getText();
-
+			String inputText = ignore_values.getText();
+			if (inputText.length() > 0) {
 				if (inputText.contains(",")) {
 					inputText = inputText.replace(",", ".");
 				}
@@ -1168,7 +1195,7 @@ public class DataImportWizard extends JDialog implements ActionListener, ChangeL
 			// might need a progress thingy
 			convert(inputFile, outputFile, fs, prefix, start, end, label, unit, name, depth, vals, dm, useCustomizedSectionName, ignoreValue);
 		} catch (NumberFormatException ex) {
-			JOptionPane.showMessageDialog(this, "Some fields you entered are not valid numbers");
+			JOptionPane.showMessageDialog(this, "One or more fields contains an invalid number");
 			return;
 		}
 
@@ -1232,14 +1259,8 @@ public class DataImportWizard extends JDialog implements ActionListener, ChangeL
 		// -----------------------------------------
 		// Main staging content
 		stageTab = new JTabbedPane();
-
-		// decision panel
-		JPanel[] stage_pane = new JPanel[number_of_stages];
-		String[] tabLabels = { "File Info", "Data Range", "Field & Unit Label", "Depth Setup", "Fields Selection" };
-		for (int i = 0; i < number_of_stages; i++) {
-			stage_pane[i] = create_stage(i);
-			stageTab.addTab(tabLabels[i], stage_pane[i]);
-		}
+		stageTab.addTab("Import Parameters", createImportParamPanel());
+		stageTab.addTab("Fields Selection", createFieldSelectionPanel());
 
 		stageTab.addChangeListener(this);
 		this.add(stageTab, BorderLayout.NORTH);
@@ -1291,23 +1312,11 @@ public class DataImportWizard extends JDialog implements ActionListener, ChangeL
 			}
 
 		} catch (Exception e) {
-			System.err.println("Error! Cannot access inputfile");
+			System.err.println("Error! Cannot access input file");
 		}
 
 		if (label_line != null && !label_line.equals("")) {
-			String fs;
-			FieldSeparator fSeparator = (FieldSeparator) fsComboBox.getSelectedItem();
-
-			if (fSeparator == FieldSeparator.COMMA) {
-				fs = ",";
-			} else if (fSeparator == FieldSeparator.TAB) {
-				fs = "\t";
-			} else if (fSeparator == FieldSeparator.SPACE) {
-				fs = " ";
-			} else {
-				fs = " ";
-			}
-
+			final String fs = getFieldSeparatorChar();
 			String[] tuples = label_line.split(fs);
 
 			for (String tuple : tuples) {

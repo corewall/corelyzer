@@ -16,12 +16,15 @@ import javax.swing.ListSelectionModel;
 import javax.swing.UIManager;
 import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
+
 
 /**
  * A class that extends the JList class so that a listing of selectable items
  * with checkboxes next to them to help indicate that they have been selected.
  */
-public class CheckBoxList extends JList {
+public class CheckBoxList extends JList implements ListSelectionListener {
 	protected class CellRenderer implements ListCellRenderer {
 
 		public Component getListCellRendererComponent(final JList list, final Object value, final int index, final boolean isSelected,
@@ -38,9 +41,6 @@ public class CheckBoxList extends JList {
 		}
 	}
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = -4862307481063472246L;
 
 	protected static Border noFocusBorder = new EmptyBorder(1, 1, 1, 1);
@@ -48,42 +48,45 @@ public class CheckBoxList extends JList {
 	public CheckBoxList() {
 		super();
 		setCellRenderer(new CellRenderer());
-
-		addMouseListener(new MouseAdapter() {
-
-			@Override
-			public void mousePressed(final MouseEvent e) {
-				int index = locationToIndex(e.getPoint());
-
-				if (index != -1) {
-					JCheckBox checkbox = (JCheckBox) getModel().getElementAt(index);
-					checkbox.setSelected(!checkbox.isSelected());
-					repaint();
-				}
+		addListSelectionListener(this);
+	}
+	
+	private JCheckBox getBox(final int index) { return (JCheckBox)getModel().getElementAt(index); }
+	
+	// When selection changes, update checkbox state. If multiple items are selected,
+	// always check and never un-check. When a single item is selected, toggle as normal.
+	public void valueChanged(ListSelectionEvent e) {
+		if (e.getValueIsAdjusting()) {
+			int[] selArray = getSelectedIndices();
+			if (selArray.length > 1) {
+				for (int idx : selArray) { getBox(idx).setSelected(true); }
+			} else if (selArray.length == 1) {
+				JCheckBox cb = getBox(selArray[0]);
+				cb.setSelected(!cb.isSelected());
+				
+				// If list only contains a single item and user clicks, it becomes selected
+				// and checkbox toggles. But clicking it again won't change the selection,
+				// thus this method won't be triggered, thus the checkbox will not toggle as
+				// expected. Clear the selection to avoid this situation. 
+				this.clearSelection();
 			}
-		});
-
-		setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+			repaint();
+		}
 	}
 
-	/**
-	 * Returns the indices of items with checkboxes enabled.
-	 */
-
-	@Override
-	public int[] getSelectedIndices() {
-		Vector<Integer> indicies = new Vector<Integer>();
+	// Returns array containing the indices of checked boxes.
+	public int[] getCheckedIndices() {
+		Vector<Integer> indices = new Vector<Integer>();
 
 		for (int i = 0; i < getModel().getSize(); i++) {
-			JCheckBox cb = (JCheckBox) getModel().getElementAt(i);
-			if (cb.isSelected()) {
-				indicies.addElement(i);
+			if (getBox(i).isSelected()) {
+				indices.addElement(i);
 			}
 		}
 
-		int[] ret = new int[indicies.size()];
-		for (int k = 0; k < indicies.size(); k++) {
-			ret[k] = indicies.elementAt(k);
+		int[] ret = new int[indices.size()];
+		for (int k = 0; k < indices.size(); k++) {
+			ret[k] = indices.elementAt(k);
 		}
 
 		return ret;
