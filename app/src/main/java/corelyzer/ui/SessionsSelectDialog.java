@@ -191,6 +191,7 @@ public class SessionsSelectDialog extends JDialog {
 			return null;
 		}
 
+		boolean hasSelection = false;
 		if (sessList != null) {
 			CheckBoxList l = (CheckBoxList) sessList;
 			boolean[] ret = new boolean[l.getModel().getSize()];
@@ -198,12 +199,14 @@ public class SessionsSelectDialog extends JDialog {
 			for (int i = 0; i < ret.length; i++) {
 				JCheckBox cb = (JCheckBox) l.getModel().getElementAt(i);
 				ret[i] = cb.isSelected();
+				if (ret[i])
+					hasSelection = true;
 			}
 
-			return ret;
-		} else {
-			return null;
+			if (hasSelection)
+				return ret;
 		}
+		return null;
 	}
 	
 	// returns text of first selected checkbox
