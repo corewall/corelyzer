@@ -1025,7 +1025,7 @@ public class DataImportWizard extends JDialog implements ActionListener, ChangeL
 		panel.add(dipp, "wrap, growx");
 		
 		// Section Name subpanel
-		JPanel snpp = new JPanel(new MigLayout("", "[][grow]15[][grow]", ""));
+		JPanel snpp = new JPanel(new MigLayout("", "[grow]", ""));
 		snpp.setBorder(BorderFactory.createTitledBorder("Section Name"));
 		
 		final String snht = new String("<html>If your data includes a column with full section names, " +
@@ -1055,16 +1055,14 @@ public class DataImportWizard extends JDialog implements ActionListener, ChangeL
 		name_column.getDocument().addDocumentListener(dl);
 		name_prefix.getDocument().addDocumentListener(dl);
 
-		snpp.add(name_label);
-		snpp.add(name_column, "growx");
-		snpp.add(prefix_label);
-		snpp.add(name_prefix, "growx, wrap");
+		JPanel secDataPanel = new JPanel(new MigLayout("", "[][grow]15[][grow]", ""));
+		secDataPanel.add(name_label);
+		secDataPanel.add(name_column, "growx, wmin 150");
+		secDataPanel.add(prefix_label);
+		secDataPanel.add(name_prefix, "growx, wmin 150");
+		snpp.add(secDataPanel, "wrap");
 		
-		// 7/30/2015 brgtodo: somehow, updating the section name preview text affects the
-		// spacing/sizing of name_prefix and name_column above, despite being in a subpanel
-		// that the parent panel (snpp) should theoretically(?) treat as a single cell.
-		// Minor issue, tabling for now.
-		JPanel previewPanel = new JPanel(new MigLayout("", "[grow][][r]", ""));
+		JPanel previewPanel = new JPanel(new MigLayout("", "[]push[r]", ""));
 		previewPanel.setBorder(BorderFactory.createTitledBorder("Section Name Preview"));
 		sectionNamePreview = new JLabel();
 		previewPanel.add(sectionNamePreview);
