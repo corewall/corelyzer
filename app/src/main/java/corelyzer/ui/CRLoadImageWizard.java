@@ -59,7 +59,7 @@ public class CRLoadImageWizard extends JDialog {
 	private void updateUI()
 	{
 		contentPane.removeAll();
-		contentPane.add( activePane, "growy" );
+		contentPane.add( activePane, "growx, growy" );
 		
 		if ( activePane.equals( sectionListPane ))
 		{
@@ -148,7 +148,7 @@ public class CRLoadImageWizard extends JDialog {
 		sectionListPane = new SectionListPane(trackSectionModel);
 		imagePropertiesPane = new ImagePropertiesPane(trackSectionModel);
 
-		contentPane = new JPanel( new MigLayout( "filly, wrap 1", "[]15[]", "[c,grow 100,fill][c,grow 0,fill]"));
+		contentPane = new JPanel( new MigLayout( "filly, wrap 1", "[grow]15[]", "[c,grow 100,fill][c,grow 0,fill]"));
 		
 		cancelButton = new JButton("Cancel");
 		cancelButton.addActionListener( new ActionListener() {
@@ -617,8 +617,8 @@ class SectionListPane extends JPanel implements ListSelectionListener {
 		this.add( separatorLabel, "span 2, split 2" );
 		this.add( separator, "gapleft rel, growx, wrap" );
 		
-		dpiXField = new JTextField();
-		dpiYField = new JTextField();
+		dpiXField = new JTextField("508");
+		dpiYField = new JTextField("508");
 		orientationComboBox = new JComboBox();
 		final DefaultComboBoxModel orientationModel = new DefaultComboBoxModel();
 		orientationModel.addElement("Horizontal");
