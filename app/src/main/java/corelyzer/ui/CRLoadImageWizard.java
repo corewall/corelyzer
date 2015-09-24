@@ -117,6 +117,8 @@ public class CRLoadImageWizard extends JDialog {
 			imagePropertiesPane.updateSectionProperties();
 			firstOpenOfPropertiesPane = false;
 		}
+		
+		sectionListPane.saveLasts();
 
 		activePane = imagePropertiesPane;
 
@@ -461,6 +463,7 @@ class SectionListPane extends JPanel implements ListSelectionListener {
 	private JTextField dpiXField, dpiYField;
 	private JList trackSectionList;
 	private TrackSectionListModel trackSectionModel;
+	private static String lastDpiX = "508", lastDpiY = "508", lastOrientation = "Horizontal"; 
 	
 	public SectionListPane( TrackSectionListModel trackSectionModel )
 	{
@@ -470,6 +473,12 @@ class SectionListPane extends JPanel implements ListSelectionListener {
 		setupUI();
 		
 		trackSectionList.setModel( trackSectionModel );
+	}
+	
+	void saveLasts() {
+		lastDpiX = dpiXField.getText();
+		lastDpiY = dpiYField.getText();
+		lastOrientation = getOrientation();
 	}
 	
 	// The lone ListSelectionListener interface method
@@ -531,6 +540,10 @@ class SectionListPane extends JPanel implements ListSelectionListener {
 	{
 		String orientationStr = ( orientationComboBox.getSelectedIndex() == 0 ? "Horizontal" : "Vertical" );
 		return orientationStr;
+	}
+	public void setOrientation(final String orientation) {
+		final int index = orientation.equals("Horizontal") ? 0 : 1;
+		orientationComboBox.setSelectedIndex(index);
 	}
 	public float getDPIX() { return Float.parseFloat( dpiXField.getText() ); }
 	public float getDPIY() { return Float.parseFloat( dpiYField.getText() ); }
@@ -617,13 +630,14 @@ class SectionListPane extends JPanel implements ListSelectionListener {
 		this.add( separatorLabel, "span 2, split 2" );
 		this.add( separator, "gapleft rel, growx, wrap" );
 		
-		dpiXField = new JTextField("508");
-		dpiYField = new JTextField("508");
+		dpiXField = new JTextField(lastDpiX);
+		dpiYField = new JTextField(lastDpiY);
 		orientationComboBox = new JComboBox();
 		final DefaultComboBoxModel orientationModel = new DefaultComboBoxModel();
 		orientationModel.addElement("Horizontal");
 		orientationModel.addElement("Vertical");
 		orientationComboBox.setModel(orientationModel);
+		setOrientation(lastOrientation);
 		
 		// if DPI Y field is empty, copy DPI X input over since DPI X/Y are usually the same
 		dpiXField.addFocusListener( new FocusAdapter() {
