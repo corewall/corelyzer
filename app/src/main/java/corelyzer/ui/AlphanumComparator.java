@@ -61,27 +61,11 @@ public class AlphanumComparator
 	// method, I can't think of another way to use AlphanumComparator to sort strings without declaring
 	// unique classes for each type you want to sort. (And in the interface case you'd still need to
 	// extend API classes like File in order to implement the interface.)  There must be a better way!
-	public static class FileAlphanumComparator implements Comparator<File>
-	{
-		public int compare(File f1, File f2)
-		{
-			return AlphanumComparator.compare( f1.getName(), f2.getName() );
-		}
-	}
-	
 	public static class StringAlphanumComparator implements Comparator<String>
 	{
 		public int compare(String s1, String s2)
 		{
 			return AlphanumComparator.compare( s1, s2 );
-		}
-	}
-	
-	public static class TSLEAlphanumComparator implements Comparator<TrackSectionListElement>
-	{
-		public int compare(TrackSectionListElement t1, TrackSectionListElement t2)
-		{
-			return AlphanumComparator.compare( t1.getName(), t2.getName() );
 		}
 	}
 	

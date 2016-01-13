@@ -24,7 +24,10 @@
  *****************************************************************************/
 package corelyzer.data;
 
+import java.util.Collections;
 import java.util.Vector;
+
+import corelyzer.ui.AlphanumComparator;
 
 public class Session {
 	String name = "UnNamed Session";
@@ -35,6 +38,8 @@ public class Session {
 	Vector<WellLogDataSet> datasets;
 
 	boolean isShow = true;
+	
+	public void sortTracks() { Collections.sort(tracks); }
 
 	public Session() {
 		tracks = new Vector<TrackSceneNode>();

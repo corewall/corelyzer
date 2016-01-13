@@ -29,12 +29,14 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
 
+import corelyzer.ui.AlphanumComparator;
+
 /**
  * Data structure to hold core track information in Java side.
  * 
  * 
  */
-public class TrackSceneNode {
+public class TrackSceneNode implements Comparable<TrackSceneNode> {
 	/** Name of the track */
 	String trackName;
 	String DISId = "N/A_N/A";
@@ -364,5 +366,9 @@ public class TrackSceneNode {
 	}
 
 	public void Update() {
+	}
+	
+	public int compareTo(TrackSceneNode track) {
+		return AlphanumComparator.compare(this.getName(), track.getName());
 	}
 }

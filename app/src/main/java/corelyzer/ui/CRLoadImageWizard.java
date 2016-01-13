@@ -200,105 +200,156 @@ public class CRLoadImageWizard extends JDialog {
 		return newTrack;
 	}
 	
-	private void loadTrackData() {
-		SortedMap<String, TreeSet<String>> map = new TreeMap<String, TreeSet<String>>(new AlphanumComparator.StringAlphanumComparator());
-		SortedMap<String, ImagePropertyTable.ImageProperties> imageProps = new TreeMap<String, ImagePropertyTable.ImageProperties>();
-		Vector<File> dupSecs = new Vector<File>();
-		for (Session s : CoreGraph.getInstance().getSessions()) {
-			for (TrackSceneNode tsn : s.getTrackSceneNodes()) {
-				map.put(tsn.getName(), new TreeSet<String>());
-				for (CoreSection cs : tsn.getCoreSections()) {
-					map.get(tsn.getName()).add(cs.getName());
+	private void dump(Vector<Vector<TrackSectionListElement>> vec, String message) {
+		if (message != null && message.length() > 0) System.out.println(message);
+		for (Vector<TrackSectionListElement> trackVec : vec) {
+			System.out.println("trackVec");
+			for (int i = 0; i < trackVec.size(); i++) {
+				System.out.println("   elt");
+				TrackSectionListElement elt = trackVec.get(i);
+				System.out.println(elt.getName());
+			}
+		}
+	}
+	
+	private void loadTrackData()
+	{
+		if ( newFiles == null )
+			return;
+		
+		Vector<Vector<TrackSectionListElement>> tsVec = new Vector<Vector<TrackSectionListElement>>();
+		Vector<String> apparentTrack = new Vector<String>(); // one per vector (each corresponds to a track) in tsVec
+		Vector<String> trackNameVec = new Vector<String>();
+		Vector<String> sectionNameVec = new Vector<String>();
+		
+		// First, build vector of vectors of existing tracks and sections, one vector per track
+		CoreGraph cg = CoreGraph.getInstance();
+		for ( Session s : cg.getSessions() )
+		{
+			for ( TrackSceneNode tsn : s.getTrackSceneNodes() )
+			{
+				Vector<TrackSectionListElement> trackVec = new Vector<TrackSectionListElement>();
+				boolean firstSection = true;
+				trackNameVec.add( tsn.getName() );
+				
+				// add entry for empty track to keep apparentTrack indices aligned with tracks
+				if ( tsn.getNumCores() == 0 )
+					apparentTrack.add( tsn.getName() );
+				
+				for ( CoreSection cs : tsn.getCoreSections() )
+				{
+					if ( firstSection ) {
+						// make best guess of track name based on name of first section in each
+						// track: thus the Nth element of apparentTrack corresponds to the
+						// Nth element (a track) in tsVec.
+						final String fullTrackID = FileUtility.parseFullTrackID( cs.getName() );
+						if ( fullTrackID == null ) {
+							// couldn't parse track out of filename
+							apparentTrack.add( null );
+						} else {
+							apparentTrack.add( fullTrackID );
+						}
+						firstSection = false;
+					}
+
+					TrackSectionListElement newSection = new TrackSectionListElement(cs.getName(), false);
 					
 					// gather image properties here, while we have access to TrackSceneNode and CoreSection's IDs
-					imageProps.put(cs.getName(), getSectionProperties( tsn.getId(), cs.getId()));
-					
-					// note files whose name matches an existing section
-					for (File f : newFiles) {
-						if (cs.getName().equals(FileUtility.stripExtension(f.getName()))) {
-							dupSecs.add(f);
-						}
-					}
+					newSection.setImageProperties( getSectionProperties(tsn.getId(), cs.getId()));
+
+					trackVec.add(newSection);
+					sectionNameVec.add(cs.getName());
 				}
+				tsVec.add(trackVec);
+			}
+		}
+
+		dump(tsVec, "Existing tracks loaded");
+		
+		// If any loaded files are duplicates of existing sections, remove them
+		Vector<File> cleanedNewFiles = (Vector<File>)newFiles.clone();
+		for ( File f : newFiles )
+		{
+			final String strippedFilename = FileUtility.stripExtension( f.getName() );
+			if ( sectionNameVec.indexOf( strippedFilename ) != -1 ) {
+				System.out.println( "ignoring apparent duplicate section " + strippedFilename );
+				cleanedNewFiles.remove( f );
 			}
 		}
 		
-		if (newFiles == null) return;
-		for (File f : dupSecs) { newFiles.remove(f); } // remove duplicate files		
-
-		Vector<File> unrec = new Vector<File>(); // track unrecognized sections
-		for (File curFile : newFiles) {
-			final String secName = FileUtility.stripExtension(curFile.getName());
-			final String fullTrackID = FileUtility.parseFullTrackID(secName);
-			if (fullTrackID != null) {
-				String trackKey = getTrackKey(map, fullTrackID);
-				if (trackKey != null) {
-					map.get(trackKey).add(secName + "*");
-				} else {
-					TreeSet<String> newSet = new TreeSet<String>(new AlphanumComparator.StringAlphanumComparator());
-					newSet.add(secName + "*");
-					map.put(fullTrackID + "*", newSet);
-				}
+		// For each new file, attempt to find a matching track: add if found, else create a new track vector.
+		// Sections whose names can't be parsed properly are added to an "unrecognized" track so the user can
+		// position them manually if desired.
+		Vector<TrackSectionListElement> unrecognizedSectionsVec = new Vector<TrackSectionListElement>();
+		unrecognizedSectionsVec.add( new TrackSectionListElement( UNRECOGNIZED_SECTIONS_TRACK, false /* prevent renaming */, true ));
+		for ( File curFile : cleanedNewFiles )
+		{
+			System.out.println("Processing " + curFile.getName() + "...");
+			final String strippedFilename = FileUtility.stripExtension( curFile.getName() );
+			TrackSectionListElement newSection = new TrackSectionListElement( strippedFilename, true, false, curFile );
+			
+			
+			final String fullTrackID = FileUtility.parseFullTrackID( strippedFilename );
+			System.out.println("track name = " + fullTrackID);
+			if ( fullTrackID == null )
+			{
+				unrecognizedSectionsVec.add( newSection );
+				continue;
+			}
+			
+			int matchingTrackIndex = -1;
+			if (( matchingTrackIndex = apparentTrack.indexOf( fullTrackID )) != -1 )
+			{
+				// found matching track
+				System.out.println("found matching track = " + apparentTrack.get(matchingTrackIndex));
+				tsVec.get( matchingTrackIndex ).add( newSection );
+				Collections.sort( tsVec.get( matchingTrackIndex ));
+			}
+			else
+			{
+				// no match, create new track and add section to it
+				System.out.println("no match found, creating new track = " + fullTrackID);
+				Vector<TrackSectionListElement> newTrack = new Vector<TrackSectionListElement>();
+				newTrack.add( newSection );
+				tsVec.add( newTrack );
+				apparentTrack.add( fullTrackID );
+			}
+		}
+		
+		dump(tsVec, "After adding new files");
+		
+		// now that they won't disrupt sorting, add track elements
+		int oldTrackIndex = 0, newTrackIndex = 1;
+		for ( Vector<TrackSectionListElement> trackVec : tsVec )
+		{
+			if ( oldTrackIndex < trackNameVec.size() ) {
+				trackVec.insertElementAt( new TrackSectionListElement( trackNameVec.elementAt( oldTrackIndex ), false, true ), 0 );
+				oldTrackIndex++;
 			} else {
-				unrec.add(curFile);
+				String newTrackName = FileUtility.parseFullTrackID( trackVec.elementAt( 0 ).getName() );
+				if ( newTrackName == null )
+					newTrackName = "New Track" + newTrackIndex++;
+				trackVec.insertElementAt( new TrackSectionListElement( newTrackName, true, true ), 0 );
 			}
 		}
+		
+		dump(tsVec, "After adding new tracks");
 
-		Vector<Vector<TrackSectionListElement>> tsVec = new Vector<Vector<TrackSectionListElement>>();
-		for (String key : map.keySet()) {
-			//System.out.println(key + ": ");
-			
-			final boolean isNew = key.endsWith("*");
-			final String listKey = isNew ? key.substring(0, key.length() - 1) : key; // strip off asterisk 
-			Vector<TrackSectionListElement> track = new Vector<TrackSectionListElement>();
-			TrackSectionListElement trackElt = new TrackSectionListElement(listKey, isNew, true);
-			track.add(trackElt);
-			for (String val : map.get(key)) {
-				//System.out.println("   " + val);
-				final boolean newSec = val.endsWith("*");
-				if (newSec) { val = val.substring(0, val.length() - 1);	}
-				
-				TrackSectionListElement newElt = new TrackSectionListElement(val, newSec, false, findSourceFile(val));
-				if (!newSec) { // set image properties for existing sections
-					newElt.setImageProperties(imageProps.get(val));
-				}
-				track.add(newElt);
-			}
-			
-			tsVec.add(track);
-		}
+		Collections.sort(tsVec, new AlphanumComparator.TrackAlphanumComparator());
 		
-		Vector<TrackSectionListElement> unrecVec = new Vector<TrackSectionListElement>();
-		unrecVec.add(new TrackSectionListElement(UNRECOGNIZED_SECTIONS_TRACK, false /* prevent renaming */, true));
-		for (File f : unrec) {
-			unrecVec.add(new TrackSectionListElement(FileUtility.stripExtension(f.getName()), true, false, f));
-		}
+		dump(tsVec, "After sorting tracks");
+
 		
-		// add unrecognized sections vector if it contains any sections.
-		if ( unrecVec.size() > 1 ) {
-			tsVec.add(unrecVec);
+		// finally, add unrecognized sections vector if it contains any sections (remember that the first element
+		// represents the track).
+		if ( unrecognizedSectionsVec.size() > 1 )
+		{
+			tsVec.add(unrecognizedSectionsVec);
 			JOptionPane.showMessageDialog( this, "One or more images could not be auto-sorted. They have been added to the Unrecognized Sections" +
 					"\nlist and should be moved. Images remaining in Unrecognized Sections will not be loaded." );
 		}
 		
 		trackSectionModel = new TrackSectionListModel(tsVec);
-	}
-	
-	private String getTrackKey(Map map, String trackID) {
-		if (map.containsKey(trackID)) return trackID;
-		if (map.containsKey(trackID + "*")) return trackID + "*";
-		return null;		
-	}
-	
-	private File findSourceFile(String secName) {
-		File srcFile = null;
-		for (File f : newFiles) {
-			if (f.getName().startsWith(secName)) {
-				srcFile = f;
-				break;
-			}
-		}
-		return srcFile;
 	}
 	
 	private void onConfirmLoad()
@@ -324,10 +375,10 @@ public class CRLoadImageWizard extends JDialog {
 					continue;
 				
 				curTrack = createTrack( session, trackElt.getName() );
-			}
-			else {
+			} else {
 				curTrack = session.getTrackSceneNodeWithName(trackElt.getName());
 			}
+
 			if ( curTrack != null )
 			{
 				for ( int eltIndex = 1; eltIndex < trackVec.size(); eltIndex++ )
@@ -377,6 +428,8 @@ public class CRLoadImageWizard extends JDialog {
 		
 		progress.setString("Section image loading complete");
 		progress.setValue(0);
+		
+		session.sortTracks();
 	}
 	
 	private void initializeSectionImageProperties()

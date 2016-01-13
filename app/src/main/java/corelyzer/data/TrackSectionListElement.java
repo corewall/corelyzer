@@ -1,8 +1,11 @@
 package corelyzer.data;
 
 import java.io.File;
+//import java.util.Comparable;
 
-public class TrackSectionListElement {
+import corelyzer.ui.AlphanumComparator;
+
+public class TrackSectionListElement implements Comparable<TrackSectionListElement> {
 	private File imageFile = null;  // should be non-null for new sections
 	private String name = null;
 	private boolean isNew = false;
@@ -45,4 +48,8 @@ public class TrackSectionListElement {
 	public void setImageProperties( final ImagePropertyTable.ImageProperties props ) { this.props = props; }
 	
 	public String toString() { return name; } // to render properly in JList
+	
+	public int compareTo(TrackSectionListElement elt) {
+		return AlphanumComparator.compare(this.getName(), elt.getName());
+	}
 }
