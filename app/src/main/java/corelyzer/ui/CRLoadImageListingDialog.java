@@ -44,6 +44,7 @@ import java.util.List;
 import java.util.Vector;
 
 import javax.swing.*;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.event.*;
 
 import org.chronos.util.j2k.J2KUtils;
@@ -450,18 +451,15 @@ public class CRLoadImageListingDialog extends JDialog {
 		JOptionPane.showMessageDialog(this, "Save Image Listing File\n\n" + "only supports Comma Delimited Files (.csv)\n"
 				+ "File will inlcude below values in each line.\n" + "filename, orientation, length, dpix, dpiy, depth");
 
-		// String saveFile = FileUtility.selectASingleFile(this,
-		// "Save a image list file...",
-		// "csv", FileUtility.SAVE);
-		String saveFile = FileUtility.selectSingleFile(this, "Save an image list file", "csv", FileUtility.SAVE);
+		JFileChooser chooser = new JFileChooser();
+		chooser.setFileFilter(new FileNameExtensionFilter("Comma Separated Values (.csv)", "csv"));
+		File selectedFile = null;
+		if (chooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION)
+			selectedFile = chooser.getSelectedFile();
 
-		if (saveFile == null) {
-			return;
-		}
+		if (selectedFile == null) return;
 
-		File selectedFile = new File(saveFile);
-
-		// make sure it has .cvs at the end
+		// make sure it has .csv at the end
 		String path = selectedFile.getAbsolutePath();
 		path = path.replace('\\', '/');
 		String[] toks = path.split(delimiter);
@@ -511,24 +509,31 @@ public class CRLoadImageListingDialog extends JDialog {
 			e.printStackTrace();
 		}
 	}
+	
+	private int showContinueAbortMessage(String message, String title) {
+		Object[] options = { "Continue", "Abort" };
+		int response = JOptionPane.showOptionDialog(this, message, title, JOptionPane.YES_NO_OPTION, JOptionPane.ERROR_MESSAGE, null, options, options[0]);
+		return response;
+	}
 
 	// load user processed csv file
 	// each line inlcudes five tuples
 	// filename, orientation, length, dpix, dpiy, depth
 	private void selectAndLoadCSVFileToList(final String delimiter) {
 		// show up general info message
-		JOptionPane.showMessageDialog(this, "Open Image Listing File\n\n" + "Only supports Comma Delimited Files (.csv)\n"
-				+ "File must follow below format in each line.\n" + "filename, orientation, length, dpix, dpiy, depth");
+		JOptionPane.showMessageDialog(this, "Image Listing Files must be in Comma Separated Values (.csv) format.\n\n"
+				+ "- Format each line as follows:\n" + "filename (including extension), orientation, length (cm), dpix, dpiy, depth (m)\n\n"
+				+ "- Orientation must be 'Horizontal' or 'Vertical' (excluding quotes).\n"
+				+ "- Headers and comment lines, if included, must start with # to avoid errors.");
 
-		// String aFileStr = FileUtility.selectASingleFile(this,
-		// "Load a image list file...", "csv", FileUtility.LOAD);
-		String aFileStr = FileUtility.selectSingleFile(this, "Load an image list file", "csv", FileUtility.LOAD);
+		JFileChooser chooser = new JFileChooser();
+		chooser.setFileFilter(new FileNameExtensionFilter("Comma Separated Values (.csv)", "csv"));
+		File selectedFile = null;
+		if (chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION)
+			selectedFile = chooser.getSelectedFile();
 
-		if (aFileStr == null) {
-			return;
-		}
+		if (selectedFile == null) return;
 
-		File selectedFile = new File(aFileStr);
 		String basePath = new File(selectedFile.getParent()).getAbsolutePath();
 
 		// vars for each tuples
@@ -539,12 +544,15 @@ public class CRLoadImageListingDialog extends JDialog {
 			BufferedReader reader = new BufferedReader(new FileReader(selectedFile));
 			String line;
 			String[] toks;
-			int nLine = 0;
+			int nLine = 1;
 			while ((line = reader.readLine()) != null) {
+				if (line.startsWith("#")) continue; // skip header/comment lines
 				toks = line.split(delimiter);
 				if (toks.length != 6) {
-					JOptionPane.showMessageDialog(this, "Line format error!\n\n" + "Line does not have 6 separate values.\n" + "File: " + selectedFile + "\n"
-							+ "Line: " + nLine + "\n" + line);
+					String errmsg = "Line format error!\n\n" + "Line does not have 6 separate values.\n" + 
+									"File: " + selectedFile + "\n" + "Line: " + nLine + "\n" + line;
+					if (showContinueAbortMessage(errmsg, "Error") == JOptionPane.NO_OPTION)
+						break;
 					nLine++;
 					continue;
 				}
@@ -560,7 +568,9 @@ public class CRLoadImageListingDialog extends JDialog {
 				}
 
 				if (!validated) {
-					JOptionPane.showMessageDialog(this, "Missing value found!\n\n" + "File: " + selectedFile + "\n" + "Line: " + nLine + "\n" + line);
+					String errmsg = "Missing value found!\n\n" + "File: " + selectedFile + "\n" + "Line: " + nLine + "\n" + line;
+					if (showContinueAbortMessage(errmsg, "Error") == JOptionPane.NO_OPTION)
+						break;
 					nLine++;
 					continue;
 				}
@@ -577,8 +587,9 @@ public class CRLoadImageListingDialog extends JDialog {
 					if (imageFile.exists()) {
 						filepath = imageFile.getAbsolutePath();
 					} else {
-						String mesg = "Image file '" + toks[0] + "' doesn't exist";
-						JOptionPane.showMessageDialog(this, mesg);
+						String errmsg = "Image file '" + toks[0] + "' doesn't exist";
+						if (showContinueAbortMessage(errmsg, "Error") == JOptionPane.NO_OPTION)
+							break;
 						continue;
 					}
 				}
@@ -593,7 +604,7 @@ public class CRLoadImageListingDialog extends JDialog {
 				nLine++;
 			}
 		} catch (Exception e) {
-			String mesg = "Image List File Parse error";
+			String mesg = "Image List File Parsing error";
 			JOptionPane.showMessageDialog(this, mesg);
 			System.err.println(mesg + ": " + e);
 		}
