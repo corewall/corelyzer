@@ -196,6 +196,18 @@ public class CRLoadImageWizard extends JDialog {
 		return newTrack;
 	}
 	
+	private void dump(Vector<Vector<TrackSectionListElement>> vec, String message) {
+		if (message != null && message.length() > 0) System.out.println(message);
+		for (Vector<TrackSectionListElement> trackVec : vec) {
+			System.out.println("trackVec");
+			for (int i = 0; i < trackVec.size(); i++) {
+				System.out.println("   elt");
+				TrackSectionListElement elt = trackVec.get(i);
+				System.out.println(elt.getName());
+			}
+		}
+	}
+	
 	private void loadTrackData()
 	{
 		if ( newFiles == null )
@@ -249,6 +261,8 @@ public class CRLoadImageWizard extends JDialog {
 			}
 		}
 		
+		dump(tsVec, "Existing tracks loaded");
+		
 		// If any loaded files are duplicates of existing sections, remove them
 		Vector<File> cleanedNewFiles = (Vector<File>)newFiles.clone();
 		for ( File f : newFiles )
@@ -267,11 +281,13 @@ public class CRLoadImageWizard extends JDialog {
 		unrecognizedSectionsVec.add( new TrackSectionListElement( UNRECOGNIZED_SECTIONS_TRACK, false /* prevent renaming */, true ));
 		for ( File curFile : cleanedNewFiles )
 		{
+			System.out.println("Processing " + curFile.getName() + "...");
 			final String strippedFilename = FileUtility.stripExtension( curFile.getName() );
 			TrackSectionListElement newSection = new TrackSectionListElement( strippedFilename, true, false, curFile );
 			
 			
-			final String fullTrackID = FileUtility.parseFullTrackID( strippedFilename ); 
+			final String fullTrackID = FileUtility.parseFullTrackID( strippedFilename );
+			System.out.println("track name = " + fullTrackID);
 			if ( fullTrackID == null )
 			{
 				unrecognizedSectionsVec.add( newSection );
@@ -282,20 +298,22 @@ public class CRLoadImageWizard extends JDialog {
 			if (( matchingTrackIndex = apparentTrack.indexOf( fullTrackID )) != -1 )
 			{
 				// found matching track
+				System.out.println("found matching track = " + apparentTrack.get(matchingTrackIndex));
 				tsVec.get( matchingTrackIndex ).add( newSection );
-				Collections.sort( tsVec.get( matchingTrackIndex ), new AlphanumComparator.TSLEAlphanumComparator() );
+				Collections.sort( tsVec.get( matchingTrackIndex ));
 			}
 			else
 			{
 				// no match, create new track and add section to it
+				System.out.println("no match found, creating new track = " + fullTrackID);
 				Vector<TrackSectionListElement> newTrack = new Vector<TrackSectionListElement>();
 				newTrack.add( newSection );
 				tsVec.add( newTrack );
 				apparentTrack.add( fullTrackID );
 			}
-			
-			Collections.sort(tsVec, new AlphanumComparator.TrackAlphanumComparator());
 		}
+		
+		dump(tsVec, "After adding new files");
 		
 		// now that they won't disrupt sorting, add track elements
 		int oldTrackIndex = 0, newTrackIndex = 1;
@@ -311,6 +329,13 @@ public class CRLoadImageWizard extends JDialog {
 				trackVec.insertElementAt( new TrackSectionListElement( newTrackName, true, true ), 0 );
 			}
 		}
+		
+		dump(tsVec, "After adding new tracks");
+
+		Collections.sort(tsVec, new AlphanumComparator.TrackAlphanumComparator());
+		
+		dump(tsVec, "After sorting tracks");
+
 		
 		// finally, add unrecognized sections vector if it contains any sections (remember that the first element
 		// represents the track).
@@ -350,7 +375,7 @@ public class CRLoadImageWizard extends JDialog {
 				curTrack = createTrack( session, trackElt.getName() );
 			}
 			else
-				curTrack = session.getTrackSceneNodeWithIndex( tsVecIndex );
+				curTrack = session.getTrackSceneNodeWithName( trackElt.getName() );
 			if ( curTrack != null )
 			{
 				for ( int eltIndex = 1; eltIndex < trackVec.size(); eltIndex++ )
@@ -400,6 +425,8 @@ public class CRLoadImageWizard extends JDialog {
 		
 		progress.setString("Section image loading complete");
 		progress.setValue(0);
+		
+		session.sortTracks();
 	}
 	
 	private void initializeSectionImageProperties()

@@ -3,6 +3,7 @@ package corelyzer.ui;
 import java.io.File;
 import java.lang.reflect.Field;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Vector;
 
 import javax.swing.JFileChooser;
@@ -35,7 +36,9 @@ public class LoadImageChooser extends JFileChooser {
 		// @Override
 		public void sort(Vector<? extends File> v) {
 			// override sort to use my own sorting method
-			Collections.sort(v, new AlphanumComparator.FileAlphanumComparator());
+			Collections.sort(v, new Comparator<File>() {
+				public int compare(File f1, File f2) { return AlphanumComparator.compare(f1.getName(), f2.getName()); }
+			});
 		}
 	}
 
