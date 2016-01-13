@@ -1073,14 +1073,6 @@ JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_highlightSection
 
 /*
  * Class:     corelyzer_graphics_SceneGraph
- * Method:    highlightSections
- * Signature: (I[I)I
- */
-JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_highlightSections
-  (JNIEnv *, jclass, jint, jintArray);
-
-/*
- * Class:     corelyzer_graphics_SceneGraph
  * Method:    hitMarker
  * Signature: (IIIIFF)Z
  */
@@ -1198,14 +1190,6 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_moveFreeDrawRectangle
  */
 JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_moveSection
   (JNIEnv *, jclass, jint, jint, jfloat, jfloat);
-
-/*
- * Class:     corelyzer_graphics_SceneGraph
- * Method:    moveSections
- * Signature: (I[IFF)V
- */
-JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_moveSections
-  (JNIEnv *, jclass, jint, jintArray, jfloat, jfloat);
 
 /*
  * Class:     corelyzer_graphics_SceneGraph
