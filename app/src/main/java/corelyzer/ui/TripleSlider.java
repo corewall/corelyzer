@@ -60,7 +60,7 @@ public class TripleSlider extends JPanel {
 		pixMax_ = DEFAULT_WIDTH - THUMB_SIZE - 1;
 		pixMax_ = DEFAULT_WIDTH - THUMB_SIZE - 1;
 		width_ = DEFAULT_WIDTH;
-		setSize(width_, DEFAULT_HEIGHT + TEXT_HEIGHT /* ó+ TEXT_BUFFER */);
+		setSize(width_, DEFAULT_HEIGHT + TEXT_HEIGHT /* + TEXT_BUFFER */);
 		setValues(0.33333, 0.33333);
 		setColor(0, Color.green);
 		setColor(1, Color.gray);
