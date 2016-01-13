@@ -1242,13 +1242,8 @@ public class CorelyzerAppController implements ActionListener {
 			new Thread(loading).start();
 
 			if (!openFile.getName().equals("previousSession.cml")) {
-				Vector<String> hst = view.preferences().getSessionHistory();
-				if (!hst.contains(openFile.getAbsolutePath())) {
-					view.preferences().getSessionHistory().add(openFile.getAbsolutePath());
-				}
+				addSessionToHistoryMenu(openFile.getAbsolutePath());
 			}
-
-			refreshSessionHistoryMenu();
 
 			// view.updateGLWindows();
 		} else {
@@ -1257,6 +1252,15 @@ public class CorelyzerAppController implements ActionListener {
 
 		view.setCurrentSessionFile(filename);
 		CRPreferences.setCurrentDir(openFile.getParent());
+	}
+	
+	private void addSessionToHistoryMenu(String sessionPath) {
+		Vector<String> hst = view.preferences().getSessionHistory();
+		String forwardSlashPath = sessionPath.replace('\\', '/');
+		if (!hst.contains(forwardSlashPath)) {
+			view.preferences().getSessionHistory().add(forwardSlashPath);
+		}
+		refreshSessionHistoryMenu();
 	}
 
 	// --------------------------------------------------------------------------
@@ -1700,27 +1704,36 @@ public class CorelyzerAppController implements ActionListener {
 		return saveStateToFile(null);
 	}
 
-	private boolean saveStateToFile(final String aFilePath) {
-		// only save selected sessions
-		SessionsSelectDialog s = new SessionsSelectDialog(view.getMainFrame());
-		s.pack();
-		s.setLocationRelativeTo(view.getMainFrame());
-		s.setVisible(true);
+	private boolean saveStateToFile(final String filePath) {
+		CoreGraph cg = CoreGraph.getInstance();
+		boolean[] isSelected = null;
+		String suggestedName = null;
+		if (cg.getNumberOfSessions() > 1) {
+			// only save selected sessions
+			SessionsSelectDialog s = new SessionsSelectDialog(view.getMainFrame());
+			s.pack();
+			s.setLocationRelativeTo(view.getMainFrame());
+			s.setVisible(true);
 
-		final boolean[] isSelected = s.getSelectedIndex();
-		final String suggestedName = s.getSelectedIndexName();
-		s.dispose();
+			isSelected = s.getSelectedIndex();
+			suggestedName = s.getSelectedIndexName();
+			s.dispose();
+		} else {
+			isSelected = new boolean[1];
+			isSelected[0] = true;
+			suggestedName = CoreGraph.getInstance().getCurrentSession().getName();
+		}
 
 		if (isSelected == null) {
 			return false;
 		}
 
 		String selected;
-		if (aFilePath == null || aFilePath.equals("")) {
+		if (filePath == null || filePath.equals("")) {
 			String title = "Save a Session file";
 			selected = FileUtility.selectASingleFile(view.getMainFrame(), title, "cml", FileUtility.SAVE, suggestedName);
 		} else {
-			selected = aFilePath;
+			selected = filePath;
 		}
 
 		if (selected != null) {
@@ -1738,12 +1751,7 @@ public class CorelyzerAppController implements ActionListener {
 				JOptionPane.showMessageDialog(view.getMainFrame(), "Failed");
 			}
 
-			// Save to history vector
-			Vector<String> hst = view.preferences().getSessionHistory();
-			if (!hst.contains(path)) {
-				view.preferences().getSessionHistory().add(path);
-			}
-			this.refreshSessionHistoryMenu();
+			addSessionToHistoryMenu(path);
 
 			if (writeResult) {
 				view.setCurrentSessionFile(new File(selected).getName());
