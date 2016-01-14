@@ -2196,11 +2196,18 @@ public class CorelyzerApp extends WindowAdapter implements MouseListener, Startu
 	}
 	
 	private void updateHighlightedSections() {
-		int[] indices = sectionList.getSelectedIndices();
-		CoreGraph cg = CoreGraph.getInstance();
-		cg.setCurrentSectionIndices(indices);
+		// gather native section IDs from selected CoreSections
+		Object[] sections = sectionList.getSelectedValues();
+		int[] secids = new int[sections.length];
+		for (int i = 0; i < sections.length; i++) {
+			CoreSection cs = (CoreSection)sections[i];
+			secids[i] = (cs != null ? cs.getId() : -1);
+		}
+		
+		CoreGraph.getInstance().setCurrentSectionIndices(secids);
+		
 		final int trackId = getSelectedTrack().getId();
-		SceneGraph.highlightSections(trackId, indices);
+		SceneGraph.highlightSections(trackId, secids);
 
 		updateGLWindows();
 	}

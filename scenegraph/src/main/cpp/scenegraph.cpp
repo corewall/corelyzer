@@ -1790,7 +1790,6 @@ JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_highlightSections
 		} else { printf("track %d not found!\n", tidx); }
 	}
 
-
 	// now highlight selected sections
 	TrackSceneNode *trackToHighlight = get_scene_track(default_track_scene, track);
 	if (trackToHighlight) {
@@ -1798,18 +1797,11 @@ JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_highlightSections
 		const jsize selSecCount = jenv->GetArrayLength(sectionArray);
 		const int secCount = trackToHighlight->modelvec.size();
 		CoreSection *lastSec = NULL;
-		for (int i = 0; i < secCount; i++) {
-			bool highlight = false;
-			for (int j = 0; j < selSecCount && !highlight; j++) { // is section selected?
-				if (selSecs[j] == i) {
-					highlight = true;
-				}
-			}
-			if (highlight) {
-				CoreSection *sec = get_track_section(trackToHighlight, i);
-				if (sec) { sec->highlight = true; } else { printf("sec %d not found, can't highlight!\n", i); }
-				if (!lastSec) { lastSec = sec; }
-			}
+		for (int i = 0; i < selSecCount; i++) {
+			const int sectionID = selSecs[i];
+			CoreSection *sec = get_track_section(trackToHighlight, sectionID);
+			if (sec) { sec->highlight = true; } else { printf("sec %d not found, can't highlight!\n", i); }
+			if (sec && !lastSec) { lastSec = sec; }
 		}
 
 		if (selSecCount > 0) {
@@ -1904,7 +1896,8 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_moveSections
 	const jsize moveSecCount = jenv->GetArrayLength(secArray);
 	for (int i = 0; i < moveSecCount; i++) {
 		CoreSection *cs = get_track_section(t, moveSecs[i]);
-		move_section(cs, dx, dy);
+		if (cs)
+			move_section(cs, dx, dy);
 	}
 
 	jenv->ReleaseIntArrayElements(secArray, moveSecs, 0);

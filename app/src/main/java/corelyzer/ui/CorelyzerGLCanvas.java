@@ -1292,7 +1292,7 @@ public class CorelyzerGLCanvas implements GLEventListener, MouseListener, MouseW
 		} else {
 			if (e.isAltDown()) // slide track section
 			{
-				// TODO consider seperate move of section image and graph
+				// TODO consider separate move of section image and graph
 				// moveSectionImage & moveSectionGraph
 				if (selectedTrack >= 0 && selectedTrackSection >= 0) {
 					if (canvas.getCursor().getType() != Cursor.HAND_CURSOR) {
@@ -1311,7 +1311,13 @@ public class CorelyzerGLCanvas implements GLEventListener, MouseListener, MouseW
 						// moving graph instead of whole section
 						SceneGraph.moveSectionGraph(selectedTrack, selectedTrackSection, tX, tY);
 					} else {
-						SceneGraph.moveSections(selectedTrack, CorelyzerApp.getApp().getSectionList().getSelectedIndices(), tX, tY);
+						Object[] sections = CorelyzerApp.getApp().getSectionList().getSelectedValues();
+						int[] secids = new int[sections.length];
+						for (int i = 0; i < sections.length; i++) {
+							CoreSection cs = (CoreSection)sections[i];
+							secids[i] = (cs != null ? cs.getId() : -1);
+						}
+						SceneGraph.moveSections(selectedTrack, secids, tX, tY);
 					}
 
 					// broadcast event to plugins
