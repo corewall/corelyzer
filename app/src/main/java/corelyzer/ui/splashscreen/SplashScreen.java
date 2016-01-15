@@ -55,7 +55,7 @@ public class SplashScreen extends JWindow {
 			ex.printStackTrace();
 		}
 
-		this.setAlwaysOnTop(true);
+		this.setAlwaysOnTop(false);
 	}
 
 	// note - this class created with JBuilder
