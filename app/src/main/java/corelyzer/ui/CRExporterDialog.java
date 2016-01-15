@@ -284,8 +284,14 @@ public class CRExporterDialog extends JDialog {
 		Object[] options = { "No", "Yes" };
 		String sp = System.getProperty("file.separator");
 
-		// -- Prepare project directories
-		String tmpDirPath = app.preferences.tmp_Directory + sp + proj_name;
+		// Prepare project directories
+		// brg 1/15/2016: Create tmpDirPath through File to ensure a directory path
+		// not ending in a path separator regardless of whether app.preferences.tmp_Directory
+		// does or not. A tmpDirPath ending in a path separator will result in bogus names
+		// when writing to Zip
+		File tmpDirFile = new File(app.preferences.tmp_Directory);
+		String tmpDirPath = new File(tmpDirFile, proj_name).getAbsolutePath();
+
 		String imgDirPath = tmpDirPath + sp + "images";
 		String dataDirPath = tmpDirPath + sp + "datasets";
 		String annoDirPath = tmpDirPath + sp + "annotations";
