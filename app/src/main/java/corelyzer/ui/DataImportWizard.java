@@ -70,7 +70,7 @@ import org.w3c.dom.Element;
 
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamWriter;
-import com.sun.xml.internal.txw2.output.IndentingXMLStreamWriter;
+import javanet.staxutils.IndentingXMLStreamWriter;
 
 import corelyzer.helper.ExampleFileFilter;
 

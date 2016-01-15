@@ -45,6 +45,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.List;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
@@ -896,7 +897,6 @@ public class CorelyzerApp extends WindowAdapter implements MouseListener, Startu
 	}
 
 	public void mouseClicked(final MouseEvent e) {
-
 		if (e.getClickCount() == 2) { // double clicks
 			Object actionSource = e.getSource();
 
@@ -2030,6 +2030,7 @@ public class CorelyzerApp extends WindowAdapter implements MouseListener, Startu
 				if (idx >= 0) {
 					CoreGraph cg = CoreGraph.getInstance();
 					cg.setCurrentTrackIdx(idx);
+					updateHighlightedSections();
 				}
 			}
 		});
@@ -2044,11 +2045,9 @@ public class CorelyzerApp extends WindowAdapter implements MouseListener, Startu
 		sectionList.setName("SectionList");
 		sectionList.addListSelectionListener(new ListSelectionListener() {
 			public void valueChanged(final ListSelectionEvent event) {
-				int idx = sectionList.getSelectedIndex();
-				if (idx >= 0) {
-					CoreGraph cg = CoreGraph.getInstance();
-					cg.setCurrentSectionIdx(idx);
-				}
+				if (event.getValueIsAdjusting())
+					return;
+				updateHighlightedSections();
 			}
 		});
 		sectionList.addMouseListener(this);
@@ -2194,6 +2193,23 @@ public class CorelyzerApp extends WindowAdapter implements MouseListener, Startu
 		StateLoader stateLoader = new StateLoader();
 		stateLoader.loadState(filename);
 		app.updateGLWindows();
+	}
+	
+	private void updateHighlightedSections() {
+		// gather native section IDs from selected CoreSections
+		Object[] sections = sectionList.getSelectedValues();
+		int[] secids = new int[sections.length];
+		for (int i = 0; i < sections.length; i++) {
+			CoreSection cs = (CoreSection)sections[i];
+			secids[i] = (cs != null ? cs.getId() : -1);
+		}
+		
+		CoreGraph.getInstance().setCurrentSectionIndices(secids);
+		
+		final int trackId = getSelectedTrack().getId();
+		SceneGraph.highlightSections(trackId, secids);
+
+		updateGLWindows();
 	}
 
 	/**

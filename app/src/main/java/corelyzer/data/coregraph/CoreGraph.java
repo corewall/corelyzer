@@ -46,7 +46,7 @@ public class CoreGraph {
 	Vector<Session> sessionVec;
 	int currentSessionIdx = -1;
 	int currentTrackIdx = -1;
-	int currentSectionIdx = -1;
+	int[] currentSectionIndices = {};
 	int currentDatasetIdx = -1;
 
 	int currentFieldIdx = -1;
@@ -125,16 +125,22 @@ public class CoreGraph {
 			TrackSceneNode t = s.getTrackSceneNodeWithIndex(currentTrackIdx);
 
 			if (t != null) {
-				return t.getCoreSection(currentSectionIdx);
+				return t.getCoreSection(this.getCurrentSectionIdx());
 			}
 		}
 
 		return null;
 	}
 
+	// return first selected section
 	public int getCurrentSectionIdx() {
-		return currentSectionIdx;
+		int result = -1;
+		if (this.currentSectionIndices.length > 0)
+			result = this.currentSectionIndices[0];
+		return result;
 	}
+	
+	public int[] getCurrentSectionIndices() { return this.currentSectionIndices; }
 
 	public Session getCurrentSession() {
 		if (currentSessionIdx < 0) {
@@ -324,7 +330,15 @@ public class CoreGraph {
 	}
 
 	public void setCurrentSectionIdx(final int idx) {
-		this.currentSectionIdx = idx;
+		if (idx != -1)
+			this.currentSectionIndices = new int[]{ idx };
+		else
+			this.currentSectionIndices = new int[]{};
+		notifyListeners();
+	}
+	
+	public void setCurrentSectionIndices(final int[] indices) {
+		this.currentSectionIndices = indices;
 		notifyListeners();
 	}
 

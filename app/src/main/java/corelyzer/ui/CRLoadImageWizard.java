@@ -12,6 +12,8 @@ import java.util.Vector;
 import javax.swing.*;
 import javax.swing.event.*;
 
+import java.util.*;
+
 import net.miginfocom.swing.MigLayout;
 
 import corelyzer.data.*;
@@ -48,7 +50,7 @@ public class CRLoadImageWizard extends JDialog {
 		super(owner);
 		this.newFiles = newFiles;
 		
-		loadTrackData();		
+		loadTrackData();
 		setupUI();
 		updateUI();
 	}
@@ -57,7 +59,7 @@ public class CRLoadImageWizard extends JDialog {
 	private void updateUI()
 	{
 		contentPane.removeAll();
-		contentPane.add( activePane, "growy" );
+		contentPane.add( activePane, "growx, growy" );
 		
 		if ( activePane.equals( sectionListPane ))
 		{
@@ -115,6 +117,8 @@ public class CRLoadImageWizard extends JDialog {
 			imagePropertiesPane.updateSectionProperties();
 			firstOpenOfPropertiesPane = false;
 		}
+		
+		sectionListPane.saveLasts();
 
 		activePane = imagePropertiesPane;
 
@@ -143,10 +147,10 @@ public class CRLoadImageWizard extends JDialog {
 	// create UI components, they'll be added to the content pane in updateUI()
 	private void setupUI()
 	{
-		sectionListPane = new SectionListPane( trackSectionModel );
-		imagePropertiesPane = new ImagePropertiesPane( trackSectionModel );
+		sectionListPane = new SectionListPane(trackSectionModel);
+		imagePropertiesPane = new ImagePropertiesPane(trackSectionModel);
 
-		contentPane = new JPanel( new MigLayout( "filly, wrap 1", "[]15[]", "[c,grow 100,fill][c,grow 0,fill]"));
+		contentPane = new JPanel( new MigLayout( "filly, wrap 1", "[grow]15[]", "[c,grow 100,fill][c,grow 0,fill]"));
 		
 		cancelButton = new JButton("Cancel");
 		cancelButton.addActionListener( new ActionListener() {
@@ -247,20 +251,19 @@ public class CRLoadImageWizard extends JDialog {
 						}
 						firstSection = false;
 					}
-					
-					TrackSectionListElement newSection = new TrackSectionListElement( cs.getName(), false );
-					
-					// grab properties from scenegraph
-					newSection.setImageProperties( getSectionProperties( tsn.getId(), cs.getId() ));
 
-					trackVec.add( newSection );
-					sectionNameVec.add( cs.getName() );
+					TrackSectionListElement newSection = new TrackSectionListElement(cs.getName(), false);
+					
+					// gather image properties here, while we have access to TrackSceneNode and CoreSection's IDs
+					newSection.setImageProperties( getSectionProperties(tsn.getId(), cs.getId()));
+
+					trackVec.add(newSection);
+					sectionNameVec.add(cs.getName());
 				}
-				
-				tsVec.add( trackVec );
+				tsVec.add(trackVec);
 			}
 		}
-		
+
 		dump(tsVec, "Existing tracks loaded");
 		
 		// If any loaded files are duplicates of existing sections, remove them
@@ -341,12 +344,12 @@ public class CRLoadImageWizard extends JDialog {
 		// represents the track).
 		if ( unrecognizedSectionsVec.size() > 1 )
 		{
-			tsVec.add( unrecognizedSectionsVec );
+			tsVec.add(unrecognizedSectionsVec);
 			JOptionPane.showMessageDialog( this, "One or more images could not be auto-sorted. They have been added to the Unrecognized Sections" +
 					"\nlist and should be moved. Images remaining in Unrecognized Sections will not be loaded." );
 		}
 		
-		trackSectionModel = new TrackSectionListModel( tsVec );
+		trackSectionModel = new TrackSectionListModel(tsVec);
 	}
 	
 	private void onConfirmLoad()
@@ -361,9 +364,8 @@ public class CRLoadImageWizard extends JDialog {
 		
 		Session session = CoreGraph.getInstance().getCurrentSession();
 		
-		for ( int tsVecIndex = 0; tsVecIndex < tsVec.size(); tsVecIndex++ )
+		for (Vector<TrackSectionListElement> trackVec : tsVec)
 		{
-			Vector<TrackSectionListElement> trackVec = tsVec.elementAt( tsVecIndex );
 			TrackSceneNode curTrack = null;
 			final TrackSectionListElement trackElt = trackVec.elementAt( 0 );
 			if ( trackElt.isNewTrack() )
@@ -373,9 +375,10 @@ public class CRLoadImageWizard extends JDialog {
 					continue;
 				
 				curTrack = createTrack( session, trackElt.getName() );
+			} else {
+				curTrack = session.getTrackSceneNodeWithName(trackElt.getName());
 			}
-			else
-				curTrack = session.getTrackSceneNodeWithName( trackElt.getName() );
+
 			if ( curTrack != null )
 			{
 				for ( int eltIndex = 1; eltIndex < trackVec.size(); eltIndex++ )
@@ -409,7 +412,7 @@ public class CRLoadImageWizard extends JDialog {
 					else
 					{
 						// if sections were inserted, need to adjust existing sections' depth
-						final int sectionId = curTrack.getCoreSection( sectionElt.getName() ).getId();
+						final int sectionId = curTrack.getCoreSection(sectionElt.getName()).getId();
 						final float oldDepthInCM = SceneGraph.getSectionDepth( curTrack.getId(), sectionId );
 						final float newDepthInCM = sectionElt.getImageProperties().depth * 100.0f; // convert m to cm
 						final float depthChangeInPix = ( newDepthInCM - oldDepthInCM ) * SceneGraph.getCanvasDPIX( 0 ) * ( 1.0f / 2.54f );
@@ -513,6 +516,7 @@ class SectionListPane extends JPanel implements ListSelectionListener {
 	private JTextField dpiXField, dpiYField;
 	private JList trackSectionList;
 	private TrackSectionListModel trackSectionModel;
+	private static String lastDpiX = "508", lastDpiY = "508", lastOrientation = "Horizontal"; 
 	
 	public SectionListPane( TrackSectionListModel trackSectionModel )
 	{
@@ -522,6 +526,12 @@ class SectionListPane extends JPanel implements ListSelectionListener {
 		setupUI();
 		
 		trackSectionList.setModel( trackSectionModel );
+	}
+	
+	void saveLasts() {
+		lastDpiX = dpiXField.getText();
+		lastDpiY = dpiYField.getText();
+		lastOrientation = getOrientation();
 	}
 	
 	// The lone ListSelectionListener interface method
@@ -583,6 +593,10 @@ class SectionListPane extends JPanel implements ListSelectionListener {
 	{
 		String orientationStr = ( orientationComboBox.getSelectedIndex() == 0 ? "Horizontal" : "Vertical" );
 		return orientationStr;
+	}
+	public void setOrientation(final String orientation) {
+		final int index = orientation.equals("Horizontal") ? 0 : 1;
+		orientationComboBox.setSelectedIndex(index);
 	}
 	public float getDPIX() { return Float.parseFloat( dpiXField.getText() ); }
 	public float getDPIY() { return Float.parseFloat( dpiYField.getText() ); }
@@ -669,13 +683,14 @@ class SectionListPane extends JPanel implements ListSelectionListener {
 		this.add( separatorLabel, "span 2, split 2" );
 		this.add( separator, "gapleft rel, growx, wrap" );
 		
-		dpiXField = new JTextField();
-		dpiYField = new JTextField();
+		dpiXField = new JTextField(lastDpiX);
+		dpiYField = new JTextField(lastDpiY);
 		orientationComboBox = new JComboBox();
 		final DefaultComboBoxModel orientationModel = new DefaultComboBoxModel();
 		orientationModel.addElement("Horizontal");
 		orientationModel.addElement("Vertical");
 		orientationComboBox.setModel(orientationModel);
+		setOrientation(lastOrientation);
 		
 		// if DPI Y field is empty, copy DPI X input over since DPI X/Y are usually the same
 		dpiXField.addFocusListener( new FocusAdapter() {

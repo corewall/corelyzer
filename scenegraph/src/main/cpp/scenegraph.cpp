@@ -1724,48 +1724,106 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_removeSectionImageFrom
 JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_highlightSection
   (JNIEnv *jenv, jclass jcls, jint track, jint section, jboolean isOn)
 {
-	TrackSceneNode *t;
-    CoreSection *cs;
+	return -1; // brg 7/18/2015: supplanted by highlightSections
 
-    t  = get_scene_track(default_track_scene, track);
-    if(!t) return -1;
+	//TrackSceneNode *t;
+ //   CoreSection *cs;
 
-    cs = get_track_section(t, section);
-    if(!cs) return -1;
+ //   t  = get_scene_track(default_track_scene, track);
+ //   if(!t) return -1;
 
-    cs->highlight = isOn;
+ //   cs = get_track_section(t, section);
+ //   if(!cs) return -1;
 
-    // set crosshair label
-    // char *label = new char[128];
-    int bufferSize = 128;
-    char * label = (char *) malloc(sizeof(char) * bufferSize);
-    {
-        sprintf(label, "section [%s]", get_section_name(cs));
-        set_crosshair_label(label);
-    }
-    free(label);
+ //   cs->highlight = isOn;
+
+ //   // set crosshair label
+ //   // char *label = new char[128];
+ //   int bufferSize = 128;
+ //   char * label = (char *) malloc(sizeof(char) * bufferSize);
+ //   {
+ //       sprintf(label, "section [%s]", get_section_name(cs));
+ //       set_crosshair_label(label);
+ //   }
+ //   free(label);
 
     // loop through track to un-highlight other sections
-    for(int i=0; i<t->modelvec.size(); ++i)
-    {
-        if( (t->modelvec[i] != NULL) && (t->modelvec[i] != cs) )
-        {
-            t->modelvec[i]->highlight = false;
-        }
-    }
+    //for(int i=0; i<t->modelvec.size(); ++i)
+    //{
+    //    if( (t->modelvec[i] != NULL) && (t->modelvec[i] != cs) )
+    //    {
+    //        t->modelvec[i]->highlight = false;
+    //    }
+    //}
 
     // Un-highlight previous selected section
-    t  = get_scene_track(default_track_scene, prevPickedTrack);
-    cs = (t) ? get_track_section(t, prevPickedSection) : NULL;
-    if(cs)
-    {
-        cs->highlight = false;
-        set_crosshair_label(NULL);
-    }
+    //t  = get_scene_track(default_track_scene, prevPickedTrack);
+    //cs = (t) ? get_track_section(t, prevPickedSection) : NULL;
+    //if(cs)
+    //{
+    //    cs->highlight = false;
+    //    set_crosshair_label(NULL);
+    //}
 
-    prevPickedTrack = track;
-    prevPickedSection = section;
+    //prevPickedTrack = track;
+    //prevPickedSection = section;
 }
+
+/*
+ * Class:     SceneGraph
+ * Method:    highlightSections
+ * Signature: (II)I
+ */
+JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_highlightSections
+  (JNIEnv *jenv, jclass jcls, jint track, jintArray sectionArray)
+{
+	// first, clear all selected sections
+	const int trackCount = num_tracks(default_track_scene);
+	for (int tidx = 0; tidx < trackCount; tidx++) {
+		TrackSceneNode *track = get_scene_track(default_track_scene, tidx);
+		if (track) {
+			const int secCount = track->modelvec.size();
+			for (int sidx = 0; sidx < secCount; sidx++) {
+				CoreSection *sec = get_track_section(track, sidx);
+				if (sec) { sec->highlight = false; } else { printf("sec %d not found, can't unhighlight!\n", sidx); }
+			}
+		} else { printf("track %d not found!\n", tidx); }
+	}
+
+	// now highlight selected sections
+	TrackSceneNode *trackToHighlight = get_scene_track(default_track_scene, track);
+	if (trackToHighlight) {
+		jint *selSecs = jenv->GetIntArrayElements(sectionArray, 0);
+		const jsize selSecCount = jenv->GetArrayLength(sectionArray);
+		const int secCount = trackToHighlight->modelvec.size();
+		CoreSection *lastSec = NULL;
+		for (int i = 0; i < selSecCount; i++) {
+			const int sectionID = selSecs[i];
+			CoreSection *sec = get_track_section(trackToHighlight, sectionID);
+			if (sec) { sec->highlight = true; } else { printf("sec %d not found, can't highlight!\n", i); }
+			if (sec && !lastSec) { lastSec = sec; }
+		}
+
+		if (selSecCount > 0) {
+			int bufferSize = 128;
+			char *label = (char *) malloc(sizeof(char) * bufferSize);
+			if (selSecCount == 1 && lastSec) {
+				sprintf(label, "section %s", get_section_name(lastSec));
+			} else {
+				sprintf(label, "track %s: %d sections selected", trackToHighlight->name, selSecCount);
+			}
+			set_crosshair_label(label);
+			free(label);
+		}
+
+		jenv->ReleaseIntArrayElements(sectionArray, selSecs, 0);
+	} else {
+		printf("trackToHighlight %d not found.\n", track);
+	}
+
+	return 0;
+}
+
 
 /*
  * Class:     corelyzer_helper_SceneGraph
@@ -1787,19 +1845,9 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setSectionHighlightCol
     set_section_highlight_color(cs, r, g, b);    
 }
 
-/*
- * Class:     SceneGraph
- * Method:    moveSection
- * Signature: (IIFF)V
- */
-JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_moveSection
-  (JNIEnv *jenv, jclass jcls, jint track, jint section, jfloat dx, jfloat dy){
-	TrackSceneNode* t;
-    CoreSection* cs;
-
-    t  = get_scene_track( default_track_scene, track);
-    cs = get_track_section(t,section);
-    
+// offset a single section
+static void move_section(CoreSection *cs, const jfloat dx, const jfloat dy)
+{
 	if(!cs) return;
 	if(!cs->movable) return;
 
@@ -1820,9 +1868,39 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_moveSection
 
 	// update section depth var
 	float cdpix, cdpiy;
-	get_canvas_dpi(0,&cdpix,&cdpiy);
-	cs->depth = cs->px *  CM_PER_INCH / cdpix;		// cm
+	get_canvas_dpi(0, &cdpix, &cdpiy);
+	cs->depth = cs->px *  CM_PER_INCH / cdpix;	// cm
+}
 
+/*
+ * Class:     SceneGraph
+ * Method:    moveSection
+ * Signature: (IIFF)V
+ */
+JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_moveSection
+  (JNIEnv *jenv, jclass jcls, jint track, jint section, jfloat dx, jfloat dy){
+	TrackSceneNode* t = get_scene_track( default_track_scene, track);
+	if (!t) return;
+    CoreSection* cs = get_track_section(t, section);
+
+	move_section(cs, dx, dy);
+}
+
+// move multiple sections at once
+JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_moveSections
+  (JNIEnv *jenv, jclass jcls, jint track, jintArray secArray, jfloat dx, jfloat dy)
+{
+	TrackSceneNode *t = get_scene_track(default_track_scene, track);
+
+	jint *moveSecs = jenv->GetIntArrayElements(secArray, 0);
+	const jsize moveSecCount = jenv->GetArrayLength(secArray);
+	for (int i = 0; i < moveSecCount; i++) {
+		CoreSection *cs = get_track_section(t, moveSecs[i]);
+		if (cs)
+			move_section(cs, dx, dy);
+	}
+
+	jenv->ReleaseIntArrayElements(secArray, moveSecs, 0);
 }
 
 /*
@@ -4839,32 +4917,7 @@ void perform_pick(int canvas, float _x, float _y)
             // things associated with section
             if( ty >= cs->py && ty <= cs->py + h)
             {
-                // Un-highlight previous selected section
-                TrackSceneNode *prev_track =
-                    get_scene_track( default_track_scene, prevPickedTrack );
-                    
-                CoreSection *prev_section = (prev_track) ?
-                    get_track_section(prev_track, prevPickedSection) : NULL;
-
-                if(prev_section)
-                {
-                    prev_section->highlight = false;
-                    set_crosshair_label(NULL);
-                }
-
-                // Highligh the picked section
-                PickedSection = cs_order[k];
-                cs->highlight = true;
-
-                // set crosshair label
-                // char *label = new char[128];
-                int bufferSize = 128;
-                char * label = (char *) malloc(sizeof(char) * bufferSize);
-                {
-                    sprintf(label, "section [%s]", get_section_name(cs));
-                    set_crosshair_label(label);
-                }
-                free(label);
+				PickedSection = cs_order[k];
 
 				// if marker locates inside section image?
 				// TODO Check lithology markers
@@ -4994,59 +5047,14 @@ void perform_pick(int canvas, float _x, float _y)
                     }
 				}
 			}
-
-            if( PickedGraph != -1 || PickedMarker != -1 
-                || PickedFreeDraw != -1)
-            {
-                // Un-highlight previous selected section
-                TrackSceneNode *prev_track =
-                    get_scene_track( default_track_scene, prevPickedTrack );
-
-                CoreSection *prev_section = (prev_track) ?
-                    get_track_section(prev_track, prevPickedSection) : NULL;
-
-                if(prev_section)
-                {
-                    prev_section->highlight = false;
-                    set_crosshair_label(NULL);                    
-                }
-
-                // Highligh the picked section
-                PickedSection = cs_order[k];
-                cs->highlight = true;
-
-                // set crosshair label
-                // char *label = new char[128];
-                int bufferSize = 128;
-                char * label = (char *) malloc(sizeof(char) * bufferSize);
-                {
-                    sprintf(label, "section [%s]", get_section_name(cs));
-                    set_crosshair_label(label);
-                }
-                free(label);
-            }
-
         } // done going through each section in track
 
-        if( PickedSection != -1)
+        if (PickedSection != -1)
         {
             PickedTrack = order[i];
         }
         else 
         {
-            // Didn't pick any section, unhighlight previous picked section
-            TrackSceneNode *prev_track =
-                get_scene_track( default_track_scene, prevPickedTrack );
-
-            CoreSection *prev_section = (prev_track) ?
-                get_track_section(prev_track, prevPickedSection) : NULL;
-
-            if(prev_section)
-            {
-                prev_section->highlight = false;
-                set_crosshair_label(NULL);                
-            }
-
             // check free draws of tracks
             // convert tx, ty from dots to meters
             float fx, fy;
