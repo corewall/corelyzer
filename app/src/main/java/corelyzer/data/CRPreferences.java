@@ -58,8 +58,8 @@ public class CRPreferences {
 	public boolean isInited = false;
 
 	// Keep track of directory open previously
-	static String currentDir = System.getProperty("user.home") + System.getProperty("file.separator") + "Documents" + System.getProperty("file.separator")
-			+ "Corelyzer";
+	static String currentDir = System.getProperty("user.home") + System.getProperty("file.separator") + 
+		"Documents" + System.getProperty("file.separator") + "Corelyzer";
 
 	// Directories
 	public String config_Directory;
@@ -113,7 +113,10 @@ public class CRPreferences {
 	}
 
 	public static void setCurrentDir(final String currentDir) {
-		CRPreferences.currentDir = currentDir;
+		if (new File(currentDir).exists())
+			CRPreferences.currentDir = currentDir;
+		else
+			CRPreferences.currentDir = System.getProperty("user.home");
 	}
 
 	Vector<String> sessionHistory;
@@ -142,9 +145,8 @@ public class CRPreferences {
 		}
 
 		// don't assume a "My Documents" directory exists - fall back on user.home if needed
-		final boolean isWindows = !(MAC_OS_X || System.getProperty("os.name").equalsIgnoreCase("linux"));
 		final String homeDir = System.getProperty("user.home");
-		final String engDefaultDataDir = (isWindows ? "Mein " : "") + "Documents" + sp + "Corelyzer";
+		final String engDefaultDataDir = "Documents" + sp + "Corelyzer";
 		File defaultDataDir = new File(homeDir + sp + engDefaultDataDir);
 		if (!defaultDataDir.exists())
 			defaultDataDir = new File(homeDir);
