@@ -281,20 +281,21 @@ public class CorelyzerAppController implements ActionListener {
 	 * Method called when the "Create Track" menu item is selected. This creates
 	 * a text entry dialog where the returned string is used to create a track.
 	 */
-	public void createTrack() {
+	public boolean createTrack() {
+		boolean created = false;
 		String name = getAValidInputString("", "Create a track", "Please input a track name", "Empty Input", "Please input non-empty string.",
 				"Duplicate Input", "Please input non-duplicated string.", CRListModels.TRACK);
 
-		if (name == null) {
-			return;
+		if (name != null) {
+			final int trackId = createTrack(name);
+				// broadcast the event to plugins
+			if (trackId > -1) {
+				pluginManager.broadcastEventToPlugins(CorelyzerPluginEvent.TRACK_CREATED, name);
+				created = true;
+			}
 		}
-
-		int trackId = createTrack(name);
-
-		// broadcast the event to plugins
-		if (trackId > -1) {
-			pluginManager.broadcastEventToPlugins(CorelyzerPluginEvent.TRACK_CREATED, name);
-		}
+		
+		return created;
 	}
 
 	// Method used to handle the creation of new tracks in the

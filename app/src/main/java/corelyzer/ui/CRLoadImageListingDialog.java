@@ -53,6 +53,8 @@ import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
 
+import net.miginfocom.swing.MigLayout;
+
 import corelyzer.data.ImagePropertyTable;
 import corelyzer.data.ImagePropertyTableModel;
 import corelyzer.data.Session;
@@ -87,6 +89,7 @@ public class CRLoadImageListingDialog extends JDialog {
 	private JButton helpButton;
 	private ImagePropertyTable imageTable;
 	private BatchInputPanel batchPanel;
+	private JComboBox destTrackList;
 
 	public CRLoadImageListingDialog(final Frame owner) {
 		super(owner);
@@ -166,10 +169,10 @@ public class CRLoadImageListingDialog extends JDialog {
 	private void $$$setupUI$$$() {
 		createUIComponents();
 		contentPane = new JPanel();
-		contentPane.setLayout(new GridLayoutManager(2, 1, new Insets(10, 10, 10, 10), -1, -1));
+		contentPane.setLayout(new GridLayoutManager(3, 1, new Insets(10, 10, 10, 10), -1, -1));
 		final JPanel panel1 = new JPanel();
 		panel1.setLayout(new GridLayoutManager(1, 3, new Insets(0, 0, 0, 0), -1, -1));
-		contentPane.add(panel1, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK
+		contentPane.add(panel1, new GridConstraints(2, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK
 				| GridConstraints.SIZEPOLICY_CAN_GROW, 1, null, null, null, 0, false));
 		final Spacer spacer1 = new Spacer();
 		panel1.add(spacer1, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL,
@@ -191,7 +194,7 @@ public class CRLoadImageListingDialog extends JDialog {
 		panel1.add(helpButton, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL,
 				GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
 		final JPanel panel3 = new JPanel();
-		panel3.setLayout(new GridLayoutManager(3, 1, new Insets(0, 0, 0, 0), -1, -1));
+		panel3.setLayout(new GridLayoutManager(4, 1, new Insets(0, 0, 0, 0), -1, -1));
 		contentPane
 				.add(panel3, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK
 						| GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null,
@@ -257,13 +260,47 @@ public class CRLoadImageListingDialog extends JDialog {
 		scrollPane1.setViewportView(imageTable);
 
 		batchPanel = new BatchInputPanel(imageTable);
-		panel3.add(batchPanel, new GridConstraints(2, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH,
+		panel3.add(batchPanel, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH,
+				GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK
+				| GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
+		
+		JPanel destTrackPanel = new JPanel(new MigLayout("fillx", "[80%][20%]", "[]"));
+		destTrackPanel.setBorder(BorderFactory.createTitledBorder("Destination Track"));
+		destTrackPanel.add(new JLabel("Load images into track: "));
+		destTrackList = new JComboBox();
+		destTrackPanel.add(destTrackList, "growx, gapright 10, cell 0 0");
+		updateTrackList();
+		destTrackList.setSelectedItem(CorelyzerApp.getApp().getSelectedTrack());
+		
+		JButton newTrackButton = new JButton("Create Track");
+		destTrackPanel.add(newTrackButton, "growx");
+		newTrackButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent event) {
+				if (CorelyzerApp.getApp().getController().createTrack()) {
+					updateTrackList();
+					destTrackList.setSelectedIndex(destTrackList.getItemCount() - 1);
+				}
+			}
+		});
+		
+		contentPane.add(destTrackPanel, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH,
 				GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK
 				| GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
 	}
 
 	private void createUIComponents() {
 		imageTable = new ImagePropertyTable();
+	}
+	
+	private void updateTrackList() {
+		Session curSession = CorelyzerApp.getApp().getSelectedSession();
+		if (curSession != null) {
+			DefaultComboBoxModel comboModel = new DefaultComboBoxModel();
+			for (TrackSceneNode tsn : curSession.getTrackSceneNodes()) {
+				comboModel.addElement(tsn);
+			}
+			destTrackList.setModel(comboModel);
+		}
 	}
 
 	public void fillListWithFiles(final Vector<File> files) {
@@ -336,10 +373,9 @@ public class CRLoadImageListingDialog extends JDialog {
 
 	private void loadImagesWithProperties() {
 		CorelyzerApp app = CorelyzerApp.getApp();
-
-		if (app != null) {
-			int trackIdx = app.getSelectedTrackIndex();
-
+		TrackSceneNode destTrack = (TrackSceneNode)destTrackList.getSelectedItem();
+		
+		if (app != null && destTrack != null) {
 			JProgressBar progress = app.getProgressUI();
 			progress.setString("Loading Images");
 			progress.setMaximum(imageTable.getRowCount());
@@ -385,9 +421,7 @@ public class CRLoadImageListingDialog extends JDialog {
 					continue;
 				}
 
-				CRDefaultListModel tmodel = app.getTrackListModel();
-				TrackSceneNode tnode = (TrackSceneNode) tmodel.elementAt(trackIdx);
-				FileUtility.setSectionImageProperties( tnode, sectionName, nativeSectionId, length, depth, dpix, dpiy, orientation );
+				FileUtility.setSectionImageProperties(destTrack, sectionName, nativeSectionId, length, depth, dpix, dpiy, orientation);
 			}
 
 			progress.setValue(imageTable.getRowCount());
