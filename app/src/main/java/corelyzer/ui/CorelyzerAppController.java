@@ -368,9 +368,8 @@ public class CorelyzerAppController implements ActionListener {
 			return;
 		}
 
-		CRDefaultListModel trackListModel = listModels.getListModel(CRListModels.TRACK);
-
-		TrackSceneNode t = (TrackSceneNode) trackListModel.elementAt(trackId);
+		final int sessionId = CoreGraph.getInstance().getCurrentSessionIdx();
+		TrackSceneNode t = CoreGraph.getInstance().getTrack(sessionId, trackId);
 
 		// need to find index of section in ListModel
 		int sid = -1;
