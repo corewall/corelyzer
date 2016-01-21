@@ -558,7 +558,8 @@ public class CRLoadImageListingDialog extends JDialog {
 		JOptionPane.showMessageDialog(this, "Image Listing Files must be in Comma Separated Values (.csv) format.\n\n"
 				+ "- Format each line as follows:\n" + "filename (including extension), orientation, length (cm), dpix, dpiy, depth (m)\n\n"
 				+ "- Orientation must be 'Horizontal' or 'Vertical' (excluding quotes).\n"
-				+ "- Headers and comment lines, if included, must start with # to avoid errors.");
+				+ "- Headers and comment lines, if included, must start with # to avoid errors.\n"
+				+ "- Image listing file must be in same directory as the image files it refers to.");
 
 		JFileChooser chooser = new JFileChooser();
 		chooser.setFileFilter(new FileNameExtensionFilter("Comma Separated Values (.csv)", "csv"));
