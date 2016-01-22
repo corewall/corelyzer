@@ -41,6 +41,7 @@
 #include <vector>
 #include <iostream>
 #include <math.h>
+#include <exception>
 
 using namespace std;
 
@@ -1239,6 +1240,7 @@ JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_genTextureBlocks
 	const int FILE_READ_ERROR = -1;
 	const int FILE_DOES_NOT_EXIST = -2;
 	const int FILE_IS_EMPTY = -3;
+	const int EXCEPTION_THROWN = -4;
 	
     // get the name and based on file extension, call the proper load function
     const int fileNameLen = jenv->GetStringLength(name);
@@ -1265,38 +1267,41 @@ JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_genTextureBlocks
 	}
     fclose(f);
 
-    // TextureSet* ts = (TextureSet*) malloc(sizeof(TextureSet));
-    TextureSet* ts = new TextureSet();
-
-    if( strstr(fileName,".JPEG") || strstr(fileName,".jpeg") ||
-        strstr(fileName,".JPG")  || strstr(fileName,".jpg") )
-    {
-        ts->texset = create_texset_from_jpeg(fileName, LEVELS);
-    }
-    else if( strstr(fileName,".PNG") || strstr(fileName,".png"))
-    {
-        ts->texset = create_texset_from_png(fileName, LEVELS);
-    }
-    else if( strstr(fileName,".BMP") || strstr(fileName,".bmp"))
-    {
-        ts->texset = create_texset_from_bmp(fileName, LEVELS);
-    }
-    else if( strstr(fileName,".TIFF") || strstr(fileName,".tiff") ||
-             strstr(fileName,".TIF")  || strstr(fileName,".tif") )
-    {
-        ts->texset = create_texset_from_tiff(fileName, LEVELS);
-    }
-    else if(strstr(fileName, ".jp2"))
-    {
-        printf("---> [TODO] Loading JPEG2000: %s\n", fileName);
-        ts->texset = create_texset_from_jp2k(fileName, LEVELS);
-    }
-    else
-    {
-        printf("Could not load image %s, unsupported format\n", fileName);
-        free(fileName);
-        return FILE_READ_ERROR;
-    }
+	TextureSet* ts = new TextureSet();
+	try {
+		if( strstr(fileName,".JPEG") || strstr(fileName,".jpeg") ||
+			strstr(fileName,".JPG")  || strstr(fileName,".jpg") )
+		{
+			ts->texset = create_texset_from_jpeg(fileName, LEVELS);
+		}
+		else if( strstr(fileName,".PNG") || strstr(fileName,".png"))
+		{
+			ts->texset = create_texset_from_png(fileName, LEVELS);
+		}
+		else if( strstr(fileName,".BMP") || strstr(fileName,".bmp"))
+		{
+			ts->texset = create_texset_from_bmp(fileName, LEVELS);
+		}
+		else if( strstr(fileName,".TIFF") || strstr(fileName,".tiff") ||
+				 strstr(fileName,".TIF")  || strstr(fileName,".tif") )
+		{
+			ts->texset = create_texset_from_tiff(fileName, LEVELS);
+		}
+		else if(strstr(fileName, ".jp2"))
+		{
+			printf("---> [TODO] Loading JPEG2000: %s\n", fileName);
+			ts->texset = create_texset_from_jp2k(fileName, LEVELS);
+		}
+		else
+		{
+			printf("Could not load image %s, unsupported format\n", fileName);
+			free(fileName);
+			return FILE_READ_ERROR;
+		}
+	} catch (exception &e) {
+		printf("Exception caught in genTextureBlocks: %s\n", e.what());
+		return EXCEPTION_THROWN;
+	}
 	
 	if (ts->texset == NULL)
 	{

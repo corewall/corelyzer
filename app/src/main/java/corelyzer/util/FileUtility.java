@@ -76,6 +76,7 @@ public class FileUtility {
 	final public static int FILE_READ_ERROR = -1;
 	final public static int FILE_DOES_NOT_EXIST = -2;
 	final public static int FILE_IS_EMPTY = -3;
+	final public static int EXCEPTION_THROWN = -4;
 
 	static public boolean copyFile(final String src, final String dst) {
 		try {
@@ -626,6 +627,8 @@ public class FileUtility {
 					msg = "File could not be found: '" + imageFile + "'";
 				else if (genblockStatus == FILE_IS_EMPTY)
 					msg = "File contains no data: '" + imageFile + "'";
+				else if (genblockStatus == EXCEPTION_THROWN)
+					msg = "Exception thrown while loading image file: '" + imageFile + "'";
 				else
 					msg = "File could not be opened, unrecognized error: '" + imageFile + "'";
 				
