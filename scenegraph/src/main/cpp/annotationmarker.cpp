@@ -36,8 +36,8 @@ extern void read_png(const char* pngfilename, int* w, int* h, GLenum* format,
 #define SELECTED  1
 #define PI        3.14159
 
-float quarterPI = 0.25*PI;
-float threeQuarterPI = 0.75*PI;
+float quarterPI = 0.25f * (float)PI;
+float threeQuarterPI = 0.75f * (float)PI;
 float boundary [] = { quarterPI,  threeQuarterPI,
                      -quarterPI, -threeQuarterPI};
 
@@ -56,7 +56,9 @@ static float markerScale  = DEFAULT_MARKER_SCALE;
 //==========================================================================
 bool is_marker_texture(int id)
 {
-    if( id < 0 || id > marker_texvec.size() - 1) return false;
+    if( id < 0 ) return false;
+	const int markerTexVecSize = marker_texvec.size() - 1;
+	if (id > markerTexVecSize) return false;
     return (marker_texvec[id].texId != 0);
 }
 
@@ -64,23 +66,22 @@ bool is_marker_texture(int id)
 // assume texture is in png file
 int alloc_marker_texture(const char* name)
 {
-    if(!name) return -1;
+    if (!name) return -1;
 
     // see if we already have it, if we do increment refcount and return
     // index
-    int i;
     int match = -1;
     int firstEmpty = -1;
-    for( i = 0; i < marker_texvec.size(); i++)
+    for (unsigned int i = 0; i < marker_texvec.size(); i++)
     {
-        if( !is_marker_texture(i))
+        if (!is_marker_texture(i))
         {
             if( firstEmpty < 0)
             {
                 firstEmpty = i;
             }
         }
-        else if(!strcmp(name,marker_texvec[i].texName) )
+        else if (!strcmp(name,marker_texvec[i].texName) )
         {
             match = i;
             i = marker_texvec.size();
@@ -88,8 +89,7 @@ int alloc_marker_texture(const char* name)
     }
 
     // if no match then make it... try to reuse empty slots
-
-    if( match < 0 )
+    if (match < 0)
     {
 
         MarkerTexture mt;
@@ -184,8 +184,7 @@ int register_marker_type(const char* typeName)
     amt.valid = true;
 
     // find an unused marker type entry
-    int i;
-    for( i = 0; i < marker_typevec.size(); ++i)
+    for (unsigned int i = 0; i < marker_typevec.size(); ++i)
     {
         if( !marker_typevec[i].valid )
         {
@@ -271,7 +270,9 @@ bool marker_type_resource_allocated(int type)
 //==========================================================================
 bool is_marker_type(int type)
 {
-    if( type < 0 || type > marker_typevec.size() - 1) return false;
+    if (type < 0) return false;
+	const int markerTypeVecSize = marker_typevec.size() - 1;
+	if (type > markerTypeVecSize) return false;
     return marker_typevec[type].valid;
 }
 

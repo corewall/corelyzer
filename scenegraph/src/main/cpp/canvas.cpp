@@ -102,7 +102,6 @@ void load_gl_extensions()
 //====================================================================
 int create_canvas(float x, float y, float w, float h, float dpix, float dpiy)
 {
-
     printf("\n\t--- Create Canvas called ---\n");
 
     Canvas c;
@@ -135,8 +134,8 @@ int create_canvas(float x, float y, float w, float h, float dpix, float dpiy)
 	c.grid_size		   = 10.0f;
 	c.grid_thickness     = 1;
 
-    position_camera( c.camera, x , y , 0.0);
-    orient_camera( c.camera, 0.0f, 0.0f, 0);
+    position_camera(c.camera, x , y , 0.0);
+    orient_camera(c.camera, 0.0f, 0.0f, 0);
 
 	c.nummeasurepoint = (MEASURE_READY);
 	c.measurepoint[0] = c.measurepoint[1] = 0.0f;
@@ -151,10 +150,10 @@ int create_canvas(float x, float y, float w, float h, float dpix, float dpiy)
 #endif
 
     // find the next invalid camera spot
-    int i;
-    for( i = 0; i < canvasvec.size(); i++)
+	unsigned int i;
+    for (i = 0; i < canvasvec.size(); i++)
     {
-        if( canvasvec[i].valid == false )
+        if (canvasvec[i].valid == false)
         {
             canvasvec[i] = c;
             canvasvec[i].valid = true;
@@ -267,8 +266,8 @@ void render_logo(int id)
     Canvas* c = &(canvasvec[id]);
 
     int logoTextureId = logo_texture_info[0];
-    int logo_w = logo_texture_info[1];
-    int logo_h = logo_texture_info[2];
+    float logo_w = (float)logo_texture_info[1];
+    float logo_h = (float)logo_texture_info[2];
 
     glPushMatrix();
     {
@@ -291,10 +290,10 @@ void render_logo(int id)
             glScalef(scale, scale, 0.0);
             glBegin(GL_QUADS);
             {
-                glTexCoord2f(0.0, 0.0); glVertex3f(0.0,    0.0,    0.0);
-                glTexCoord2f(0.0, 1.0); glVertex3f(0.0,    logo_h, 0.0);
+                glTexCoord2f(0.0, 0.0); glVertex3f(0.0, 0.0, 0.0);
+                glTexCoord2f(0.0, 1.0); glVertex3f(0.0, logo_h, 0.0);
                 glTexCoord2f(1.0, 1.0); glVertex3f(logo_w, logo_h, 0.0);
-                glTexCoord2f(1.0, 0.0); glVertex3f(logo_w, 0.0,    0.0);
+                glTexCoord2f(1.0, 0.0); glVertex3f(logo_w, 0.0, 0.0);
             }
             glEnd();
             glDisable(GL_BLEND);
@@ -344,14 +343,14 @@ void render_remote_control_icon(int id)
 
         Canvas* c = &(canvasvec[id]);
         int logoTextureId = remoteLogo_texture_info[0];
-        int logo_w = remoteLogo_texture_info[1];
-        int logo_h = remoteLogo_texture_info[2];
+        float logo_w = (float)remoteLogo_texture_info[1];
+        float logo_h = (float)remoteLogo_texture_info[2];
 
         // Translate properly depends on canvas ID
         float scale = 0.4f;
         float x_translate, y_translate;
 
-        if(acrossTwoCanvases)
+        if (acrossTwoCanvases)
         {
             if(id == workCanvasId) // right
             {
@@ -637,7 +636,9 @@ void render_canvas(int id)
 //====================================================================
 bool is_canvas( int canvas )
 {
-    if( canvas < 0 || canvas >= canvasvec.size() ) return false;
+	if (canvas < 0) return false;
+	const int canvasVecSize = canvasvec.size();
+    if (canvas >= canvasVecSize) return false;
     return canvasvec[canvas].valid;
 }
 
@@ -819,9 +820,8 @@ void  set_canvas_measurepointnumber(int id, int num){
 //====================================================================
 void  set_canvas_mode(int id, int imode) {
 
-	canvasvec[id].mode = imode;
+	canvasvec[id].mode = (float)imode;
 	canvasvec[id].nummeasurepoint = (MEASURE_READY);
-
 }
 
 //====================================================================
@@ -942,8 +942,8 @@ void render_crossHair(Canvas *c)
         glPushMatrix();
         {
             glTranslatef( c->mouseX, c->mouseY, 0);
-            float scale = c->horizontal ? c->w / c->w0 / 1.5 : 
-                                          c->h / c->h0 / 1.5;
+            float scale = c->horizontal ? c->w / c->w0 / 1.5f : 
+                                          c->h / c->h0 / 1.5f;
             glScalef( scale, scale, 1.0);
             glTranslatef(10, -10, 0);
             float dpi = get_horizontal_depth() ? c->dpi_x : c->dpi_y;
@@ -978,8 +978,8 @@ void render_grid(Canvas* c)
 		float gxstart, gxend, gystart, gyend;
 
         // how many cm are we?
-        rangeX = (c->w / c->dpi_x) * (CM_PER_INCH);
-		rangeY = (c->h / c->dpi_y) * (CM_PER_INCH);
+        rangeX = (c->w / c->dpi_x) * CM_PER_INCH;
+		rangeY = (c->h / c->dpi_y) * CM_PER_INCH;
 
         // screen space increment of 1 cm
         incrementX = (1.0f / c->dpi_x) * CM_PER_INCH;
@@ -994,15 +994,15 @@ void render_grid(Canvas* c)
         gyend   = gystart + ceilf(rangeY / interval_scale);
 
         float k, gx0, gx1, gy0, gy1;
-		int count=0;
+		int count = 0;
 		gx0 = y + c->h;
 		gx1 = y;
 		gy0 = x;
 		gy1 = x + c->w;
 
         glDisable(GL_TEXTURE_2D);
-		glLineWidth(c->grid_thickness);
-		glColor3f( c->r, c->g, c->b);
+		glLineWidth((float)c->grid_thickness);
+		glColor3f(c->r, c->g, c->b);
 
 		// draw grid
 		switch (c->grid_type) {
@@ -1068,12 +1068,12 @@ void render_grid(Canvas* c)
 			case GRID_POINT:
 				{
 					// horizontal lines
-					glPointSize(c->grid_thickness*2);
+					glPointSize(c->grid_thickness * 2.0f);
 					glPushMatrix();
 					glScalef( interval_scale / incrementX, interval_scale / incrementY, 1.0);
 					glBegin(GL_POINTS);
 					for( k = gystart; k <= gyend; ++k)
-						for (int l = gxstart; l <= gxend; ++l)
+						for (float l = gxstart; l <= gxend; ++l)
 							glVertex2f( l, k );
 					glEnd();
 					glPopMatrix();
@@ -1088,7 +1088,7 @@ void render_grid(Canvas* c)
 					glScalef( interval_scale / incrementX, interval_scale / incrementY, 1.0);
 					glBegin(GL_LINES);
 					for( k = gystart; k <= gyend; ++k)
-						for (int l = gxstart; l <= gxend; ++l)
+						for (float l = gxstart; l <= gxend; ++l)
 						{
 							// vertical
 							glVertex2f( l, k+halfy );
@@ -1120,7 +1120,7 @@ void render_scale(Canvas* c)
         // if vertical then draw on left side of canvas, else draw along
         // the bottom of the canvas
 
-        float range, increment, translate, sx, coverage;
+        float range, increment, translate, coverage;
         float dpi, scale;
         float tickstart, tickend;
         int   tick_threshold;
@@ -1170,42 +1170,42 @@ void render_scale(Canvas* c)
 
         if( range > tick_threshold ) // up to centimeters
         {
-            range *= .1;
+            range *= 0.1f;
             interval_scale *= 10.0f; // increment is cm
             units = "cm";
         }
 
         if( range > tick_threshold ) // up to decimeters
         {
-            range *= .1;
+            range *= 0.1f;
             interval_scale *= 10.0f; // increment is cm
             units = "dm";
         }
 
         if( range > tick_threshold ) // up to meters
         {
-            range *= .1;
+            range *= 0.1f;
             interval_scale *= 10.0f; // increment is cm
             units = "m";
         }
 
         if( range > tick_threshold ) //up to deka meters
         {
-            range *= .1;
+            range *= 0.1f;
             interval_scale *= 10.0f; // increment is cm
             units = "dam";
         }
 
         if( range  > tick_threshold ) //up to hecto meters
         {
-            range *= .1;
+            range *= 0.1f;
             interval_scale *= 10.0f; // increment is cm
             units = "hm";
         }
 
         if( range  > tick_threshold ) //up to kilometers
         {
-            range *= .1;
+            range *= 0.1f;
             interval_scale *= 10.0f; // increment is cm
             units = "km";
         }
@@ -1213,7 +1213,6 @@ void render_scale(Canvas* c)
 #ifdef DEBUG
         printf("Range %f %s\n", range, units.c_str());
 #endif
-
 
         // determine start and end in current units
 
@@ -1297,7 +1296,7 @@ void render_scale(Canvas* c)
 
                     // draw tick lines
                     glLineWidth(3);
-                    glColor3f(0.6, 0.6, 0.6);
+                    glColor3f(0.6f, 0.6f, 0.6f);
                     glBegin(GL_LINES);
                     {
                         glVertex2f(k, r0);
@@ -1327,7 +1326,7 @@ void render_scale(Canvas* c)
                         glTranslatef(tx, ty, 0);
                         glScalef(t_hscale, t_vscale, 1.0);
 
-                        float color[3]; color[0] = color[1] = color[2] = 0.6;
+                        float color[3]; color[0] = color[1] = color[2] = 0.6f;
                         render_string_shadowed(buf, 0, len - 1, color, 2);
                     }
                     glPopMatrix();
@@ -1343,7 +1342,7 @@ void render_scale(Canvas* c)
 
                     // draw tick lines
                     glLineWidth(3);
-                    glColor3f(0.6, 0.6, 0.6);
+                    glColor3f(0.6f, 0.6f, 0.6f);
                     glBegin(GL_LINES);
                     {
                         glVertex2f(r0, k);
@@ -1374,7 +1373,7 @@ void render_scale(Canvas* c)
                         glTranslatef(tx, ty, 0);
                         glScalef(text_vscale, t_hscale, 1.0);
 
-                        float color[3]; color[0] = color[1] = color[2] = 0.6;
+                        float color[3]; color[0] = color[1] = color[2] = 0.6f;
                         render_string_shadowed(buf, 0, len - 1, color, 2);
                     }
                     glPopMatrix();
@@ -1438,8 +1437,8 @@ void run_through_scene_graph(Canvas* c)
         {
             c->coverage_x      = c->w;
             c->coverage_y      = c->h;
-            c->half_coverage_x = c->coverage_x * .5;
-            c->half_coverage_y = c->coverage_y * .5;
+            c->half_coverage_x = c->coverage_x * 0.5f;
+            c->half_coverage_y = c->coverage_y * 0.5f;
         }
         /* else
         {
@@ -1577,7 +1576,7 @@ void render_clast_mode(Canvas* c)
             float xx = x1 / dpi * CM_PER_INCH;
             float yy = y1 / dpi * CM_PER_INCH;
             sprintf(coordbuf, "(%.2f, %.2f)", xx, yy);
-            render_string_shadowed(coordbuf, 0, strlen(coordbuf)-1);
+            render_string_shadowed(coordbuf, 0, strlen(coordbuf) - 1);
         }
         glPopMatrix();
 
@@ -1728,7 +1727,7 @@ void render_measure_mode(Canvas* c)
                 glColor3f( 1, 0, 0);
                 draw_solid_square (0, 0, 20);
 
-                glScalef( 1.0 / scale, 1.0 / scale, 1.0);
+                glScalef( 1.0f / scale, 1.0f / scale, 1.0f);
                 glTranslatef( -c->measurepoint[0], -c->measurepoint[1], 0);
 
             }
@@ -1745,7 +1744,7 @@ void render_measure_mode(Canvas* c)
                 }
                 glEnd();
                 glLineWidth(1.5);
-                glColor3f(0.8, 0.8, 0.8);
+                glColor3f(0.8f, 0.8f, 0.8f);
                 glBegin(GL_LINES);
                 {
                     glVertex2f( c->measurepoint[0], c->measurepoint[1] );
@@ -1778,7 +1777,7 @@ void render_measure_mode(Canvas* c)
                 glColor3f( 1, 0, 0);
                 draw_solid_square (0, 0, 20);
 
-                glScalef( 1.0 / scale, 1.0 / scale, 1.0);
+                glScalef( 1.0f / scale, 1.0f / scale, 1.0f);
                 glTranslatef( -c->measurepoint[0], -c->measurepoint[1], 0);
 
                 // the second end point coord
@@ -1805,7 +1804,7 @@ void render_measure_mode(Canvas* c)
                 sprintf(coordbuf, "Distance: %.2f cm", dist);
                 render_string_shadowed(coordbuf, 0, strlen(coordbuf)-1);
                 glTranslatef(-12, -40, 0);
-                glScalef( 1.0 / scale, 1.0 / scale, 1.0);
+                glScalef( 1.0f / scale, 1.0f / scale, 1.0f);
                 glTranslatef( -c->measurepoint[2], -c->measurepoint[3], 0);
 
                 free(coordbuf);

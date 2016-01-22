@@ -57,7 +57,7 @@
 
 #include "camera.h"
 
-#define CM_PER_INCH           2.54
+#define CM_PER_INCH 2.54f
 
 #define GRID_BASIC		0
 #define GRID_HORIZON	1

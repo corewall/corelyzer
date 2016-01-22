@@ -106,7 +106,7 @@ int get_file_format(char *filename) {
     ext++;
     if(ext) {
 	for(i = 0; i < sizeof(format)/sizeof(*format); i++) {
-	    if(strnicmp(ext, extension[i], 3) == 0) {
+	    if(_strnicmp(ext, extension[i], 3) == 0) {
 		return format[i];
 	    }
 	}
@@ -294,7 +294,7 @@ void get_sub_image_scaled( char* in_pix, char* out_pix, int x, int y,
 // Crossplatform way of check if a directory exists
 bool isDirectoryExists(const char* aPath)
 {
-	if ( access( aPath, 0 ) == 0 )
+	if ( _access( aPath, 0 ) == 0 )
     {
         struct stat status;
         stat( aPath, &status );
@@ -401,9 +401,9 @@ void build_tex_blocks(char* pixels, MultiLevelTextureSetEX* set, bool hasDir, in
     float exponent; // blksize * 2 ^ exp can encompass image
 
     if( lh > lv )
-        exponent = ceilf( log((float) lh) / log(2.0)) + 1;
+        exponent = ceilf( log((float) lh) / log(2.0f)) + 1;
     else
-        exponent = ceilf( log((float) lv) / log(2.0)) + 1;
+        exponent = ceilf( log((float) lv) / log(2.0f)) + 1;
 
     if( exponent < set->levels ) set->levels = (int) exponent;
 
@@ -490,7 +490,7 @@ void build_tex_blocks(char* pixels, MultiLevelTextureSetEX* set, bool hasDir, in
         
         char level_dir[5];
         sprintf(level_dir, "%d", level);
-        set->scales[k] = 1.0f / powf( 2.0f, level );
+        set->scales[k] = 1.0f / powf( 2.0f, (float)level );
         set->pyramid_level[k] = level;
 
 #ifdef DEBUG
@@ -521,7 +521,6 @@ void build_tex_blocks(char* pixels, MultiLevelTextureSetEX* set, bool hasDir, in
         {
             for( int j = 0; j < set->cols[k]; ++j)
             {
-                float coverage_w, coverage_h;
                 int id = i * set->cols[k] + j;
 
                 set->tex[k][id].imgx        = int(j * (lvl_blksize));
@@ -744,28 +743,24 @@ int insert_texset(MultiLevelTextureSetEX* set)
     if(!set) return -1;
 
     // make sure it isn't already there
-    
-    int i;
-    for( i = 0; i < texsetvec.size(); ++i)
+    unsigned int i;
+    for (i = 0; i < texsetvec.size(); ++i)
     {
-        if( texsetvec[i] == set)
+        if (texsetvec[i] == set)
             return i;
     }
 
     // find a null spot
-
-    for( i = 0; i < texsetvec.size(); ++i)
+    for (i = 0; i < texsetvec.size(); ++i)
     {
         if( texsetvec[i] == NULL )
         {
             texsetvec[i] = set;
             return i;
         }
-
     }
 
     // place at the end
-
     texsetvec.push_back(set);
     return texsetvec.size() - 1;
 }
@@ -1221,9 +1216,9 @@ MultiLevelTextureSetEX* create_texset_from_png(const char* filename, int nlevels
     texset->src_w = (int) png_get_image_width(png_ptr, info_ptr);
     texset->src_h = (int) png_get_image_height(png_ptr, info_ptr);
     texset->src_dpi_x = ((float) png_get_x_pixels_per_meter(png_ptr,info_ptr)) 
-        / 100.0 * 2.54f;
+        / 100.0f * 2.54f;
     texset->src_dpi_y = ((float) png_get_y_pixels_per_meter(png_ptr,info_ptr)) 
-        / 100.0 * 2.54f;
+        / 100.0f * 2.54f;
 
     // copy pixels
     char* pixels = NULL;
@@ -1638,7 +1633,7 @@ MultiLevelTextureSetEX* create_texset_from_tiff(const char* filename, int nlevel
         // Take care of big-endian systems, eg. PPC
         if(is_bigendian())
         {
-            int row;
+            unsigned int row;
             for (row = 0; row < h; ++row)
             {
                 // Make sure our channels are in the right order
@@ -2140,12 +2135,12 @@ void free_texset(int set, bool del_disk_blocks)
 //=========================================================================
 void free_all_texsets( bool del_disk_blocks)
 {
-    for( int i = 0; i < texsetvec.size(); ++i)
+    for (unsigned int i = 0; i < texsetvec.size(); ++i)
     {
 #ifdef DEBUG
         printf("freeing texset %d\n", i);
 #endif
-    free_texset( i, del_disk_blocks);
+		free_texset(i, del_disk_blocks);
     }
 
     texsetvec.clear();
@@ -2154,7 +2149,9 @@ void free_all_texsets( bool del_disk_blocks)
 //=========================================================================
 bool is_texset( int s )
 {
-    if( s < 0 || s >= texsetvec.size() ) return false;
+	if (s < 0) return false;
+	const int texsetVecSize = texsetvec.size();
+    if(s >= texsetVecSize) return false;
     return (texsetvec[s] != NULL);
 }
 

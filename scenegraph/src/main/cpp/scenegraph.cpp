@@ -787,38 +787,11 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_deleteTrack
 JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setTrackHighlight
   (JNIEnv *jenv, jclass jcls, jint track, jboolean isOn)
 {
-    int i;
-    TrackSceneNode *tsn;
-
-    // make sure to unhilight all tracks
-    /*
-    for( i = 0; i < num_tracks(default_track_scene); ++i)
-    {
-        tsn = get_scene_track(default_track_scene,i);
-        if(!tsn)
-        {
-            continue;
-        }
-        else
-        {
-            tsn->highlight = false;
-            set_crosshair_label(NULL);            
-        }
-    } */
-
     // highlight the track we want
-
-    tsn = get_scene_track(default_track_scene, track);
+    TrackSceneNode *tsn = get_scene_track(default_track_scene, track);
     if(!tsn) return;
 
     tsn->highlight = isOn;
-
-    /*
-    char *label = new char[128];
-    sprintf(label, "track [%s]", tsn->name);
-    set_crosshair_label(label);
-    free(label);
-    */
 }
 
 /*
@@ -834,8 +807,6 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setTrackHighlightColor
 
     set_track_highlight_color(t, r, g, b);
 }
-
-
 
 /*
  * Class:     corelyzer_helper_SceneGraph
@@ -1104,14 +1075,14 @@ JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_getSectionIDByName
     TrackSceneNode *t = get_scene_track(default_track_scene, trackId);
     if(!t) return -1;
 
-    int i;
+    unsigned int i;
     char* nbuf;
 
     i = jenv->GetStringLength(name);
     nbuf = (char*) malloc(i*sizeof(char) + 1);
     jenv->GetStringUTFRegion(name, 0, i, nbuf);
 
-    for(i = 0; i < t->modelvec.size(); i++)
+    for (i = 0; i < t->modelvec.size(); i++)
     {
         CoreSection* cs = t->modelvec[i];
 
@@ -1141,14 +1112,11 @@ JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_getSectionIDFromURL
     TrackSceneNode *t = get_scene_track(default_track_scene, trackId);
     if(!t) return -1;
 
-    int i;
-    char* nbuf;
-
-    i = jenv->GetStringLength(urlString);
-    nbuf = (char*) malloc(i*sizeof(char) + 1);
+    unsigned int i = jenv->GetStringLength(urlString);
+    char *nbuf = (char*) malloc(i*sizeof(char) + 1);
     jenv->GetStringUTFRegion(urlString, 0, i, nbuf);
 
-    for(i = 0; i < t->modelvec.size(); i++)
+    for (i = 0; i < t->modelvec.size(); i++)
     {
         CoreSection* cs = t->modelvec[i];
 
@@ -1183,15 +1151,12 @@ JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_getSectionIDFromURL
 JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_loadImage
   (JNIEnv * jenv, jclass jcls, jstring name)
 {
-    int i;
-    char* nbuf;
-
-    i = jenv->GetStringLength(name);
-    nbuf = (char*) malloc(i*sizeof(char)+1);
+    unsigned int i = jenv->GetStringLength(name);
+    char *nbuf = (char*) malloc(i*sizeof(char)+1);
     jenv->GetStringUTFRegion(name, 0, i, nbuf);
 
     // Search the tVec for common filename
-    for(int j=0; j<tVec.size(); j++)
+    for (unsigned int j = 0; j < tVec.size(); j++)
     {
         TextureSet* ts = tVec[j];
         if(ts == NULL) continue;
@@ -1314,9 +1279,9 @@ JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_genTextureBlocks
     free(fileName);
 
     // find a place to insert
-    for (int i = 0; i < tVec.size(); i++)
+    for (unsigned int i = 0; i < tVec.size(); i++)
     {
-        if(tVec[i] == NULL)
+        if (tVec[i] == NULL)
         {
             tVec[i] = ts;
             return 1;
@@ -1607,13 +1572,10 @@ JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_addSectionToTrack // f
     }
 	
 	// update x position
-	TrackSceneNode* t;
-    CoreSection* cs;
-    t  = get_scene_track(track);
+	TrackSceneNode* t = get_scene_track(track);
 	section->px = t->nextPos;
 
     return append_model( get_scene_track(default_track_scene,track), section);
-
 }
 
 /*
@@ -1874,7 +1836,7 @@ static void move_section(CoreSection *cs, const jfloat dx, const jfloat dy)
 	// update section depth var
 	float cdpix, cdpiy;
 	get_canvas_dpi(0, &cdpix, &cdpiy);
-	cs->depth = cs->px *  CM_PER_INCH / cdpix;	// cm
+	cs->depth = cs->px * CM_PER_INCH / cdpix; // cm
 }
 
 /*
@@ -1914,12 +1876,10 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_moveSections
  * Signature: (IIFF)V
  */
 JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_moveSectionGraph
-(JNIEnv *jenv, jclass jcls, jint track, jint section, jfloat dx, jfloat dy){
-
-	TrackSceneNode* t;
-    CoreSection* cs;
-    t  = get_scene_track( default_track_scene, track);
-    cs = get_track_section(t,section);
+(JNIEnv *jenv, jclass jcls, jint track, jint section, jfloat dx, jfloat dy)
+{
+    TrackSceneNode *t = get_scene_track(default_track_scene, track);
+    CoreSection *cs = get_track_section(t, section);
     
     if(!cs) return;
     if(!cs->graphMovable) return;
@@ -1941,12 +1901,10 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_moveSectionGraph
 		// update section depth var
 		float cdpix, cdpiy;
 		get_canvas_dpi(0,&cdpix,&cdpiy);
-		cs->depth = cs->px *  CM_PER_INCH / cdpix;		// cm
-		
+		cs->depth = cs->px * CM_PER_INCH / cdpix; // cm
 	}
 	else
 		cs->graph_offset += dx;
-	
 }
 
 /*
@@ -2003,7 +1961,7 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_positionSection
 	// update section depth var
 	float cdpix, cdpiy;
 	get_canvas_dpi(0,&cdpix,&cdpiy);
-	cs->depth = cs->px *  CM_PER_INCH / cdpix;		// cm
+	cs->depth = cs->px * CM_PER_INCH / cdpix; // cm
 }
 
 /*
@@ -2255,7 +2213,6 @@ JNIEXPORT jfloat JNICALL Java_corelyzer_graphics_SceneGraph_getSectionGraphOffse
 	get_canvas_dpi(0,&cdpix,&cdpiy);
 
 	return cs->graph_offset * CM_PER_INCH / cdpix;
-
 }
 
 /*
@@ -2264,10 +2221,9 @@ JNIEXPORT jfloat JNICALL Java_corelyzer_graphics_SceneGraph_getSectionGraphOffse
  * Signature: (IIF)V
  */
 JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setSectionGraphOffset
-(JNIEnv *jenv, jclass jcls, jint track, jint section, jfloat offset){
-	
+(JNIEnv *jenv, jclass jcls, jint track, jint section, jfloat offset)
+{
 	// offset is cm scale
-
 	TrackSceneNode* t;
     CoreSection* cs;
 
@@ -2292,7 +2248,8 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setSectionGraphOffset
  * Signature: (II)I
  */
 JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_getSectionSourceImage
-  (JNIEnv *jenv, jclass jcls, jint track, jint section){
+  (JNIEnv *jenv, jclass jcls, jint track, jint section)
+{
 
     TrackSceneNode* t;
     CoreSection* cs;
@@ -2302,7 +2259,6 @@ JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_getSectionSourceImage
     if(!cs) return -1;
 
     return cs->src;
-
 }
 /*
  * Class:     SceneGraph
@@ -2310,13 +2266,11 @@ JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_getSectionSourceImage
  * Signature: (I)F
  */
 JNIEXPORT jfloat JNICALL Java_corelyzer_graphics_SceneGraph_getSectionDPIX
-  (JNIEnv *jenv, jclass jcls, jint track, jint section){
-
-    TrackSceneNode* t;
-    CoreSection* cs;
-    t  = get_scene_track(default_track_scene, track);
-    cs = get_track_section(t,section);
-    if(!cs) return -1.0f;
+  (JNIEnv *jenv, jclass jcls, jint track, jint section)
+{
+    TrackSceneNode* t = get_scene_track(default_track_scene, track);
+    CoreSection* cs = get_track_section(t, section);
+    if (!cs) return -1.0f;
 
     return cs->dpi_x;
 }
@@ -2327,12 +2281,10 @@ JNIEXPORT jfloat JNICALL Java_corelyzer_graphics_SceneGraph_getSectionDPIX
  * Signature: (I)F
  */
 JNIEXPORT jfloat JNICALL Java_corelyzer_graphics_SceneGraph_getSectionDPIY
-  (JNIEnv *jenv, jclass jcls, jint track, jint section){
-
-    TrackSceneNode* t;
-    CoreSection* cs;
-    t  = get_scene_track(default_track_scene, track);
-    cs = get_track_section(t,section);
+  (JNIEnv *jenv, jclass jcls, jint track, jint section)
+{
+    TrackSceneNode* t = get_scene_track(default_track_scene, track);
+    CoreSection* cs = get_track_section(t, section);
     if(!cs) return -1.0f;
 
     return cs->dpi_y;
@@ -2412,10 +2364,10 @@ JNIEXPORT jboolean JNICALL Java_corelyzer_graphics_SceneGraph_getSectionOrientat
     CoreSection* cs;
 
     tsn = get_scene_track(default_track_scene,trackId);
-    if(!tsn) return 0.0f;
+    if (!tsn) return false;
 
-    cs  = get_track_section( tsn, sectionId);
-    if(!cs) return 0.0f;
+    cs = get_track_section( tsn, sectionId);
+    if (!cs) return false;
 
     return cs->orientation;
 }
@@ -3441,49 +3393,42 @@ JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_pickForTrack
  * Signature: (IIFF)I
  */
 JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_pickForSection
-  (JNIEnv *jenv, jclass jcls, jint canvas, jint track, jfloat x, jfloat y){
+  (JNIEnv *jenv, jclass jcls, jint canvas, jint track, jfloat x, jfloat y)
+{
+    if (!is_canvas(canvas)) return -1;
 
-    int zlen, *order;
-    int i;
-    TrackSceneNode* tsn;
-    CoreSection* cs;
-    float cdpix, cdpiy;
-
-    if(!is_canvas(canvas)) return -1;
-    get_canvas_dpi(canvas,&cdpix,&cdpiy);
+	float cdpix, cdpiy;
+	get_canvas_dpi(canvas,&cdpix,&cdpiy);
 
     if(!is_track( default_track_scene, track)) return -1;
 
-    tsn  = get_scene_track( default_track_scene, track);
-    zlen = get_track_section_zorder_length(tsn);
-    if( zlen <= 0 ) return -1;
+    TrackSceneNode *tsn = get_scene_track(default_track_scene, track);
+    const int zlen = get_track_section_zorder_length(tsn);
+    if (zlen <= 0) return -1;
 
-    x   -= tsn->px;
-    y   -= tsn->py;
+    x -= tsn->px;
+    y -= tsn->py;
 
-    order = (int*) malloc( sizeof(int) * zlen);
+    int *order = (int*) malloc( sizeof(int) * zlen);
 
-    get_track_section_zorder(tsn,order);
+    get_track_section_zorder(tsn, order);
 
     // bounding box test
-    for( i = 0; i < zlen; ++i)
+    for (int i = 0; i < zlen; ++i)
     {
-        float w, h;
+        if (!is_section_model(tsn,order[i])) continue;
 
-        if(!is_section_model(tsn,order[i])) continue;
+        CoreSection *cs = get_track_section(tsn,order[i]);
+        float w = (float)get_texset_src_width(cs->src);
+        float h = (float)get_texset_src_height(cs->src);
+        w /= cs->dpi_x;
+        h /= cs->dpi_y;
+        w *= cdpix;
+        h *= cdpiy;
 
-        cs = get_track_section(tsn,order[i]);
-        w  = get_texset_src_width(cs->src);
-        h  = get_texset_src_height(cs->src);
-        w  /= cs->dpi_x;
-        h  /= cs->dpi_y;
-        w  *= cdpix;
-        h  *= cdpiy;
-
-        if(cs->orientation == PORTRAIT)
+        if (cs->orientation == PORTRAIT)
         {
-            float t;
-            t = w;
+            float t = w;
             w = h;
             h = t;
         }
@@ -3499,7 +3444,6 @@ JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_pickForSection
     }
 
     // none found
-
     free(order);
     return -1;
 }
@@ -4136,17 +4080,11 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setCoreSectionMarkerVe
  jfloat ax, jfloat ay, jfloat v0, jfloat v1, jfloat v2, jfloat v3)
 {
     // Notice: floats here are relative to the beginning of the core section
-    TrackSceneNode* t;
-    CoreSection* cs;
-    int i;
-    char* nbuf;
+    TrackSceneNode *t = get_scene_track(default_track_scene, track);
+    CoreSection *cs = get_track_section(t,section);
 
-    t  = get_scene_track(default_track_scene, track);
-    cs = get_track_section(t,section);
-
-	if( cs && is_section_annotation(cs,marker)) {
-        set_marker_vertex( &(cs->annovec[marker]->m), 
-							ax, ay, v0, v1, v2, v3);
+	if (cs && is_section_annotation(cs,marker)) {
+        set_marker_vertex( &(cs->annovec[marker]->m), ax, ay, v0, v1, v2, v3);
 	}
 }
 
@@ -4813,21 +4751,22 @@ void perform_pick(int canvas, float _x, float _y)
     PickedFreeDraw = -1;
 
     // go through zorder of scene's tracks from front to back
-    int zlen, *order;
-    int i,k,l;
+    int i,k;
+	unsigned int l;
     TrackSceneNode* tsn;
-    float cdpix, cdpiy;
     
     if(!is_canvas(canvas)) return;
+
+	float cdpix, cdpiy;
     get_canvas_dpi(canvas,&cdpix,&cdpiy);
 
-	zlen = get_scene_track_zorder_length(default_track_scene);
+	int zlen = get_scene_track_zorder_length(default_track_scene);
     if( zlen <= 0 ) return;
 
-    order = (int*) malloc( sizeof(int) * zlen);
+    int *order = (int*) malloc( sizeof(int) * zlen);
     get_scene_track_zorder( default_track_scene, order);
 
-    for( i = 0; i < zlen && PickedTrack == -1; ++i) // track
+    for (i = 0; i < zlen && PickedTrack == -1; ++i) // track
     {
         if(!is_track(default_track_scene, order[i])) continue;
 
@@ -4848,7 +4787,7 @@ void perform_pick(int canvas, float _x, float _y)
         get_track_section_zorder(tsn,cs_order);
 
         // bounding box test
-        for( k = 0; k < cs_zlen && PickedSection == -1; ++k) // section
+        for (k = 0; k < cs_zlen && PickedSection == -1; ++k) // section
         {
             float w, h;
 
@@ -4866,18 +4805,18 @@ void perform_pick(int canvas, float _x, float _y)
 
                 if(cs->orientation == PORTRAIT)
                 {
-                    float t;
+                    float t = w;
                     w = h;
                     h = t;
                 }
             }
             else // image
             {
-                w  = get_texset_src_width(cs->src);  // pixel in src width
-                h  = get_texset_src_height(cs->src); // pixel in src height
+                w = (float)get_texset_src_width(cs->src);  // pixel in src width
+                h = (float)get_texset_src_height(cs->src); // pixel in src height
 
-                float intTop = (cs->intervalTop / 2.54) * cs->dpi_x;
-                float intBot = (cs->intervalBottom / 2.54) * cs->dpi_x;
+                float intTop = (cs->intervalTop / 2.54f) * cs->dpi_x;
+                float intBot = (cs->intervalBottom / 2.54f) * cs->dpi_x;
                 float visibleW = intBot - intTop;
 
                 // check the orientation
@@ -4908,11 +4847,8 @@ void perform_pick(int canvas, float _x, float _y)
 			else
 			{
 				// adjust offset
-                int min_var = startPx > startPx + cs->graph_offset ?
-                              startPx + cs->graph_offset : startPx;
-
-                int max_var = startPx + w > startPx + w + cs->graph_offset ?
-                              startPx + w : startPx + w + cs->graph_offset;
+                const float min_var = startPx > startPx + cs->graph_offset ? startPx + cs->graph_offset : startPx;
+                const float max_var = startPx + w > startPx + w + cs->graph_offset ? startPx + w : startPx + w + cs->graph_offset;
 
                 if (tx < min_var) continue;
                 if (tx > max_var) continue;
@@ -4926,9 +4862,7 @@ void perform_pick(int canvas, float _x, float _y)
 
 				// if marker locates inside section image?
 				// TODO Check lithology markers
-				for(l = 0;
-					l < cs->annovec.size() && PickedMarker == -1; 
-					l++)
+				for (l = 0; l < cs->annovec.size() && PickedMarker == -1; l++)
                 {
                     CoreAnnotation *ca = cs->annovec[l];
                     if(!ca) continue;
@@ -4957,9 +4891,7 @@ void perform_pick(int canvas, float _x, float _y)
                 // traverse marker first and then graph
 				
                 // test marker
-                for( l = 0;
-                     l < cs->annovec.size() && PickedMarker == -1; 
-                     l++)
+                for( l = 0; l < cs->annovec.size() && PickedMarker == -1; l++)
                 {
                     CoreAnnotation *ca = cs->annovec[l];
                     if(!ca) continue;
@@ -4969,10 +4901,7 @@ void perform_pick(int canvas, float _x, float _y)
                     mw = ca->m.w * getMarkerScale();
                     mh = ca->m.h * getMarkerScale();
 
-                    if( 	ty >= my
-                                && ty <= my + mh
-                                && tx >= mx + startPx
-                                && tx <= mx + mw + startPx)
+                    if (ty >= my && ty <= my + mh && tx >= mx + startPx && tx <= mx + mw + startPx)
                     {
                         PickedMarker = l;
                     }
@@ -5001,10 +4930,7 @@ void perform_pick(int canvas, float _x, float _y)
 #endif
 
                 // test freedraw
-                for( l = 0;
-                     l < cs->freedrawvec.size() && PickedGraph == -1 && 
-                         PickedMarker == -1 && PickedFreeDraw == -1;
-                     l++)
+                for (l = 0; l < cs->freedrawvec.size() && PickedGraph == -1 && PickedMarker == -1 && PickedFreeDraw == -1; l++)
                 {
                     int fdid = cs->freedrawvec[l];
 
@@ -5016,10 +4942,7 @@ void perform_pick(int canvas, float _x, float _y)
                     mw = get_free_draw_width(fdid);
                     mh = get_free_draw_height(fdid);
 
-                    if( ty >= my
-                        && ty <= my + mh
-                        && tx >= mx + startPx
-                        && tx <= mx + mw + startPx)
+                    if( ty >= my && ty <= my + mh && tx >= mx + startPx && tx <= mx + mw + startPx)
                     {
                         PickedFreeDraw = fdid;
                     }
@@ -5031,9 +4954,7 @@ void perform_pick(int canvas, float _x, float _y)
             if( ty > cs->py + h && PickedMarker == -1) 
             {
                 // TODO Check lithology markers
-                for( l = 0;
-                     l < cs->annovec.size() && PickedMarker == -1; 
-                     l++)
+                for( l = 0; l < cs->annovec.size() && PickedMarker == -1; l++)
                 {
                     CoreAnnotation *ca = cs->annovec[l];
                     if(!ca) continue;
@@ -5043,10 +4964,7 @@ void perform_pick(int canvas, float _x, float _y)
                     mw = ca->m.w * getMarkerScale();
                     mh = ca->m.h * getMarkerScale();
 
-                    if( 	ty >= my
-                                && ty <= my + mh
-                                && tx >= mx + startPx
-                                && tx <= mx + mw + startPx)
+                    if (ty >= my && ty <= my + mh && tx >= mx + startPx && tx <= mx + mw + startPx)
                     {
                         PickedMarker = l;
                     }
@@ -5066,9 +4984,7 @@ void perform_pick(int canvas, float _x, float _y)
             fx = tx / cdpix * 2.54f / 100.0f;
             fy = ty / cdpiy * 2.54f / 100.0f;
             
-            for( int l = 0;
-                 l < tsn->freedrawvec.size() && PickedFreeDraw == -1;
-                 l++)
+            for (unsigned int l = 0; l < tsn->freedrawvec.size() && PickedFreeDraw == -1; l++)
             {
                 int fdid = tsn->freedrawvec[l];
                 
@@ -5089,15 +5005,12 @@ void perform_pick(int canvas, float _x, float _y)
                     PickedTrack = order[i];
                 }
             }
-            
         }
 
         free(cs_order);
-
     } // done going through each track
 
-    free(order);
-    
+    free(order);   
 }
 
 //=======================================================================

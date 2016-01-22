@@ -52,7 +52,7 @@ int create_free_draw_rectangle(int plugin, int track, int section,
     pfdr->scale_independent = false;
     pfdr->visible = true;
     //find the first empty slot
-    for( int i = 0; i < freedrawvec.size(); i++)
+    for (unsigned int i = 0; i < freedrawvec.size(); i++)
     {
         if( freedrawvec[i] == NULL)
         {

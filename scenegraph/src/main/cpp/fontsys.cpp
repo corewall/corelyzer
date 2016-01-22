@@ -209,17 +209,17 @@ void load_font(int font)
 
         glNewList( cwf->glyphMap[i], GL_COMPILE);
         glBindTexture(GL_TEXTURE_2D, cwf->texids[list_index]);
-        glTranslatef(bmp_glyph->left, bmp_glyph->top - bmp.rows, 0);
+        glTranslatef((float)bmp_glyph->left, (float)bmp_glyph->top - bmp.rows, 0);
         glBegin(GL_QUADS);
         {
-            glTexCoord2d(0,0); glVertex2f(0,bmp.rows);
-            glTexCoord2d(0,y); glVertex2f(0,0);
-            glTexCoord2d(x,y); glVertex2f(bmp.width, 0);
-            glTexCoord2d(x,0); glVertex2f(bmp.width, bmp.rows);
+            glTexCoord2d(0,0); glVertex2i(0, bmp.rows);
+            glTexCoord2d(0,y); glVertex2i(0,0);
+            glTexCoord2d(x,y); glVertex2i(bmp.width, 0);
+            glTexCoord2d(x,0); glVertex2i(bmp.width, bmp.rows);
         }
         glEnd();
-        glTranslatef(cwf->advanceX[i] - bmp_glyph->left,
-                     bmp.rows - bmp_glyph->top, 0);
+        glTranslatef((float)cwf->advanceX[i] - bmp_glyph->left,
+                     (float)bmp.rows - bmp_glyph->top, 0);
         glEndList();
 
         list_index++;
@@ -265,7 +265,9 @@ void set_current_font(int font)
 //=======================================================================
 bool is_font(int font)
 {
-    if( font < 0 || font > fontvec.size() - 1) return false;
+	if (font < 0) return false;
+	const int fontVecSize = fontvec.size() - 1;
+    if (font > fontVecSize) return false;
     return (fontvec[font] != NULL);
 }
 
@@ -362,7 +364,7 @@ void render_string_label(const char* str, int start, int end)
     CWFont* cwf = fontvec[current_font];
 	
 	// draw backgrond label: dark blue
-	glColor4f(0,0,0.3, 0.5);
+	glColor4f(0, 0 ,0.3f, 0.5f);
 	// calculate size of quad
 	float w = 0;;
 	for (int i=start; i<=end; i++) {
@@ -412,7 +414,7 @@ void render_string_shadowed(const char* str, int start, int end,
 	// draw backgrond shadow: almost black
 	glEnable(GL_TEXTURE_2D);
 	glEnable(GL_BLEND);
-	glColor3f(0,0,0.1);
+	glColor3f(0, 0 ,0.1f);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glPushMatrix();
     glTranslatef(offset,offset,0);
@@ -463,7 +465,7 @@ void render_string_outlined(const char* str, int start, int end)
 	// draw outline: almost black. draw it with four directional offset
 	glEnable(GL_TEXTURE_2D);
 	glEnable(GL_BLEND);
-	glColor3f(0,0,0.1);
+	glColor3f(0, 0, 0.1f);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glPushMatrix();
     glTranslatef(2,2,0);

@@ -39,8 +39,8 @@
 
 #include <vector>
 
-#define CM_PER_INCH       2.54
-#define INCH_PER_CM       0.394
+#define CM_PER_INCH       2.54f
+#define INCH_PER_CM       0.394f
 
 #define DEFAULT_GRAPH_HEIGHT      (1.0f) // Graph height in inch
 #define DEFAULT_GRAPH_SCALE       (1.5f)

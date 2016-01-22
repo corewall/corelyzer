@@ -52,10 +52,9 @@ int create_track_scene()
    ts->trackvec.clear();
    ts->zorder.clear();
 
-   int i;
-   for( i = 0; i < trackscenevec.size(); i++)
+   for (unsigned int i = 0; i < trackscenevec.size(); i++)
    {
-        if( trackscenevec[i] == NULL )
+        if (trackscenevec[i] == NULL)
         {
             trackscenevec[i] = ts;
             return i;
@@ -78,15 +77,19 @@ void free_track_scene(int i)
 //================================================================
 bool is_track_scene(int i)
 {
-    if( i < 0 || i > trackscenevec.size() - 1) return false;
+    if (i < 0) return false;
+	const int trackSceneVecSize = trackscenevec.size() - 1;
+	if (i > trackSceneVecSize) return false;
     return (trackscenevec[i] != NULL );
 }
 
 //================================================================
 bool is_track(int scene, int trackid)
 {
-    if( !is_track_scene(scene)) return false;
-    if( trackid < 0 || trackid > trackscenevec[scene]->trackvec.size() - 1)
+    if (!is_track_scene(scene)) return false;
+    if (trackid < 0) return false;
+	const int trackVecSize = trackscenevec[scene]->trackvec.size() - 1;
+	if (trackid > trackVecSize)
         return false;
     return (trackscenevec[scene]->trackvec[trackid] != NULL );
 }
@@ -129,7 +132,7 @@ int append_track(int scene, const char* sessionName, const char* trackName)
     char * newHoleStr = strtok(newTrackName, "_");
 
     // try to reuse a track vec slot
-    for(int i = 0; i < ts->trackvec.size(); ++i)
+    for (unsigned int i = 0; i < ts->trackvec.size(); ++i)
     {
         if( ts->trackvec[i] == NULL)
         {
@@ -143,7 +146,7 @@ int append_track(int scene, const char* sessionName, const char* trackName)
             }
 
             bool found = false;
-            for( int k = 0; k < ts->zorder.size(); ++k)
+            for( unsigned int k = 0; k < ts->zorder.size(); ++k)
             {
                 if( ts->zorder[k] == i)
                 {
@@ -209,8 +212,8 @@ int append_track(int scene, const char* sessionName, const char* trackName)
 //================================================================
 void free_all_tracks(int scene)
 {
-    if(!is_track_scene(scene)) return;
-    for( int i = 0; i < trackscenevec[scene]->trackvec.size(); ++i)
+    if (!is_track_scene(scene)) return;
+    for (unsigned int i = 0; i < trackscenevec[scene]->trackvec.size(); ++i)
     {
         free_track(trackscenevec[scene]->trackvec[i]);
         trackscenevec[scene]->trackvec[i] = NULL;
@@ -240,7 +243,7 @@ void free_track_section_model(int scene, int trackid, int sectionid)
 int get_scene_track(int scene, const char* name)
 {
     if(!is_track_scene(scene)) return -1;
-    for( int i = 0; i < trackscenevec[scene]->trackvec.size(); ++i)
+    for(unsigned int i = 0; i < trackscenevec[scene]->trackvec.size(); ++i)
     {
         if( trackscenevec[scene]->trackvec[i] == NULL) continue;
         
@@ -305,10 +308,10 @@ void bring_track_front(int scene, int trackid)
 //================================================================
 void attach_free_draw_to_scene(int scene, int fdid)
 {
-    if(!is_track_scene(scene)) return;
-    if(!is_free_draw_rectangle(fdid)) return;
+    if (!is_track_scene(scene)) return;
+    if (!is_free_draw_rectangle(fdid)) return;
     TrackScene* ts = trackscenevec[scene];
-    for( int i = 0; i < ts->freedrawvec.size(); i++)
+    for (unsigned int i = 0; i < ts->freedrawvec.size(); i++)
     {
         if( ts->freedrawvec[i] == -1)
         {
@@ -316,7 +319,6 @@ void attach_free_draw_to_scene(int scene, int fdid)
             return;
         }
     }
-
 
     trackscenevec[scene]->freedrawvec.push_back(fdid);
 }
@@ -327,7 +329,7 @@ void detach_free_draw_from_scene(int scene, int fdid)
     if(!is_track_scene(scene)) return;
     if(!is_free_draw_rectangle(fdid)) return;
     TrackScene* ts = trackscenevec[scene];
-    for( int i = 0; i < ts->freedrawvec.size(); i++) 
+    for (unsigned int i = 0; i < ts->freedrawvec.size(); i++) 
     {
         if( ts->freedrawvec[i] == fdid)
         {
@@ -394,9 +396,9 @@ void render_track_scene(int id, Canvas* c)
     // draw plugin free draw rectangles, scale so x,y,w,h are in meters
     glPushMatrix();
     {
-        float scale = 1.0 / c->dpi_x * CM_PER_INCH / 100.0f;
-        glScalef(1.0/scale,1.0/scale,1.0/scale);
-        for( i = 0; i < ts->freedrawvec.size(); i++)
+        float scale = 1.0f / c->dpi_x * CM_PER_INCH / 100.0f;
+        glScalef(1.0f/scale, 1.0f/scale, 1.0f/scale);
+        for (unsigned int i = 0; i < ts->freedrawvec.size(); i++)
         {
     //        printf("Rendering pfdr %d\n", ts->freedrawvec[i]);
             render_free_draw(ts->freedrawvec[i]);
@@ -430,10 +432,10 @@ int get_scene_track_zorder_length(int scene)
 //================================================================
 void get_scene_track_zorder(int scene, int* order)
 {
-    if(!is_track_scene(scene)) return;
-    if(!order) return;
+    if (!is_track_scene(scene)) return;
+    if (!order) return;
     
-    for(int i = 0; i < trackscenevec[scene]->zorder.size(); ++i)
+    for (unsigned int i = 0; i < trackscenevec[scene]->zorder.size(); ++i)
     {
         order[i] = trackscenevec[scene]->zorder[i];
     }
@@ -497,7 +499,7 @@ int append_track(const char* sessionName, const char* trackName)
 
     // try to reuse a track vec slot
     int pos = -1;
-    for( int i = 0; i < ts->trackvec.size(); ++i)
+    for (unsigned int i = 0; i < ts->trackvec.size(); ++i)
     {
         if( ts->trackvec[i] == NULL)
         {
@@ -511,7 +513,7 @@ int append_track(const char* sessionName, const char* trackName)
             }
 
             bool found = false;
-            for( int k = 0; k < ts->zorder.size(); ++k)
+            for (unsigned int k = 0; k < ts->zorder.size(); ++k)
             {
                 if( ts->zorder[k] == i)
                 {
@@ -543,9 +545,9 @@ int append_track(const char* sessionName, const char* trackName)
 //================================================================
 void free_all_tracks()
 {
-    if(!is_scene_bound()) return;
-    if(!is_track_scene(BoundScene)) return;
-    for( int i = 0; i < trackscenevec[BoundScene]->trackvec.size(); ++i)
+    if (!is_scene_bound()) return;
+    if (!is_track_scene(BoundScene)) return;
+    for (unsigned int i = 0; i < trackscenevec[BoundScene]->trackvec.size(); ++i)
     {
         free_track(trackscenevec[BoundScene]->trackvec[i]);
         trackscenevec[BoundScene]->trackvec[i] = NULL;
@@ -566,9 +568,9 @@ void free_track(int trackid)
 //================================================================
 int get_scene_track(const char* name)
 {
-    if(!is_scene_bound()) return -1;
-    if(!is_track_scene(BoundScene)) return -1;
-    for( int i = 0; i < trackscenevec[BoundScene]->trackvec.size(); ++i)
+    if (!is_scene_bound()) return -1;
+    if (!is_track_scene(BoundScene)) return -1;
+    for (unsigned int i = 0; i < trackscenevec[BoundScene]->trackvec.size(); ++i)
     {
         if( trackscenevec[BoundScene]->trackvec[i] == NULL) continue;
         
@@ -638,11 +640,11 @@ void bring_track_front(int trackid)
 //================================================================
 void attach_free_draw_to_scene(int fdid)
 {
-    if(!is_scene_bound()) return;
-    if(!is_track_scene(BoundScene)) return;
-    if(!is_free_draw_rectangle(fdid)) return;
+    if (!is_scene_bound()) return;
+    if (!is_track_scene(BoundScene)) return;
+    if (!is_free_draw_rectangle(fdid)) return;
     TrackScene* ts = trackscenevec[BoundScene];
-    for( int i = 0; i < ts->freedrawvec.size(); i++)
+    for (unsigned int i = 0; i < ts->freedrawvec.size(); i++)
     {
         if( ts->freedrawvec[i] == -1)
         {
@@ -661,7 +663,7 @@ void detach_free_draw_from_scene(int fdid)
     if(!is_track_scene(BoundScene)) return;
     if(!is_free_draw_rectangle(fdid)) return;
     TrackScene* ts = trackscenevec[BoundScene];
-    for( int i = 0; i < ts->freedrawvec.size(); i++) 
+    for (unsigned int i = 0; i < ts->freedrawvec.size(); i++) 
     {
         if( ts->freedrawvec[i] == fdid)
         {
@@ -725,16 +727,16 @@ void render_track_scene(Canvas* c)
 
     // draw plugin free draw rectangles, scale so x,y,w,h are in meters
     glPushMatrix();
-    float scale = 1.0 / c->dpi_x * CM_PER_INCH / 100.0f;
+    float scale = 1.0f / c->dpi_x * CM_PER_INCH / 100.0f;
     float indep_scale = c->w / c->w0;
-    glScalef(1.0/scale,1.0/scale,1.0/scale);
-    for( i = 0; i < ts->freedrawvec.size(); i++)
+    glScalef(1.0f/scale, 1.0f/scale, 1.0f/scale);
+    for (unsigned int i = 0; i < ts->freedrawvec.size(); i++)
     {
-        if( is_free_draw_scale_independent(ts->freedrawvec[i]))
+        if(is_free_draw_scale_independent(ts->freedrawvec[i]))
         {
             glScalef( indep_scale, indep_scale, 1.0f);
             render_free_draw(ts->freedrawvec[i]);
-            glScalef( 1.0 / indep_scale, 1.0 / indep_scale, 1.0f);
+            glScalef( 1.0f / indep_scale, 1.0f / indep_scale, 1.0f);
         }
         else
         {
@@ -773,10 +775,10 @@ int get_scene_track_zorder_length()
 //================================================================
 void get_scene_track_zorder(int* order)
 {
-    if(!is_scene_bound()) return;
-    if(!order) return;
+    if (!is_scene_bound()) return;
+    if (!order) return;
     
-    for(int i = 0; i < trackscenevec[BoundScene]->zorder.size(); ++i)
+    for (unsigned int i = 0; i < trackscenevec[BoundScene]->zorder.size(); ++i)
     {
         order[i] = trackscenevec[BoundScene]->zorder[i];
     }
@@ -857,7 +859,7 @@ void stagger_track_sections(const int trackid, const bool stagger)
 
 	if ( stagger )
 	{
-		for ( int i = 1; i < depthSortedVec.size(); i++ )
+		for (unsigned int i = 1; i < depthSortedVec.size(); i++)
 		{
 			if (i % 2 != 0) // offset odd sections
 			{
@@ -886,7 +888,7 @@ void stagger_track_sections(const int trackid, const bool stagger)
 		// the canvas, so we're actually looking for the largest value.
 		int i = 0;
 		float lowHeight = FLT_MIN;
-		for ( i = 0; i < depthSortedVec.size(); i++ )
+		for (unsigned int i = 0; i < depthSortedVec.size(); i++)
 		{
 			CoreSection *cs = depthSortedVec[i];
 			if ( cs->py > lowHeight )
@@ -894,7 +896,7 @@ void stagger_track_sections(const int trackid, const bool stagger)
 		}
 		
 		// move all sections to lowest section's height
-		for ( i = 0; i < depthSortedVec.size(); i++ )
+		for (unsigned int i = 0; i < depthSortedVec.size(); i++)
 		{
 			CoreSection *cs = depthSortedVec[i];
 			cs->py = lowHeight;

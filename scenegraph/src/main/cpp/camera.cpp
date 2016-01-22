@@ -35,7 +35,9 @@ std::vector< Camera > camvec;
 //========================================================================
 bool is_camera(int i)
 {
-    if( i < 0 || i >= camvec.size() ) return false;
+    if (i < 0) return false;
+	const int camVecSize = camvec.size();
+	if (i >= camVecSize) return false;
     return camvec[i].valid;
 }
 
@@ -43,7 +45,7 @@ bool is_camera(int i)
 int create_camera()
 {
     // see if there is already an existing invalid camera
-    for( int i = 0; i < camvec.size(); i++)
+    for (unsigned int i = 0; i < camvec.size(); i++)
     {
         if( camvec[i].valid == false ) 
         {

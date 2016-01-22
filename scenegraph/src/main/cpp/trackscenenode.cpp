@@ -73,7 +73,7 @@ int append_model( TrackSceneNode* t, CoreSection* c)
     if( !t || !c ) return -1;
     int pos = -1;
     
-    for( int i = 0; i < t->modelvec.size(); ++i)
+    for( unsigned int i = 0; i < t->modelvec.size(); ++i)
     {
         if( t->modelvec[i] == NULL )
         {
@@ -87,7 +87,7 @@ int append_model( TrackSceneNode* t, CoreSection* c)
             }
             
             bool found = false;
-            for( int k = 0; k < t->zorder.size(); ++k)
+            for( unsigned int k = 0; k < t->zorder.size(); ++k)
             {
                 if( t->zorder[k] == i )
                 {
@@ -130,7 +130,7 @@ void free_track(TrackSceneNode* t)
 void free_all_models(TrackSceneNode* t)
 {
     if(!t) return;
-    for( int i = 0; i < t->modelvec.size(); ++i)
+    for( unsigned int i = 0; i < t->modelvec.size(); ++i)
     {
         free_section_model(t->modelvec[i]);
         t->modelvec[i] = NULL;
@@ -155,8 +155,10 @@ void free_model(TrackSceneNode* t, int section)
 //================================================================
 bool is_section_model(TrackSceneNode* t, int section)
 {
-    if(!t) return false;
-    if(section < 0 || section > t->modelvec.size() - 1) return false;
+    if (!t) return false;
+    if (section < 0) return false;
+	const int modelVecSize = t->modelvec.size() - 1;
+	if (section > modelVecSize) return false;
     return (t->modelvec[section] != NULL);
 }
 
@@ -184,7 +186,7 @@ void bring_model_front(TrackSceneNode* t, int section)
    
     int i;
     int z = -1;
-    for( i = 0; i < t->zorder.size(); ++i)
+    for (unsigned int i = 0; i < t->zorder.size(); ++i)
     {
         if( t->zorder[i] == section )
         {
@@ -265,33 +267,32 @@ void render_track(TrackSceneNode* t, Canvas* c)
 
     // draw plugin free draw rectangles, scale so x,y,w,h are in meters
     glPushMatrix();
-    float scale = 1.0 / c->dpi_x * CM_PER_INCH / 100.0f;
+    float scale = 1.0f / c->dpi_x * CM_PER_INCH / 100.0f;
     float indep_scale = c->w / c->w0;
-    glScalef(1.0 /scale,1.0 /scale,1.0 /scale);
-    for( i = 0; i < t->freedrawvec.size(); i++)
+    glScalef(1.0f/scale, 1.0f/scale, 1.0f/scale);
+    for (unsigned int i = 0; i < t->freedrawvec.size(); i++)
     {
         if( is_free_draw_scale_independent(t->freedrawvec[i]))
         {
             glScalef( indep_scale, indep_scale, 1.0f);
             render_free_draw(t->freedrawvec[i]);
-            glScalef( 1.0 / indep_scale, 1.0 / indep_scale, 1.0f);
+            glScalef( 1.0f / indep_scale, 1.0f / indep_scale, 1.0f);
         }
         else
         {
             render_free_draw(t->freedrawvec[i]);
-
         }
     }
 
     glPopMatrix();
 
-    glTranslatef( -t->px, -t->py, 0);
+    glTranslatef(-t->px, -t->py, 0);
 
     // orig: translate_camera( c->camera, t->px, t->py, 0);
-    if(get_horizontal_depth()) {
-        translate_camera( c->camera, t->px, t->py, 0);
+    if (get_horizontal_depth()) {
+        translate_camera(c->camera, t->px, t->py, 0);
     } else {
-        translate_camera( c->camera, -t->py, t->px, 0);
+        translate_camera(c->camera, -t->py, t->px, 0);
     }
 }
 
@@ -313,7 +314,7 @@ int get_track_section_zorder_length(TrackSceneNode* t)
 void get_track_section_zorder(TrackSceneNode* t, int* order)
 {
     if(!t || !order) return;
-    for( int i = 0; i < t->zorder.size(); ++i)
+    for (unsigned int i = 0; i < t->zorder.size(); ++i)
     {
         order[i] = t->zorder[i];
     }
@@ -322,28 +323,24 @@ void get_track_section_zorder(TrackSceneNode* t, int* order)
 //================================================================
 void update_track_dimensions(TrackSceneNode* t)
 {
-    if(!t) return;
+    if (!t) return;
     float max_x = 0.0, max_y = 0.0;
     float min_x = 0.0, min_y = 0.0;
 
-    for( int i = 0; i < t->zorder.size(); ++i)
+    for (unsigned int i = 0; i < t->zorder.size(); ++i)
     {
         CoreSection* c = t->modelvec[ t->zorder[i] ];
-        if( !c ) continue;
+        if (!c) continue;
         
-        if( c->px < min_x ) min_x = c->px;
-        if( c->py < min_y ) min_y = c->py;
+        if (c->px < min_x) min_x = c->px;
+        if (c->py < min_y) min_y = c->py;
         
-        float cw, ch;
-        float gw, gh;
-
-        cw = get_texset_src_width( c->src );
-        ch = get_texset_src_height( c->src );
+        float cw = (float)get_texset_src_width(c->src);
+        float ch = (float)get_texset_src_height(c->src);
         
-        if(c->orientation == PORTRAIT)
+        if (c->orientation == PORTRAIT)
         {
-            float t;
-            t  = cw;
+            float t = cw;
             cw = ch;
             ch = t;
         }
@@ -351,21 +348,21 @@ void update_track_dimensions(TrackSceneNode* t)
 //        printf("Checking image of dims %f x %f, with dpis of %f, %f\n",
 //               cw,ch,c->dpi_x,c->dpi_y);
 
-        if( cw > 0)
+        if (cw > 0)
         {
             // scale to describe number of inches actually covered
             cw /= c->dpi_x;
             if( c->px + cw > max_x) max_x = (c->px + cw);
         }
 
-        if( ch > 0)
+        if (ch > 0)
         {
             // scale to describe number of inches actually covered
             ch /= c->dpi_y;
             if( c->py + cw > max_y) max_y = (c->py + ch);
         }
 
-        for( int i = 0; i < c->graphvec.size(); i++)
+        for (unsigned int i = 0; i < c->graphvec.size(); i++)
         {
             Box* b = get_graph_box( c, c->graphvec[i] );
             if(!b) continue;
@@ -384,7 +381,7 @@ void attach_free_draw_to_track(TrackSceneNode* t, int fdid)
 {
     if(!t) return;
     if(!is_free_draw_rectangle(fdid)) return;
-    for( int i = 0; i < t->freedrawvec.size(); i++)
+    for (unsigned int i = 0; i < t->freedrawvec.size(); i++)
     {
         if( t->freedrawvec[i] == -1)
         {
@@ -400,12 +397,12 @@ void attach_free_draw_to_track(TrackSceneNode* t, int fdid)
 //================================================================
 void detach_free_draw_from_track(TrackSceneNode* t, int fdid)
 {
-    if(!t) return;
-    if(!is_free_draw_rectangle(fdid)) return;
+    if (!t) return;
+    if (!is_free_draw_rectangle(fdid)) return;
 
-    for( int i = 0; i < t->freedrawvec.size(); i++) 
+    for (unsigned int i = 0; i < t->freedrawvec.size(); i++) 
     {
-        if( t->freedrawvec[i] == fdid)
+        if (t->freedrawvec[i] == fdid)
         {
             t->freedrawvec[i] = -1;
             return;
@@ -416,20 +413,20 @@ void detach_free_draw_from_track(TrackSceneNode* t, int fdid)
 //================================================================
 void push_section_to_end(TrackSceneNode* t, int section)
 {
-    if(!is_section_model(t,section)) return;
+    if (!is_section_model(t,section)) return;
     float dpix, dpiy;
-    get_canvas_dpi( 0, &dpix, &dpiy );
+    get_canvas_dpi(0, &dpix, &dpiy);
 
     float max_x = 0.0f;
     CoreSection* max_sec = NULL;
 
-    for( int i = 0; i < t->modelvec.size(); i++)
+    for (unsigned int i = 0; i < t->modelvec.size(); i++)
     {
-        if(!is_section_model(t,i)) continue;
-        if( i == section ) continue;
+        if (!is_section_model(t,i)) continue;
+        if (i == section) continue;
 
         CoreSection* cs = get_track_section( t, i);
-        if( cs->px >= max_x )
+        if (cs->px >= max_x)
         {
             max_x = cs->px;
             max_sec = cs;

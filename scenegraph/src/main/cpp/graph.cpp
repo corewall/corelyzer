@@ -53,7 +53,9 @@ static float graphScale  = DEFAULT_GRAPH_SCALE;
 //======================================================================
 bool is_graph(int gid)
 {
-	if(gid < 0 || gid > graphvec.size() - 1) return false;
+	if (gid < 0) return false;
+	const int graphVecSize = graphvec.size() - 1;
+	if (gid > graphVecSize) return false;
     return graphvec[gid] != NULL;
 }
 
@@ -142,27 +144,28 @@ int add_line_graph_to_section(int track, int section,
 	const float depth = get_table_row_depth( dataset, table, rows-1);
 	g->w = (depth * depthunitscale * INCH_PER_CM);
 	if (cs->src == -1) {
-		cs->width = g->w * CM_PER_INCH;			// cm
-		cs->height = DEFAULT_SECTION_HEIGHT;	// cm
+		cs->width = g->w * CM_PER_INCH; // cm
+		cs->height = DEFAULT_SECTION_HEIGHT; // cm
 	}
 	// end of calc width
 
-    g->min     = get_field_min(dataset, table, field);
-    g->max     = get_field_max(dataset, table, field);
+    g->min = get_field_min(dataset, table, field);
+    g->max = get_field_max(dataset, table, field);
 
     g->orig_min = get_field_min(dataset, table, field);
     g->orig_max = get_field_max(dataset, table, field);
 	
-	g->exclude_min = FLT_MIN; g->exclude_max = FLT_MAX;
-	
-	g->type	   = GRAPH_LINE;
+	g->exclude_min = FLT_MIN;
+	g->exclude_max = FLT_MAX;
+
+	g->type = GRAPH_LINE;
 	
 	// graph initialization complete, now add to graphvec
 
     // if graphvec has empty slots, use the first one we find...
-    for ( int i = 0; i < graphvec.size(); i++)
+    for (unsigned int i = 0; i < graphvec.size(); i++)
     {
-        if ( graphvec[i] == NULL)
+        if (graphvec[i] == NULL)
         {
             graphvec[i] = g;
             // put the graph in the sections graphvec
@@ -184,7 +187,7 @@ int add_line_graph_to_section(int track, int section,
 // Remove all graphs for the specified dataset
 void remove_dataset_graphs( const int dataset )
 {
-	for ( int gid = 0; gid < graphvec.size(); gid++ )
+	for (unsigned int gid = 0; gid < graphvec.size(); gid++)
 	{
 		if ( graphvec[gid] && graphvec[gid]->dataset == dataset )
 			remove_line_graph_from_section( gid );
@@ -271,15 +274,15 @@ int remove_line_graph_from_section(int gid)
 //======================================================================
 int locate_graph(int track, int section, int dataset, int table, int field)
 {
-    for(int i=0; i<graphvec.size(); i++) 
+    for (unsigned int i = 0; i < graphvec.size(); i++) 
     {
-        if( graphvec[i] )
+        if (graphvec[i])
         {
-            if( (graphvec[i]->track   == track) &&
+            if ((graphvec[i]->track   == track) &&
                 (graphvec[i]->section == section) &&
                 (graphvec[i]->field   == field) &&
                 (graphvec[i]->dataset == dataset) &&
-                (graphvec[i]->table   == table) )
+                (graphvec[i]->table   == table))
             {
                 return i;
             }    
@@ -307,13 +310,13 @@ void render_minmax_labels(Canvas * c, CoreSection* cs, int gid)
     sprintf(maxLabel, "Max: %.2f", max);
 
     float angle = get_horizontal_depth() ? 0.0f : -90.0f;
-    float v_shift_max = -(b->h -0.5) * c->dpi_y;
+    float v_shift_max = -(b->h - 0.5f) * c->dpi_y;
     float h_shift = 0.0f;
-    float scale = 0.5 * getGraphScale();
+    float scale = 0.5f * getGraphScale();
 
-    if(isCollapse)
+    if (isCollapse)
     {
-        h_shift = 5 * 40 * get_graph_slot(gid);
+        h_shift = (float)(5 * 40 * get_graph_slot(gid));
     }
 
     glColor3f(1.0f, 1.0f, 1.0f);
@@ -364,7 +367,7 @@ void render_label(Canvas* c, CoreSection* cs, int gid)
     // int   len = (real_len <= 5) ? real_len : 5;
 
     float shiftv = b->h * c->dpi_y;
-    float shifth = (len) * 24 * get_graph_slot(gid);
+    float shifth = (float)(len * 24 * get_graph_slot(gid));
 
     // float scaleh = 0.5f * getGraphScale();
     // float scalev = 0.5f * getGraphScale();
@@ -442,7 +445,7 @@ void render_graph(Canvas* c, CoreSection* cs, int gid)
     if (g->show) 
     {
         const float fieldRange = (g->max - g->min);
-        const float fieldMed = (g->max + g->min)/2.0;
+        const float fieldMed = (g->max + g->min) / 2.0f;
         const float y_scale = (g->h * getGraphScale()) / (fieldRange * INCH_PER_CM);
 
         // fit curve into border
@@ -450,7 +453,7 @@ void render_graph(Canvas* c, CoreSection* cs, int gid)
             
         // this means it's 1x1 pixel image for missing purpose
         // no need to rotate it no matter what
-        if( (cs->dpi_y == 0.25) && (cs->dpi_x < 1.0f) )
+        if( (cs->dpi_y == 0.25f) && (cs->dpi_x < 1.0f) )
         {
             cs->orientation = LANDSCAPE;
         }
@@ -769,7 +772,7 @@ void make_poly_verts( std::vector<GraphPoint> &gpVec, const int numSides, const 
 	if ( numSides < 3 )
 		return;
 	
-	const float radsPerVert = ( 2.0f * PI ) / numSides;
+	const float radsPerVert = ( 2.0f * (float)PI ) / numSides;
 	float curRads = startRads;
 	for ( int i = 0; i < numSides; i++ )
 	{
@@ -800,11 +803,11 @@ inline void render_graph_point( const GraphPoint &pt, const GraphPointShape ptSh
 		case GPS_DIAMOND:
 		{
 			const int numSides = ( ptShape == GPS_TRIANGLE ) ? 3 : 4;
-			const float startRads = ( ptShape == GPS_SQUARE ) ? PI / 4.0f : PI / 2.0f;
+			const float startRads = ( ptShape == GPS_SQUARE ) ? (float)PI / 4.0f : (float)PI / 2.0f;
 			make_poly_verts( gpVec, numSides, startRads ); // 9/2/2011 brgtodo: silly to recompute for every point
 			
 			glBegin(GL_POLYGON);
-			for ( int i = 0; i < gpVec.size(); i++ )
+			for (unsigned int i = 0; i < gpVec.size(); i++)
 			{
 				const float x = pt.x + ( gpVec[i].x * 0.2f * INCH_PER_CM );// / scaling ;
 				const float y = pt.y + ( gpVec[i].y * 0.2f * INCH_PER_CM * scaling );
@@ -853,9 +856,7 @@ void render_border(float width, float height)
 std::vector< int > match_my_graph_id(int trackId, int sectionId)
 {
     std::vector< int > gids;
-
-    int i;
-    for(i=0; i<graphvec.size(); i++) {
+    for (unsigned i = 0; i < graphvec.size(); i++) {
         if( (graphvec[i]->track   == trackId) &&
             (graphvec[i]->section == sectionId) )
         {
@@ -870,7 +871,7 @@ std::vector< int > match_my_graph_id(int trackId, int sectionId)
 // find graph with matching dataset and field
 int	find_graph_by_field( const int dataset, const int field )
 {
-	for ( int i = 0; i < graphvec.size(); i++ )
+	for (unsigned int i = 0; i < graphvec.size(); i++)
 	{
 		if ( graphvec[i] )
 			if ( graphvec[i]->dataset == dataset && graphvec[i]->field == field )
@@ -1099,7 +1100,7 @@ float get_line_graph_color_component(int gid, int component)
 //======================================================================
 int   get_line_graph_type (int gid)
 {
-	if(!is_graph(gid)) return 0.0;
+	if(!is_graph(gid)) return 0;
 	
 	return graphvec[gid]->type;
 }
@@ -1128,9 +1129,11 @@ void move_graph_to_top(int gid)
 //======================================================================
 int get_graph_from_section_slot(CoreSection* ptr, int slot)
 {
-    if(!ptr) return -1;
-    if( slot < 0 || slot >= ptr->graphvec.size() ) return -1;
-    if(!is_graph(ptr->graphvec[slot])) return -1;
+    if (!ptr) return -1;
+	if (slot < 0) return false;
+	const int graphVecSize = ptr->graphvec.size();
+    if (slot >= graphVecSize) return -1;
+    if (!is_graph(ptr->graphvec[slot])) return -1;
     return ptr->graphvec[slot];
 }
 
@@ -1182,7 +1185,7 @@ Box* get_graph_box(CoreSection* cs, int gid) // return units in inch
     {
         int sgid;
         sgid = cs->graphvec[i];
-        y_box_adjust += GRAPH_FIELDS_GAP + get_graph_height(sgid);
+        y_box_adjust += (float)GRAPH_FIELDS_GAP + get_graph_height(sgid);
     }
 
     b->w = width;                  // inch
@@ -1191,11 +1194,11 @@ Box* get_graph_box(CoreSection* cs, int gid) // return units in inch
 
     if(isCollapse)
     {
-        b->y = -(GRAPH_FIELDS_GAP + b->h);
+        b->y = -((float)GRAPH_FIELDS_GAP + b->h);
     }
     else
     {
-        b->y = -(y_box_adjust + GRAPH_FIELDS_GAP + b->h);
+        b->y = -(y_box_adjust + (float)GRAPH_FIELDS_GAP + b->h);
     }
 
     return b;
@@ -1248,7 +1251,7 @@ Box* get_graph_box(Canvas* c, CoreSection* cs, int gid) // return units in inch
     {
         int sgid;
         sgid = cs->graphvec[i];
-        y_box_adjust += GRAPH_FIELDS_GAP + get_graph_height(sgid);
+        y_box_adjust += (float)GRAPH_FIELDS_GAP + get_graph_height(sgid);
     }
 
     b->w = width;                  // inch
@@ -1257,11 +1260,11 @@ Box* get_graph_box(Canvas* c, CoreSection* cs, int gid) // return units in inch
 
     if(isCollapse)
     {
-        b->y = -(GRAPH_FIELDS_GAP + b->h);
+        b->y = -((float)GRAPH_FIELDS_GAP + b->h);
     }
     else
     {
-        b->y = -(y_box_adjust + GRAPH_FIELDS_GAP + b->h);
+        b->y = -(y_box_adjust + (float)GRAPH_FIELDS_GAP + b->h);
     }
 
     return b;

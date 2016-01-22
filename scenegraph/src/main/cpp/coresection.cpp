@@ -150,7 +150,7 @@ void free_section_model(CoreSection* ptr)
 //================================================================
 void render_section_graphs(CoreSection* ptr, Canvas *c)
 {
-    for(int i = 0; i < ptr->graphvec.size(); i++)
+    for (unsigned int i = 0; i < ptr->graphvec.size(); i++)
     {
 		// render graph
 		render_graph( c, ptr, ptr->graphvec[i] );
@@ -161,7 +161,7 @@ void render_section_graphs(CoreSection* ptr, Canvas *c)
 void render_section_markers(CoreSection* ptr, Canvas *c)
 {
     glColor3f(1,1,1);
-    for( int i = 0; i < ptr->annovec.size(); i++)
+    for (unsigned int i = 0; i < ptr->annovec.size(); i++)
     {
         CoreAnnotation* ca = ptr->annovec[i];
         if(ca)
@@ -178,7 +178,7 @@ void render_section_markers(CoreSection* ptr, Canvas *c)
 //================================================================
 void render_section_free_draw_rects(CoreSection *ptr, Canvas *c)
 {
-    for( int i = 0; i < ptr->freedrawvec.size(); i++)
+    for (unsigned int i = 0; i < ptr->freedrawvec.size(); i++)
     {
         render_free_draw( ptr->freedrawvec[i] );
     } 
@@ -413,7 +413,7 @@ void render_source_arrow(CoreSection * ptr, Canvas * c)
             if(signY == -1)
             {
                 glTranslatef(0,  imageHeight, 0);
-                glScalef(1, signY, 1);
+                glScalef(1, (float)signY, 1);
                 glTranslatef(0, -imageHeight, 0);
             }
 
@@ -491,8 +491,8 @@ void render_section_model(CoreSection* ptr, Canvas *c)
 
     c->coverage_x      /= scale[0];
     c->coverage_y      /= scale[1];
-    c->half_coverage_x  = .5 * c->coverage_x;
-    c->half_coverage_y  = .5 * c->coverage_y;
+    c->half_coverage_x  = 0.5f * c->coverage_x;
+    c->half_coverage_y  = 0.5f * c->coverage_y;
 
     float x, y, z, r;
 #ifdef DEBUG
@@ -549,7 +549,7 @@ void render_section_model(CoreSection* ptr, Canvas *c)
 		glPushMatrix();  // PUSHING MATRIX BEFORE RENDER MODEL
 		{
             // define visible interval additional clipping
-            float scaleFactorX = ptr->dpi_x/2.54;
+            float scaleFactorX = ptr->dpi_x / CM_PER_INCH;
             float topPx    = ptr->intervalTop * scaleFactorX;
             float bottomPx = ptr->intervalBottom * scaleFactorX;
 
@@ -585,7 +585,7 @@ void render_section_model(CoreSection* ptr, Canvas *c)
                 if(ptr->orientation == PORTRAIT) // portrait, need a rotation & translation
                 {
                     float t, w;
-                    w = get_texset_src_width(ptr->src);
+                    w = (float)get_texset_src_width(ptr->src);
 
                     // swap coverage dimensions
                     t = c->coverage_x;
@@ -605,8 +605,8 @@ void render_section_model(CoreSection* ptr, Canvas *c)
 #ifdef DEBUG
                     // turn_camera(c->camera, 0, 3.14/2, 0);\
 
-                    float imgW = get_texset_src_width(ptr->src);
-                    float imgH = get_texset_src_height(ptr->src);
+                    float imgW = (float)get_texset_src_width(ptr->src);
+                    float imgH = (float)get_texset_src_height(ptr->src);
 
                     printf("imgW: %.2f imgH: %.2f\n", imgW, imgH);
                     printf("scale: %.2f %.2f\n", scale[0], scale[1]);
@@ -614,12 +614,12 @@ void render_section_model(CoreSection* ptr, Canvas *c)
 
                     if(!get_horizontal_depth()) {
                         translate_camera(c->camera,
-                                         -get_texset_src_width(ptr->src), // up-down
-                                          get_texset_src_width(ptr->src), // left-right
+                                         (float)-get_texset_src_width(ptr->src), // up-down
+                                         (float)get_texset_src_width(ptr->src), // left-right
                                          0);
                     }
 
-                    glTranslatef(0, get_texset_src_width(ptr->src), 0);
+                    glTranslatef(0, (float)get_texset_src_width(ptr->src), 0);
                     glRotatef(r, 0, 0, 1);
 
                     // define visible interval clipping planes
@@ -642,7 +642,7 @@ void render_section_model(CoreSection* ptr, Canvas *c)
                 }
 
                 // make sure our base color is white
-                float opacity = (ptr->highlight) ? 0.9 : 1.0;
+                float opacity = (ptr->highlight) ? 0.9f : 1.0f;
                 glColor4f(1, 1, 1, opacity);
 
                 //determine LOD based on the DPI of the image,
@@ -703,9 +703,9 @@ void render_section_model(CoreSection* ptr, Canvas *c)
 		
 		float lEnd = 0;
 		float rEnd = lEnd + ptr->width * INCH_PER_CM * c->dpi_x;
-		float thick = DEFAULT_SECTION_HEIGHT * INCH_PER_CM * c->dpi_y;	// 10 cm dummy core
+		float thick = DEFAULT_SECTION_HEIGHT * INCH_PER_CM * c->dpi_y; // 10 cm dummy core
 		// solid dummy section
-		glColor4f(0.2, 0.2, 0.2, 0.2);
+		glColor4f(0.2f, 0.2f, 0.2f, 0.2f);
 		glBegin(GL_QUADS);
 		{
 			glVertex2f(lEnd, 0);		// left upper
@@ -716,7 +716,7 @@ void render_section_model(CoreSection* ptr, Canvas *c)
 		glEnd();
 
 		// outline of dummy section
-		glColor4f(0.4, 0.4, 0.4, 1.0);
+		glColor4f(0.4f, 0.4f, 0.4f, 1.0f);
 		glBegin(GL_LINE_LOOP);
 		{
 			glVertex2f(lEnd, 0);		// left upper
@@ -728,13 +728,13 @@ void render_section_model(CoreSection* ptr, Canvas *c)
 
 		// Draw section name on this dummy
 		if (ptr->name && showSectionText) {
-			float gapx = thick * 0.3;
-			glColor3f(1.0, 1.0, 1.0);
-			glTranslatef(gapx, gapx*2, 0);
-			glScalef( 2, 2, 1.0);
-			render_string_shadowed( ptr->name, 0, strlen(ptr->name) - 1 );
-			glScalef( 0.5, 0.5, 1.0);
-			glTranslatef(-gapx, -gapx*2, 0);
+			float gapx = thick * 0.3f;
+			glColor3f(1.0f, 1.0f, 1.0f);
+			glTranslatef(gapx, gapx * 2, 0);
+			glScalef(2, 2, 1.0);
+			render_string_shadowed(ptr->name, 0, strlen(ptr->name) - 1);
+			glScalef(0.5f, 0.5f, 1.0f);
+			glTranslatef(-gapx, -gapx * 2, 0);
 		}
 
 	}
@@ -916,9 +916,9 @@ int create_section_annotation(CoreSection* ptr, int group, int type,
 	}
 
     // find the first open slot, otherwise append to end
-    for(int i = 0; i < ptr->annovec.size(); i++)
+    for (unsigned int i = 0; i < ptr->annovec.size(); i++)
     {
-        if(ptr->annovec[i] == NULL)
+        if (ptr->annovec[i] == NULL)
         {
             ptr->annovec[i] = captr;
             return i;
@@ -940,16 +940,18 @@ void free_section_annotation(CoreSection* ptr, int annoId)
 //================================================================
 bool is_section_annotation(CoreSection* ptr, int annoId)
 {
-    if(!ptr || annoId < 0) return false;
-    if( annoId > ptr->annovec.size() - 1) return false;
+    if (!ptr || annoId < 0) return false;
+	const int annoVecSize = ptr->annovec.size() - 1;
+    if (annoId > annoVecSize) return false;
     return (ptr->annovec[annoId] != NULL);
 }
 
 //================================================================
 void  set_section_annotation_focus (CoreSection* ptr, int annoId, bool value)
 {
-    if(!ptr || annoId < 0) return;
-    if( annoId > ptr->annovec.size() - 1) return;
+    if (!ptr || annoId < 0) return;
+	const int annoVecSize = ptr->annovec.size() - 1;
+    if (annoId > annoVecSize) return;
     ptr->annovec[annoId]->m.focused = value;
 }
 
@@ -1057,12 +1059,12 @@ float get_section_annotation_vt3(CoreSection* ptr, int annoId)
 //================================================================
 void attach_free_draw_to_section(CoreSection* ptr, int fdid)
 {
-    if(!ptr) return;
-    if(!is_free_draw_rectangle(fdid)) return;
+    if (!ptr) return;
+    if (!is_free_draw_rectangle(fdid)) return;
 
-    for( int i = 0; i < ptr->freedrawvec.size(); i++)
+    for (unsigned int i = 0; i < ptr->freedrawvec.size(); i++)
     {
-        if( ptr->freedrawvec[i] == -1)
+        if (ptr->freedrawvec[i] == -1)
         {
             ptr->freedrawvec[i] = fdid;
             return;
@@ -1071,19 +1073,18 @@ void attach_free_draw_to_section(CoreSection* ptr, int fdid)
 
     ptr->freedrawvec.push_back(fdid);
     set_free_draw_x(fdid, ptr->px);
-    set_free_draw_width(fdid, get_texset_src_width(ptr->src));
-
+    set_free_draw_width(fdid, (float)get_texset_src_width(ptr->src));
 }
 
 //================================================================
 void detach_free_draw_from_section(CoreSection* ptr, int fdid)
 {
-    if(!ptr) return;
-    if(!is_free_draw_rectangle(fdid)) return;
+    if (!ptr) return;
+    if (!is_free_draw_rectangle(fdid)) return;
 
-    for( int i = 0; i < ptr->freedrawvec.size(); i++) 
+    for (unsigned int i = 0; i < ptr->freedrawvec.size(); i++) 
     {
-        if( ptr->freedrawvec[i] == fdid)
+        if (ptr->freedrawvec[i] == fdid)
         {
             ptr->freedrawvec[i] = -1;
             return;
@@ -1106,10 +1107,10 @@ void render_highlight(CoreSection* ptr, Canvas* c)
 	if(ptr->highlight == true)
 	{
         Box *bounds = new Box();
-        bounds->x = 0.0;
-        bounds->y = 0.0;
-        bounds->w = get_texset_src_width (ptr->src);
-        bounds->h = get_texset_src_height(ptr->src);
+        bounds->x = 0.0f;
+        bounds->y = 0.0f;
+        bounds->w = (float)get_texset_src_width(ptr->src);
+        bounds->h = (float)get_texset_src_height(ptr->src);
 
         glBindTexture(GL_TEXTURE_2D, 0);
         glLineWidth(5.0);
@@ -1273,12 +1274,12 @@ void  set_section_highlight_color(CoreSection * ptr, float r, float g, float b)
 bool  doesCoreSectionHasDuplicateWithInfo(CoreSection *cs, float x, float y, float v0, float v1, float v2, float v3,
                                           const char* urlString, const char* localString)
 {
-    if(!cs) return false;
+    if (!cs) return false;
 
-    for( int i = 0; i < cs->annovec.size(); i++)
+    for (unsigned int i = 0; i < cs->annovec.size(); i++)
     {
         CoreAnnotation* ca = cs->annovec[i];
-        if(ca)
+        if (ca)
         {
             AnnotationMarker m = ca->m;
 
@@ -1288,7 +1289,6 @@ bool  doesCoreSectionHasDuplicateWithInfo(CoreSection *cs, float x, float y, flo
               )
             {
                 // printf("[Duplicate Debug] %.4f\t%.4f\t%.4f\t%.4f\n", m.depthX, x, m.depthY, y);
-
                 return true;
             }
         }

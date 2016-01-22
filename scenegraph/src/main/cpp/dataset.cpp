@@ -78,28 +78,27 @@ SectionTable::~SectionTable()
 //======================================================================
 int create_dataset(const char* name)
 {
-    if(!name) return -1;
+    if (!name) return -1;
 
     // see if the set by the same name is already there
-    int i;
-
-    for( i = 0; i < datasetvec.size(); i++ ) 
+    unsigned int i;
+    for (i = 0; i < datasetvec.size(); i++) 
     {
-        if( datasetvec[i] == NULL )
+        if (datasetvec[i] == NULL )
             continue;
 
-        if( !strcmp(datasetvec[i]->name, name))
+        if (!strcmp(datasetvec[i]->name, name))
             return i;
     }
 
     Dataset* d = new Dataset();
-    d->name = new char[ strlen(name) + 1];
+    d->name = new char[strlen(name) + 1];
     strcpy(d->name,name);
     d->url = NULL;
 
-    for( i = 0; i < datasetvec.size(); i++)
+    for (i = 0; i < datasetvec.size(); i++)
     {
-        if( datasetvec[i] == NULL)
+        if (datasetvec[i] == NULL)
         {
             datasetvec[i] = d;
             return i;
@@ -168,9 +167,9 @@ int create_table(int set, const char* name)
 
     SectionTable* t = new SectionTable( name );
 
-    for ( int i = 0; i < datasetvec[set]->sectionvec.size(); i++ )
+    for (unsigned int i = 0; i < datasetvec[set]->sectionvec.size(); i++)
     {
-        if ( datasetvec[set]->sectionvec[i] == NULL)
+        if (datasetvec[set]->sectionvec[i] == NULL)
         {
             datasetvec[set]->sectionvec[i] = t;
             return i;
@@ -197,16 +196,19 @@ int num_tables(int set)
 //======================================================================
 bool is_dataset(int set)
 {
-    if( set < 0 || set >= datasetvec.size() ) return false;
+    if (set < 0) return false;
+	const int dataSetVecSize = datasetvec.size();
+	if (set >= dataSetVecSize) return false;
     return (datasetvec[set] != NULL) ? true : false;
 }
 
 //======================================================================
 bool is_table(int set, int table)
 {
-    if(!is_dataset(set)) return false;
-    if( table < 0 || table >= datasetvec[set]->sectionvec.size() )
-        return false;
+    if (!is_dataset(set)) return false;
+    if (table < 0) return false;
+	const int secVecSize = datasetvec[set]->sectionvec.size();
+	if (table >= secVecSize) return false;
     return (datasetvec[set]->sectionvec[table] != NULL) ? true : false;
 }
 
@@ -544,10 +546,10 @@ bool is_table_cell_valid_fast(int set, int table, int field, int row)
 //======================================================================
 int get_dataset(const char* name)
 {
-    for( int i = 0; i < datasetvec.size(); i++)
+    for (unsigned int i = 0; i < datasetvec.size(); i++)
     {
-        if( datasetvec[i] == NULL) continue;
-        if( !strcmp(datasetvec[i]->name, name)) return i;
+        if (datasetvec[i] == NULL) continue;
+        if (!strcmp(datasetvec[i]->name, name)) return i;
     }
 
     return -1;
@@ -563,11 +565,11 @@ Dataset* get_dataset(int set)
 //======================================================================
 int get_table(int set, const char* name)
 {
-    if(!is_dataset(set)) return -1;
-    for( int i = 0; i < datasetvec[set]->sectionvec.size(); i++)
+    if (!is_dataset(set)) return -1;
+    for (unsigned int i = 0; i < datasetvec[set]->sectionvec.size(); i++)
     {
-        if( datasetvec[set]->sectionvec[i] == NULL) continue;
-        if( !strcmp(datasetvec[set]->sectionvec[i]->name, name)) return i;
+        if(datasetvec[set]->sectionvec[i] == NULL) continue;
+        if(!strcmp(datasetvec[set]->sectionvec[i]->name, name)) return i;
     }
 
     return -1;
