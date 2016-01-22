@@ -1777,7 +1777,7 @@ JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_highlightSections
 			if (selSecCount == 1 && lastSec) {
 				sprintf(label, "section %s", get_section_name(lastSec));
 			} else {
-				sprintf(label, "track %s: %d sections selected", trackToHighlight->name, selSecCount);
+				sprintf(label, "track %s: %d sections selected", trackToHighlight->name, (int)selSecCount);
 			}
 			set_crosshair_label(label);
 			free(label);
@@ -1785,7 +1785,7 @@ JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_highlightSections
 
 		jenv->ReleaseIntArrayElements(sectionArray, selSecs, 0);
 	} else {
-		printf("trackToHighlight %d not found.\n", track);
+		printf("trackToHighlight %d not found.\n", (int)track);
 	}
 
 	return 0;
