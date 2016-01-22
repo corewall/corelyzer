@@ -1,4 +1,6 @@
 .gradle/
+app/help/
+eclipseWorkingDir/
 build/
 dist/
 .DS_Store
