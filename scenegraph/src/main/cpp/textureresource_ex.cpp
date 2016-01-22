@@ -104,12 +104,16 @@ int get_file_format(char *filename) {
     if (ext == NULL)
 	return -1;
     ext++;
-    if(ext) {
-	for(i = 0; i < sizeof(format)/sizeof(*format); i++) {
-	    if(_strnicmp(ext, extension[i], 3) == 0) {
-		return format[i];
-	    }
-	}
+    if (ext) {
+		for (i = 0; i < sizeof(format)/sizeof(*format); i++) {
+#ifdef WIN32
+			if (_strnicmp(ext, extension[i], 3) == 0) {
+#else
+			if (strnicmp(ext, extension[i], 3) == 0) {
+#endif
+				return format[i];
+			}
+		}
     }
 
     return -1;
@@ -294,7 +298,11 @@ void get_sub_image_scaled( char* in_pix, char* out_pix, int x, int y,
 // Crossplatform way of check if a directory exists
 bool isDirectoryExists(const char* aPath)
 {
+#ifdef WIN32
 	if ( _access( aPath, 0 ) == 0 )
+#else
+	if (access(aPath, 0) == 0)
+#endif
     {
         struct stat status;
         stat( aPath, &status );
@@ -1912,7 +1920,7 @@ MultiLevelTextureSetEX* create_texset_from_jp2k(const char* filename, int nlevel
 		pokeOpjImg(image);
 		//------------------------------------
 	    texset->components = image->numcomps;
-	    switch(image->color_space)
+	    switch (image->color_space)
 	    {
             case CLRSPC_SRGB:
                 texset->src_format = RGB; break;
