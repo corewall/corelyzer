@@ -367,8 +367,6 @@ void delete_texset(MultiLevelTextureSetEX *texset)
     }
 }
 
-FILE *loggo = NULL;
-
 void build_tex_blocks(char* pixels, MultiLevelTextureSetEX* set, bool hasDir, int library)
 {
 #ifdef DEBUG
@@ -690,7 +688,7 @@ void build_tex_blocks(char* pixels, MultiLevelTextureSetEX* set, bool hasDir, in
                     }
                     else
                     {
-                        fprintf(loggo,"ERROR: Couldn't write to blockfile %s\n",
+                        printf("ERROR: Couldn't write to blockfile %s\n",
                                blockfile_name.c_str());
                     }
                 }
@@ -698,7 +696,7 @@ void build_tex_blocks(char* pixels, MultiLevelTextureSetEX* set, bool hasDir, in
                 {
                     fclose(fptr);
 #ifdef DEBUG
-                    fprintf(loggo,"Blockfile %s already exists, using that file\n",
+                    printf("Blockfile %s already exists, using that file\n",
                            blockfile_name.c_str());
 #endif
                 }
@@ -716,11 +714,6 @@ void build_tex_blocks(char* pixels, MultiLevelTextureSetEX* set, bool hasDir, in
         delete [] tex_rgba;
     if( tex_to_file )
         delete [] tex_to_file;
-
-    if (loggo != NULL) {
-	    fclose(loggo);
-	    loggo = NULL;
-    }
 }
 
 void build_tex_blocks(char* pixels, MultiLevelTextureSetEX* set, bool hasDir)
