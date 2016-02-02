@@ -51,6 +51,7 @@ import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
@@ -205,43 +206,48 @@ public class CRGraphDialog extends JFrame {
 	// designer, but we now use the far friendlier MigLayout for the graph dialog.
 	private void setupUI()
 	{
-		contentPane = new JPanel();
-		contentPane.setLayout( new MigLayout("wrap 4"));
-		
-		contentPane.add( new JLabel("Choose a dataset:"), "span" );
+		contentPane = new JPanel(new MigLayout("", "[grow]", "[][grow][][]"));		
+		contentPane.add(new JLabel("Choose a dataset:"), "split 2");
 		
 		datasetList = new JComboBox();
 		final DefaultComboBoxModel datasetComboBoxModel = new DefaultComboBoxModel();
-		datasetComboBoxModel.addElement( "RGR_TEST.xml" );
-		datasetList.setModel( datasetComboBoxModel );
-		contentPane.add( datasetList, "span" );
+		datasetComboBoxModel.addElement("RGR_TEST.xml");
+		datasetList.setModel(datasetComboBoxModel);
+		contentPane.add(datasetList, "wrap, growx");
 		
 		// tweak tooltip for platform: on Mac, Command-click toggles selection; on Win, Control-click
-		final String toggleKeyStr = System.getProperty("os.name").toLowerCase().startsWith("mac os x") ? new String("Command") : new String("Control");
+		final String toggleKeyStr = CorelyzerApp.isOSX() ? new String("Command") : new String("Control");
 		final String sectionSelectionToolTip = new String("Shift-click to select a range.\n" + toggleKeyStr + "-click to toggle selection of a single item");
 		
-		sectionsListLabel = new JLabel("Choose graph section:");
+		JPanel graphSecsPanel = new JPanel(new MigLayout("filly, insets 5", "[grow][]", "[][grow]"));
+		sectionsListLabel = new JLabel("Choose graph section(s):");
 		sectionsListLabel.setToolTipText( sectionSelectionToolTip );
-		contentPane.add( sectionsListLabel, "span" );
+		graphSecsPanel.add(sectionsListLabel, "wrap");
 		
 		sectionsList = new JList();
 		sectionsList.setModel( new DefaultListModel() );
 		sectionsList.setToolTipText( sectionSelectionToolTip );
 		final JScrollPane sectionsScrollPane = new JScrollPane();
 		sectionsScrollPane.setViewportView( sectionsList );
-		contentPane.add( sectionsScrollPane, "span 3, height 100::, growx" );
+		graphSecsPanel.add(sectionsScrollPane, "grow");
 		
 		selectAllButton = new JButton("Select All");
-		contentPane.add( selectAllButton );
+		graphSecsPanel.add(selectAllButton);
 		
-		contentPane.add( new JLabel("Properties fields:"), "span" );
+		JPanel fieldsPanel = new JPanel(new MigLayout("insets 5", "[grow]", "[][grow]"));
+		fieldsPanel.add(new JLabel("Properties fields:"), "wrap");
 		final JScrollPane fieldsScrollPane = new JScrollPane();
 		fieldsTable = new CheckBoxTable();
 		fieldsScrollPane.setViewportView( fieldsTable );
-		contentPane.add( fieldsScrollPane, "span, height 100::" );
+		fieldsPanel.add(fieldsScrollPane, "grow");
 		
+		JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, true, graphSecsPanel, fieldsPanel);
+		splitPane.setResizeWeight(0.5);
+		splitPane.setOneTouchExpandable(true);
+		contentPane.add(splitPane, "grow, wrap");
 
-		contentPane.add( new JLabel( "Graph type:" ));
+		JPanel graphPropsPanel = new JPanel(new MigLayout("fillx, wrap 4, insets 5", "[][grow][][grow]", "")); 
+		graphPropsPanel.add( new JLabel("Graph type:"));
 		typeList = new JComboBox();
 		final DefaultComboBoxModel graphTypeComboBoxModel = new DefaultComboBoxModel();
 		graphTypeComboBoxModel.addElement("Line");
@@ -249,40 +255,42 @@ public class CRGraphDialog extends JFrame {
 		graphTypeComboBoxModel.addElement("Cross point");
 		graphTypeComboBoxModel.addElement("Line & Points");
 		typeList.setModel( graphTypeComboBoxModel );
-		contentPane.add( typeList, "growx" );
+		graphPropsPanel.add(typeList, "growx");
 		
 		ifCollapseGraphs = new JCheckBox("Collapse graphs");
 		ifCollapseGraphs.setToolTipText( "Draw all section graphs in the same coordinate plane" );
-		contentPane.add( ifCollapseGraphs, "span 2" );
+		graphPropsPanel.add( ifCollapseGraphs, "span 2, wrap" );
 		
-		contentPane.add( new JLabel( "Scale min:" ));
+		graphPropsPanel.add( new JLabel( "Scale min:" ));
 		scaleMinText = new JTextField();
 		scaleMinText.setToolTipText( "Minimum value of y in coordinate plane" );
-		contentPane.add( scaleMinText, "growx" );
+		graphPropsPanel.add( scaleMinText, "growx" );
 		
-		contentPane.add( new JLabel( "Scale max:" ));
+		graphPropsPanel.add( new JLabel( "Scale max:" ));
 		scaleMaxText = new JTextField();
 		scaleMaxText.setToolTipText( "Maximum value of y in coordinate plane" );
-		contentPane.add( scaleMaxText, "growx" );
+		graphPropsPanel.add( scaleMaxText, "growx" );
 		
-		contentPane.add( new JLabel( "Exclude values <" ));
+		graphPropsPanel.add( new JLabel( "Exclude values <" ));
 		excludeMinText = new JTextField();
 		excludeMinText.setToolTipText( "Datapoints less than this value will not be plotted" );
-		contentPane.add( excludeMinText, "growx" );
+		graphPropsPanel.add( excludeMinText, "growx" );
 		
-		contentPane.add ( new JLabel( "and/or >" ));
+		graphPropsPanel.add ( new JLabel( "and/or >" ));
 		excludeMaxText = new JTextField();
 		excludeMaxText.setToolTipText( "Datapoints greater than this value will not be plotted" );
-		contentPane.add( excludeMaxText, "growx" );
+		graphPropsPanel.add( excludeMaxText, "growx" );
 
 		leaveGapsBox = new JCheckBox("Leave gaps at excluded values", false );
 		leaveGapsBox.setToolTipText( "Don't draw a line between points that have excluded points between them" );
-		contentPane.add( leaveGapsBox, "span" );
+		graphPropsPanel.add( leaveGapsBox, "span" );
 		
 		applyButton = new JButton("Apply");
-		contentPane.add( applyButton, "span 4, split 2, align right" );
+		graphPropsPanel.add( applyButton, "span 4, split 2, align right" );
 		closeButton = new JButton("Close");
-		contentPane.add( closeButton, "align right" );
+		graphPropsPanel.add( closeButton, "align right" );
+		
+		contentPane.add(graphPropsPanel, "growx");
 	}
 
 	private void applyGraphSelection( final int sectionIndex ) {
