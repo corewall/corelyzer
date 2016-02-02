@@ -56,6 +56,7 @@ import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.TableModelEvent;
@@ -88,6 +89,12 @@ public class CRGraphDialog extends JFrame {
 	private static final long serialVersionUID = -8879622939957228395L;
 
 	public static void main(final String[] args) {
+		try {
+			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
 		CRGraphDialog dialog = new CRGraphDialog(null);
 		dialog.pack();
 		dialog.setSize(480, 480);
@@ -219,7 +226,7 @@ public class CRGraphDialog extends JFrame {
 		final String toggleKeyStr = CorelyzerApp.isOSX() ? new String("Command") : new String("Control");
 		final String sectionSelectionToolTip = new String("Shift-click to select a range.\n" + toggleKeyStr + "-click to toggle selection of a single item");
 		
-		JPanel graphSecsPanel = new JPanel(new MigLayout("filly, insets 5", "[grow][]", "[][grow]"));
+		JPanel graphSecsPanel = new JPanel(new MigLayout("insets 5", "[grow][]", "[][grow]"));
 		sectionsListLabel = new JLabel("Choose graph section(s):");
 		sectionsListLabel.setToolTipText( sectionSelectionToolTip );
 		graphSecsPanel.add(sectionsListLabel, "wrap");
@@ -243,6 +250,12 @@ public class CRGraphDialog extends JFrame {
 		
 		JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, true, graphSecsPanel, fieldsPanel);
 		splitPane.setResizeWeight(0.5);
+
+		// Windows L&F has no visual indication of resizability other than very tiny (5px?)
+		// one-touch arrows: override default divider gap and arrow size with 15px
+		if (!CorelyzerApp.isOSX())
+			splitPane.setDividerSize(15);
+		
 		splitPane.setOneTouchExpandable(true);
 		contentPane.add(splitPane, "grow, wrap");
 
