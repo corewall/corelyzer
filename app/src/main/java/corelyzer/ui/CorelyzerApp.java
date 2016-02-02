@@ -105,6 +105,8 @@ public class CorelyzerApp extends WindowAdapter implements MouseListener, Startu
 
 	final static int MENU_MASK = MAC_OS_X ? Toolkit.getDefaultToolkit().getMenuShortcutKeyMask() : ActionEvent.CTRL_MASK;
 
+	public static boolean isOSX() { return MAC_OS_X; }
+	
 	private static void addAllPlugins(final File file, final java.util.List<String> plugins) {
 		if (file.exists()) {
 			String[] allJarFiles = file.list(new FilenameExtensionFilter("jar"));
