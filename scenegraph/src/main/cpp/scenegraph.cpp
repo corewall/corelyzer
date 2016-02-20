@@ -4970,6 +4970,11 @@ void perform_pick(int canvas, float _x, float _y)
                     }
 				}
 			}
+
+			if (PickedGraph != -1 || PickedMarker != -1 || PickedFreeDraw != -1) {
+				PickedSection = cs_order[k];
+			}
+
         } // done going through each section in track
 
         if (PickedSection != -1)

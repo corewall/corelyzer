@@ -1160,7 +1160,7 @@ public class CorelyzerGLCanvas implements GLEventListener, MouseListener, MouseW
 					PAN_MODE = 0;
 					return;
 				}
-
+				
 				if (selectedFreeDraw > -1) {
 					CorelyzerApp
 							.getApp()
@@ -1530,8 +1530,6 @@ public class CorelyzerGLCanvas implements GLEventListener, MouseListener, MouseW
 		}
 
 		prePos.setLocation(0, 0);
-		selectedTrack = -1;
-		selectedTrackSection = -1;
 		canvas.setCursor(Cursor.getDefaultCursor());
 
 		CorelyzerApp.getApp().updateGLWindows();
