@@ -36,6 +36,8 @@ import java.util.Hashtable;
 import java.util.Vector;
 import java.util.prefs.Preferences;
 
+import org.apache.commons.lang3.StringUtils;
+
 import corelyzer.graphics.SceneGraph;
 
 /**
@@ -381,7 +383,17 @@ public class CRPreferences {
 		
 		return success;
 	}
-
+	
+	public String dumpDirectoryConfig() {
+		String[] dirStrs = { "config dir: " + config_Directory,
+							 "appStart dir: " + appStart_Directory,
+							 "datastore dir: " + datastore_Directory,
+							 "texBlock dir: " + texBlock_Directory,
+							 "download dir: " + download_Directory,
+							 "annotation dir: " + annotation_Directory };
+		return "--- Corelyzer Directories ---\n" + StringUtils.join(dirStrs, "\n");
+	}
+	
 	public boolean readDisplayConfig(final File aFile) {
 		// read the file and loadin setups
 		try {

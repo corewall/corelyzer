@@ -249,6 +249,8 @@ public class CorelyzerApp extends WindowAdapter implements MouseListener, Startu
 			prefs.isInited = true;
 		}
 
+		System.out.println(prefs.dumpDirectoryConfig());
+		
 		return prefs;
 	}
 
