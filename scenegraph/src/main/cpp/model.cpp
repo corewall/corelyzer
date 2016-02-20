@@ -34,6 +34,10 @@
 #include <math.h>
 #include <stack>
 
+// brg 2/19/2016: Render logging is so verbose that it can slow framerate
+// to the point of annoyance: log based on this switch instead of DEBUG.
+//#define VERBOSE_RENDER_LOGGING
+
 //======================================================================
 void create_model_grid( int src, ModelGridsLOD*& m)
 {    
@@ -148,7 +152,7 @@ typedef struct ModelDrawStackNode_s {
 void render_model_grid(ModelGridsLOD* m, Canvas* c)
 {
 
-#ifdef DEBUG
+#ifdef VERBOSE_LOGGING
     printf("\n\t--- Render Model Grid ---\n");
     printf("Rendering ModelGridsLOD at address 0x%x\n", m);
 #endif
@@ -177,7 +181,7 @@ void render_model_grid(ModelGridsLOD* m, Canvas* c)
     float x, y, z;
     get_camera_position( c->camera, &x, &y, &z);
 
-#ifdef DEBUG
+#ifdef VERBOSE_RENDER_LOGGING
     printf("Camera position %.2f, %.2f\n", x, y);
     printf("Camera LR %.2f, %.2f\n", (x+c->coverage_x), (y+c->coverage_y));
     printf("Camera coverage: %.2f, %.2f\n", c->coverage_x, c->coverage_y);
@@ -188,7 +192,7 @@ void render_model_grid(ModelGridsLOD* m, Canvas* c)
     float cu = y;                  // up
     float cd = y + c->coverage_y;  // down
 
-#ifdef DEBUG
+#ifdef VERBOSE_RENDER_LOGGING
         printf("== Orig Cam: (%.2f, %.2f) - (%.2f %.2f)\n",
                cl, cu, cr, cd);
 #endif
@@ -247,14 +251,14 @@ void render_model_grid(ModelGridsLOD* m, Canvas* c)
             _cd = -cl;
         }
 
-#ifdef DEBUG
+#ifdef VERBOSE_RENDER_LOGGING
         printf("Checking If Nodes (%d, %d) to (%d, %d) intersect\n",
                ulc, ulr, llc, llr);
 #endif
 
         if(ulx > _cr || uly > _cd || llx < _cl || lly < _cu)
         {
-#ifdef DEBUG
+#ifdef VERBOSE_RENDER_LOGGING
             printf("\tModel Area of (%.2f,%.2f) to (%.2f,%.2f) SKIPPED!\n",
                    ulx, uly, llx, lly);
             printf("\tCamera space covering (%.2f,%.2f) to (%.2f,%.2f)\n",
@@ -263,7 +267,7 @@ void render_model_grid(ModelGridsLOD* m, Canvas* c)
             dstack.pop();
             continue;
         }
-#ifdef DEBUG
+#ifdef VERBOSE_RENDER_LOGGING
         else
         {
             printf("\tModel Area of (%.2f,%.2f) to (%.2f,%.2f) OK!\n",
@@ -283,7 +287,7 @@ void render_model_grid(ModelGridsLOD* m, Canvas* c)
             if(!n)
                 continue;
 
-#ifdef DEBUG
+#ifdef VERBOSE_RENDER_LOGGING
             printf("\t!!! Drawing node at col: %d, row %d !!!\n", n->col, 
                    n->row);
             printf("\t!!! Starts at (%.2f, %.2f) to (%.2f, %.2f) !!!\n",
@@ -330,7 +334,7 @@ void render_model_grid(ModelGridsLOD* m, Canvas* c)
             snode.row = dstack.top().row - int(ceil(dstack.top().span_y * .5));
             snode.next_subgrid = NW_CORNER;
             
-#ifdef DEBUG
+#ifdef VERBOSE_RENDER_LOGGING
             printf("NW CORNER: Pushing node (%d, %d) onto stack\n",
                    snode.col, snode.row);
 #endif
@@ -345,7 +349,7 @@ void render_model_grid(ModelGridsLOD* m, Canvas* c)
             snode.row = dstack.top().row - int(ceil(dstack.top().span_y * .5));
             snode.next_subgrid = NW_CORNER;
 
-#ifdef DEBUG
+#ifdef VERBOSE_RENDER_LOGGING
             printf("NE CORNER: Pushing node (%d, %d) onto stack\n",
                    snode.col, snode.row);
 #endif
@@ -360,7 +364,7 @@ void render_model_grid(ModelGridsLOD* m, Canvas* c)
             snode.row = dstack.top().row;
             snode.next_subgrid = NW_CORNER;
 
-#ifdef DEBUG
+#ifdef VERBOSE_RENDER_LOGGING
             printf("SE CORNER: Pushing node (%d, %d) onto stack\n",
                    snode.col, snode.row);
 #endif
@@ -375,7 +379,7 @@ void render_model_grid(ModelGridsLOD* m, Canvas* c)
             snode.row = dstack.top().row;
             snode.next_subgrid = NW_CORNER;
 
-#ifdef DEBUG
+#ifdef VERBOSE_RENDER_LOGGING
             printf("SW CORNER: Pushing node (%d, %d) onto stack\n",
                    snode.col, snode.row);
 #endif
