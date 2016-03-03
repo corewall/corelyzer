@@ -1015,6 +1015,21 @@ float get_section_annotation_y (CoreSection* ptr, int annoId)
 }
 
 //================================================================
+// return length in cm, where "length" is the distance along CoreSection's depth axis
+float get_section_length(CoreSection* cs)
+{
+	float length = 0.0f;
+	if (cs)
+	{
+		if (cs->orientation == PORTRAIT)
+			length = cs->height;
+		else
+			length = cs->width;
+	}
+	return length;
+}
+
+//================================================================
 float get_section_annotation_icon_x(CoreSection* ptr, int annoId)
 {
     if(!is_section_annotation(ptr,annoId)) return 0.0f;

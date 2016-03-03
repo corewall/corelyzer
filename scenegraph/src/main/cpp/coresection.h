@@ -120,6 +120,8 @@ void  set_section_draw_vert_line    (CoreSection* ptr, bool draw, float x);
 float get_section_annotation_x (CoreSection* ptr, int annoId);
 float get_section_annotation_y (CoreSection* ptr, int annoId);
 
+float get_section_length(CoreSection* ptr);
+
 void  attach_free_draw_to_section   ( CoreSection* ptr, int pfdrId);
 void  detach_free_draw_from_section ( CoreSection* ptr, int pfdrId);
 

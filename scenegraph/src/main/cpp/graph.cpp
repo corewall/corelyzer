@@ -486,7 +486,8 @@ void render_graph(Canvas* c, CoreSection* cs, int gid)
 			glTranslatef( graphStart, (b->y + b->h) * c->dpi_y, 0.0 );
 
             // Leave 2 pixels spacing and adjust width visible interval
-			const float widthAdjust = ((cs->width - cs->intervalBottom) + cs->intervalTop) * INCH_PER_CM * c->dpi_x;
+			const float csLength = get_section_length(cs);
+			const float widthAdjust = ((csLength - cs->intervalBottom) + cs->intervalTop) * INCH_PER_CM * c->dpi_x;
 			render_border(b->w * c->dpi_x - widthAdjust + 2, b->h * c->dpi_y + 2);
 
 			// 7/18/2012 brg: at distant zoom levels, labels are illegible and slow
