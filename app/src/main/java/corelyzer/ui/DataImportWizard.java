@@ -43,6 +43,7 @@ import java.io.IOException;
 import java.util.Vector;
 
 import javax.swing.BorderFactory;
+import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
@@ -701,7 +702,9 @@ public class DataImportWizard extends JDialog implements ActionListener, ChangeL
 
 								// depth & sensors
 								// Still within a section
-								String[] tuples = line.split(fs);
+								// brg: -1 arg ensures all delimiters are parsed and included in resulting array...without
+								// this arg, tuples can be shorter than vals array resulting in ArrayOutOfBoundsExceptions.
+								String[] tuples = line.split(fs, -1);
 
 								// depth
 								Element depth_e = doc.createElement("depth");
@@ -963,10 +966,11 @@ public class DataImportWizard extends JDialog implements ActionListener, ChangeL
 	}
 	
 	private JPanel createImportParamPanel() {
-		JPanel panel = new JPanel(new MigLayout("","[grow]",""));
+		JPanel panel = new JPanel();
+		panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
 		
 		// File Import Parameters Panel
-		JPanel fipp = new JPanel(new MigLayout("", "[][]20[]push[][]"));
+		JPanel fipp = new JPanel(new MigLayout("insets 5", "[][]20[]push[][]"));
 		fipp.setBorder(BorderFactory.createTitledBorder("File Import Parameters"));
 		fileLabel = new JLabel("[File Name]");
 		JButton fileBtn = new JButton("Select...");
@@ -984,10 +988,10 @@ public class DataImportWizard extends JDialog implements ActionListener, ChangeL
 		fipp.add(new JLabel("Field Delimiter: "));
 		fipp.add(fsComboBox);
 		
-		panel.add(fipp, "wrap, growx");
+		panel.add(fipp);
 		
 		// Data Import Parameters Panel
-		JPanel dipp = new JPanel(new MigLayout("", "[][grow]15[][grow]", ""));
+		JPanel dipp = new JPanel(new MigLayout("insets 5", "[][grow]15[][grow]", ""));
 		dipp.setBorder(BorderFactory.createTitledBorder("Data Import Parameters"));
 		
 		// data start/end
@@ -1022,10 +1026,10 @@ public class DataImportWizard extends JDialog implements ActionListener, ChangeL
 		ignore_values = new JTextField("");
 		dipp.add(ignore_values, "growx");
 
-		panel.add(dipp, "wrap, growx");
+		panel.add(dipp);
 		
 		// Section Name subpanel
-		JPanel snpp = new JPanel(new MigLayout("", "[grow]", ""));
+		JPanel snpp = new JPanel(new MigLayout("insets 5", "[grow]", ""));
 		snpp.setBorder(BorderFactory.createTitledBorder("Section Name"));
 		
 		final String snht = new String("<html>If your data includes a column with full section names, " +
@@ -1062,10 +1066,12 @@ public class DataImportWizard extends JDialog implements ActionListener, ChangeL
 		secDataPanel.add(name_prefix, "growx, wmin 150");
 		snpp.add(secDataPanel, "wrap");
 		
-		JPanel previewPanel = new JPanel(new MigLayout("", "[]push[r]", ""));
+		JPanel previewPanel = new JPanel(new MigLayout("insets 5", "[grow][]", ""));
 		previewPanel.setBorder(BorderFactory.createTitledBorder("Section Name Preview"));
 		sectionNamePreview = new JLabel();
-		previewPanel.add(sectionNamePreview);
+		java.awt.Font curFont = sectionNamePreview.getFont();
+		sectionNamePreview.setFont(curFont.deriveFont(java.awt.Font.BOLD));
+		previewPanel.add(sectionNamePreview, "grow");
 		JButton updatePreview = new JButton("Update Preview");
 		updatePreview.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -1073,9 +1079,9 @@ public class DataImportWizard extends JDialog implements ActionListener, ChangeL
 			}
 		});
 		previewPanel.add(updatePreview);
-		snpp.add(previewPanel, "span, growx, wrap, gaptop 10");
+		snpp.add(previewPanel, "span, growx, wrap");
 		
-		panel.add(snpp, "growx, wrap");
+		panel.add(snpp);
 		
 		return panel;
 	}
