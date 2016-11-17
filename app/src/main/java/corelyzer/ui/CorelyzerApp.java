@@ -286,6 +286,7 @@ public class CorelyzerApp extends WindowAdapter implements MouseListener, Startu
 
 	int pluginUIIndex = -1;
 	JFrame mainFrame;
+	String baseTitle; // mainFrame title i.e. "Corelyzer [version]"
 	JPanel rootPanel;
 	JList sessionList;
 	JList trackList;
@@ -1278,8 +1279,10 @@ public class CorelyzerApp extends WindowAdapter implements MouseListener, Startu
 		// Update mainFrame title
 		if (!currentSessionFile.equals("")) {
 			File f = new File(currentSessionFile);
-			String title = "Corelyzer (" + f.getName() + ")";
+			String title = this.baseTitle + " (" + f.getName() + ")";
 			getMainFrame().setTitle(title);
+		} else {
+			getMainFrame().setTitle(this.baseTitle);
 		}
 	}
 
@@ -1991,7 +1994,10 @@ public class CorelyzerApp extends WindowAdapter implements MouseListener, Startu
 		if ((versionNumber == null) || versionNumber.equals("")) {
 			versionNumber = "undetermined";
 		}
-		mainFrame = new JFrame("Corelyzer " + versionNumber);
+		
+		this.baseTitle = "Corelyzer " + versionNumber;
+		
+		mainFrame = new JFrame(baseTitle);
 		mainFrame.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 		mainFrame.setSize(320, 100);
 		mainFrame.setLocation(600, 100);

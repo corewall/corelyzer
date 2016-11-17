@@ -1627,6 +1627,10 @@ public class CorelyzerAppController implements ActionListener {
 			// Java
 			cg.removeDatasets(s);
 			cg.removeSession(s);
+			
+			if (cg.getSessions().size() == 0) {
+				view.setCurrentSessionFile("");
+			}
 		}
 	}
 
