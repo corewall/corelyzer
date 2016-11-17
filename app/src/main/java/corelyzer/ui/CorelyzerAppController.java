@@ -1754,7 +1754,7 @@ public class CorelyzerAppController implements ActionListener {
 			addSessionToHistoryMenu(path);
 
 			if (writeResult) {
-				view.setCurrentSessionFile(new File(selected).getName());
+				view.setCurrentSessionFile(path);
 			}
 
 			return writeResult;
