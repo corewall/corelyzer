@@ -35,7 +35,9 @@ import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.Hashtable;
 import java.util.Vector;
@@ -1530,6 +1532,18 @@ public class CorelyzerAppController implements ActionListener {
 
 		if (confDir.exists()) {
 			File[] allFiles = confDir.listFiles();
+			
+			// sort list by last modified date so most recent files appear first
+			Collections.sort(Arrays.asList(allFiles), new Comparator<File>() {
+				public int compare(File f1, File f2) {
+					if (f1.lastModified() < f2.lastModified())
+						return 1;
+					else if (f1.lastModified() > f2.lastModified())
+						return -1;
+					else
+						return 0;
+				}
+			});
 
 			int autoSaveCount = 0;
 			for (File f : allFiles) {
