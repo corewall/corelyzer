@@ -411,13 +411,16 @@ public class CRLoadImageWizard extends JDialog {
 					}
 					else
 					{
-						// if sections were inserted, need to adjust existing sections' depth
+						// if sections were inserted, adjust existing sections' depths to avoid overlaps
 						final int sectionId = curTrack.getCoreSection(sectionElt.getName()).getId();
-						final float oldDepthInCM = SceneGraph.getSectionDepth( curTrack.getId(), sectionId );
+						final float oldDepthInCM = SceneGraph.getSectionDepth(curTrack.getId(), sectionId);
 						final float newDepthInCM = sectionElt.getImageProperties().depth * 100.0f; // convert m to cm
-						final float depthChangeInPix = ( newDepthInCM - oldDepthInCM ) * SceneGraph.getCanvasDPIX( 0 ) * ( 1.0f / 2.54f );
-						if ( Math.abs( depthChangeInPix ) > 0.0f )
-							SceneGraph.moveSection( curTrack.getId(), sectionId, depthChangeInPix, 0.0f );
+						final float depthChangeInPix = (newDepthInCM - oldDepthInCM) * SceneGraph.getCanvasDPIX(0) * (1.0f / 2.54f);
+						if (depthChangeInPix > 0.0f) {
+							// only move existing sections downward - moving upward to abut
+							// newly-loaded sections above may disrupt intended positioning 
+							SceneGraph.moveSection(curTrack.getId(), sectionId, depthChangeInPix, 0.0f);
+						}
 					}
 				}
 			}
