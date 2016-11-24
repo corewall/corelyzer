@@ -24,6 +24,7 @@
  *****************************************************************************/
 package corelyzer.ui;
 
+import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
@@ -612,9 +613,11 @@ public class CorelyzerGLCanvas implements GLEventListener, MouseListener, MouseW
 	public void displayChanged(final GLAutoDrawable drawable, final boolean modeChanged, final boolean deviceChanged) {
 		// do nothing
 	}
+	
+	private Component getPopupParent() { return CorelyzerApp.getApp().getPopupParent(this); }
 
 	private void doDeleteSection() {
-		if (JOptionPane.YES_OPTION == JOptionPane.showConfirmDialog(this.canvas, "Are you sure?")) {
+		if (JOptionPane.YES_OPTION == JOptionPane.showConfirmDialog(getPopupParent(), "Are you sure?")) {
 			CorelyzerApp app = CorelyzerApp.getApp();
 
 			if (app != null) {
@@ -672,7 +675,7 @@ public class CorelyzerGLCanvas implements GLEventListener, MouseListener, MouseW
 		Vector<WellLogDataSet> datasets = session.getDatasets();
 
 		if (datasets.size() <= 0) {
-			JOptionPane.showMessageDialog(this.canvas, "Please load at least a dataset first");
+			JOptionPane.showMessageDialog(getPopupParent(), "At least one dataset must be loaded.");
 
 			return;
 		}
@@ -833,7 +836,7 @@ public class CorelyzerGLCanvas implements GLEventListener, MouseListener, MouseW
 
 			Object[] options = annotationOptions.toArray();
 
-			int sel = JOptionPane.showOptionDialog(this.canvas, "Which kind of Annotation?", "Annotation Form Selector", JOptionPane.YES_NO_OPTION,
+			int sel = JOptionPane.showOptionDialog(getPopupParent(), "Which kind of Annotation?", "Annotation Form Selector", JOptionPane.YES_NO_OPTION,
 					JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
 
 			if (sel < 0) {
@@ -880,7 +883,7 @@ public class CorelyzerGLCanvas implements GLEventListener, MouseListener, MouseW
 
 			if (parentTrackId != -1 && parentSectionId != -1) {
 				String mesg = "You can only cut the original sections";
-				JOptionPane.showMessageDialog(this.canvas, mesg);
+				JOptionPane.showMessageDialog(getPopupParent(), mesg);
 
 				return;
 			}
@@ -994,7 +997,7 @@ public class CorelyzerGLCanvas implements GLEventListener, MouseListener, MouseW
 			CorelyzerApp app = CorelyzerApp.getApp();
 			app.getMainFrame().setAlwaysOnTop(false);
 
-			String inputValue = JOptionPane.showInputDialog(this.canvas, "Please input a depth value in meters: ");
+			String inputValue = JOptionPane.showInputDialog(getPopupParent(), "Please input the depth to jump to in meters: ");
 
 			app.getMainFrame().setAlwaysOnTop(true);
 
@@ -1022,7 +1025,7 @@ public class CorelyzerGLCanvas implements GLEventListener, MouseListener, MouseW
 				}
 				SceneGraph.unlock();
 			} catch (NumberFormatException e) {
-				JOptionPane.showMessageDialog(null, "Please type in a number", "Alert", JOptionPane.ERROR_MESSAGE);
+				JOptionPane.showMessageDialog(getPopupParent(), "Please type in a number", "Alert", JOptionPane.ERROR_MESSAGE);
 			}
 		} else if (key == KeyEvent.VK_OPEN_BRACKET || key == KeyEvent.VK_CLOSE_BRACKET || key == '9' || key == '0') {
 			// graph scaling

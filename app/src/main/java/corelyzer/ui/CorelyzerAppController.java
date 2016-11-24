@@ -1249,7 +1249,7 @@ public class CorelyzerAppController implements ActionListener {
 
 			// view.updateGLWindows();
 		} else {
-			JOptionPane.showMessageDialog(null, "The selected file does not exist");
+			JOptionPane.showMessageDialog(view.getMainFrame(), "The selected file does not exist");
 		}
 
 		view.setCurrentSessionFile(filename);
@@ -1515,9 +1515,7 @@ public class CorelyzerAppController implements ActionListener {
 					if (new File(path).exists()) {
 						loadStateFile(path);
 					} else {
-						view.getMainFrame().setAlwaysOnTop(false);
-						JOptionPane.showMessageDialog(null, "The selected file does not exist anymore");
-						view.getMainFrame().setAlwaysOnTop(true);
+						JOptionPane.showMessageDialog(view.getMainFrame(), "The selected file does not exist anymore");
 					}
 				}
 			});
@@ -1561,9 +1559,7 @@ public class CorelyzerAppController implements ActionListener {
 							if (new File(path).exists()) {
 								loadStateFile(path);
 							} else {
-								view.getMainFrame().setAlwaysOnTop(false);
-								JOptionPane.showMessageDialog(null, "The selected file does not exist.");
-								view.getMainFrame().setAlwaysOnTop(true);
+								JOptionPane.showMessageDialog(view.getMainFrame(), "The selected file does not exist.");
 							}
 						}
 					});

@@ -25,10 +25,12 @@
 
 package corelyzer.ui;
 
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Frame;
 import java.awt.GridLayout;
 import java.awt.Point;
+import java.awt.Rectangle;
 import java.awt.Toolkit;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
@@ -45,7 +47,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.List;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
@@ -754,6 +755,23 @@ public class CorelyzerApp extends WindowAdapter implements MouseListener, Startu
 
 	public int getPluginUIIndex() {
 		return pluginUIIndex;
+	}
+
+	// Return appropriate parent for popup messages: mainFrame if it's in the
+	// canvas, otherwise the canvas. Use to prevent popup messages from being
+	// popped behind mainFrame entirely hidden and preventing clicks on canvas.
+	// Workaround is to move mainFrame to reveal obscured popup, but many users
+	// (understandably) just bail out, since Corelyzer behaves as if it's hung/frozen.
+	public Component getPopupParent(CorelyzerGLCanvas srcCanvas) {
+		Rectangle mfBounds = getMainFrame().getBounds();
+		Rectangle canvasBounds = srcCanvas.getCanvas().getParent().getBounds();
+		Point canvasLoc = srcCanvas.getCanvas().getParent().getLocationOnScreen();
+		canvasBounds.translate(canvasLoc.x, canvasLoc.y);
+		if (mfBounds.intersects(canvasBounds)) {
+			return getMainFrame();
+		} else {
+			return srcCanvas.getCanvas();
+		}
 	}
 
 	public JProgressBar getProgressUI() {
