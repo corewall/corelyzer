@@ -369,7 +369,7 @@ public class CorelyzerApp extends WindowAdapter implements MouseListener, Startu
 			SwingUtilities.invokeLater(new Runnable() {
 				public void run() {
 					AboutDialog aboutDlg = new AboutDialog();
-					aboutDlg.checkUpdateAction();
+					aboutDlg.checkUpdateAction(true);
 					aboutDlg.dispose();
 				}
 			});
@@ -763,6 +763,9 @@ public class CorelyzerApp extends WindowAdapter implements MouseListener, Startu
 	// Workaround is to move mainFrame to reveal obscured popup, but many users
 	// (understandably) just bail out, since Corelyzer behaves as if it's hung/frozen.
 	public Component getPopupParent(CorelyzerGLCanvas srcCanvas) {
+		if (srcCanvas == null) {
+			return getMainFrame();
+		}
 		Rectangle mfBounds = getMainFrame().getBounds();
 		Rectangle canvasBounds = srcCanvas.getCanvas().getParent().getBounds();
 		Point canvasLoc = srcCanvas.getCanvas().getParent().getLocationOnScreen();
@@ -773,6 +776,8 @@ public class CorelyzerApp extends WindowAdapter implements MouseListener, Startu
 			return srcCanvas.getCanvas();
 		}
 	}
+	
+	public Component getPopupParent() { return getPopupParent(null); }
 
 	public JProgressBar getProgressUI() {
 		if (usePluginUI) {
@@ -878,7 +883,9 @@ public class CorelyzerApp extends WindowAdapter implements MouseListener, Startu
 
 	public String getCorelyzerVersion()
 	{
-		return this.getClass().getPackage().getImplementationVersion();
+		String defaultVersion = "2.0.4";
+		String implVersion = this.getClass().getPackage().getImplementationVersion();
+		return (implVersion == null ? defaultVersion : implVersion);
 	}
 
 	public void GLWindowsToBack() {

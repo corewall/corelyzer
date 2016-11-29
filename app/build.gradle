@@ -45,6 +45,7 @@ dependencies {
 	compile('net.java.dev.stax-utils:stax-utils:20070216') {
 		exclude group:'com.bea.xml'
 	}
+	compile 'org.json:json:20140107'
 }
 
 clean.doLast {
