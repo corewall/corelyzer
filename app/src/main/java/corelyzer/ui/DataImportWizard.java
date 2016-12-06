@@ -1106,7 +1106,7 @@ public class DataImportWizard extends JDialog implements ActionListener, ChangeL
 				FileReader fr = new FileReader(f);
 				this.fileContent.read(fr, null);
 				this.fileLabel.setText(f.getName());
-				this.end_number.setText(String.valueOf(this.fileContent.getLineCount()));
+				this.end_number.setText(String.valueOf(getDefaultEndLine()));
 				updateSectionNamePreview();
 			} catch (FileNotFoundException ex) {
 				System.err.println("Error: File not found " + f);
@@ -1114,6 +1114,25 @@ public class DataImportWizard extends JDialog implements ActionListener, ChangeL
 				System.err.println("Error: IO Exception " + f);
 			}
 		}
+	}
+	
+	// return last data line, ignoring empty lines at end of file
+	private int getDefaultEndLine() {
+		final int lastLine = this.fileContent.getLineCount();
+		int dataEndLine = lastLine;
+		try {
+			for (int curLine = lastLine; curLine >= 1; curLine--) {
+				final int start = this.fileContent.getLineStartOffset(curLine - 1);
+				final int end = this.fileContent.getLineEndOffset(curLine - 1);
+				if (this.fileContent.getText(start, end - start).trim().length() == 0)
+					dataEndLine = curLine - 1;
+				else
+					break;
+			}
+		} catch (Exception e) {
+			System.err.println("Error finding last data line: " + e.getMessage());
+		}
+		return dataEndLine;
 	}
 	
 	private String getFieldSeparatorChar() {
