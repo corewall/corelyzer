@@ -49,6 +49,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.StringTokenizer;
 import java.util.Vector;
+import java.util.prefs.Preferences;
 
 import javax.help.CSH;
 import javax.help.HelpBroker;
@@ -77,6 +78,9 @@ import javax.swing.WindowConstants;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
+import org.apache.http.NameValuePair;
+
+import com.brsanthu.googleanalytics.*;
 import com.install4j.api.launcher.StartupNotification;
 
 import corelyzer.controller.CRExperimentController;
@@ -374,9 +378,10 @@ public class CorelyzerApp extends WindowAdapter implements MouseListener, Startu
 				}
 			});
 		}
-
+		
 		if (myApp.preferences.isInited) {
 			myApp.startup();
+			myApp.pingLaunchTracker();
 		}
 
 		// apply preferences
@@ -461,6 +466,28 @@ public class CorelyzerApp extends WindowAdapter implements MouseListener, Startu
 
 		toolFrame.addWindowListener( pvm );
 		getMainFrame().addWindowListener( pvm );
+	}
+	
+	// Google Analytics launch tracking
+	public void pingLaunchTracker() {
+		SwingUtilities.invokeLater(new Runnable() {
+			public void run() {
+				// load or create unique user ID
+				Preferences sysPrefs = Preferences.userNodeForPackage(CorelyzerApp.class);
+				String uuid = sysPrefs.get("uuid", null);
+				if (uuid == null) {
+					uuid = java.util.UUID.randomUUID().toString();
+					sysPrefs.put("uuid", uuid);
+				}
+
+				// track launch
+				GoogleAnalytics ga = new GoogleAnalytics("UA-88247383-1");
+				GoogleAnalyticsResponse response = ga.post(new PageViewHit("http://www.laccore.org", "launch: UUID=" + uuid));
+//				for (NameValuePair kvp : response.getPostedParms()) {
+//					System.out.println("key: " + kvp.getName() + ", value: "+ kvp.getValue());
+//				}
+			}
+		});
 	}
 	
 	public boolean containsDatasetName(final String aName) {
