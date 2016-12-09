@@ -24,11 +24,11 @@
  *****************************************************************************/
 package corelyzer.ui;
 
-import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.awt.Frame;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.IOException;
@@ -41,8 +41,12 @@ import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.JSeparator;
 import javax.swing.WindowConstants;
 
+import corelyzer.util.VersionUtils;
+
+import net.miginfocom.swing.MigLayout;
 import org.json.JSONObject;
 
 /**
@@ -50,52 +54,51 @@ import org.json.JSONObject;
  * application.
  */
 public class AboutDialog extends JDialog implements ActionListener {
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = -6020275856495545374L;
 	JButton moreinfoBtn;
 	JButton swUpdateBtn;
+	
+	public static void main(String[] args) {
+		Frame frame = new Frame();
+		AboutDialog ad = new AboutDialog(frame);
+		ad.setVisible(true);
+	}
 
-	public AboutDialog() {
-		super(CorelyzerApp.getApp().getMainFrame());
+	public AboutDialog(Frame parent) {
+		super(parent);
 		setTitle("About Corelyzer");
-		setSize(310, 460);
 		this.setResizable(false);
+		this.getContentPane().setLayout(new MigLayout("wrap", "[center]", ""));
 
-		// Dimension scrnsize = Toolkit.getDefaultToolkit().getScreenSize();
-		// int loc_x = scrnsize.width / 2 - (this.getSize().width / 2);
-		// int loc_y = scrnsize.height / 2 - (this.getSize().height / 2);
-		// this.setLocation(loc_x, loc_y);
-		this.setLocationRelativeTo(CorelyzerApp.getApp().getMainFrame());
-
-		setLayout(new FlowLayout(FlowLayout.CENTER, 100, 5));
-
-		JLabel label = new JLabel(new ImageIcon("resources/corelyzer_icon.jpg"));
-		add(label);
-
+		add(new JLabel(new ImageIcon("resources/corelyzer_icon.jpg")));
 		String version = CorelyzerApp.getApp().getCorelyzerVersion();
-		label = new JLabel("Version " + version);
-		add(label);
-
-		swUpdateBtn = new JButton("Software Update...");
+		add(new JLabel("Version " + version));
+		add(new JLabel("CSDCO/LacCore - University of Minnesota"));
+		
+		swUpdateBtn = new JButton("Check for Updates");
 		swUpdateBtn.addActionListener(this);
 		swUpdateBtn.setEnabled(true);
-		add(swUpdateBtn);
-
-		label = new JLabel("Electronic Visualization Laboratory");
-		add(label);
-		label = new JLabel("University of Illinois at Chicago");
-		add(label);
+		add(swUpdateBtn, "split 2");
 
 		moreinfoBtn = new JButton("More Info...");
 		moreinfoBtn.addActionListener(this);
 		add(moreinfoBtn);
+		JSeparator sep = new JSeparator();
+		add(sep, "growx");
+		
+		// Java Runtime info
+		String javaVersion = System.getProperty("java.version");
+		String javaVendor = System.getProperty("java.vendor");
+		String javaHome = System.getProperty("java.home");
+		add(new JLabel("Running Java " + javaVersion + " (" + javaVendor + ")"));
+		add(new JLabel("Java home: " + javaHome));
+
+		pack();
+		this.setLocationRelativeTo(CorelyzerApp.getApp().getMainFrame());
 
 		setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
 
 		this.addWindowListener(new WindowAdapter() {
-
 			@Override
 			public void windowActivated(final WindowEvent e) {
 				moreinfoBtn.requestFocusInWindow();
@@ -105,27 +108,17 @@ public class AboutDialog extends JDialog implements ActionListener {
 
 	public void actionPerformed(final ActionEvent ae) {
 		if (ae.getSource().equals(this.moreinfoBtn)) {
+			String url = null;
 			try {
-				String app;
-				String url = System.getProperty("corelyzer.projecturl");
-				System.out.println(url);
-
-				// todo
-				//URI uri = new URI(url);
-				//java.awt.Desktop.getDesktop().browse(uri);
-
-				if (System.getProperty("os.name").toLowerCase().contains("windows")) {
-					app = "cmd.exe /c explorer " + url;
-					Runtime.getRuntime().exec(app);
-				} else {
-					app = "open";
-					String[] cmd = { app, url };
-					Runtime.getRuntime().exec(cmd);
-				}
-
+				url = "http://csdco.umn.edu/resources/software/corelyzer";
+				URI uri = new URI(url);
+				java.awt.Desktop.getDesktop().browse(uri);
 			} catch (IOException ex) {
-				System.err.println("IOException in About#MoreInfo button");
-			} //catch (Exception e) {
+				System.err.println("IOException trying to browse to " + url + " from About Dialog");
+			} catch (URISyntaxException urie) {
+				System.err.println("URI Syntax Exception parsing " + url + ":" + urie.getMessage());
+			}
+			//catch (Exception e) {
 			//	System.err.println("Exception attempting to open URL in default browser: " + e.getMessage());
 			//}
 		} else if (ae.getSource().equals(this.swUpdateBtn)) {
@@ -141,16 +134,6 @@ public class AboutDialog extends JDialog implements ActionListener {
 	public void checkUpdateAction(final boolean silent) {
 		Runnable getLatest = new Runnable() {
 			public void run() {
-				// todo: move to non-existent testing code!
-//				System.out.println(isLatestVersion("2", "2"));
-//				System.out.println(isLatestVersion("2", "1"));
-//				System.out.println(isLatestVersion("1.0.0", "1.0.0"));
-//				System.out.println(isLatestVersion("1.0.1", "1.0.0"));
-//				System.out.println(isLatestVersion("1.0.1", "1.0"));
-//				System.out.println(isLatestVersion("1.0.1", "1.0.0.0"));
-//				System.out.println(isLatestVersion("1.2.3.0", "1.2.3"));
-//				System.out.println(isLatestVersion("1.2.3.0", "1.2.4"));
-		        
 				// grab latest release's version from Github
 				String urlStr = "https://api.github.com/repos/corewall/corelyzer/releases/latest";
 				BufferedReader reader = null;
@@ -174,7 +157,7 @@ public class AboutDialog extends JDialog implements ActionListener {
 				
 				try {
 					if (latestVersion != null) {
-						if (!isLatestVersion(curVersion, latestVersion)) {
+						if (!VersionUtils.isLatestVersion(curVersion, latestVersion)) {
 							final String msg = "Corelyzer " + latestVersion + " is available, open download page in default browser?";
 							if (JOptionPane.showConfirmDialog(CorelyzerApp.getApp().getPopupParent(), msg, "New Version Available", JOptionPane.YES_NO_OPTION) == 0)
 							{
@@ -199,47 +182,5 @@ public class AboutDialog extends JDialog implements ActionListener {
 	}
 	
 	private void msg(String text) { JOptionPane.showMessageDialog(CorelyzerApp.getApp().getPopupParent(), text); }
-
-	// strip qualifying text from a version string e.g. "-beta" from "1.2.3-beta"
-	private String stripVersionQualifier(String version) {
-		int[] delims = { '-', '_', ' ' };
-		for (int i = 0; i < delims.length; i++) {
-			int idx = version.indexOf(delims[i]);
-			if (idx != -1) {
-				version = version.substring(0, idx);
-				break;
-			}
-		}
-
-		return version;
-	}
-
-	// return true if version1 >= version2 
-	private boolean isLatestVersion(String version1, String version2) throws NumberFormatException {
-		String[] v1 = stripVersionQualifier(version1).split("\\.");
-		String[] v2 = stripVersionQualifier(version2).split("\\.");
-
-		boolean latest = false;
-		boolean diffFound = false;
-		int index = 0;
-		while (index < v1.length && index < v2.length) {
-			try {
-				int comp = Integer.valueOf(v1[index]).compareTo(Integer.valueOf(v2[index]));
-				if (comp != 0) {
-					latest = (comp > 0); // comp > 0 implies v1 > v2
-					diffFound = true;
-					break;
-				}
-			} catch (NumberFormatException nfe) {
-				throw nfe;
-			}
-			index++;
-		}
-		
-		// if equivalent up to this point, longer version is greater
-		if (!diffFound)
-			latest = v1.length >= v2.length;
-			
-		return latest;
-	}
 }
+

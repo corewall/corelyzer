@@ -128,7 +128,8 @@ public class CorelyzerAppController implements ActionListener {
 	}
 
 	public void about() {
-		AboutDialog aboutdlg = new AboutDialog();
+		AboutDialog aboutdlg = new AboutDialog(CorelyzerApp.getApp().getMainFrame());
+		aboutdlg.setModal(true);
 		aboutdlg.setVisible(true);
 	}
 

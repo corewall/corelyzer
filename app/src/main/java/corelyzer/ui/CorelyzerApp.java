@@ -372,7 +372,7 @@ public class CorelyzerApp extends WindowAdapter implements MouseListener, Startu
 		if (prefs.getAutoCheckVersion()) {
 			SwingUtilities.invokeLater(new Runnable() {
 				public void run() {
-					AboutDialog aboutDlg = new AboutDialog();
+					AboutDialog aboutDlg = new AboutDialog(CorelyzerApp.getApp().getMainFrame());
 					aboutDlg.checkUpdateAction(true);
 					aboutDlg.dispose();
 				}
