@@ -246,43 +246,94 @@ public class FileUtility {
 	
 	public static String selectASingleFile(final Window parent, final String title, final String filterStr, final int mode, final String suggestedFilename) {
 		setAlwaysOnTop(false, parent);
-
-		FileDialog dlg = createFileDialog(parent, title, filterStr, mode);
 		
-		if (filterStr != null) {
-			FilenameExtensionFilter filter = new FilenameExtensionFilter(filterStr);
+		final boolean MAC_OS_X = System.getProperty("os.name").toLowerCase().startsWith("mac os x");
 
-			dlg.setFilenameFilter(filter);
-		}
-		
-		if ( suggestedFilename != null )
-			dlg.setFile( suggestedFilename );
-
-		//parent.setAlwaysOnTop(false);
-		dlg.pack();
-		dlg.setVisible(true);
-
-		String directory = dlg.getDirectory();
-		if (directory != null)
+		if (MAC_OS_X) {
+			FileDialog dlg = createFileDialog(parent, title, filterStr, mode);
+			
+			if (filterStr != null) {
+				FilenameExtensionFilter filter = new FilenameExtensionFilter(filterStr);
+	
+				dlg.setFilenameFilter(filter);
+			}
+			
+			if ( suggestedFilename != null )
+				dlg.setFile( suggestedFilename );
+	
+			//parent.setAlwaysOnTop(false);
+			dlg.pack();
+			dlg.setVisible(true);
+	
+			String directory = dlg.getDirectory();
+			if (directory != null)
+				CRPreferences.setCurrentDir(directory);
+	
+			String filename = dlg.getFile();
+			if (filename != null && mode == FileUtility.SAVE && filterStr != null && !filename.toLowerCase().endsWith(filterStr.toLowerCase())) {
+				filename = filename + "." + filterStr;
+			}
+	
+			if (directory == null || filename == null) {
+				setAlwaysOnTop(true, parent);
+				return null;
+			}
+	
 			CRPreferences.setCurrentDir(directory);
-
-		String filename = dlg.getFile();
-		if (filename != null && mode == FileUtility.SAVE && filterStr != null && !filename.toLowerCase().endsWith(filterStr.toLowerCase())) {
-			filename = filename + "." + filterStr;
-		}
-
-		if (directory == null || filename == null) {
+			dlg.dispose();
+	
+			File f = new File(directory + filename);
+	
 			setAlwaysOnTop(true, parent);
-			return null;
+			return f.getAbsolutePath();
+		} else {
+			// FileDialog on Windows pops but immediately hides behind GLCanvas, stick with JFileChooser for now
+			JFileChooser chooser = new JFileChooser();
+			chooser.setCurrentDirectory(new File(CRPreferences.getCurrentDir()));
+			chooser.setDialogTitle(title);
+			
+			if ( suggestedFilename != null ) {
+				final File suggestedFile = new File( suggestedFilename );
+				chooser.setSelectedFile( suggestedFile );
+			}
+			
+			chooser.resetChoosableFileFilters();
+
+			if (mode == FileUtility.SAVE) {
+				chooser.setDialogType(JFileChooser.SAVE_DIALOG);
+			} else {
+				chooser.setDialogType(JFileChooser.OPEN_DIALOG);
+			}
+
+			if (filterStr != null) {
+				ExampleFileFilter filter = new ExampleFileFilter(filterStr);
+				chooser.setFileFilter(filter);
+			}
+
+			int returnVal;
+
+			if (mode == FileUtility.SAVE) {
+				returnVal = chooser.showSaveDialog(parent);
+			} else {
+				returnVal = chooser.showOpenDialog(parent);
+			}
+
+			if (returnVal == JFileChooser.APPROVE_OPTION) {
+				File selectedFile = chooser.getSelectedFile();
+				CRPreferences.setCurrentDir(selectedFile.getParent());
+
+				String filePath = selectedFile.getAbsolutePath();
+				if (mode == FileUtility.SAVE && filterStr != null && !filePath.toLowerCase().endsWith(filterStr.toLowerCase())) {
+					filePath = filePath + "." + filterStr;
+				}
+
+				setAlwaysOnTop(true, parent);
+				return filePath;
+			}
 		}
-
-		CRPreferences.setCurrentDir(directory);
-		dlg.dispose();
-
-		File f = new File(directory + filename);
 
 		setAlwaysOnTop(true, parent);
-		return f.getAbsolutePath();
+		return null;
 	}
 
 	public static String[] selectMultipleFiles(final Window parent, final String title, final String filterStr) {
