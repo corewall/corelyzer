@@ -1,5 +1,5 @@
 //////////////////////////////////////////////////////////////////////////////////
-// CorrelaterLib - Correlater Class Library :  
+// CorrelatorLib - Correlator Class Library :  
 // It's rebult based on functions in Splicer and Sagan Tool.
 //
 // Copyright (C) 2007 Hyejung Hur,  
@@ -40,6 +40,7 @@ public:
 	virtual void	visitor( CoreObject* object ); 
 
 public:
+	void init( void );
 	void setWidth( int width );
 	int getWidth( void );
 	

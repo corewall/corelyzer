@@ -1,5 +1,5 @@
 //////////////////////////////////////////////////////////////////////////////////
-// CorrelaterLib - Correlater Class Library :  
+// CorrelatorLib - Correlator Class Library :    
 // It's rebult based on functions in Splicer and Sagan Tool.
 //
 // Copyright (C) 2007 Hyejung Hur,  
@@ -26,6 +26,7 @@
 #define _CORE_HOLE_H_
 
 #include <vector>
+#include <string>
 #include <CoreObject.h>
 #include <Core.h>
  
@@ -42,22 +43,27 @@ public:
 	virtual void	accept( Actor* flt ); 
 	virtual void	update( void );
 
-	virtual void	init( int type = ALL_TIE );
+	virtual void	init( int type = ALL_TIE, bool fromFile = false );
+	void	init( int type, int coretype, char* annotation, bool fromFile = false );
 	virtual void	reset( void );
 	
 	virtual void setRange( data_range range );
 
 	virtual void getTuple( std::string& data, int type );
 	virtual void	copy(  CoreObject* objectptr );	
-
-        void    setType( int type );
-        int     getType( void );
+	void	copyData(CoreObject* objectptr );	
+	
+	void    setType( int type );
+	int     getType( void );
+	std::string getTypeStr();
 
 public:
 	Core*	createCore( int index );
-
-	int		validate( void );
+	void	deleteCore( int index );
 	
+	void	reset( int type );
+	int		validate( void );
+		
 #ifdef DEBUG	
 	void debugPrintOut( void );
 #endif
@@ -67,31 +73,36 @@ public:
 	int		getNumber( void );
 	
 	Core*	getCore( int index );
+	Core*	getCoreByNo( int index );	
 	Core*	getCore( double basedepth, double offset );
 	int		getNumOfCores( void );
 	
-	void	setName( char name );
-	char	getName( void );
+	void	setName( char* name );
+	const char*	getName( void );
 	
 	void	setELDStatus( bool status );
 	bool	getELDStatus( void );
 
-	int	getSite( void );
-	int	getLeg( void );
+	virtual const char*	getSite( void );
+	virtual const char*	getLeg( void );
 	
 	void	setDataFormat( int format );
 
 	int		getDataFormat( void );
-	int		check(int leg, int site , char holename =-1, int corenumber =-1,  char* section = NULL);			
-
+	int		check(char* leg, char* site , char* holename =NULL, int corenumber =-1,  char* section = NULL);			
+	
+	void	setTopAvailable( bool status );
+	bool	getTopAvailable( void );
+	
 protected:
 	std::vector<Core*> m_cores;
 	bool m_eldStatus;
 
 private:
 	int	m_number;
-	char 	m_name;
+	std::string m_name;
  	int  	m_type;
+	bool m_topAvailable;
 	
 	int m_dataFormat;	
 	

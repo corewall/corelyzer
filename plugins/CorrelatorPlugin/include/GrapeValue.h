@@ -1,5 +1,5 @@
 //////////////////////////////////////////////////////////////////////////////////
-// CorrelaterLib - Correlater Class Library :  
+// CorrelatorLib - Correlator Class Library :   
 // It's rebult based on functions in Splicer and Sagan Tool.
 //
 // Copyright (C) 2007 Hyejung Hur,  

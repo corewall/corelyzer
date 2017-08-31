@@ -5,104 +5,114 @@ allprojects {
 
 defaultTasks 'clean', 'package'
 
-task clean << {
-	ant.delete(dir: file('dist'), failonerror: false)
-	ant.delete(dir: file('bin'), failonerror: false)
+task clean  {
+	doLast {
+		ant.delete(dir: file('dist'), failonerror: false)
+		ant.delete(dir: file('bin'), failonerror: false)
+	}
 }
 
 /**
  * Packaging tasks.	 It may be good to just extend the gradle dist task instead of having a custom task.
  */
-task 'package-check'(dependsOn: [':app:build']) << {
-	def required = file("scenegraph/dist/scenegraph-${version}.jar")
-	if (!required.exists()) {
-		logger.error("!! Missing required scenegraph library or version mismatch.  Expected: scenegraph/dist/scenegraph-${version}.jar")
-		logger.error("!! The library must be generated (or re-generated for this version) via 'gradle :scenegraph:build-jni'")
-		logger.error("!! See scenegraph/README for instructions on how to setup the build environment")
-		throw new Error("Missing required scenegraph library or version mismatch.  Expected: scenegraph/dist/scenegraph-${version}.jar")
+task 'package-check'(dependsOn: [':app:build'])  {
+	doLast {
+		def required = file("scenegraph/dist/scenegraph-${version}.jar")
+		if (!required.exists()) {
+			logger.error("!! Missing required scenegraph library or version mismatch.  Expected: scenegraph/dist/scenegraph-${version}.jar")
+			logger.error("!! The library must be generated (or re-generated for this version) via 'gradle :scenegraph:build-jni'")
+			logger.error("!! See scenegraph/README for instructions on how to setup the build environment")
+			throw new Error("Missing required scenegraph library or version mismatch.  Expected: scenegraph/dist/scenegraph-${version}.jar")
+		}
 	}
 }
 
 /**
  * Package things up as a Mac application bundle
  */
-task packageMac(dependsOn: 'package-check') << {
-	def app = file('dist/mac/Corelyzer.app')
-	if (app.exists()) {
+task packageMac(dependsOn: 'package-check')  {
+	doLast {
+		def app = file('dist/mac/Corelyzer.app')
+		if (app.exists()) {
+			// copy the jars and native libraries
+			copy {
+				into 'dist/mac/Corelyzer.app/Contents/Resources/Java'
+				from 'app/dist'
+				from 'app/deps/mac'
+				from file('scenegraph/dist').listFiles().findAll { it.name.endsWith('.jar') || it.name.endsWith('.jnilib') }
+				from file('plugins').listFiles().findAll { it.name.endsWith('.jar') }
+			}
+		} else {
+			mkdir(app)
+
+			// copy the skeleton
+			copy {
+				into app
+				from 'packages/mac'
+			}
+
+			// copy the base resources and help files
+			copy {
+				into 'dist/mac/Corelyzer.app/Contents/Resources'
+				from 'packages/base/resources'
+			}
+			copy {
+				into 'dist/mac/Corelyzer.app/Contents/help'
+				from 'packages/base/help'
+			}
+
 		// copy the jars and native libraries
-		copy {
-			into 'dist/mac/Corelyzer.app/Contents/Resources/Java'
-			from 'app/dist'
-			from 'app/deps/mac'
-			from file('scenegraph/dist').listFiles().findAll { it.name.endsWith('.jar') || it.name.endsWith('.jnilib') }
-			from file('plugins').listFiles().findAll { it.name.endsWith('.jar') }
-		}
-	} else {
-		mkdir(app)
-
-		// copy the skeleton
-		copy {
-			into app
-			from 'packages/mac'
-		}
-
-		// copy the base resources and help files
-		copy {
-			into 'dist/mac/Corelyzer.app/Contents/Resources'
-			from 'packages/base/resources'
-		}
-		copy {
-			into 'dist/mac/Corelyzer.app/Contents/help'
-			from 'packages/base/help'
-		}
-
-		// copy the jars and native libraries
-		copy {
-			into 'dist/mac/Corelyzer.app/Contents/Resources/Java'
-			from 'app/dist'
-			from 'app/deps/mac'
-			from file('scenegraph/dist').listFiles().findAll { it.name.endsWith('.jar') || it.name.endsWith('.jnilib') }
-		}
+			copy {
+				into 'dist/mac/Corelyzer.app/Contents/Resources/Java'
+				from 'app/dist'
+				from 'app/deps/mac'
+				from file('scenegraph/dist').listFiles().findAll { it.name.endsWith('.jar') || it.name.endsWith('.jnilib') }
+			}
 
 		// copy plugins
-		copy {
-			into 'dist/mac/Corelyzer.app/Contents/plugins'
-			from file('plugins').listFiles().findAll { it.name.endsWith('.jar') }
-		}
+			copy {
+				into 'dist/mac/Corelyzer.app/Contents/plugins'
+				from file('plugins').listFiles().findAll { it.name.endsWith('.jar') }
+			}
 
 		// update our Info.plist
-		def classpath = file('dist/mac/Corelyzer.app/Contents/Resources/Java').listFiles().findAll { it.name.endsWith('.jar') }.collect { file ->
-			'\t\t\t<string>\\$JAVAROOT/' + file.name + '</string>'
-		}
-		def plist = file('dist/mac/Corelyzer.app/Contents/Info.plist')
-		def text = plist.text.toString()
-		text = text.replaceAll(':version', version) // add our version
-		text = text.replaceAll(':classpath', classpath.join('\n'))
-		plist.write(text)
+			def classpath = file('dist/mac/Corelyzer.app/Contents/Resources/Java').listFiles().findAll { it.name.endsWith('.jar') }.collect { file ->
+				'\t\t\t<string>\\$JAVAROOT/' + file.name + '</string>'
+			}
+			def plist = file('dist/mac/Corelyzer.app/Contents/Info.plist')
+			def text = plist.text.toString()
+			text = text.replaceAll(':version', version) // add our version
+			text = text.replaceAll(':classpath', classpath.join('\n'))
+			plist.write(text)
 
-		// make our app executable
-		ant.chmod(file:"dist/mac/Corelyzer.app/Contents/MacOS/Corelyzer", perm:"ugo+rx")
+			// make our app executable
+			ant.chmod(file:"dist/mac/Corelyzer.app/Contents/MacOS/Corelyzer", perm:"ugo+rx")
+		}
 	}
 }
 
 // sign the app so Mac users are only pestered by the "Do you want Corelyzer
 // to allow incoming network connections" dialog once...otherwise it appears
 // at every launch.
-task signCode << {
-	exec {
-		workingDir 'dist/mac'
-		commandLine 'codesign', '--force', '--deep', '--sign', '-', 'Corelyzer.app'
-		standardOutput = new ByteArrayOutputStream()
-		println standardOutput.toString()
+task signCode  {
+	doLast {
+		exec {
+			workingDir 'dist/mac'
+			commandLine 'codesign', '--force', '--deep', '--sign', '-', 'Corelyzer.app'
+			standardOutput = new ByteArrayOutputStream()
+			println standardOutput.toString()
+		}
 	}
 }
 
-task createTarball << {
-	println "create-tarball!"
-	ant.exec(executable: 'tar', dir: 'dist/mac') {
-		arg(value: 'czvf')
-		arg(value: "Corelyzer-${version}.tar.gz")
-		arg(value: 'Corelyzer.app')
+task createTarball {
+	doLast {
+		println "create-tarball!"
+		ant.exec(executable: 'tar', dir: 'dist/mac') {
+			arg(value: 'czvf')
+			arg(value: "Corelyzer-${version}.tar.gz")
+			arg(value: 'Corelyzer.app')
+		}
 	}
 }
 
@@ -115,60 +125,66 @@ createTarball.doFirst { signCode.execute() }
 
 def winDist = file("dist/win/Corelyzer")
 def winLibs = file('dist/win/Corelyzer/lib')
-task packageWin(dependsOn: ['package-check', 'create-win-dist']) << {
+task packageWin(dependsOn: ['package-check', 'create-win-dist']) {
+	doLast{
 	// copy the jars to Corelyzer/lib
-	copy {
-		into winLibs
-		from 'app/dist'
-		from file('app/deps/win').listFiles().findAll { it.name.endsWith('.jar') }
-		from file('scenegraph/dist').listFiles().findAll { it.name.endsWith('.jar') }
-	}
+		copy {
+			into winLibs
+			from 'app/dist'
+			from file('app/deps/win').listFiles().findAll { it.name.endsWith('.jar') }
+			from file('scenegraph/dist').listFiles().findAll { it.name.endsWith('.jar') }
+		}
 
 	// copy dlls to Corelyzer since I couldn't find a way to make Windows find them in lib
-	copy {
-		into winDist
-		from file('app/deps/win').listFiles().findAll { it.name.endsWith('.dll') }
-		from file('scenegraph/dist').listFiles().findAll { it.name.endsWith('.dll') }
-	}
-
-	// copy help and resources
-	copy {
-		into 'dist/win/Corelyzer/help'
-		from file('packages/base/help')
-	}
-	copy {
-		into 'dist/win/Corelyzer/resources'
-		from file('packages/base/resources')
-	}
-
-	// copy plugins
-	copy {
-		into 'dist/win/Corelyzer/plugins'
-		from file('plugins').listFiles().findAll { it.name.endsWith('.jar') }
-	}
-
-	// create our zip file
-	ant.zip(basedir: file("dist/win"), destfile: file("dist/win/Corelyzer-${version}.zip"), includes: "Corelyzer/**")
-
-	// TODO create installer
-}
-
-task 'create-win-dist' << {
-	if (!winDist.exists()) {
-		mkdir(winDist)
-		mkdir(winLibs)
-
-		// copy the skeleton
 		copy {
 			into winDist
-			from 'packages/win'
+			from file('app/deps/win').listFiles().findAll { it.name.endsWith('.dll') }
+			from file('scenegraph/dist').listFiles().findAll { it.name.endsWith('.dll') }
+		}
+
+	// copy help and resources
+		copy {
+			into 'dist/win/Corelyzer/help'
+			from file('packages/base/help')
+		}
+		copy {
+			into 'dist/win/Corelyzer/resources'
+			from file('packages/base/resources')
+		}
+
+	// copy plugins
+		copy {
+			into 'dist/win/Corelyzer/plugins'
+			from file('plugins').listFiles().findAll { it.name.endsWith('.jar') }
+		}
+
+	// create our zip file
+		ant.zip(basedir: file("dist/win"), destfile: file("dist/win/Corelyzer-${version}.zip"), includes: "Corelyzer/**")
+
+	// TODO create installer
+	}
+}
+
+task 'create-win-dist' {
+	doLast {
+		if (!winDist.exists()) {
+			mkdir(winDist)
+			mkdir(winLibs)
+
+		// copy the skeleton
+			copy {
+				into winDist
+				from 'packages/win'
+			}
 		}
 	}
 }
 
-task 'package'(dependsOn: ['packageMac', 'packageWin']) << {}
+task 'package'(dependsOn: ['packageMac', 'packageWin']) {
+	doLast {}
+}
 
 task wrapper(type: Wrapper) {
-	gradleVersion = '0.9.2'
+	gradleVersion = '4.1'
 	jarFile = 'wrapper/gradle-wrapper.jar'
 }

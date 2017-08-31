@@ -1,5 +1,5 @@
 //////////////////////////////////////////////////////////////////////////////////
-// CorrelaterLib - Correlater Class Library :  
+// CorrelatorLib - Correlator Class Library :  
 // It's rebult based on functions in Splicer and Sagan Tool.
 //
 // Copyright (C) 2007 Hyejung Hur,  
@@ -84,8 +84,8 @@ public:
 	int		applyAffine( double offset );
 
 	void	calcEquation( Tie* tieptr );
-	int		calcCoeficiant( int off = 0 );
-	int		calcCoeficiantUpdate( int off = 0 );
+	int		calcCoefficient( int off = 0 );
+	int		calcCoefficientUpdate( int off = 0 );
 	
 	int		calcOffset( void );
 
@@ -98,9 +98,15 @@ public:
 
 	void	setTieTo( Value* valueptr);
 	void	setTied( Value* valueptr);
+
+	void	setTied( double mcd );
 	
 	Core*	getTieTo( void );
 	Core*	getTied( void );
+	Value*	getTiedValue( void );
+	Value*	getTieToValue( void );
+
+	void	setDummy( void ) { m_dummy = true; }
 	
 	TieInfo* getInfoTieTo( void );
 	TieInfo* getInfoTied( void );
@@ -133,11 +139,34 @@ public:
 	bool isConstrained(void);
 
 	double getOffset(void);
-
+	
+	void setStrightFlag(bool flag);
+	bool getStrightFlag(void);
+	
+	void setFirstShiftFlag(bool flag);
+	bool isFirstShift(void);
+	
+	void setAppend(bool flag, bool all = false);
+	bool isAppend(void);
+	bool isAll(void);
+	
+	// brgtodo 6/25/2014: isActive() never called, enable() never called,  m_active only
+	// referred to in one case (TIE_SHIFT)
+	void disable(void) { m_active= false; }
+	void enable(void) { m_active = true; }
+	bool isActive(void) { return m_active; }
+	
+	void addRefCount(void) { m_ref_count++; }
+	int getRefCount(void) { return m_ref_count; } 
+		
 protected:
 	Value*	findValue( int iscoreto );
-	int findValue( Core* coreptr, double top );
+	Value* findValue( Core* coreptr, double depth );
+	
+	int findValueNumber( Core* coreptr, double top );
+	
 	double evalCore( Core* coreA, Core* coreB, Value* valueA, Value* valueB );
+	Value* createInterpolatedValue(Core* coreptr, double mcd, Value* valueptr);
 	
 protected:
 	int	m_tietype;
@@ -146,10 +175,13 @@ protected:
 	int m_applied;
 	bool m_constrained;
 	bool m_fromFile;
+	bool m_active;
+	bool m_dummy;
 	
 	double m_b;
 	double m_rate;
-
+	int m_ref_count;
+	
 	double m_coef;
 	int m_nx;
 	int m_lead_lag;
@@ -158,6 +190,10 @@ protected:
 	double m_cumOffset;
 	
 	bool m_sharedFlag;
+	bool m_straightFlag;
+	bool m_isFirstShift;
+	bool m_isAppend;
+	bool m_isAll;
 	
 	TieInfo m_tiedcore;
 	TieInfo m_tieTocore;

@@ -1,5 +1,5 @@
 //////////////////////////////////////////////////////////////////////////////////
-// CorrelaterLib - Correlater Class Library :  
+// CorrelatorLib - Correlator Class Library :   
 // It's rebult based on functions in Splicer and Sagan Tool.
 //
 // Copyright (C) 2007 Hyejung Hur,  
@@ -25,6 +25,7 @@
 #ifndef _CORE_CORE_H_
 #define _CORE_CORE_H_
 
+#include <string>
 #include <vector>
 #include <CoreObject.h>
 
@@ -46,7 +47,7 @@ public:
 	virtual void	accept( Actor* flt ); 
 	virtual void	update( void );
 
-	virtual void	init( int type = ALL_TIE );
+	virtual void	init( int type = ALL_TIE, bool fromFile = false );
 	virtual void	reset( void );
 	
 	virtual void setRange( data_range range );	
@@ -56,10 +57,21 @@ public:
 	
 public:
 	Value*	createValue( int index );
-	Section*	createSection( int index );
-		
-	int		validate( void );
+	Value*	createValue( int index, double depth );
+	Value*	createInterpolatedValue( double depth );
+	int	deleteInterpolatedValue( int number );
 	
+	Section*	createSection( int index );
+	void	deleteSection( int index );
+	void	deleteValue( int index );
+	void	updateLight( void );
+
+	void	copyData(CoreObject* objectptr );	
+	
+	void	reset( int type );
+			
+	int		validate( void );
+		
 #ifdef DEBUG	
 	void debugPrintOut( void );
 #endif
@@ -70,7 +82,10 @@ protected:
 
 	int		checkDepthOrder( void );
 
-	void 		cleanTies( int type = ALL_TIE );
+	void 		cleanTies( int type = ALL_TIE, bool fromFile = false );
+
+private:
+	Value* createTypedValue(const int index);
 	
 	// set_functions and get_functions.
 public:
@@ -78,6 +93,7 @@ public:
 	int		getNumber( void );
 
 	Value*	getValue( int index );
+	Value*	getValue( int section_id, double top );
 	int		getNumOfValues( void );
 
 	Section* getSection( int index );
@@ -87,6 +103,9 @@ public:
 	int		getType( void );
 	
 	char	getCoreType( void );
+	
+	Value*	getLast(void);
+	Value*  getFirst(void);
 		
 	void	setDepthOffset( double offset, bool applied = false, bool fromfile = false );
 	void	setDepthOffset( double offset, char valuetype, bool applied = false, bool fromfile = false );
@@ -96,6 +115,8 @@ public:
 	
 	int 	getAffineStatus( void );
 	int 	getRawAffineStatus( void );
+	int		getAffineType( void );
+	void	setAffineType( int type );
 		
 	void	setSmoothStatus( int status );
 	int		getSmoothStatus( void );
@@ -111,17 +132,19 @@ public:
 	void	refGood( void );
 	void	unrefGood( void );
 	
-	void	undo( void );
+	void	undo( bool fromfile = false );
 
 	bool 	isShiftbyTie();
 	void	setOffsetByAboveTie(double offset, char valuetype);
 	
 	int		addTie( Tie* object );
 	int		deleteTie( int index );
+	int		deleteTies( int type );
 	Tie*	getTie( int index );	
 	Tie*	getTie( int type, int index );		
 	int		getNumOfTies( void );
 	int		getNumOfTies( int type );
+	void	disableTies( void );
 
 	int		addStrat( Strat* object );
 	int		getNumOfStrat( void );	
@@ -129,12 +152,24 @@ public:
 	int		deleteStrat( void );
 	Strat*  getStrat( int index );
 	
-	virtual char getName( void );
-	virtual int	getSite( void );
-	virtual int	getLeg( void );
+	virtual const char* getName( void );
+	virtual const char* getSite( void );
+	virtual const char* getLeg( void );
 	
 	int		getDataFormat( void );
-	int		check(int leg, int site , char holename =-1, int corenumber =-1,  char* section = NULL);			
+	int		check(char* leg, char* site , char* holename =NULL, int corenumber =-1,  char* section = NULL);	
+	
+	void	setLogValue( Value* valueptr );
+	Value*	getLogValue( void );
+	
+	void	setQuality( int quality );
+	int		getQuality( void );
+
+	void setComment(const std::string &comment);
+	std::string getComment();
+
+	void setAffineDatatype(const std::string &type);
+	std::string getAffineDatatype();
 
 protected:
 	std::vector<Value*> m_values;
@@ -142,13 +177,15 @@ protected:
 	std::vector<Strat*> m_strats;
 	std::vector<Section*> m_sections;
 	
-	struct data_affine m_affine[2];
+	struct data_affine m_affine[2]; // index 0 refers to file (aka "raw") data, 1 to in-memory data
 	
 	int m_type;
 	int m_smoothStatus;	
 	
 	int m_goodRef;
-
+	int	m_quality;
+	bool m_cull_tabled;
+	
 	double m_stddev;
 	double m_mean;
 	
@@ -156,13 +193,18 @@ protected:
 
 	double m_stretch;
 	double m_mudline;
+	
+	Value* m_logValueptr;
+
 	//???
 	//coreptr->cum_dep_offset=0.0;
 	//coreptr->did_offset=False;
 			
 private:
 	int	m_number;
-	
+	std::string m_affineDatatype; // name of datatype used to create affine shift
+	std::string m_comment;
+
 };
 
 #endif

@@ -1,5 +1,5 @@
 //////////////////////////////////////////////////////////////////////////////////
-// CorrelaterLib - Correlater Class Library :  
+// CorrelatorLib - Correlator Class Library :    
 // It's rebult based on functions in Splicer and Sagan Tool.
 //
 // Copyright (C) 2007 Hyejung Hur,  
@@ -57,7 +57,7 @@ public:
 public:
 	bool			getValue( char *name, unsigned long &value );
 	bool			getValuei( char *name, int &value );
-	bool			getValue( char *name, float &value );
+	bool			getValue( char *name, double &value );
 	bool			getValue( char *name, char ** value );
 	bool			getValueb( char *name, bool &value );
 
@@ -97,6 +97,7 @@ public:
 private :
 	void	loadAffineCoreData(CXMLElement* pElem);
 	void	loadSpliceCoreData(CXMLElement* pElem);
+	void	loadELDCoreData(CXMLElement* pElem);	
 
 		// variables
 private :

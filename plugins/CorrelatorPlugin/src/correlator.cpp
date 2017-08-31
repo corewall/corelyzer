@@ -5,8 +5,8 @@
 #include "CullFilter.h"
 #include "DecimateFilter.h"
 #include "GaussianFilter.h"
-#include "Correlater.h"
-#include "AutoCorrelater.h"
+#include "Correlator.h"
+#include "AutoCorrelator.h"
 #include "Section.h"
 
 using namespace std;
@@ -14,7 +14,7 @@ using namespace std;
 // global stuff
 DataManager* manager   = NULL;
 Data* dataptr          = NULL;
-Correlater* correlator = NULL;
+Correlator* correlator = NULL;
 Hole* splicedataptr    = NULL;
 
 //************************** JNI FUNCTIONS ********************************//
@@ -191,7 +191,7 @@ JNIEXPORT void JNICALL Java_corelyzer_plugin_correlator_Correlator_updateData
 JNIEXPORT void JNICALL Java_corelyzer_plugin_correlator_Correlator_execute
   (JNIEnv * jenv, jclass jclass, jboolean hasSplice)
 {
-    correlator = new Correlater(dataptr);
+    correlator = new Correlator(dataptr);
     correlator->generateSpliceHole();
 
     if(hasSplice)
@@ -223,7 +223,7 @@ JNIEXPORT jobjectArray JNICALL Java_corelyzer_plugin_correlator_Correlator_getHo
 		    holeptr  = dataptr->getHole(i);
 
             char* holeName = new char(2);
-            holeName[0] = holeptr->getName(); // ? just single char?
+            holeName[0] = holeptr->getName()[0]; // ? just single char?
             holeName[1] = '\0';
             str = jenv->NewStringUTF(holeName);
             jenv->SetObjectArrayElement(strArray, i, str);
@@ -350,9 +350,9 @@ JNIEXPORT jobjectArray JNICALL Java_corelyzer_plugin_correlator_Correlator_getSe
 /*
  * Class:     corelyzer_plugin_correlator_Correlator
  * Method:    getLeg
- * Signature: (I)I
+ * Signature: (I)I     //()Ljava/lang/String;
  */
-JNIEXPORT jint JNICALL Java_corelyzer_plugin_correlator_Correlator_getLeg
+JNIEXPORT jstring JNICALL Java_corelyzer_plugin_correlator_Correlator_getLeg
   (JNIEnv * jenv, jclass jcls, jint jholeIdx)
 {
     if(dataptr)
@@ -361,22 +361,26 @@ JNIEXPORT jint JNICALL Java_corelyzer_plugin_correlator_Correlator_getLeg
 
         if( (jholeIdx < 0) || (jholeIdx >= holeSize) )
         {
-            return -1;
+            return NULL;
         }
 
         Hole* holeptr = dataptr->getHole((int)jholeIdx);
         if(holeptr)
         {
-            return holeptr->getLeg();
+        	if (holeptr->getLeg() == NULL)
+    			return NULL;
+    		return jenv->NewStringUTF(holeptr->getLeg());
+           // int legnumber = (int) strtol(holeptr->getLeg(), (char **)NULL, 10);
+           // return legnumber;
         }
         else
         {
-            return -1;
+            return NULL;
         }        
     }
     else
     {
-        return -1;
+        return NULL;
     }
 }
 
@@ -385,7 +389,9 @@ JNIEXPORT jint JNICALL Java_corelyzer_plugin_correlator_Correlator_getLeg
  * Method:    getSite
  * Signature: (I)I
  */
-JNIEXPORT jint JNICALL Java_corelyzer_plugin_correlator_Correlator_getSite
+ 
+ // below won't work anymore for 
+JNIEXPORT jstring JNICALL Java_corelyzer_plugin_correlator_Correlator_getSite
   (JNIEnv * jenv, jclass jcls, jint jholeIdx)
 {
     if(dataptr)
@@ -394,22 +400,24 @@ JNIEXPORT jint JNICALL Java_corelyzer_plugin_correlator_Correlator_getSite
 
         if( (jholeIdx < 0) || (jholeIdx >= holeSize) )
         {
-            return -1;
+            return NULL;
         }
 
         Hole* holeptr = dataptr->getHole((int)jholeIdx);
         if(holeptr)
         {
-            return holeptr->getSite();
+        	if (holeptr->getSite() == NULL)
+    			return NULL;
+    		return jenv->NewStringUTF(holeptr->getSite());
         }
         else
         {
-            return -1;
+            return NULL;
         }
     }
     else
     {
-        return -1;
+        return NULL;
     }
 }
 
@@ -588,7 +596,7 @@ JNIEXPORT void JNICALL Java_corelyzer_plugin_correlator_Correlator_debugPrintOut
     std::cout << "[Correlator] Debug print out information" << std::endl;
     if(dataptr)
     {
-        dataptr->debugPrintOut();
+        //dataptr->debugPrintOut();
     }
 }
 

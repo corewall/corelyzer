@@ -5,7 +5,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import javax.media.opengl.GL2;
+//import javax.media.opengl.GL2;
+import com.jogamp.opengl.GL2;
 
 import corelyzer.graphics.SceneGraph;
 import corelyzer.plugin.CorelyzerPlugin;

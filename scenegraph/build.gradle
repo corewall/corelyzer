@@ -1,87 +1,95 @@
 apply plugin: 'java'
 apply plugin: 'eclipse'
 
-sourceCompatibility = 1.5
-targetCompatibility = 1.5
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
 
-manifest.mainAttributes(
-	'Implementation-Title': 'Corelyzer Scenegraph Library',
-	'Implementation-Version': version
-)
+jar.doFirst {
+	manifest {
+		attributes("Implementation-Title": "Corelyzer Scenegraph Library",
+                      "Implementation-Version": version)
+	}
+} 
 
 clean.doLast {
 	ant.delete(dir: file('bin'), failonerror: false)
 }
 
-task 'clean-dist'() << {
-	ant.delete(dir: file('dist'), failonerror: false)
+task 'clean-dist'()  {
+	doLast {
+		ant.delete(dir: file('dist'), failonerror: false)
+	}
 }
 
-task 'generate-jni-headers'(dependsOn: 'build') << {
+task 'generate-jni-headers'(dependsOn: 'build') {
+	doLast {
 	// copy our jar into dist/
-	copy {
-		into file('dist')
-		from configurations.default.allArtifactFiles
-	}
+		copy {
+			into file('dist')
+			from configurations.default.allArtifacts.getFiles()
+		}
 
 	// create build/cpp
-	def build = new File(project.buildDir, 'cpp')
-	mkdir(build)
+		def build = new File(project.buildDir, 'cpp')
+		mkdir(build)
 
 	// generate the JNI header
-	ant.exec(executable: 'javah', dir: file('dist'), failonerror: true) {
-		arg(value: '-classpath')
-		arg(value: "scenegraph-${version}.jar")
-		arg(value: '-d')
-		arg(path: build)
-		arg(value: 'corelyzer.graphics.SceneGraph')
+		ant.exec(executable: 'javah', dir: file('dist'), failonerror: true) {
+			arg(value: '-classpath')
+			arg(value: "scenegraph-${version}.jar")
+			arg(value: '-d')
+			arg(path: build)
+			arg(value: 'corelyzer.graphics.SceneGraph')
+		}
 	}
 }
 
-task 'build-jni-mac'(dependsOn: 'generate-jni-headers') << {
-	def build = new File(project.buildDir, 'cpp')
-	def dist = file('dist')
-	def src = file('src/main/cpp')
-	def deps = file('deps/mac')
-	def includes = [
-		src.absolutePath,
-		dist.absolutePath,
-		build.absolutePath,
-		'/Developer/SDKs/MacOSX10.5.sdk/System/Library/Frameworks/JavaVM.framework/Versions/Current/Headers',
-		file('deps/mac/include').absolutePath,
-		file('deps/mac/include/freetype2').absolutePath]
+task 'build-jni-mac'(dependsOn: 'generate-jni-headers') {
+	doLast {
+		def build = new File(project.buildDir, 'cpp')
+		def dist = file('dist')
+		def src = file('src/main/cpp')
+		def deps = file('deps/mac')
+		def includes = [
+			src.absolutePath,
+			dist.absolutePath,
+			build.absolutePath,
+			'/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/Library/Frameworks/JavaVM.framework/Versions/Current/Headers',
+			file('deps/mac/include').absolutePath,
+			file('deps/mac/include/freetype2').absolutePath]
 
 	// compile
-	mkdir(build)
-	src.eachFileMatch({ it.endsWith('.c') || it.endsWith('.cpp')} ) { file ->
-		compileMac(file, 'i386', includes, build)
-		compileMac(file, 'x86_64', includes, build)
-		if (!file.name.contains('intrinsic') && !file.name.contains('dxt')) {
-			compileMac(file, 'ppc', includes, build)
+		mkdir(build)
+		src.eachFileMatch({ it.endsWith('.c') || it.endsWith('.cpp')} ) { file ->
+//			compileMac(file, 'i386', includes, build)
+			compileMac(file, 'x86_64', includes, build)
+//			if (!file.name.contains('intrinsic') && !file.name.contains('dxt')) {
+//				compileMac(file, 'ppc', includes, build)
+//			}
 		}
-	}
 
 	// link
-	def libs = file('deps/mac/lib').listFiles().findAll { it.name.endsWith('.a') }
-	def rfile = file('src/main/cpp/mac.r')
-	linkMac('i386',	  libs, rfile, build)
-	linkMac('x86_64', libs, rfile, build)
-	linkMac('ppc',	  libs, rfile, build)
+		def libs = file('deps/mac/lib').listFiles().findAll { it.name.endsWith('.a') }
+		def rfile = file('src/main/cpp/mac.r')
+//	linkMac('i386',	  libs, rfile, build)
+		linkMac('x86_64', libs, rfile, build)
+//	linkMac('ppc',	  libs, rfile, build)
 
 	// lipo
-	ant.exec(executable: 'lipo', dir: build, failonerror: true) {
-		arg(value: '-create')
-		arg(value: '-arch')
-		arg(value: 'i386')
-		arg(value: 'i386.jnilib')
-		arg(value: '-arch')
-		arg(value: 'ppc')
-		arg(value: 'ppc.jnilib')
-		arg(value: '-arch')
-		arg(value: 'x86_64')
-		arg(value: 'x86_64.jnilib')
-		arg(value: '-output')
-		arg(path: new File(dist, 'libscenegraph.jnilib'))
+		ant.exec(executable: 'lipo', dir: build, failonerror: true) {
+			arg(value: '-create')
+//		arg(value: '-arch')
+//		arg(value: 'i386')
+//		arg(value: 'i386.jnilib')
+//		arg(value: '-arch')
+//		arg(value: 'ppc')
+//		arg(value: 'ppc.jnilib')
+			arg(value: '-arch')
+			arg(value: 'x86_64')
+			arg(value: 'x86_64.jnilib')
+			arg(value: '-output')
+			arg(path: new File(dist, 'libscenegraph.jnilib'))
+		}
 	}
 }
 
@@ -89,11 +97,11 @@ def linkMac(arch, libs, rfile, dir) {
 	ant {
 		echo("Linking ${arch}.jnilib")
 		exec(executable: 'c++', dir: dir, failonerror: true) {
-			arg(value: '-mmacosx-version-min=10.3')
+			arg(value: '-mmacosx-version-min=10.12')
 			arg(value: '-g')
 			arg(value: '-bundle')
 			arg(value: '-isysroot')
-			arg(value: '/Developer/SDKs/MacOSX10.5.sdk')
+			arg(value: '/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk')
 			arg(value: '-O')
 			arg(value: '-arch')
 			arg(value: arch)
@@ -123,10 +131,10 @@ def compileMac(src, arch, includes, dir) {
 	ant {
 		echo("Compiling ${src.name} for Mac ${arch}")
 		exec(executable: 'c++', dir: dir, logError: true, failonerror: true) {
-			arg(value: '-mmacosx-version-min=10.3')
+			arg(value: '-mmacosx-version-min=10.12')
 			arg(value: '-c')
 			arg(value: '-isysroot')
-			arg(value: '/Developer/SDKs/MacOSX10.5.sdk')
+			arg(value: '/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk')
 			arg(value: '-O')
 			arg(value: '-arch')
 			arg(value: arch)
@@ -143,29 +151,30 @@ def compileMac(src, arch, includes, dir) {
 	}
 }
 
-task 'build-jni-win'(dependsOn: 'generate-jni-headers') << {
-	def build = new File(project.buildDir, 'cpp')
-	def dist = file('dist')
-	def src = file('src/main/cpp')
-	def deps = file('deps/win32')
-	def includes = [
-		src.absolutePath,
-		dist.absolutePath,
-		build.absolutePath,
-		deps.absolutePath,
-		file('deps/win32/bootstrap/usr/i686-pc-mingw32/include/freetype2').absolutePath]
+task 'build-jni-win'(dependsOn: 'generate-jni-headers') {
+	doLast {
+		def build = new File(project.buildDir, 'cpp')
+		def dist = file('dist')
+		def src = file('src/main/cpp')
+		def deps = file('deps/win32')
+		def includes = [
+			src.absolutePath,
+			dist.absolutePath,
+			build.absolutePath,
+			deps.absolutePath,
+			file('deps/win32/bootstrap/usr/i686-pc-mingw32/include/freetype2').absolutePath]
 
 	// expand our cross-compile tarball
-	def bootstrap = file('deps/win32/bootstrap')
-	if (!bootstrap.exists()) {
-		ant {
-			echo("Expanding cross-compile environment")
-			exec(executable: 'tar', dir: deps) {
-				arg(value: 'xzvf')
-				arg(value: 'bootstrap.tar.gz')
+		def bootstrap = file('deps/win32/bootstrap')
+		if (!bootstrap.exists()) {
+			ant {
+				echo("Expanding cross-compile environment")
+				exec(executable: 'tar', dir: deps) {
+					arg(value: 'xzvf')
+					arg(value: 'bootstrap.tar.gz')
+				}
 			}
 		}
-	}
 
 	// 4/2/2012 brg: Don't bother compiling, cross-compiled Win32 build has
 	// texture generation problems that I have yet to sort out.
@@ -181,11 +190,12 @@ task 'build-jni-win'(dependsOn: 'generate-jni-headers') << {
 	// link
 	//linkWin(deps.listFiles().findAll { it.name.endsWith('.lib')}, build, path)
 
-	copy {
-		into dist
-		from new File(deps, 'scenegraph.dll') // MSVC build
-		from new File(deps, 'OpenJPEG.dll')
-		from new File(deps, 'pthreadVC2.dll')
+		copy {
+			into dist
+			from new File(deps, 'scenegraph.dll') // MSVC build
+			from new File(deps, 'OpenJPEG.dll')
+			from new File(deps, 'pthreadVC2.dll')
+		}
 	}
 }
 
@@ -231,4 +241,6 @@ def linkWin(libs, dir, path) {
 	}
 }
 
-task 'build-jni'(dependsOn: ['build-jni-mac', 'build-jni-win']) << {}
+task 'build-jni'(dependsOn: ['build-jni-mac', 'build-jni-win']) {
+	doLast {}
+}

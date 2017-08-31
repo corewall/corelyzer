@@ -1,18 +1,19 @@
 apply plugin: 'java'
 apply plugin: 'eclipse'
 
-sourceCompatibility = 1.5
-targetCompatibility = 1.5
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
 
-manifest.mainAttributes(
-	'Implementation-Title': 'Corelyzer Application',
-	'Implementation-Version': version
-)
-
+jar.doFirst {
+	manifest {
+		attributes("Implementation-Title": "Corelyzer Application",
+        	"Implementation-Version": version)
+    }
+} 
 repositories {
 	mavenCentral()
-	mavenRepo(url: 'http://download.java.net/maven/2/', artifactUrls: ['https://maven.atlassian.com/maven1/maven2'])
-	flatDir name: 'local', dirs: file('deps')
+	maven {url 'https://maven.java.net/service/local/staging/deploy/maven2/'}
+		flatDir name: 'local', dirs: file('deps')
 }
 
 configurations {
@@ -40,8 +41,8 @@ dependencies {
 	compile ':clibwrapper_jiio:1.1'
 	compile 'ch.qos.logback:logback-core:0.5'
 	compile 'ch.qos.logback:logback-classic:0.5'
-	compile 'org.jogamp.gluegen:gluegen-rt-main:2.0.2'
-	compile 'org.jogamp.jogl:jogl-all-main:2.0.2'
+	compile group: 'org.jogamp.gluegen', name: 'gluegen-rt-main', version: '2.3.2'
+	compile group: 'org.jogamp.jogl', name: 'jogl-all-main', version: '2.3.2'
 	compile('net.java.dev.stax-utils:stax-utils:20070216') {
 		exclude group:'com.bea.xml'
 	}
@@ -58,6 +59,6 @@ build.doLast {
 	copy {
 		into file('dist')
 		from configurations.default
-		from configurations.default.allArtifacts.files
+		from configurations.default.allArtifacts.getFiles()
 	}
 }

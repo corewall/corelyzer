@@ -1,6 +1,7 @@
 package corelyzer.plugin.freedraw;
 
-import javax.media.opengl.GL;
+//import javax.media.opengl.GL;
+import com.jogamp.opengl.GL2;
 
 /**
  * A class to hold freedraw state.
@@ -8,7 +9,7 @@ import javax.media.opengl.GL;
  * @author Josh Reed (jareed@andrill.org)
  */
 public class FreedrawContext {
-	final GL gl;
+	final GL2 gl;
 	final int freeDraw;
 	final int canvas;
 	final int track;
@@ -43,7 +44,7 @@ public class FreedrawContext {
 	 * @param scale
 	 *            the scale.
 	 */
-	public FreedrawContext(final GL gl, final int freeDraw, final int canvas, final int track, final int section, final float x, final float y, final float w,
+	public FreedrawContext(final GL2 gl, final int freeDraw, final int canvas, final int track, final int section, final float x, final float y, final float w,
 			final float h, final float scale) {
 		this.gl = gl;
 		this.freeDraw = freeDraw;
@@ -65,7 +66,7 @@ public class FreedrawContext {
 		return freeDraw;
 	}
 
-	public GL getGl() {
+	public GL2 getGl() {
 		return gl;
 	}
 

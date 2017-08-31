@@ -55,10 +55,14 @@ import javax.help.CSH;
 import javax.help.HelpBroker;
 import javax.help.HelpSet;
 import javax.help.HelpSetException;
-import javax.media.opengl.GLProfile;
-import javax.media.opengl.awt.GLCanvas;
-import javax.media.opengl.GLCapabilities;
-import javax.media.opengl.GLContext;
+//import javax.media.opengl.GLProfile;
+//import javax.media.opengl.awt.GLCanvas;
+//import javax.media.opengl.GLCapabilities;
+//import javax.media.opengl.GLContext;
+import com.jogamp.opengl.GLProfile;
+import com.jogamp.opengl.awt.GLCanvas;
+import com.jogamp.opengl.GLCapabilities;
+import com.jogamp.opengl.GLContext;
 import javax.swing.BorderFactory;
 import javax.swing.JFrame;
 import javax.swing.JList;
@@ -381,7 +385,7 @@ public class CorelyzerApp extends WindowAdapter implements MouseListener, Startu
 		
 		if (myApp.preferences.isInited) {
 			myApp.startup();
-			myApp.pingLaunchTracker();
+			// myApp.pingLaunchTracker();
 		}
 
 		// apply preferences
@@ -561,8 +565,11 @@ public class CorelyzerApp extends WindowAdapter implements MouseListener, Startu
 				// brg 3/16/2012: Once we have a shared context, it must be passed in the constructor.
 				// The setContext() method doesn't work. (JOGL bug?)
 				GLCanvas cvs = null;
-				if ( sharedContext != null )
-					cvs = new GLCanvas(cap, null, sharedContext, null);
+				if ( sharedContext != null ) {
+					//cvs = new GLCanvas(cap, null, sharedContext, null);
+					cvs = new GLCanvas(cap);
+					cvs.setSharedContext(sharedContext);
+				}
 				else
 					cvs = new GLCanvas(cap);
 

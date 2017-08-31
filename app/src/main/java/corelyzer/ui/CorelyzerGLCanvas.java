@@ -48,9 +48,12 @@ import java.util.List;
 import java.util.Vector;
 import java.util.concurrent.locks.ReentrantLock;
 
-import javax.media.opengl.GLAutoDrawable;
-import javax.media.opengl.awt.GLCanvas;
-import javax.media.opengl.GLEventListener;
+//import javax.media.opengl.GLAutoDrawable;
+//import javax.media.opengl.awt.GLCanvas;
+//import javax.media.opengl.GLEventListener;
+import com.jogamp.opengl.GLAutoDrawable;
+import com.jogamp.opengl.awt.GLCanvas;
+import com.jogamp.opengl.GLEventListener;
 import javax.swing.AbstractButton;
 import javax.swing.ButtonGroup;
 import javax.swing.ImageIcon;

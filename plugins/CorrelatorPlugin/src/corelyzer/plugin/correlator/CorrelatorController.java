@@ -27,7 +27,7 @@ package corelyzer.plugin.correlator;
 import corelyzer.data.*;
 import corelyzer.data.coregraph.CoreGraph;
 import corelyzer.data.graph.Tuple;
-import corelyzer.helper.SceneGraph;
+import corelyzer.graphics.SceneGraph;
 import corelyzer.helper.URLRetrieval;
 import corelyzer.ui.CorelyzerApp;
 import corelyzer.util.StringUtility;
@@ -313,8 +313,8 @@ public class CorrelatorController {
 
         //noinspection ConstantConditions
         if( (holes != null) && (holes.length > 0) ) {
-            int leg  = Correlator.getLeg(0);
-            int site = Correlator.getSite(0);
+            String leg  = Correlator.getLeg(0);
+            String site = Correlator.getSite(0);
             String sessionName = "Session-" + leg + "-" + site;
 
             CorelyzerApp app = CorelyzerApp.getApp();
@@ -324,8 +324,8 @@ public class CorrelatorController {
             }
 
             for(int i=0; i<holes.length; ++i) {
-                int legNumber   = Correlator.getLeg(i);
-                int siteNumber  = Correlator.getSite(i);
+                String legNumber   = Correlator.getLeg(i);
+                String siteNumber  = Correlator.getSite(i);
 
                 String holeName = holes[i];
                 System.out.println("---> Leg: " + legNumber +

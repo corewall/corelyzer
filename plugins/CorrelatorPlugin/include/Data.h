@@ -1,5 +1,5 @@
 //////////////////////////////////////////////////////////////////////////////////
-// CorrelaterLib - Correlater Class Library :  
+// CorrelatorLib - Correlator Class Library :   
 // It's rebult based on functions in Splicer and Sagan Tool.
 //
 // Copyright (C) 2007 Hyejung Hur,  
@@ -42,7 +42,9 @@ public:
 	virtual void	accept( Actor* flt ); 
 	virtual void	update( void );
 
-	virtual void	init( int type = ALL_TIE );
+	virtual void	init( int type = ALL_TIE, bool fromFile = false );
+	void	init( int type, int coretype, char* annotation, bool fromFile = false );
+	
 	virtual void	reset( void );
 
 	virtual void setRange( data_range range );
@@ -50,14 +52,22 @@ public:
 	virtual void getTuple( std::string& data, int type=DATA );
 
 public:
-	Hole*	createHole( int index, char name );
-	Hole*	getHole( char name );
-	Hole*	getHole( char name, int format, int datatype );
+	Hole*	createHole( int index, char* name, int type, char* annotation = NULL );
+	Hole*	getHole( char* name );
+	Hole*	getHole( char* name, int format, int datatype, char* annotation = NULL);
+	Hole*	getHole( char* name, int datatype, char* annotation);
 	Hole*	getHole( int index );
+	Hole*	getHole( char* name, int index);
+	void	remove( int datatype );
+
+	void	reset( int type, int coretype, char* annotation );
 
 	void	sort( void );
 
 	int		validate( void );
+
+	void	getTypeRange( int type, char* annot, double& min, double& max );
+
 	
 #ifdef DEBUG	
 	void debugPrintOut( void );
@@ -66,6 +76,7 @@ public:
 	// set_functions and get_functions.
 public:
 	int		getNumOfHoles( void );
+	int		getNumOfHoles( char* name );	
 	
 	void	setCorrStatus( int status );
 	int		getCorrStatus( void );
@@ -73,11 +84,11 @@ public:
 	void	setAffineStatus( int status );
 	int		getAffineStatus( void );
 		
-	void	setSite( int site );
-	int		getSite( void );
+	void	setSite( char* site );
+	virtual const char*	getSite( void );
 	
-	void	setLeg( int leg );
-	virtual int		getLeg( void );
+	void	setLeg( char* leg );
+	virtual const char*	getLeg( void );
 	
 	void	setSubLeg( int leg );
 	int		getSubLeg( void );
@@ -85,20 +96,25 @@ public:
 	void	setType( int type );
 	int		getType( void );
 	
+	int		getNumOfTypes(void);
+	
 	void	setFlip( int flip );
 	int		isFlip( void );
 	
 	void	setDataFormat( int format );
 
 	int		getDataFormat( void );
-	int		check(int leg, int site , char holename =-1, int corenumber =-1,  char* section = NULL);
+	int		check(char* leg, char* site , char* holename =NULL, int corenumber =-1,  char* section = NULL);
 
 	void	setStretch( double stretch );
 	double	getStretch( void );
 	
 	void	setMudLine( double line );
 	double	getMudLine( void );
-		
+
+protected:
+	bool checkType(int typeA, int typeB, const char* annotA, const char* annotB);
+	
 protected:	
 	std::vector<Hole*> m_holes;
 	int	m_type;
@@ -111,8 +127,8 @@ protected:
 	double m_mudline;
 	
 private:
-	int m_site;		// site number
-	int m_leg;		// leg  number	
+	std::string m_site;		// site number
+	std::string m_leg;		// leg  number	
 	int m_subleg;
 	
 	int m_dataFormat;
