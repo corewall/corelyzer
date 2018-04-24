@@ -2,7 +2,7 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9.00"
-	Name="libscenegraph"
+	Name="scenegraph"
 	ProjectGUID="{0C54D4FC-41D3-4950-9947-80B74B695DBD}"
 	RootNamespace="libscenegraph"
 	Keyword="ManagedCProj"
@@ -12,13 +12,16 @@
 		<Platform
 			Name="Win32"
 		/>
+		<Platform
+			Name="x64"
+		/>
 	</Platforms>
 	<ToolFiles>
 	</ToolFiles>
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
+			OutputDirectory="..\..\deps\win32"
 			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="2"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
@@ -43,7 +46,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;$(ProjectDir)\..\..\deps\win32\include&quot;;&quot;C:\Program Files (x86)\Java\jdk1.6.0_29\include&quot;;&quot;C:\Program Files (x86)\Java\jdk1.6.0_29\include\win32&quot;"
+				AdditionalIncludeDirectories="&quot;$(ProjectDir)\..\..\deps\win32\include&quot;;C:\jdk1.6.0_29\include;C:\jdk1.6.0_29\include\win32"
 				PreprocessorDefinitions="WIN32;_DEBUG;DEBUG;USE_FASTDXT"
 				MinimalRebuild="false"
 				BasicRuntimeChecks="0"
@@ -65,11 +68,90 @@
 				AdditionalDependencies="opengl32.lib glu32.lib libpng.lib libtiff.lib libjpeg.lib jvm.lib squish.lib freetype221.lib OpenJPEG.lib pthreadVC2.lib"
 				OutputFile="$(OutDir)\scenegraph.dll"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="&quot;$(ProjectDir)\..\..\deps\win32&quot;;&quot;C:\Program Files (x86)\Java\jdk1.6.0_29\lib&quot;"
+				AdditionalLibraryDirectories="&quot;$(ProjectDir)\..\..\deps\win32&quot;;C:\jdk1.6.0_29\lib"
 				GenerateDebugInformation="true"
 				AssemblyDebug="1"
 				RandomizedBaseAddress="1"
 				DataExecutionPrevention="0"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
+		</Configuration>
+		<Configuration
+			Name="Debug|x64"
+			OutputDirectory="$(PlatformName)\$(ConfigurationName)"
+			IntermediateDirectory="$(PlatformName)\$(ConfigurationName)"
+			ConfigurationType="2"
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
+			CharacterSet="2"
+			ManagedExtensions="0"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+				TargetEnvironment="3"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				Optimization="0"
+				AdditionalIncludeDirectories="&quot;$(ProjectDir)\..\..\deps\x64\include&quot;;&quot;C:\Program Files\Java\jdk1.7.0_79\include&quot;;&quot;C:\Program Files\Java\jdk1.7.0_79\include\win32&quot;"
+				PreprocessorDefinitions="WIN32;_WIN32;;_DEBUG;DEBUG;USE_FASTDXT"
+				MinimalRebuild="false"
+				BasicRuntimeChecks="0"
+				RuntimeLibrary="3"
+				WarningLevel="3"
+				Detect64BitPortabilityProblems="true"
+				DebugInformationFormat="3"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLinkerTool"
+				AdditionalDependencies="opengl32.lib glu32.lib libpng13.lib libtiff.lib turbojpeg-static.lib freetype.lib pthreadVC2.lib"
+				AdditionalLibraryDirectories="&quot;$(ProjectDir)\..\..\deps\x64&quot;;&quot;C:\Program Files\Java\jdk1.7.0_79\lib&quot;"
+				IgnoreDefaultLibraryNames="libcmt.lib"
+				GenerateDebugInformation="true"
+				AssemblyDebug="1"
+				RandomizedBaseAddress="1"
+				DataExecutionPrevention="0"
+				TargetMachine="17"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -120,7 +202,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="&quot;$(ProjectDir)\..\..\deps\win32\include&quot;;&quot;C:\Program Files (x86)\Java\jdk1.6.0_29\include&quot;;&quot;C:\Program Files (x86)\Java\jdk1.6.0_29\include\win32&quot;"
+				AdditionalIncludeDirectories="&quot;$(ProjectDir)\..\..\deps\win32\include&quot;;C:\jdk1.6.0_29\include;C:\jdk1.6.0_29\include\win32"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WIN32;USE_FASTDXT"
 				MinimalRebuild="false"
 				RuntimeLibrary="0"
@@ -139,15 +221,93 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="opengl32.lib glu32.lib libpng.lib libtiff.lib libjpeg.lib jvm.lib freetype221.lib squish.lib OpenJPEG.lib pthreadVC2.lib"
-				OutputFile="$(OutDir)\scenegraph.dll"
+				OutputFile="C:\Users\bgrivna\Desktop\corewall\Corelyzer\CorelyzerWin-2.0.4_rc5\scenegraph.dll"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="&quot;$(ProjectDir)\..\..\deps\win32&quot;;&quot;C:\Program Files (x86)\Java\jdk1.6.0_29\lib&quot;"
+				AdditionalLibraryDirectories="&quot;$(ProjectDir)\..\..\deps\win32&quot;;C:\jdk1.6.0_29\lib"
 				IgnoreAllDefaultLibraries="false"
 				IgnoreDefaultLibraryNames=""
 				GenerateDebugInformation="true"
 				ResourceOnlyDLL="false"
 				RandomizedBaseAddress="1"
 				DataExecutionPrevention="0"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
+		</Configuration>
+		<Configuration
+			Name="Release|x64"
+			OutputDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)"
+			IntermediateDirectory="$(PlatformName)\$(ConfigurationName)"
+			ConfigurationType="2"
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
+			UseOfMFC="0"
+			CharacterSet="2"
+			ManagedExtensions="0"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+				TargetEnvironment="3"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				Optimization="2"
+				AdditionalIncludeDirectories="&quot;$(ProjectDir)\..\..\deps\x64\include&quot;;&quot;C:\Program Files\Java\jdk1.7.0_79\include&quot;;&quot;C:\Program Files\Java\jdk1.7.0_79\include\win32&quot;"
+				PreprocessorDefinitions="WIN32;_WIN32;NDEBUG;USE_FASTDXT"
+				RuntimeLibrary="2"
+				BufferSecurityCheck="true"
+				WarningLevel="3"
+				Detect64BitPortabilityProblems="true"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLinkerTool"
+				AdditionalDependencies="opengl32.lib glu32.lib libpng13.lib libtiff.lib turbojpeg-static.lib freetype.lib pthreadVC2.lib"
+				AdditionalLibraryDirectories="&quot;$(ProjectDir)\..\..\deps\x64&quot;;&quot;C:\Program Files\Java\jdk1.7.0_79\lib&quot;"
+				IgnoreDefaultLibraryNames="libcmt.lib"
+				GenerateDebugInformation="true"
+				AssemblyDebug="2"
+				RandomizedBaseAddress="1"
+				DataExecutionPrevention="0"
+				TargetMachine="17"
 			/>
 			<Tool
 				Name="VCALinkTool"
