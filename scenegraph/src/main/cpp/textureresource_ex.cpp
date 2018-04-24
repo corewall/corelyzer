@@ -52,7 +52,7 @@ extern "C" {
 #include <jerror.h>
 
 // For JPEG2000
-#include "openjpeg.h"
+//#include "openjpeg.h"
 
 #define J2K_CFMT 0
 #define JP2_CFMT 1
@@ -119,6 +119,7 @@ int get_file_format(char *filename) {
     return -1;
 }
 
+#ifdef CORELYZER_JPEG2000_SUPPORT
 void pokeOpjImg(opj_image_t * opjimage)
 {
     int x0 = opjimage->x0;
@@ -131,6 +132,7 @@ void pokeOpjImg(opj_image_t * opjimage)
     printf("x0: %d, y0: %d, x1: %d, y1: %d, numcomps: %d\n",
 	    x0, y0, x1, y1, numcomps);
 }
+#endif
 
 };
 
@@ -160,6 +162,7 @@ vector< MultiLevelTextureSetEX* > texsetvec;
 const int i = 1;
 #define is_bigendian() ( (*(char*)&i) == 0 )
 
+// 4/5/2018: This f'n is used only on big endian systems
 unsigned long swap_bytes (unsigned long nLongNumber)
 {
    return (((nLongNumber&0x000000FF)<<24)+((nLongNumber&0x0000FF00)<<8)+
@@ -1791,6 +1794,7 @@ MultiLevelTextureSetEX* create_texset_from_tiff(const char* filename, int nlevel
     // return insert_texset( texset);
 }
 
+#ifdef CORELYZER_JPEG2000_SUPPORT
 // TODO
 MultiLevelTextureSetEX* create_texset_from_jp2k(const char* filename, int nlevels, int blksize)
 {
@@ -2058,10 +2062,11 @@ MultiLevelTextureSetEX* create_texset_from_jp2k(const char* filename, int nlevel
     src = NULL;
 
     printf("[J2P] End of do JPEG2000\n");
-
     return texset;
     // return NULL;
 }
+#endif // #ifdef CORELYZER_JPEG2000_SUPPORT
+
 
 //====================================================================
 void free_texset(int set, bool del_disk_blocks)

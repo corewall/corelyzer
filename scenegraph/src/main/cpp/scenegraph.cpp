@@ -1252,11 +1252,12 @@ JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_genTextureBlocks
 		{
 			ts->texset = create_texset_from_tiff(fileName, LEVELS);
 		}
-		else if(strstr(fileName, ".jp2"))
-		{
-			printf("---> [TODO] Loading JPEG2000: %s\n", fileName);
-			ts->texset = create_texset_from_jp2k(fileName, LEVELS);
-		}
+		// 4/24/2018 brg: removing JPEG2000 support
+		//else if(strstr(fileName, ".jp2"))
+		//{
+		//	printf("---> [TODO] Loading JPEG2000: %s\n", fileName);
+		//	ts->texset = create_texset_from_jp2k(fileName, LEVELS);
+		//}
 		else
 		{
 			printf("Could not load image %s, unsupported format\n", fileName);
@@ -1380,17 +1381,18 @@ JNIEXPORT jboolean JNICALL Java_corelyzer_graphics_SceneGraph_genTextureBlocksTo
             return false;
         }
     }
-    else if(strstr(inputFileName, ".jp2"))
-    {
-        printf("---> [TODO] Loading JPEG2000: %s\n", inputFileName);
-        texset = create_texset_from_jp2k(inputFileName, LEVELS);
+  //  else if(strstr(inputFileName, ".jp2"))
+  //  {
+  //      printf("---> [TODO] Loading JPEG2000: %s\n", inputFileName);
+  //      texset = create_texset_from_jp2k(inputFileName, LEVELS);
+		//printf("Out of create_texset2\n");
 
-        if(texset == NULL)
-        {
-            free(inputFileName);
-            return false;
-        }
-    }
+  //      if(texset == NULL)
+  //      {
+  //          free(inputFileName);
+  //          return false;
+  //      }
+  //  }
     else
     {
         printf("Could not load image %s, unsupported format\n", inputFileName);

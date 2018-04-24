@@ -113,8 +113,10 @@ MultiLevelTextureSetEX*   create_texset_from_bmp    (const char* file,int nlevel
                                 int blksize = DEFAULT_BLK_SIZE);
 MultiLevelTextureSetEX*   create_texset_from_tiff   (const char* file,int nlevels,
                                 int blksize = DEFAULT_BLK_SIZE);
+#ifdef CORELYZER_JPEG2000_SUPPORT
 MultiLevelTextureSetEX*   create_texset_from_jp2k   (const char* file,int nlevels,
                                 int blksize = DEFAULT_BLK_SIZE);
+#endif
 
 void delete_texset(MultiLevelTextureSetEX *texset);
 
