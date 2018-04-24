@@ -878,7 +878,7 @@ public class IODPListsDialog extends JDialog {
 			parent = this;
 		}
 
-		String aFile = FileUtility.selectSingleFile(parent, "Select an affine table", null, FileUtility.LOAD);
+		String aFile = FileUtility.selectASingleFile(parent, "Select an affine table", null, FileUtility.LOAD);
 
 		if (aFile != null) {
 			this.loadAAffineTable(aFile);
@@ -928,7 +928,7 @@ public class IODPListsDialog extends JDialog {
 			parent = this;
 		}
 
-		String aFile = FileUtility.selectSingleFile(parent, "Select a splice table", null, FileUtility.LOAD);
+		String aFile = FileUtility.selectASingleFile(parent, "Select a splice table", null, FileUtility.LOAD);
 
 		if (aFile != null) {
 			this.loadASpliceTable(aFile);

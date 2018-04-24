@@ -24,76 +24,81 @@
  *****************************************************************************/
 package corelyzer.ui;
 
-import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.awt.Frame;
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
+import java.io.InputStreamReader;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.JSeparator;
 import javax.swing.WindowConstants;
 
-import corelyzer.helper.URLRetrieval;
+import corelyzer.util.VersionUtils;
+
+import net.miginfocom.swing.MigLayout;
+import org.json.JSONObject;
 
 /**
  * Class extends JDialog in order to show the "About" dialog for the
  * application.
  */
 public class AboutDialog extends JDialog implements ActionListener {
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = -6020275856495545374L;
 	JButton moreinfoBtn;
 	JButton swUpdateBtn;
+	
+	public static void main(String[] args) {
+		Frame frame = new Frame();
+		AboutDialog ad = new AboutDialog(frame);
+		ad.setVisible(true);
+	}
 
-	public AboutDialog() {
-		super(CorelyzerApp.getApp().getMainFrame());
+	public AboutDialog(Frame parent) {
+		super(parent);
 		setTitle("About Corelyzer");
-		setSize(310, 460);
 		this.setResizable(false);
+		this.getContentPane().setLayout(new MigLayout("wrap", "[center]", ""));
 
-		// Dimension scrnsize = Toolkit.getDefaultToolkit().getScreenSize();
-		// int loc_x = scrnsize.width / 2 - (this.getSize().width / 2);
-		// int loc_y = scrnsize.height / 2 - (this.getSize().height / 2);
-		// this.setLocation(loc_x, loc_y);
-		this.setLocationRelativeTo(CorelyzerApp.getApp().getMainFrame());
-
-		setLayout(new FlowLayout(FlowLayout.CENTER, 100, 5));
-
-		JLabel label = new JLabel(new ImageIcon("resources/corelyzer_icon.jpg"));
-		add(label);
-
+		add(new JLabel(new ImageIcon("resources/corelyzer_icon.jpg")));
 		String version = CorelyzerApp.getApp().getCorelyzerVersion();
-		label = new JLabel("Version " + version);
-		add(label);
-
-		swUpdateBtn = new JButton("Software Update...");
+		add(new JLabel("Version " + version));
+		add(new JLabel("CSDCO/LacCore - University of Minnesota"));
+		
+		swUpdateBtn = new JButton("Check for Updates");
 		swUpdateBtn.addActionListener(this);
 		swUpdateBtn.setEnabled(true);
-		add(swUpdateBtn);
-
-		label = new JLabel("Electronic Visualization Laboratory");
-		add(label);
-		label = new JLabel("University of Illinois at Chicago");
-		add(label);
+		add(swUpdateBtn, "split 2");
 
 		moreinfoBtn = new JButton("More Info...");
 		moreinfoBtn.addActionListener(this);
 		add(moreinfoBtn);
+		JSeparator sep = new JSeparator();
+		add(sep, "growx");
+		
+		// Java Runtime info
+		String javaVersion = System.getProperty("java.version");
+		String javaVendor = System.getProperty("java.vendor");
+		String javaHome = System.getProperty("java.home");
+		add(new JLabel("Running Java " + javaVersion + " (" + javaVendor + ")"));
+		add(new JLabel("Java home: " + javaHome));
+
+		pack();
+		this.setLocationRelativeTo(CorelyzerApp.getApp().getMainFrame());
 
 		setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
 
 		this.addWindowListener(new WindowAdapter() {
-
 			@Override
 			public void windowActivated(final WindowEvent e) {
 				moreinfoBtn.requestFocusInWindow();
@@ -102,127 +107,80 @@ public class AboutDialog extends JDialog implements ActionListener {
 	}
 
 	public void actionPerformed(final ActionEvent ae) {
-
 		if (ae.getSource().equals(this.moreinfoBtn)) {
+			String url = null;
 			try {
-				String app;
-				String url = System.getProperty("corelyzer.projecturl");
-
-				if (System.getProperty("os.name").toLowerCase().contains("windows")) {
-					app = "cmd.exe /c explorer " + url;
-					Runtime.getRuntime().exec(app);
-				} else {
-					app = "open";
-					String[] cmd = { app, url };
-					Runtime.getRuntime().exec(cmd);
-				}
-
+				url = "http://csdco.umn.edu/resources/software/corelyzer";
+				URI uri = new URI(url);
+				java.awt.Desktop.getDesktop().browse(uri);
 			} catch (IOException ex) {
-				System.err.println("IOException in About#MoreInfo button");
+				System.err.println("IOException trying to browse to " + url + " from About Dialog");
+			} catch (URISyntaxException urie) {
+				System.err.println("URI Syntax Exception parsing " + url + ":" + urie.getMessage());
 			}
+			//catch (Exception e) {
+			//	System.err.println("Exception attempting to open URL in default browser: " + e.getMessage());
+			//}
 		} else if (ae.getSource().equals(this.swUpdateBtn)) {
-			this.checkUpdateAction();
+			this.checkUpdateAction(false);
 		} else {
 			System.out.println("Nothing fun here");
 		}
 
 		dispose();
 	}
-
-	public void checkUpdateAction() {
-		Runnable checkStatus = new Runnable() {
-
+	
+	// if silent = true, no message dialog will be popped if Corelyzer is up to date
+	public void checkUpdateAction(final boolean silent) {
+		Runnable getLatest = new Runnable() {
 			public void run() {
-				String sp = System.getProperty("file.separator");
-
-				String versionURLString = "http://www.evl.uic.edu/cavern/corewall/distros/" + "current_version";
-				String localVersionFile = new File("./").getAbsolutePath() + sp + "latestVersion";
-
-				boolean retResult;
-
+				// grab latest release's version from Github
+				String urlStr = "https://api.github.com/repos/corewall/corelyzer/releases/latest";
+				BufferedReader reader = null;
+				JSONObject jsonObj = null;
 				try {
-					retResult = URLRetrieval.retrieveLocalCopy(versionURLString, localVersionFile);
-				} catch (IOException e) {
-					System.out.println("---> [Exception] AboutDialog runnnable " + e);
-					retResult = false;
-				}
-
-				if (!retResult) {
-					JOptionPane.showMessageDialog(CorelyzerApp.getApp().getMainFrame(), "Couldn't get latest version info.\n" + "Please try again later.");
+					reader = new BufferedReader(new InputStreamReader(new URL(urlStr).openStream()));
+					String jsonResponse = "";
+					String inputLine = null;
+					while ((inputLine = reader.readLine()) != null) {
+						jsonResponse += inputLine;
+					}
+					jsonObj = new JSONObject(jsonResponse);
+					if (reader != null)
+						reader.close();
+				} catch (IOException ioe) {
+					msg("Latest version data unavailable");
+				}				
+				
+				String latestVersion = jsonObj.getString("tag_name");
+				String curVersion = CorelyzerApp.getApp().getCorelyzerVersion();
+				
+				try {
+					if (latestVersion != null) {
+						if (!VersionUtils.isLatestVersion(curVersion, latestVersion)) {
+							final String msg = "Corelyzer " + latestVersion + " is available, open download page in default browser?";
+							if (JOptionPane.showConfirmDialog(CorelyzerApp.getApp().getPopupParent(), msg, "New Version Available", JOptionPane.YES_NO_OPTION) == 0)
+							{
+								java.awt.Desktop.getDesktop().browse(new URI(jsonObj.getString("html_url")));
+							}
+						} else if (!silent) {
+							msg("Corelyzer is up to date.");
+						}
+					}
+				} catch (NumberFormatException nfe) {
+					msg("Version check failed, couldn't parse version: " + nfe.getMessage());
 					return;
+				} catch (URISyntaxException use) {
+					msg("Version check failed, invalid URI syntax: + " + use.getMessage());
+					return;
+				} catch (Exception e) {
+					msg("Version check failed.");
 				}
-
-				checkVersion(localVersionFile);
 			}
 		};
-
-		System.out.println("---> Start the version checking thread");
-		new Thread(checkStatus).start();
+		new Thread(getLatest).start();
 	}
-
-	private void checkVersion(final String aFile) {
-		File f = new File(aFile);
-		String latest_version = "";
-
-		if (f.exists()) {
-			try {
-				FileReader fr = new FileReader(f);
-				BufferedReader br = new BufferedReader(fr);
-
-				String line;
-
-				while ((line = br.readLine()) != null) {
-					String[] toks = line.split("=");
-
-					if (toks[0].trim().equalsIgnoreCase("current_version")) {
-						latest_version = toks[1].trim();
-					}
-				}
-
-				br.close();
-				fr.close();
-			} catch (IOException e) {
-				System.err.println("-- [INFO] IOException - Read version info failed");
-			}
-
-			String myVersion = CorelyzerApp.getApp().getCorelyzerVersion();
-			if (myVersion.compareTo(latest_version) >= 0) {
-			} else {
-				Object[] options = { "Download from CoreWall.org Now", "Later" };
-
-				int sel = JOptionPane.showOptionDialog(CorelyzerApp.getApp().getMainFrame(), "The latest version is " + latest_version
-						+ ". Do you want to download now?", "Software Update", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, options,
-						options[0]);
-
-				switch (sel) {
-					case 0:
-						try {
-							String app;
-							String url = "http://www.corewall.org/downloads.php";
-
-							if (System.getProperty("os.name").toLowerCase().contains("windows")) {
-								app = "cmd.exe /c explorer " + url;
-								Runtime.getRuntime().exec(app);
-							} else {
-								app = "open";
-								String[] cmd = { app, url };
-								Runtime.getRuntime().exec(cmd);
-							}
-
-							this.setVisible(false);
-
-						} catch (IOException ex) {
-							System.err.println("IOException in About#swUpdate button");
-						}
-
-						break;
-
-					default:
-						System.out.println("Do nothing");
-				}
-
-			}
-		}
-	}
-
+	
+	private void msg(String text) { JOptionPane.showMessageDialog(CorelyzerApp.getApp().getPopupParent(), text); }
 }
+

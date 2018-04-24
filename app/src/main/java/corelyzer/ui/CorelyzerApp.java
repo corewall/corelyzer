@@ -25,10 +25,12 @@
 
 package corelyzer.ui;
 
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Frame;
 import java.awt.GridLayout;
 import java.awt.Point;
+import java.awt.Rectangle;
 import java.awt.Toolkit;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
@@ -45,9 +47,9 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.List;
 import java.util.StringTokenizer;
 import java.util.Vector;
+import java.util.prefs.Preferences;
 
 import javax.help.CSH;
 import javax.help.HelpBroker;
@@ -76,6 +78,9 @@ import javax.swing.WindowConstants;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
+import org.apache.http.NameValuePair;
+
+import com.brsanthu.googleanalytics.*;
 import com.install4j.api.launcher.StartupNotification;
 
 import corelyzer.controller.CRExperimentController;
@@ -286,6 +291,7 @@ public class CorelyzerApp extends WindowAdapter implements MouseListener, Startu
 
 	int pluginUIIndex = -1;
 	JFrame mainFrame;
+	String baseTitle; // mainFrame title i.e. "Corelyzer [version]"
 	JPanel rootPanel;
 	JList sessionList;
 	JList trackList;
@@ -366,15 +372,16 @@ public class CorelyzerApp extends WindowAdapter implements MouseListener, Startu
 		if (prefs.getAutoCheckVersion()) {
 			SwingUtilities.invokeLater(new Runnable() {
 				public void run() {
-					AboutDialog aboutDlg = new AboutDialog();
-					aboutDlg.checkUpdateAction();
+					AboutDialog aboutDlg = new AboutDialog(CorelyzerApp.getApp().getMainFrame());
+					aboutDlg.checkUpdateAction(true);
 					aboutDlg.dispose();
 				}
 			});
 		}
-
+		
 		if (myApp.preferences.isInited) {
 			myApp.startup();
+			myApp.pingLaunchTracker();
 		}
 
 		// apply preferences
@@ -459,6 +466,28 @@ public class CorelyzerApp extends WindowAdapter implements MouseListener, Startu
 
 		toolFrame.addWindowListener( pvm );
 		getMainFrame().addWindowListener( pvm );
+	}
+	
+	// Google Analytics launch tracking
+	public void pingLaunchTracker() {
+		SwingUtilities.invokeLater(new Runnable() {
+			public void run() {
+				// load or create unique user ID
+				Preferences sysPrefs = Preferences.userNodeForPackage(CorelyzerApp.class);
+				String uuid = sysPrefs.get("uuid", null);
+				if (uuid == null) {
+					uuid = java.util.UUID.randomUUID().toString();
+					sysPrefs.put("uuid", uuid);
+				}
+
+				// track launch
+				GoogleAnalytics ga = new GoogleAnalytics("UA-88247383-1");
+				GoogleAnalyticsResponse response = ga.post(new PageViewHit("http://www.laccore.org", "launch: UUID=" + uuid));
+//				for (NameValuePair kvp : response.getPostedParms()) {
+//					System.out.println("key: " + kvp.getName() + ", value: "+ kvp.getValue());
+//				}
+			}
+		});
 	}
 	
 	public boolean containsDatasetName(final String aName) {
@@ -755,6 +784,28 @@ public class CorelyzerApp extends WindowAdapter implements MouseListener, Startu
 		return pluginUIIndex;
 	}
 
+	// Return appropriate parent for popup messages: mainFrame if it's in the
+	// canvas, otherwise the canvas. Use to prevent popup messages from being
+	// popped behind mainFrame entirely hidden and preventing clicks on canvas.
+	// Workaround is to move mainFrame to reveal obscured popup, but many users
+	// (understandably) just bail out, since Corelyzer behaves as if it's hung/frozen.
+	public Component getPopupParent(CorelyzerGLCanvas srcCanvas) {
+		if (srcCanvas == null) {
+			return getMainFrame();
+		}
+		Rectangle mfBounds = getMainFrame().getBounds();
+		Rectangle canvasBounds = srcCanvas.getCanvas().getParent().getBounds();
+		Point canvasLoc = srcCanvas.getCanvas().getParent().getLocationOnScreen();
+		canvasBounds.translate(canvasLoc.x, canvasLoc.y);
+		if (mfBounds.intersects(canvasBounds)) {
+			return getMainFrame();
+		} else {
+			return srcCanvas.getCanvas();
+		}
+	}
+	
+	public Component getPopupParent() { return getPopupParent(null); }
+
 	public JProgressBar getProgressUI() {
 		if (usePluginUI) {
 			JFrame f = getPluginFrame();
@@ -859,7 +910,9 @@ public class CorelyzerApp extends WindowAdapter implements MouseListener, Startu
 
 	public String getCorelyzerVersion()
 	{
-		return this.getClass().getPackage().getImplementationVersion();
+		String defaultVersion = "2.0.4";
+		String implVersion = this.getClass().getPackage().getImplementationVersion();
+		return (implVersion == null ? defaultVersion : implVersion);
 	}
 
 	public void GLWindowsToBack() {
@@ -1278,8 +1331,10 @@ public class CorelyzerApp extends WindowAdapter implements MouseListener, Startu
 		// Update mainFrame title
 		if (!currentSessionFile.equals("")) {
 			File f = new File(currentSessionFile);
-			String title = "Corelyzer (" + f.getName() + ")";
+			String title = this.baseTitle + " (" + f.getName() + ")";
 			getMainFrame().setTitle(title);
+		} else {
+			getMainFrame().setTitle(this.baseTitle);
 		}
 	}
 
@@ -1991,7 +2046,10 @@ public class CorelyzerApp extends WindowAdapter implements MouseListener, Startu
 		if ((versionNumber == null) || versionNumber.equals("")) {
 			versionNumber = "undetermined";
 		}
-		mainFrame = new JFrame("Corelyzer " + versionNumber);
+		
+		this.baseTitle = "Corelyzer " + versionNumber;
+		
+		mainFrame = new JFrame(baseTitle);
 		mainFrame.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 		mainFrame.setSize(320, 100);
 		mainFrame.setLocation(600, 100);

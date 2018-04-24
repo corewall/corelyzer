@@ -45,6 +45,8 @@ dependencies {
 	compile('net.java.dev.stax-utils:stax-utils:20070216') {
 		exclude group:'com.bea.xml'
 	}
+	compile 'org.json:json:20140107'
+	compile 'com.brsanthu:google-analytics-java:1.1.2'
 }
 
 clean.doLast {

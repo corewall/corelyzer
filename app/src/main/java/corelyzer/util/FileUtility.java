@@ -218,6 +218,27 @@ public class FileUtility {
 
 		return null;
 	}
+	
+	private static FileDialog createFileDialog(Window parent, String title, String filterStr, int mode) {
+		FileDialog dlg;
+
+		if (parent instanceof Dialog) {
+			dlg = new FileDialog((Dialog) parent, title);
+		} else if (parent instanceof Frame) {
+			dlg = new FileDialog((Frame) parent, title);
+		} else {
+			dlg = new FileDialog(new Frame(), title);
+		}
+
+		if (mode == FileUtility.LOAD) {
+			dlg.setMode(FileDialog.LOAD);
+		} else {
+			dlg.setMode(FileDialog.SAVE);
+		}
+
+		dlg.setDirectory(CRPreferences.getCurrentDir());
+		return dlg;
+	}
 
 	public static String selectASingleFile(final Window parent, final String title, final String filterStr, final int mode) {
 		return selectASingleFile( parent, title, filterStr, mode, null );
@@ -225,64 +246,48 @@ public class FileUtility {
 	
 	public static String selectASingleFile(final Window parent, final String title, final String filterStr, final int mode, final String suggestedFilename) {
 		setAlwaysOnTop(false, parent);
-
-		boolean MAC_OS_X = System.getProperty("os.name").toLowerCase().startsWith("mac os x");
+		
+		final boolean MAC_OS_X = System.getProperty("os.name").toLowerCase().startsWith("mac os x");
 
 		if (MAC_OS_X) {
-			FileDialog dlg;
-
-			if (parent instanceof Dialog) {
-				dlg = new FileDialog((Dialog) parent, title);
-			} else if (parent instanceof Frame) {
-				dlg = new FileDialog((Frame) parent, title);
-			} else {
-				dlg = new FileDialog(new Frame(), title);
-			}
-			dlg.setAlwaysOnTop(true);
-			dlg.setModal(true);
-
-			if (mode == FileUtility.LOAD) {
-				dlg.setMode(FileDialog.LOAD);
-			} else {
-				dlg.setMode(FileDialog.SAVE);
-			}
-
-			dlg.setDirectory(CRPreferences.getCurrentDir());
-
+			FileDialog dlg = createFileDialog(parent, title, filterStr, mode);
+			
 			if (filterStr != null) {
 				FilenameExtensionFilter filter = new FilenameExtensionFilter(filterStr);
-
+	
 				dlg.setFilenameFilter(filter);
 			}
 			
 			if ( suggestedFilename != null )
 				dlg.setFile( suggestedFilename );
-
-			// parent.setAlwaysOnTop(false);
+	
+			//parent.setAlwaysOnTop(false);
 			dlg.pack();
 			dlg.setVisible(true);
-
+	
 			String directory = dlg.getDirectory();
-			CRPreferences.setCurrentDir(directory);
-
+			if (directory != null)
+				CRPreferences.setCurrentDir(directory);
+	
 			String filename = dlg.getFile();
 			if (filename != null && mode == FileUtility.SAVE && filterStr != null && !filename.toLowerCase().endsWith(filterStr.toLowerCase())) {
 				filename = filename + "." + filterStr;
 			}
-
+	
 			if (directory == null || filename == null) {
 				setAlwaysOnTop(true, parent);
 				return null;
 			}
-
+	
 			CRPreferences.setCurrentDir(directory);
 			dlg.dispose();
-
+	
 			File f = new File(directory + filename);
-
+	
 			setAlwaysOnTop(true, parent);
 			return f.getAbsolutePath();
 		} else {
+			// FileDialog on Windows pops but immediately hides behind GLCanvas, stick with JFileChooser for now
 			JFileChooser chooser = new JFileChooser();
 			chooser.setCurrentDirectory(new File(CRPreferences.getCurrentDir()));
 			chooser.setDialogTitle(title);
@@ -332,7 +337,6 @@ public class FileUtility {
 	}
 
 	public static String[] selectMultipleFiles(final Window parent, final String title, final String filterStr) {
-
 		JFileChooser chooser = new JFileChooser();
 		chooser.setCurrentDirectory(new File(CRPreferences.getCurrentDir()));
 		chooser.setDialogTitle(title);
@@ -343,9 +347,8 @@ public class FileUtility {
 			ExampleFileFilter filter = new ExampleFileFilter(filterStr);
 			chooser.setFileFilter(filter);
 		}
-
+		
 		int returnVal = chooser.showOpenDialog(parent);
-
 		if (returnVal == JFileChooser.APPROVE_OPTION) {
 			File[] selectedFiles = chooser.getSelectedFiles();
 			if (selectedFiles.length <= 0) {
@@ -362,43 +365,6 @@ public class FileUtility {
 			CRPreferences.setCurrentDir(selectedFiles[0].getParent());
 
 			return fileStrs.toArray(strs);
-		}
-
-		return null;
-	}
-
-	public static String selectSingleFile(final Window parent, final String title, final String filterStr, final int mode) {
-
-		JFileChooser chooser = new JFileChooser();
-		chooser.setCurrentDirectory(new File(CRPreferences.getCurrentDir()));
-		chooser.setDialogTitle(title);
-		chooser.resetChoosableFileFilters();
-		chooser.setMultiSelectionEnabled(false);
-
-		if (filterStr != null) {
-			ExampleFileFilter filter = new ExampleFileFilter(filterStr);
-			chooser.setFileFilter(filter);
-		}
-
-		int returnVal;
-		if (mode == FileUtility.LOAD) {
-			returnVal = chooser.showOpenDialog(parent);
-		} else if (mode == FileUtility.SAVE) {
-			returnVal = chooser.showSaveDialog(parent);
-		} else {
-			returnVal = JFileChooser.CANCEL_OPTION;
-		}
-
-		if (returnVal == JFileChooser.APPROVE_OPTION) {
-			File selectedFile = chooser.getSelectedFile();
-
-			if (selectedFile == null) {
-				return null;
-			} else {
-				CRPreferences.setCurrentDir(selectedFile.getParent());
-
-				return selectedFile.getAbsolutePath();
-			}
 		}
 
 		return null;
@@ -548,6 +514,7 @@ public class FileUtility {
 		final boolean MAC_OS_X = System.getProperty("os.name").toLowerCase().startsWith("mac os x");
 		if ( MAC_OS_X )
 		{
+			// 2016 BRG: QuaQua is dead, be done with it.
 			// 2/2/2012 brg: On Mac, use Quaqua file chooser to sort image files
 			// properly: 
 			oldLAF = UIManager.getLookAndFeel();

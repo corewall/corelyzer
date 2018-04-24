@@ -1,6 +1,7 @@
 package corelyzer.helper;
 
 import java.io.File;
+import java.io.FilenameFilter;
 import java.util.Enumeration;
 import java.util.Hashtable;
 
@@ -28,9 +29,7 @@ import javax.swing.filechooser.FileFilter;
  * @author Jeff Dinkins
  * @version 1.8 08/26/98
  */
-public class ExampleFileFilter extends FileFilter { // implements FilenameFilter
-													// {
-
+public class ExampleFileFilter extends FileFilter implements FilenameFilter {
 	private Hashtable filters = null;
 	private String description = null;
 	private String fullDescription = null;
@@ -116,7 +115,7 @@ public class ExampleFileFilter extends FileFilter { // implements FilenameFilter
 	 * @see #getExtension
 	 * @see FileFilter#accepts
 	 */
-
+	// javax.swing.FileFilter accept (used for JFileChoosers)
 	@Override
 	public boolean accept(final File f) {
 		if (f != null) {
@@ -124,12 +123,22 @@ public class ExampleFileFilter extends FileFilter { // implements FilenameFilter
 				return true;
 			}
 			String extension = getExtension(f);
-			if (extension != null && filters.get(getExtension(f)) != null) {
+			if (acceptExtension(extension)) {
 				return true;
 			}
-			;
 		}
 		return false;
+	}
+
+	// java.io.FilenameFilter accept (used for FileDialog)
+	@Override
+	public boolean accept(final File dir, final String name) {
+		final String extension = getExtension(name);
+		return acceptExtension(extension);
+	}
+	
+	private boolean acceptExtension(String ext) {
+		return ext != null && filters.get(ext) != null;
 	}
 
 	/**
@@ -191,12 +200,15 @@ public class ExampleFileFilter extends FileFilter { // implements FilenameFilter
 	 */
 	public String getExtension(final File f) {
 		if (f != null) {
-			String filename = f.getName();
-			int i = filename.lastIndexOf('.');
-			if (i > 0 && i < filename.length() - 1) {
-				return filename.substring(i + 1).toLowerCase();
-			}
-
+			return getExtension(f.getName());
+		}
+		return null;
+	}
+	
+	private String getExtension(final String filename) {
+		final int i = filename.lastIndexOf('.');
+		if (i > 0 && i < filename.length() - 1) {
+			return filename.substring(i + 1).toLowerCase();
 		}
 		return null;
 	}

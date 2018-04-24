@@ -35,7 +35,9 @@ import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.Hashtable;
 import java.util.Vector;
@@ -126,7 +128,8 @@ public class CorelyzerAppController implements ActionListener {
 	}
 
 	public void about() {
-		AboutDialog aboutdlg = new AboutDialog();
+		AboutDialog aboutdlg = new AboutDialog(CorelyzerApp.getApp().getMainFrame());
+		aboutdlg.setModal(true);
 		aboutdlg.setVisible(true);
 	}
 
@@ -1247,7 +1250,7 @@ public class CorelyzerAppController implements ActionListener {
 
 			// view.updateGLWindows();
 		} else {
-			JOptionPane.showMessageDialog(null, "The selected file does not exist");
+			JOptionPane.showMessageDialog(view.getMainFrame(), "The selected file does not exist");
 		}
 
 		view.setCurrentSessionFile(filename);
@@ -1513,9 +1516,7 @@ public class CorelyzerAppController implements ActionListener {
 					if (new File(path).exists()) {
 						loadStateFile(path);
 					} else {
-						view.getMainFrame().setAlwaysOnTop(false);
-						JOptionPane.showMessageDialog(null, "The selected file does not exist anymore");
-						view.getMainFrame().setAlwaysOnTop(true);
+						JOptionPane.showMessageDialog(view.getMainFrame(), "The selected file does not exist anymore");
 					}
 				}
 			});
@@ -1530,6 +1531,18 @@ public class CorelyzerAppController implements ActionListener {
 
 		if (confDir.exists()) {
 			File[] allFiles = confDir.listFiles();
+			
+			// sort list by last modified date so most recent files appear first
+			Collections.sort(Arrays.asList(allFiles), new Comparator<File>() {
+				public int compare(File f1, File f2) {
+					if (f1.lastModified() < f2.lastModified())
+						return 1;
+					else if (f1.lastModified() > f2.lastModified())
+						return -1;
+					else
+						return 0;
+				}
+			});
 
 			int autoSaveCount = 0;
 			for (File f : allFiles) {
@@ -1547,9 +1560,7 @@ public class CorelyzerAppController implements ActionListener {
 							if (new File(path).exists()) {
 								loadStateFile(path);
 							} else {
-								view.getMainFrame().setAlwaysOnTop(false);
-								JOptionPane.showMessageDialog(null, "The selected file does not exist.");
-								view.getMainFrame().setAlwaysOnTop(true);
+								JOptionPane.showMessageDialog(view.getMainFrame(), "The selected file does not exist.");
 							}
 						}
 					});
@@ -1627,6 +1638,10 @@ public class CorelyzerAppController implements ActionListener {
 			// Java
 			cg.removeDatasets(s);
 			cg.removeSession(s);
+			
+			if (cg.getSessions().size() == 0) {
+				view.setCurrentSessionFile("");
+			}
 		}
 	}
 
@@ -1754,7 +1769,7 @@ public class CorelyzerAppController implements ActionListener {
 			addSessionToHistoryMenu(path);
 
 			if (writeResult) {
-				view.setCurrentSessionFile(new File(selected).getName());
+				view.setCurrentSessionFile(path);
 			}
 
 			return writeResult;
