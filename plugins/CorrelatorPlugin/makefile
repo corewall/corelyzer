@@ -10,8 +10,8 @@ else
     CXXFLAGS += -fPIC
 endif
 
-CPP     = g++-4.0
-CC      = gcc-4.0
+CPP     = clang++
+CC      = clang
 LIBTOOL = libtool
 
 OBJ_FILES = correlator.o
@@ -44,7 +44,7 @@ native: jni
 
 $(EXEC): $(OBJ_FILES)
 	$(ENVP) $(CPP) -g $(DYNFLAG) -o $(EXEC) \
-	$(OBJ_FILES) $(LDFLAGS) $(DYN_LOOKUP) -framework Carbon ./lib/libcore.a ./lib/libxerces-c.a
+	$(OBJ_FILES) $(LDFLAGS) $(DYN_LOOKUP) -framework Cocoa ./lib/libcore.dylib ./lib/libxerces-c.a
 	$(REZ)
 	/bin/cp $(EXEC) ../../bin/dyld/
 

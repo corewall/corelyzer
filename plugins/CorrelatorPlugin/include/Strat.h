@@ -1,5 +1,5 @@
 //////////////////////////////////////////////////////////////////////////////////
-// CorrelaterLib - Correlater Class Library :  
+// CorrelatorLib - Correlator Class Library :  
 // It's rebult based on functions in Splicer and Sagan Tool.
 //
 // Copyright (C) 2007 Hyejung Hur,  
@@ -66,6 +66,11 @@ protected:
 	
 	// set_functions and get_functions.
 public:
+	const char*   getDatumName( void );
+	const char*   getCode( void );
+	double  getTopAge( void );
+	double  getBotAge( void );
+
 	int		applyTopAffine( double offset );
 	int		applyBotAffine( double offset );
 
@@ -93,6 +98,8 @@ public:
 	void	setBotCoreId( int coreid );
 	int		getTopCoreId( void );
 	int		getBotCoreId( void );
+	int		getTopCoreNumber( void );
+	int		getBotCoreNumber( void );	
 	
 	int		getDataFormat( void ) { return -1; };
 
@@ -101,10 +108,15 @@ public:
 	
 	void	setTopCore( Core* coreptr );
 	void	setBotCore( Core* coreptr );	
+	const char*	getHoleName( void );
+	
+	void	setOrder(int order);
+	int		getOrder( void );
 
 protected:		
 	std::string m_name;
 	std::string m_code;
+	int m_order;
 	int	m_dataType;
 	double m_age[2];
 	Core* m_core[2];

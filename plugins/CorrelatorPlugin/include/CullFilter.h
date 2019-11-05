@@ -1,5 +1,5 @@
 //////////////////////////////////////////////////////////////////////////////////
-// CorrelaterLib - Correlater Class Library :  
+// CorrelatorLib - Correlator Class Library :  
 // It's rebult based on functions in Splicer and Sagan Tool.
 //
 // Copyright (C) 2007 Hyejung Hur,  
@@ -26,7 +26,9 @@
 #define _CORE_CULL_FILTER_H_
 
 #include <vector>
+#include <string>
 #include <Actor.h>
+#include <Data.h>
 
 class Equation
 {
@@ -45,15 +47,16 @@ public:
 	HashInfo( void ) { };
 	~HashInfo( void ) { };
 public:
-	int m_leg;
+	std::string m_leg;
 	int m_subleg;
-	int m_site;
-	char m_hole;
+	std::string m_site;
+	std::string m_hole;
 	int m_core;
 	char m_type;
 	int m_value[2];
 	char m_section[2];
 	double m_top;
+	bool m_badcore;
 };
 
 class CullFilter : public Actor
@@ -72,9 +75,10 @@ public:
 public:
 	void init( void );
 	int create( char* filename );
+	
 	void destory( void );
 	
-	int openCullTable( char* filename );
+	int openCullTable( char* filename, char* type );
 	int closeCullTable( void );
 	
 	// set_functions and get_functions.
@@ -106,11 +110,13 @@ protected:
 	int m_count;
 	int m_signalMax;
 	std::vector<HashInfo*> m_hashtable;
-	
+	std::string m_appliedType;
+	int m_nType;
+		
 	bool m_userEquation;
 
 	Equation m_cull_equation;
-	Equation m_grape;
+	Equation m_gra;
 	Equation m_pwave;
 	Equation m_susceptibility;
 	Equation m_naturalgamma;

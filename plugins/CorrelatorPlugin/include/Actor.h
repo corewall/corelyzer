@@ -1,5 +1,5 @@
 //////////////////////////////////////////////////////////////////////////////////
-// CorrelaterLib - Correlater Class Library :  
+// CorrelatorLib - Correlator Class Library :  
 // It's rebult based on functions in Splicer and Sagan Tool.
 //
 // Copyright (C) 2007 Hyejung Hur,  
@@ -44,6 +44,13 @@ public:
 public:
 	void	setDataType( int type );
 	int		getDataType( void );
+	
+	void	setCoreType( int type );
+	int		getCoreType( void );
+
+	void	setAnnotation( std::string annot );
+	const char*	getAnnotation( void );
+	
 
 	void setEnable( bool enable );
 	bool getEnable( void );
@@ -52,8 +59,11 @@ public:
 protected:
 	static int m_noOfObject;	
 	int m_datatype;
+	int m_coretype;
+	
 	bool m_enable;
-
+	std::string m_annotation;
+			
 private:
 	int m_id;
 	

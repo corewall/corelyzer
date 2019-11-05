@@ -1,5 +1,5 @@
 //////////////////////////////////////////////////////////////////////////////////
-// CorrelaterLib - Correlater Class Library :  
+// CorrelatorLib - Correlator Class Library :  
 // It's rebult based on functions in Splicer and Sagan Tool.
 //
 // Copyright (C) 2007 Hyejung Hur,  
@@ -45,8 +45,10 @@ public:
 	double avedepstep;
 	double ratio;
 
-	data_range();
-	~data_range() {};
+	data_range(void);
+	~data_range(void) {};
+public:
+	void init(void);
 };
 
 class CoreObject
@@ -64,20 +66,22 @@ public:
 	virtual void	update( void ) =0;
 	
 	virtual int		getDataFormat( void ) =0;
-	virtual int		check(int leg, int site , char holename =-1, int corenumber =-1,  char* section = NULL)  { return 0; } ;
+	virtual int		check(char* leg, char* site , char* holename =NULL, int corenumber =-1,  char* section = NULL)  { return 0; } ;
 
 	virtual void setRange( data_range range ) { } ;
 
 	virtual void getTuple( std::string& data, int type ) { };
 	void copyRange( CoreObject* objectptr );	
 
-	virtual int		getSite( void ) { return -1; };
-	virtual int		getLeg( void ) { return -1; };
-	virtual char	getName( void ) {return '0'; };			
+	virtual const char*	getSite( void ) { return NULL; };
+	virtual const char*	getLeg( void ) { return NULL; };
+	virtual const char*	getName( void ) { return NULL; };			
 	// set_functions and get_functions.
 public:
 	unsigned int	getId( void );
+	void setId(unsigned int nId);
 	void setRange( void );
+	void initRange( void );
 
 	data_range*	getRange( void );
 	void	updateRange( void );
@@ -88,6 +92,10 @@ public:
 	double getMax( void );
 	double	getMinDepth( void );
 	double	getMaxDepth( void );
+
+	void	setTop( double top );
+		
+	double	getRatio( void );
 		
 	void setUpdate( void );
 	
@@ -149,6 +157,11 @@ inline double CoreObject::getMin( void )
 inline double CoreObject::getMax( void ) 
 { 
 	return m_range.max; 
+}
+
+inline double CoreObject::getRatio( void ) 
+{ 
+	return m_range.ratio; 
 }
  
 #endif

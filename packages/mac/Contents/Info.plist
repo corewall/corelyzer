@@ -76,7 +76,7 @@
 			<key>corelyzer.plugin.iCores.localAtomSrc</key>
 			<string>http://iweb/corecast.xml</string>
 			<key>corelyzer.plugins.path</key>
-			<string>~/Library/Application Support/Corelyzer</string>
+			<string>~/Library/Application_Support/Corelyzer</string>
 			<key>corelyzer.projecturl</key>
 			<string>http://www.corewall.org/</string>
 			<key>corelyzer.version</key>
@@ -88,6 +88,42 @@
 		<string>-Xms512m -Xmx512m</string>
 		<key>WorkingDirectory</key>
 		<string>$APP_PACKAGE/Contents/</string>
-	</dict>
+        </dict>
+        <key>NSAppTransportSecurity</key>
+        <dict>
+                <key>NSAllowsArbitraryLoads</key>
+                <true/>
+                <key>NSExceptionDomains</key>
+                <dict>
+                        <key>127.0.0.1</key>
+                        <dict>
+                                <key>NSIncludesSubdomains</key>
+                                <true/>
+                                <key>NSTemporaryExceptionAllowsInsecureHTTPLoads</key>
+                                <true/>
+                        </dict>
+                        <key>web.iodp.tamu.edu</key>
+                        <dict>
+                                <key>NSIncludesSubdomains</key>
+                                <true/>
+                                <key>NSTemporaryExceptionAllowsInsecureHTTPLoads</key>
+                                <true/>
+                        </dict>
+                        <key>webserv.iodp.tamu.edu</key>
+                        <dict>
+                                <key>NSIncludesSubdomains</key>
+                                <true/>
+                                <key>NSTemporaryExceptionAllowsInsecureHTTPLoads</key>
+                                <true/>
+                        </dict>
+                        <key>services.chronos.org</key>
+                        <dict>
+                                <key>NSIncludesSubdomains</key>
+                                <true/>
+                                <key>NSTemporaryExceptionAllowsInsecureHTTPLoads</key>
+                                <true/>
+                        </dict>
+                </dict>
+        </dict>
 </dict>
 </plist>

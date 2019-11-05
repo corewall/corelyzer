@@ -1,5 +1,5 @@
 //////////////////////////////////////////////////////////////////////////////////
-// CorrelaterLib - Correlater Class Library :  
+// CorrelatorLib - Correlator Class Library :  
 // It's rebult based on functions in Splicer and Sagan Tool.
 //
 // Copyright (C) 2007 Hyejung Hur,  
@@ -37,11 +37,16 @@ struct DataInfo
 {
 	Data* m_dataptr;
 	std::vector<std::string> m_coreDataFiles;
+	std::vector<int> m_coreDataFormat;
+	std::vector<int> m_coreDataType;
+	
 	std::string m_appliedCullFilename;
 	std::string m_appliedAffineFilename;
 	std::string m_appliedSpliceFilename;
 	std::string m_appliedLogFilename;
 	std::string m_appliedEldFilename;
+	std::vector<std::string> m_startDataFiles;
+	std::vector<int> m_stratDataType;
 };
 
 class DataManager
@@ -59,13 +64,24 @@ public:
 	int		registerPath( char* paths );
 	void	printPaths( void );
 	
-	Data*	load( const char* filename, Data* dataptr = NULL );
+	Data*	load( const char* filename, Data* dataptr = NULL, char* annotation = NULL );
+	Data*	loadAltSplice( const char* filename, Data* dataptr, int type, char* annotation = NULL);
+	void	loadCullTable( const char* filename, int coretype, Data* dataptr, char* annotation = NULL );
+	
+	int		changeFormat(const char* infilename, const char* outfilename);
+
 	
 	int		save( char* filename, Data* dataptr, int format );
 	int		save( char* filename, Data* dataptr );
-	
-	int		save( char* filename, Hole* dataptr, int leg, int site );
-	int		save( char* filename, int column, DecimateFilter *decifilter=NULL, GaussianFilter *smoothfilter=NULL, CullFilter *cullfilter=NULL);
+	int		saveHole( char* filename, Hole* dataptr );
+	int		save( char* filename, Data* dataptr, char* affinefile );
+
+	int		save( char* read_filename, char* write_filename, int depth_idx, int data_idx );
+
+	int		saveTimeSeries( char* agefilename, char* filename, Data* dataptr );
+	int		saveTimeSeriesHole( char* agefilename, char* filename, Hole* dataptr );
+			
+	int		save( char* filename, Hole* dataptr, const char* leg, const char* site, bool age = false );
 	
 	void	setCoreFormat( int format );
 	int		getCoreFormat( void );
@@ -76,7 +92,11 @@ public:
 	int		getStratType( void );
 	
 	void	setCullFile( char* filename );
-	
+	void	cleanSplice(void);
+	void	cleanLog(void);
+	void	cleanStrat(void);
+	void	cleanCore(Data* dataptr, int datatype);
+		
 	Data*	getLogData( void );
 	std::string* getLogInfo( void );
 	void	setSelectedColumn( int column );

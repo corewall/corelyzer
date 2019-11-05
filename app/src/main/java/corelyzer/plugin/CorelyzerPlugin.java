@@ -3,7 +3,8 @@ package corelyzer.plugin;
 import java.awt.Component;
 import java.util.Vector;
 
-import javax.media.opengl.GL2;
+//import javax.media.opengl.GL2;
+import com.jogamp.opengl.GL2;
 import javax.swing.JFrame;
 import javax.swing.JPopupMenu;
 

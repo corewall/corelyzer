@@ -1,5 +1,5 @@
 //////////////////////////////////////////////////////////////////////////////////
-// CorrelaterLib - Correlater Class Library :  
+// CorrelatorLib - Correlator Class Library :    
 // It's rebult based on functions in Splicer and Sagan Tool.
 //
 // Copyright (C) 2007 Hyejung Hur,  
@@ -27,10 +27,11 @@
 	
 #include <stdio.h>
 	
-#define DEBUG						1
+//#define DEBUG						1
 
 #define NO							0
 #define YES							1
+#define ALL							2
 
 // Data Format
 #define	MST95REPORT					0
@@ -63,15 +64,40 @@
 #define CORE_DATA					27
 #define NOT_DEFINE_DATA				28
 #define SPLICED_RECORD				29
+#define LOGSMOOTH					30
+#define SECTION						31
+#define ELD_RECORD					38
+
+#define	INTERNAL_REPORT				40
+#define	INTERNAL_TYPE				41
 
 // Core Data types
-#define	GRAPE						30	
+#define	GRA							30	
 #define	PWAVE						31	
 #define	SUSCEPTIBILITY				32
 #define	NATURALGAMMA				33
 #define	REFLECTANCE					34
 #define OTHERTYPE					35
 #define LOGTYPE						36
+#define USERDEFINEDTYPE				37
+#define INTERPOLATED_VALUE			38
+
+// Old (prior to 1.9) Affine Types
+// 'Y' describes cores shifted a different distance than the core above.
+// Thus 'N' describes cores that are either unshifted, or shifted by the
+// 'this and all below' method (all cores below the selected
+// core have the same shift distance as the core above)
+#define AFFINE_N					0
+#define AFFINE_Y					1
+
+// IODP Affine/Composite types
+#define AFFINE_TIE					1
+#define AFFINE_SET					2
+#define AFFINE_ANCHOR				3
+
+#define AFFINE_TIE_STR				"TIE"
+#define AFFINE_SET_STR				"SET"
+#define AFFINE_ANCHOR_STR			"ANCHOR"
 
 // Strat types
 #define DIATOMS						0
@@ -82,6 +108,7 @@
 
 // Data quality flags 
 #define	GOOD						0
+#define	BAD							1
 #define	BAD_TOP						1
 #define	BAD_CULL1					2
 #define	BAD_CULL2					4
@@ -91,7 +118,7 @@
 #define	BAD_CORE_NUM				64
 #define BAD_CULLTABLE				128
 #define	BAD_SMOOTH					256
-#define BAD_CODE					-999.99
+#define BAD_CODE					-999.00
 
 // Culling 
 #define	LESS_THAN					0
@@ -105,7 +132,8 @@
 #define	CULL_TABLE					2
 #define CULL_PARAMETER_AND_TABLE	3
 // section cm depth to use for whether to cull a value using cull table
-#define CULL_TABLE_DEPTH_CHECK		1.0 
+#define CULL_TABLE_DEPTH_CHECK		0.01 
+#define CULL_BAD_CORE				4
 
 // 
 #define ROUND_CHECK					0.001  
@@ -117,8 +145,13 @@
 #define ALL_TIE						3
 #define SAGAN_TIE					4
 #define SAGAN_FIXED_TIE				5
+#define ALT_REAL_TIE				6
+#define DUMMY_TIE					7
+
 
 #define QUALITY						6
+#define STRETCH						7
+#define QUALITY_SPLICE				8
 
 // Buffer
 #define	MAX_LINE					1024
@@ -148,6 +181,8 @@
 #define TIE							4
 #define STRAT						5
 #define SPLICEDATA					6
+#define SPLICESMOOTH				7
+#define TIE_SHIFT					8
 
 // smoothing
 #define NONE						0
@@ -186,10 +221,15 @@
 #define PLUSMINUS_STD				3.0		//number of std awy from mean to set variable axis min & max
 
 
+// brgtodo 5/19/2014: Totally unclear on what most of the matrix array values are used for.
+// Indices 0, 5, 10, 15 seem to be always set to 1.0. 11 contains the current offset. 12 appears
+// to be used to back up the current offset(?).  Other than that, values are only copied from other
+// matrices.
 struct data_affine {
 	double matrix[16];
 	bool applied;
 	char valuetype;
+	int affinetype;
 };
 
 #define round(x) (x<0?ceil((x)-0.5):floor((x)+0.5))

@@ -1,5 +1,5 @@
 //////////////////////////////////////////////////////////////////////////////////
-// CorrelaterLib - Correlater Class Library :  
+// CorrelatorLib - Correlator Class Library :  
 // It's rebult based on functions in Splicer and Sagan Tool.
 //
 // Copyright (C) 2007 Hyejung Hur,  
@@ -28,6 +28,7 @@
 #include <vector>
 #include <Value.h>
 
+
 class Section : public CoreObject
 {
 public:
@@ -40,7 +41,8 @@ public:
 public:
 	virtual void	accept( Actor* flt ) { }; 
 	virtual void	update( void );
-	virtual int		getDataFormat( void ) { };
+	virtual int		getDataFormat( void ) { return 1; };
+	virtual void	getTuple( std::string& data, int type );
 
 	// set_functions and get_functions.
 public:

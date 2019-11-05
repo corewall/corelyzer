@@ -52,8 +52,8 @@ public class Correlator {
     public native static String[] getHoleNames();
     public native static String[] getCoreNames(int holeIdx);
     public native static String[] getSectionNames(int holeIdx, int coreIdx);
-    public native static int getLeg(int holeIdx);
-    public native static int getSite(int holeIdx);
+    public native static String getLeg(int holeIdx);
+    public native static String getSite(int holeIdx);
     public native static char getCoreType(int holeIdx, int coreIdx);
 
     // a float array of [d0, v0, d1, v1, ...]
