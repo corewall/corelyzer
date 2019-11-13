@@ -171,7 +171,10 @@ public class CorelyzerPluginManager {
 			// check this frame is visible, then iconified
 			if (p.getFrame().isVisible()) {
 				p.getFrame().setExtendedState(Frame.ICONIFIED);
-				p.getFrame().setVisible(false);
+				// 11/13/2019 brg: on Mac, setVisible(false) causes iconified
+				// app to vanish from Dock entirely, never to be found and
+				// deiconified again.
+				// p.getFrame().setVisible(false);
 			}
 		}
 

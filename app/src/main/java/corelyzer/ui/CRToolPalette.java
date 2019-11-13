@@ -505,7 +505,8 @@ public class CRToolPalette extends JFrame implements ActionListener {
 			// window iconified event, which causes PaletteVisibilityManager to go haywire. I believe the deactivate
 			// event results from the OS's animation of the minimization. Thus we suspend the PVM here, and
 			// unsuspend it in CorelyzerApp.windowDeiconified().
-			app.suspendPaletteVisibilityManager(true);
+			// 11/13/2019 brg: suspending no longer seems to be necessary
+			// app.suspendPaletteVisibilityManager(true);
 			
 			app.getMainFrame().setVisible(true);
 			this.mainUIToggleButton.setSelected(true);

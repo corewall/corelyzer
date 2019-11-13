@@ -418,6 +418,8 @@ public class CorelyzerApp extends WindowAdapter implements MouseListener, Startu
 		}
 		
 		myApp.installPaletteVisibilityManager();
+		// myApp.getMainFrame().setName("main");
+		// myApp.getToolFrame().setName("toolbar");
 		
 		// show tooltips for 10 seconds before dismissing - default time seems a bit too short
 		ToolTipManager.sharedInstance().setDismissDelay( 10000 );
@@ -468,10 +470,11 @@ public class CorelyzerApp extends WindowAdapter implements MouseListener, Startu
 			canvasWindow.addWindowListener( pvm );
 		}
 
-		toolFrame.addWindowListener( pvm );
-		getMainFrame().addWindowListener( pvm );
+		toolFrame.addWindowListener(pvm);
+		getMainFrame().addWindowListener(pvm);
+		// getMainFrame().addWindowStateListener(pvm);
 	}
-	
+
 	// Google Analytics launch tracking
 	public void pingLaunchTracker() {
 		SwingUtilities.invokeLater(new Runnable() {
@@ -598,6 +601,7 @@ public class CorelyzerApp extends WindowAdapter implements MouseListener, Startu
 				canvasNum++;
 				
 				windowVec.add(win);
+				// win.setName("canvas" + Integer.toString(canvasNum));
 
 				final float px = tileWidth * c + (borderLeft + borderRight) * screenDpiX * c;
 				final float py = tileHeight * r + (borderUp + borderDown) * screenDpiY * r;
@@ -2330,7 +2334,8 @@ public class CorelyzerApp extends WindowAdapter implements MouseListener, Startu
 		
 		getMainFrame().setVisible(toolFrame.isAppFrameSelected());
 		
-		CorelyzerApp.getApp().suspendPaletteVisibilityManager( false );
+		// 11/13/2019 brg: no longer needed, or so it seems...
+		// CorelyzerApp.getApp().suspendPaletteVisibilityManager(false);
 	}
 
 	@Override
