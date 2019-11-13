@@ -1583,9 +1583,7 @@ public class CorelyzerGLCanvas implements GLEventListener, MouseListener, MouseW
 		canvasLock.lock();
 		{
 			h = SceneGraph.getCanvasHeight(canvasId);
-
 			sy = h / canvas.getHeight();
-
 			SceneGraph.panScene(0, dY * sy);
 
 			this.convertMousePointToSceneSpace(currentPos, scenePos);
@@ -1602,7 +1600,6 @@ public class CorelyzerGLCanvas implements GLEventListener, MouseListener, MouseW
 	}
 
 	public void setMode(final int imode) {
-
 		// change canvas mode
 		canvasMode = imode;
 
@@ -1611,19 +1608,15 @@ public class CorelyzerGLCanvas implements GLEventListener, MouseListener, MouseW
 			case 0:
 				this.normalMode.setSelected(true);
 				break;
-
 			case 1:
 				this.measureMode.setSelected(true);
 				break;
-
 			case 2:
 				this.markerMode.setSelected(true);
 				break;
-
 			case 3:
 				this.clastMode.setSelected(true);
 				break;
-
 			case 4:
 				this.cutMode.setSelected(true);
 				break;
@@ -1793,66 +1786,41 @@ public class CorelyzerGLCanvas implements GLEventListener, MouseListener, MouseW
 	}
 
 	private void zoomSceneWithScrollWheel(final MouseWheelEvent e) {
-		// FIXME MouseWheelEvent info
-		/*
-		 * System.out.println(e);
-		 * 
-		 * String mesg = "Component: " + e.getComponent(); mesg += ", id: " +
-		 * e.getID(); mesg += ", when: " + e.getWhen(); mesg += ", modifiers: "
-		 * + e.getModifiers(); mesg += ", x: " + e.getX(); mesg += ", y: " +
-		 * e.getY(); mesg += ", clickCount: " + e.getClickCount(); mesg +=
-		 * ", scrollType: " + e.getScrollType(); mesg += ", scrollAmount: " +
-		 * e.getScrollAmount(); mesg += ", wheelRot: " + e.getWheelRotation();
-		 * 
-		 * System.out.println(mesg);
-		 */
-		// --
-
 		int scrollAmount = e.getScrollAmount();
 		int wheelRotation = e.getWheelRotation();
 		Point mousePos = e.getPoint();
-
-		/*
-		 * // int scrollType = e.getScrollType(); // int scrollUnit =
-		 * e.getUnitsToScroll();
-		 * 
-		 * System.out.println("---- ScrollAmount:   " + scrollAmount);
-		 * System.out.println("---- ScrollType:     " + scrollType);
-		 * System.out.println("---- ScrollUnit:     " + scrollUnit);
-		 * System.out.println("---- WheelRotation:  " + wheelRotation);
-		 * System.out.println("---- Mouse Location: " + mousePos);
-		 */
-		// determine what point to zoom in or out on
-
-		float cp[] = { 0.0f, 0.0f }; // canvas position x,y
-		float sc[] = { 0.0f, 0.0f }; // scene center x,y
-		float s; // scale factor
-		// float w; // canvas width
-
+		
+		// int scrollType = e.getScrollType();
+		// int scrollUnit = e.getUnitsToScroll();
+		// System.out.println("---- ScrollAmount:   " + scrollAmount);
+		// System.out.println("---- ScrollType:     " + scrollType);
+		// System.out.println("---- ScrollUnit:     " + scrollUnit);
+		// System.out.println("---- WheelRotation:  " + wheelRotation);
+		// System.out.println("---- Mouse Location: " + mousePos);
+		
 		canvasLock.lock();
 		{
+			// determine what point to zoom in or out on
+			float cp[] = { 0.0f, 0.0f }; // canvas position x,y
+			float sc[] = { 0.0f, 0.0f }; // scene center x,y
+			float s = 0.0f; // scale factor
+
 			this.convertMousePointToSceneSpace(mousePos, cp);
 
 			sc[0] = SceneGraph.getSceneCenterX();
 			sc[1] = SceneGraph.getSceneCenterY();
 
-			/*
-			 * System.out.println("Mouse Position Translated to " + cp[0] + ", "
-			 * + cp[1]);
-			 * 
-			 * System.out.println("Difference from center " + (cp[0] - sc[0]) +
-			 * ", " + (cp[1] - sc[1]));
-			 */
+			// System.out.println("Mouse Position Translated to " + cp[0] + ", " + cp[1]);
+			// System.out.println("Difference from center " + (cp[0] - sc[0]) + ", " + (cp[1] - sc[1]));
 
 			// each amount is approximately 5%
-
-			if (wheelRotation <= 0) {
+			if (wheelRotation < 0) {
 				s = (float) Math.pow(.95, scrollAmount);
-			} else {
+			} else if (wheelRotation > 0) {
 				s = (float) Math.pow(1.05f, scrollAmount);
+			} else {
+				return;
 			}
-
-			// System.out.println("Scale Factor " + s);
 
 			SceneGraph.scaleScene(s);
 
@@ -1861,9 +1829,7 @@ public class CorelyzerGLCanvas implements GLEventListener, MouseListener, MouseW
 
 			this.convertMousePointToSceneSpace(mousePos, ncp);
 
-			// System.out.println("New Pos of mouse point after scale " + ncp[0]
-			// +
-			// ", " + ncp[1]);
+			// System.out.println("New Pos of mouse point after scale " + ncp[0] + ", " + ncp[1]);
 
 			ncp[0] = ncp[0] - cp[0];
 			ncp[1] = ncp[1] - cp[1];
