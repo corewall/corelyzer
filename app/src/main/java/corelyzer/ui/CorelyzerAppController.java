@@ -160,11 +160,8 @@ public class CorelyzerAppController implements ActionListener {
 	}
 
 	public void clearImageCache() {
-
 		File texDir = new File(view.preferences().texBlock_Directory);
-
 		if (texDir.exists() && texDir.isDirectory()) {
-
 			Object[] options = { "No", "Yes" };
 
 			int sel = JOptionPane.showOptionDialog(view.getMainFrame(), "Are you sure want to clear your image texture cache?",
@@ -187,6 +184,9 @@ public class CorelyzerAppController implements ActionListener {
 					}
 				}
 			}
+		} else {
+			final String msg = "The image cache directory\n" + view.preferences().texBlock_Directory + "\ncannot be found.";
+			JOptionPane.showMessageDialog(view.getMainFrame(), msg);
 		}
 	}
 
