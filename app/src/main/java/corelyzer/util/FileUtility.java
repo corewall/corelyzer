@@ -250,7 +250,7 @@ public class FileUtility {
 		final boolean MAC_OS_X = System.getProperty("os.name").toLowerCase().startsWith("mac os x");
 
 		if (MAC_OS_X) {
-			FileDialog dlg = createFileDialog(parent, title, filterStr, mode);
+			FileDialog dlg = createFileDialog(null, title, filterStr, mode);
 			
 			if (filterStr != null) {
 				FilenameExtensionFilter filter = new FilenameExtensionFilter(filterStr);
