@@ -15,7 +15,7 @@ clean.doLast {
 	ant.delete(dir: file('bin'), failonerror: false)
 }
 
-task 'clean-dist'()  {
+task 'clean-dist' {
 	doLast {
 		ant.delete(dir: file('dist'), failonerror: false)
 	}
@@ -23,17 +23,17 @@ task 'clean-dist'()  {
 
 task 'generate-jni-headers'(dependsOn: 'build') {
 	doLast {
-	// copy our jar into dist/
+		// copy our jar into dist/
 		copy {
 			into file('dist')
 			from configurations.default.allArtifacts.getFiles()
 		}
 
-	// create build/cpp
+		// create build/cpp
 		def build = new File(project.buildDir, 'cpp')
 		mkdir(build)
 
-	// generate the JNI header
+		// generate the JNI header
 		ant.exec(executable: 'javah', dir: file('dist'), failonerror: true) {
 			arg(value: '-classpath')
 			arg(value: "scenegraph-${version}.jar")
@@ -41,6 +41,15 @@ task 'generate-jni-headers'(dependsOn: 'build') {
 			arg(path: build)
 			arg(value: 'corelyzer.graphics.SceneGraph')
 		}
+	}
+
+	// To build and debug, VSCode seems to depend on contents of build/classes/java
+	// being copied into scenegraph/bin, but doesn't always do so on its own, unclear why.
+	// Copy manually here.
+	mkdir('bin')
+	copy {
+		into file('bin')
+		from 'build/classes/java/'
 	}
 }
 
@@ -58,32 +67,20 @@ task 'build-jni-mac'(dependsOn: 'generate-jni-headers') {
 			file('deps/mac/include').absolutePath,
 			file('deps/mac/include/freetype2').absolutePath]
 
-	// compile
+		// compile
 		mkdir(build)
 		src.eachFileMatch({ it.endsWith('.c') || it.endsWith('.cpp')} ) { file ->
-//			compileMac(file, 'i386', includes, build)
 			compileMac(file, 'x86_64', includes, build)
-//			if (!file.name.contains('intrinsic') && !file.name.contains('dxt')) {
-//				compileMac(file, 'ppc', includes, build)
-//			}
 		}
 
-	// link
+		// link
 		def libs = file('deps/mac/lib').listFiles().findAll { it.name.endsWith('.a') }
 		def rfile = file('src/main/cpp/mac.r')
-//	linkMac('i386',	  libs, rfile, build)
 		linkMac('x86_64', libs, rfile, build)
-//	linkMac('ppc',	  libs, rfile, build)
 
-	// lipo
+		// lipo
 		ant.exec(executable: 'lipo', dir: build, failonerror: true) {
 			arg(value: '-create')
-//		arg(value: '-arch')
-//		arg(value: 'i386')
-//		arg(value: 'i386.jnilib')
-//		arg(value: '-arch')
-//		arg(value: 'ppc')
-//		arg(value: 'ppc.jnilib')
 			arg(value: '-arch')
 			arg(value: 'x86_64')
 			arg(value: 'x86_64.jnilib')
@@ -164,7 +161,7 @@ task 'build-jni-win'(dependsOn: 'generate-jni-headers') {
 			deps.absolutePath,
 			file('deps/win32/bootstrap/usr/i686-pc-mingw32/include/freetype2').absolutePath]
 
-	// expand our cross-compile tarball
+		// expand our cross-compile tarball
 		def bootstrap = file('deps/win32/bootstrap')
 		if (!bootstrap.exists()) {
 			ant {
@@ -176,19 +173,19 @@ task 'build-jni-win'(dependsOn: 'generate-jni-headers') {
 			}
 		}
 
-	// 4/2/2012 brg: Don't bother compiling, cross-compiled Win32 build has
-	// texture generation problems that I have yet to sort out.
-	// Use working MSVC-built scenegraph.dll in deps.
+		// 4/2/2012 brg: Don't bother compiling, cross-compiled Win32 build has
+		// texture generation problems that I have yet to sort out.
+		// Use working MSVC-built scenegraph.dll in deps.
 
-	// compile
-	//mkdir(build)
-	//def path = file('deps/win32/bootstrap/usr/bin/').absolutePath
-	//src.eachFileMatch({ it.endsWith('.c') || it.endsWith('.cpp')} ) { file ->
-	//	compileWin(file, includes, build, path)
-	//}
+		// compile
+		//mkdir(build)
+		//def path = file('deps/win32/bootstrap/usr/bin/').absolutePath
+		//src.eachFileMatch({ it.endsWith('.c') || it.endsWith('.cpp')} ) { file ->
+		//	compileWin(file, includes, build, path)
+		//}
 
-	// link
-	//linkWin(deps.listFiles().findAll { it.name.endsWith('.lib')}, build, path)
+		// link
+		//linkWin(deps.listFiles().findAll { it.name.endsWith('.lib')}, build, path)
 
 		copy {
 			into dist

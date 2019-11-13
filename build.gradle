@@ -61,7 +61,7 @@ task packageMac(dependsOn: 'package-check')  {
 				from 'packages/base/help'
 			}
 
-		// copy the jars and native libraries
+			// copy the jars and native libraries
 			copy {
 				into 'dist/mac/Corelyzer.app/Contents/Resources/Java'
 				from 'app/dist'
@@ -69,13 +69,13 @@ task packageMac(dependsOn: 'package-check')  {
 				from file('scenegraph/dist').listFiles().findAll { it.name.endsWith('.jar') || it.name.endsWith('.jnilib') }
 			}
 
-		// copy plugins
+			// copy plugins
 			copy {
 				into 'dist/mac/Corelyzer.app/Contents/plugins'
 				from file('plugins').listFiles().findAll { it.name.endsWith('.jar') }
 			}
 
-		// update our Info.plist
+			// update our Info.plist
 			def classpath = file('dist/mac/Corelyzer.app/Contents/Resources/Java').listFiles().findAll { it.name.endsWith('.jar') }.collect { file ->
 				'\t\t\t<string>\\$JAVAROOT/' + file.name + '</string>'
 			}
@@ -87,47 +87,37 @@ task packageMac(dependsOn: 'package-check')  {
 
 			// make our app executable
 			ant.chmod(file:"dist/mac/Corelyzer.app/Contents/MacOS/Corelyzer", perm:"ugo+rx")
+
+			// codesign the app so Mac users are only pestered by the "Do you want Corelyzer
+			// to allow incoming network connections" dialog once...otherwise it appears
+			// at every launch.
+			exec {
+				println "Code signing app package"
+				workingDir 'dist/mac'
+				commandLine 'codesign', '--force', '--deep', '--sign', '-', 'Corelyzer.app'
+				standardOutput = new ByteArrayOutputStream()
+				println standardOutput.toString()
+			}
+
+			// tar and zip up app bundle
+			def tarfile = "Corelyzer-${version}.tar.gz"
+			println "Creating tarball ${tarfile}"
+			ant.exec(executable: 'tar', dir: 'dist/mac') {
+				arg(value: 'czvf')
+				arg(value: tarfile)
+				arg(value: 'Corelyzer.app')
+			}
 		}
 	}
 }
 
-// sign the app so Mac users are only pestered by the "Do you want Corelyzer
-// to allow incoming network connections" dialog once...otherwise it appears
-// at every launch.
-task signCode  {
-	doLast {
-		exec {
-			workingDir 'dist/mac'
-			commandLine 'codesign', '--force', '--deep', '--sign', '-', 'Corelyzer.app'
-			standardOutput = new ByteArrayOutputStream()
-			println standardOutput.toString()
-		}
-	}
-}
-
-task createTarball {
-	doLast {
-		println "create-tarball!"
-		ant.exec(executable: 'tar', dir: 'dist/mac') {
-			arg(value: 'czvf')
-			arg(value: "Corelyzer-${version}.tar.gz")
-			arg(value: 'Corelyzer.app')
-		}
-	}
-}
-
-// couldn't get these tasks to run any other way - dependsOn
-// didn't seem to trigger them...??? 
-packageMac.doLast { createTarball.execute() }
-createTarball.doFirst { signCode.execute() }
 
 // Windows packaging
-
 def winDist = file("dist/win/Corelyzer")
 def winLibs = file('dist/win/Corelyzer/lib')
 task packageWin(dependsOn: ['package-check', 'create-win-dist']) {
-	doLast{
-	// copy the jars to Corelyzer/lib
+	doLast {
+		// copy the jars to Corelyzer/lib
 		copy {
 			into winLibs
 			from 'app/dist'
@@ -135,14 +125,14 @@ task packageWin(dependsOn: ['package-check', 'create-win-dist']) {
 			from file('scenegraph/dist').listFiles().findAll { it.name.endsWith('.jar') }
 		}
 
-	// copy dlls to Corelyzer since I couldn't find a way to make Windows find them in lib
+		// copy dlls to Corelyzer since I couldn't find a way to make Windows find them in lib
 		copy {
 			into winDist
 			from file('app/deps/win').listFiles().findAll { it.name.endsWith('.dll') }
 			from file('scenegraph/dist').listFiles().findAll { it.name.endsWith('.dll') }
 		}
 
-	// copy help and resources
+		// copy help and resources
 		copy {
 			into 'dist/win/Corelyzer/help'
 			from file('packages/base/help')
@@ -152,16 +142,16 @@ task packageWin(dependsOn: ['package-check', 'create-win-dist']) {
 			from file('packages/base/resources')
 		}
 
-	// copy plugins
+		// copy plugins
 		copy {
 			into 'dist/win/Corelyzer/plugins'
 			from file('plugins').listFiles().findAll { it.name.endsWith('.jar') }
 		}
 
-	// create our zip file
+		// create our zip file
 		ant.zip(basedir: file("dist/win"), destfile: file("dist/win/Corelyzer-${version}.zip"), includes: "Corelyzer/**")
 
-	// TODO create installer
+		// TODO create installer
 	}
 }
 
@@ -171,7 +161,7 @@ task 'create-win-dist' {
 			mkdir(winDist)
 			mkdir(winLibs)
 
-		// copy the skeleton
+			// copy the skeleton
 			copy {
 				into winDist
 				from 'packages/win'
@@ -182,9 +172,4 @@ task 'create-win-dist' {
 
 task 'package'(dependsOn: ['packageMac', 'packageWin']) {
 	doLast {}
-}
-
-task wrapper(type: Wrapper) {
-	gradleVersion = '4.1'
-	jarFile = 'wrapper/gradle-wrapper.jar'
 }

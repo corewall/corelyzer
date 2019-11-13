@@ -13,7 +13,8 @@ jar.doFirst {
 repositories {
 	mavenCentral()
 	maven {url 'https://maven.java.net/service/local/staging/deploy/maven2/'}
-		flatDir name: 'local', dirs: file('deps')
+	maven {url 'https://repo.opennms.org/maven2/'}
+	flatDir name: 'local', dirs: file('deps')
 }
 
 configurations {
@@ -43,6 +44,7 @@ dependencies {
 	compile 'ch.qos.logback:logback-classic:0.5'
 	compile group: 'org.jogamp.gluegen', name: 'gluegen-rt-main', version: '2.3.2'
 	compile group: 'org.jogamp.jogl', name: 'jogl-all-main', version: '2.3.2'
+	compile group: 'com.apple', name: 'dnssd', version: '108.6'
 	compile('net.java.dev.stax-utils:stax-utils:20070216') {
 		exclude group:'com.bea.xml'
 	}
@@ -60,5 +62,14 @@ build.doLast {
 		into file('dist')
 		from configurations.default
 		from configurations.default.allArtifacts.getFiles()
+	}
+
+	// To build and debug, VSCode seems to depend on contents of build/classes/java
+	// being copied into app/bin dir, but doesn't always do so on its own, unclear why.
+	// Copy manually here.
+	mkdir('bin')
+	copy {
+		into file('bin')
+		from 'build/classes/java'
 	}
 }
