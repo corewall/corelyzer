@@ -57,7 +57,7 @@ public class ControlClientConnectionThread extends Thread {
 	}
 
 	@Override
-	@SuppressWarnings({ "ConstantConditions" })
+	@SuppressWarnings({"ConstantConditions", "unused"})
 	public void run() {
 		try {
 			DataInputStream dis = new DataInputStream(socket.getInputStream());

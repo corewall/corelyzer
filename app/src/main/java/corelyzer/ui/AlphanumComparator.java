@@ -24,7 +24,6 @@
 
 package corelyzer.ui;
 
-import java.io.File;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Vector;

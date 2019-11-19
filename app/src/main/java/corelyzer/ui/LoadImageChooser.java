@@ -1,17 +1,16 @@
 package corelyzer.ui;
 
 import java.io.File;
-import java.lang.reflect.Field;
+import java.io.FilenameFilter;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Vector;
 
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
-import javax.swing.UIManager;
 import javax.swing.plaf.basic.BasicDirectoryModel;
 import javax.swing.plaf.metal.MetalFileChooserUI;
-import javax.swing.plaf.basic.BasicFileChooserUI;
+import java.awt.FileDialog;
 
 // 1/31/2012 brg: JFileChooser doesn't respect numeric values when sorting filenames, which
 // makes loading images a pain. Furthermore, there's no trivial way to change the sort order!
@@ -62,31 +61,51 @@ public class LoadImageChooser extends JFileChooser {
 	}
 
 	public static void main(String[] args) {
-		// brg 1/31/2012: Make the file chooser look Windows-y rather than ugly "metal" Java GUI look
-		try {
-			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+		FileDialog fd = new FileDialog(new JFrame(), "Title", FileDialog.LOAD);
+		fd.setMultipleMode(true);
+		fd.setFilenameFilter(new Filtro());
+		fd.setVisible(true);
+	}
 
-		LoadImageChooser lic = new LoadImageChooser();
-		LoadImageDirectoryModel bdm = new LoadImageDirectoryModel(lic);
+	// public static void main(String[] args) {
+	// 	// brg 1/31/2012: Make the file chooser look Windows-y rather than ugly "metal" Java GUI look
+	// 	try {
+	// 		UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+	// 	} catch (Exception e) {
+	// 		e.printStackTrace();
+	// 	}
 
-		try {
-			final Field model = BasicFileChooserUI.class.getDeclaredField("model");
-			if (model != null)
-			{
-				model.setAccessible(true);
-				model.set(lic.getUI(), bdm);
+	// 	LoadImageChooser lic = new LoadImageChooser();
+	// 	LoadImageDirectoryModel bdm = new LoadImageDirectoryModel(lic);
+
+	// 	try {
+	// 		final Field model = BasicFileChooserUI.class.getDeclaredField("model");
+	// 		if (model != null)
+	// 		{
+	// 			model.setAccessible(true);
+	// 			model.set(lic.getUI(), bdm);
+	// 		}
+	// 	} catch (NoSuchFieldException nsfe) {} catch (IllegalAccessException iae) {}
+
+
+	// 	JFrame win = new JFrame("Sorting Chooser SSCCE");
+	// 	win.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+	// 	win.add(lic);
+	// 	win.pack();
+
+	// 	win.setVisible(true);
+	// }
+}
+
+class Filtro implements FilenameFilter {
+	public boolean accept(File path, String f) {
+		// final String fname = f.ge;
+		final String[] exts = {".jpg", ".jpeg", ".gif", ".bmp", ".png"};
+		for (String ext : exts) {
+			if (f.toLowerCase().contains(ext)) {
+				return true;
 			}
-		} catch (NoSuchFieldException nsfe) {} catch (IllegalAccessException iae) {}
-
-
-		JFrame win = new JFrame("Sorting Chooser SSCCE");
-		win.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		win.add(lic);
-		win.pack();
-
-		win.setVisible(true);
+		}
+		return false;
 	}
 }

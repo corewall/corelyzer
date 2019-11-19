@@ -281,7 +281,7 @@ public class CRAnnotationWindow extends AbstractAnnotationDialog {
 	private JButton refreshButton;
 	private JButton openInBrowserButton;
 
-	private JComboBox groups;
+	private JComboBox<String> groups;
 	private JEditorPane preview;
 	private JButton deleteButton;
 
@@ -452,8 +452,8 @@ public class CRAnnotationWindow extends AbstractAnnotationDialog {
 		label1.setText("Group: ");
 		panel6.add(label1, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED,
 				GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-		groups = new JComboBox();
-		final DefaultComboBoxModel defaultComboBoxModel1 = new DefaultComboBoxModel();
+		groups = new JComboBox<String>();
+		final DefaultComboBoxModel<String> defaultComboBoxModel1 = new DefaultComboBoxModel<String>();
 		defaultComboBoxModel1.addElement("UNDEFINED");
 		defaultComboBoxModel1.addElement("SEDIMENTOLOGY");
 		defaultComboBoxModel1.addElement("GEOPHYSICS");

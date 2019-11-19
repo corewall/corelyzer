@@ -45,7 +45,6 @@ import java.util.Vector;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
-import javax.swing.event.*;
 
 import org.chronos.util.j2k.J2KUtils;
 
@@ -60,7 +59,6 @@ import corelyzer.data.ImagePropertyTableModel;
 import corelyzer.data.Session;
 import corelyzer.data.TrackSceneNode;
 import corelyzer.data.coregraph.CoreGraph;
-import corelyzer.data.lists.CRDefaultListModel;
 import corelyzer.util.FeedUtils;
 import corelyzer.util.FileUtility;
 import corelyzer.util.core.CoreModule;
@@ -89,7 +87,7 @@ public class CRLoadImageListingDialog extends JDialog {
 	private JButton helpButton;
 	private ImagePropertyTable imageTable;
 	private BatchInputPanel batchPanel;
-	private JComboBox destTrackList;
+	private JComboBox<TrackSceneNode> destTrackList;
 
 	public CRLoadImageListingDialog(final Frame owner) {
 		super(owner);
@@ -267,7 +265,7 @@ public class CRLoadImageListingDialog extends JDialog {
 		JPanel destTrackPanel = new JPanel(new MigLayout("fillx", "[80%][20%]", "[]"));
 		destTrackPanel.setBorder(BorderFactory.createTitledBorder("Destination Track"));
 		destTrackPanel.add(new JLabel("Load images into track: "));
-		destTrackList = new JComboBox();
+		destTrackList = new JComboBox<TrackSceneNode>();
 		destTrackPanel.add(destTrackList, "growx, gapright 10, cell 0 0");
 		updateTrackList();
 		destTrackList.setSelectedItem(CorelyzerApp.getApp().getSelectedTrack());
@@ -295,7 +293,7 @@ public class CRLoadImageListingDialog extends JDialog {
 	private void updateTrackList() {
 		Session curSession = CorelyzerApp.getApp().getSelectedSession();
 		if (curSession != null) {
-			DefaultComboBoxModel comboModel = new DefaultComboBoxModel();
+			DefaultComboBoxModel<TrackSceneNode> comboModel = new DefaultComboBoxModel<TrackSceneNode>();
 			for (TrackSceneNode tsn : curSession.getTrackSceneNodes()) {
 				comboModel.addElement(tsn);
 			}
@@ -576,7 +574,8 @@ public class CRLoadImageListingDialog extends JDialog {
 		float length, dpix, dpiy, depth;
 
 		try {
-			BufferedReader reader = new BufferedReader(new FileReader(selectedFile));
+			FileReader fr = new FileReader(selectedFile);
+			BufferedReader reader = new BufferedReader(fr);
 			String line;
 			String[] toks;
 			int nLine = 1;
@@ -638,6 +637,8 @@ public class CRLoadImageListingDialog extends JDialog {
 				((ImagePropertyTable) imageTable).addImageAndProperties(filepath, orientation, length, dpix, dpiy, depth);
 				nLine++;
 			}
+			reader.close();
+			fr.close();
 		} catch (Exception e) {
 			String mesg = "Image List File Parsing error";
 			JOptionPane.showMessageDialog(this, mesg);

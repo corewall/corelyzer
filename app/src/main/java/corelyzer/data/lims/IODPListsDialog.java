@@ -119,21 +119,21 @@ public class IODPListsDialog extends JDialog {
 	private JButton resetButton;
 	private JButton openButton;
 	private JButton applyButton;
-	private JComboBox srvPrefixComboBox;
+	private JComboBox<String> srvPrefixComboBox;
 	// private JComboBox toolComboBox;
-	private JComboBox siteComboBox;
+	private JComboBox<String> siteComboBox;
 	private JTable dataURLTable;
 	private JPanel loggingDBPane;
 	private JLabel dataFilesLabel;
 	// private JLabel toolLabel;
 	// private JLabel holeLabel;
 	private JLabel serviceLabel;
-	private JComboBox legComboBox;
+	private JComboBox<String> legComboBox;
 	// private JComboBox holeComboBox;
 	private JLabel siteLabel;
 	private JLabel legLabel;
-	private JComboBox chronosServiceComboBox;
-	private JComboBox siteField;
+	private JComboBox<String> chronosServiceComboBox;
+	private JComboBox<String> siteField;
 	private JTextField filterTextField;
 	private JTable resultTable;
 	private JLabel searchLabel;
@@ -346,8 +346,8 @@ public class IODPListsDialog extends JDialog {
 		label1.setText("Service provider: ");
 		panel5.add(label1, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED,
 				GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-		chronosServiceComboBox = new JComboBox();
-		final DefaultComboBoxModel defaultComboBoxModel1 = new DefaultComboBoxModel();
+		chronosServiceComboBox = new JComboBox<String>();
+		final DefaultComboBoxModel<String> defaultComboBoxModel1 = new DefaultComboBoxModel<String>();
 		defaultComboBoxModel1.addElement("http://services.chronos.org/");
 		defaultComboBoxModel1.addElement("http://webserv.iodp.tamu.edu:8080/");
 		defaultComboBoxModel1.addElement("http://webserv.ship.iodp.tamu.edu:8080/");
@@ -379,9 +379,9 @@ public class IODPListsDialog extends JDialog {
 		searchLabel.setText("Search results: ");
 		panel5.add(searchLabel, new GridConstraints(3, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED,
 				GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-		siteField = new JComboBox();
+		siteField = new JComboBox<String>();
 		siteField.setEditable(true);
-		final DefaultComboBoxModel defaultComboBoxModel2 = new DefaultComboBoxModel();
+		final DefaultComboBoxModel<String> defaultComboBoxModel2 = new DefaultComboBoxModel<String>();
 		siteField.setModel(defaultComboBoxModel2);
 		panel5.add(siteField, new GridConstraints(1, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL,
 				GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
@@ -396,9 +396,9 @@ public class IODPListsDialog extends JDialog {
 		loggingDBPane.add(serviceLabel, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE,
 				GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, new Dimension(120, -1), new Dimension(120, -1), new Dimension(120, -1), 0,
 				false));
-		srvPrefixComboBox = new JComboBox();
+		srvPrefixComboBox = new JComboBox<String>();
 		srvPrefixComboBox.setEditable(false);
-		final DefaultComboBoxModel defaultComboBoxModel3 = new DefaultComboBoxModel();
+		final DefaultComboBoxModel<String> defaultComboBoxModel3 = new DefaultComboBoxModel<String>();
 		defaultComboBoxModel3.addElement("http://brg.ldeo.columbia.edu/services/");
 		defaultComboBoxModel3.addElement("http://brg.ship.iodp.tamu.edu/services/");
 		srvPrefixComboBox.setModel(defaultComboBoxModel3);
@@ -422,7 +422,7 @@ public class IODPListsDialog extends JDialog {
 		legLabel.setToolTipText("For example: 199, 200");
 		loggingDBPane.add(legLabel, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED,
 				GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-		legComboBox = new JComboBox();
+		legComboBox = new JComboBox<String>();
 		legComboBox.setEditable(true);
 		legComboBox.setToolTipText("For example: 199, 200");
 		loggingDBPane.add(legComboBox, new GridConstraints(1, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL,
@@ -433,7 +433,7 @@ public class IODPListsDialog extends JDialog {
 		siteLabel.setToolTipText("For example: 1218, U1313");
 		loggingDBPane.add(siteLabel, new GridConstraints(2, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED,
 				GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-		siteComboBox = new JComboBox();
+		siteComboBox = new JComboBox<String>();
 		siteComboBox.setEditable(true);
 		siteComboBox.setToolTipText("For example: 1218, U1313");
 		loggingDBPane.add(siteComboBox, new GridConstraints(2, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL,
@@ -1586,8 +1586,8 @@ public class IODPListsDialog extends JDialog {
 			// this.srvPrefixComboBox.getSelectedItem().toString() +
 			// "vocab/Tool.xsd";
 
-			final DefaultComboBoxModel legListModel = updateComboBoxModel(legSchemaURL, "leg");
-			final DefaultComboBoxModel siteListModel = updateComboBoxModel(siteSchemaURL, "site");
+			final DefaultComboBoxModel<String> legListModel = updateComboBoxModel(legSchemaURL, "leg");
+			final DefaultComboBoxModel<String> siteListModel = updateComboBoxModel(siteSchemaURL, "site");
 			// final DefaultComboBoxModel holeListModel =
 			// updateComboBoxModel(holeSchemaURL, "hole");
 			// final DefaultComboBoxModel toolListModel =
@@ -1628,7 +1628,7 @@ public class IODPListsDialog extends JDialog {
 	private void onRefreshSiteComboBox() {
 		// Query available site with given LEG(EXP) info
 		String inputLeg = legComboBox.getSelectedItem().toString();
-		final DefaultComboBoxModel siteListModel = updateSiteModelWithInputLeg(inputLeg);
+		final DefaultComboBoxModel<String> siteListModel = updateSiteModelWithInputLeg(inputLeg);
 
 		SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
@@ -1643,7 +1643,7 @@ public class IODPListsDialog extends JDialog {
 
 	private void onRefreshSiteField() {
 		// Query available site info using select image list service
-		final DefaultComboBoxModel siteFieldsModel = updateSiteFieldModelWithService();
+		final DefaultComboBoxModel<String> siteFieldsModel = updateSiteFieldModelWithService();
 
 		SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
@@ -1849,6 +1849,7 @@ public class IODPListsDialog extends JDialog {
 			}
 
 			String labelLine = br.readLine();
+			br.close();
 			String[] labels = labelLine.split("\t");
 			if (labels.length != 0) {
 				if (labels[0].trim().equalsIgnoreCase("depth")) {
@@ -1898,8 +1899,8 @@ public class IODPListsDialog extends JDialog {
 		});
 	}
 
-	private DefaultComboBoxModel updateComboBoxModel(final String schemaURL, final String labelName) throws Exception {
-		DefaultComboBoxModel model = new DefaultComboBoxModel();
+	private DefaultComboBoxModel<String> updateComboBoxModel(final String schemaURL, final String labelName) throws Exception {
+		DefaultComboBoxModel<String> model = new DefaultComboBoxModel<String>();
 
 		DOMParser parser = new DOMParser();
 
@@ -1946,8 +1947,8 @@ public class IODPListsDialog extends JDialog {
 		return model;
 	}
 
-	private DefaultComboBoxModel updateSiteFieldModelWithService() {
-		DefaultComboBoxModel model = new DefaultComboBoxModel();
+	private DefaultComboBoxModel<String> updateSiteFieldModelWithService() {
+		DefaultComboBoxModel<String> model = new DefaultComboBoxModel<String>();
 		final String query = chronosServiceComboBox.getSelectedItem() + "resteasy-lims-webservices/re?service=getSciDataFile&qaqc=false&analysis=LATLONG";
 
 		if (isServiceReachable(query)) { // except using chronos
@@ -1998,10 +1999,10 @@ public class IODPListsDialog extends JDialog {
 	/**
 	 * Example: http://brg.ldeo.columbia.edu/services/LogHole/?exp=304
 	 */
-	private DefaultComboBoxModel updateSiteModelWithInputLeg(final String inputLeg) {
+	private DefaultComboBoxModel<String> updateSiteModelWithInputLeg(final String inputLeg) {
 		final String queryURL = srvPrefixComboBox.getSelectedItem().toString() + "LogHole/?exp=" + inputLeg;
 
-		DefaultComboBoxModel model = new DefaultComboBoxModel();
+		DefaultComboBoxModel<String> model = new DefaultComboBoxModel<String>();
 
 		DOMParser parser = new DOMParser();
 		try {

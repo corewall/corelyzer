@@ -177,7 +177,7 @@ public class CRExperimentController {
 					return;
 				}
 
-				Iterator iter = cg.getSessions().iterator();
+				Iterator<Session> iter = cg.getSessions().iterator();
 
 				// noinspection WhileLoopReplaceableByForEach
 				while (iter.hasNext()) {
@@ -252,7 +252,7 @@ public class CRExperimentController {
 			return;
 		}
 
-		Iterator iter = cg.getSessions().iterator();
+		Iterator<Session> iter = cg.getSessions().iterator();
 
 		// noinspection WhileLoopReplaceableByForEach
 		while (iter.hasNext()) {

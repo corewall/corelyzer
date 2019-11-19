@@ -27,8 +27,6 @@ package corelyzer.data;
 import java.util.Collections;
 import java.util.Vector;
 
-import corelyzer.ui.AlphanumComparator;
-
 public class Session {
 	String name = "UnNamed Session";
 	String DISId = "N/A_N/A";

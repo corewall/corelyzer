@@ -58,6 +58,8 @@ import corelyzer.helper.URLRetrieval;
 import corelyzer.ui.CorelyzerApp;
 import corelyzer.util.FileUtility;
 
+@SuppressWarnings({"unused"}) // stifle two goofy dead code warnings, find on "suppressed"
+
 /**
  * Class used to load the working session state file in XML format.
  */
@@ -234,7 +236,7 @@ public class StateLoader {
 						options, options[1]);
 				return result;
 			} else {
-				URL u;
+				URL u = null;
 
 				try {
 					u = new URL(urn);
@@ -257,7 +259,7 @@ public class StateLoader {
 
 					// what if it's just a url with no filename?
 					local = app.preferences().download_Directory + sp + all[all.length - 1];
-				} else {
+				} else { // suppressed dead code warning - u can be null
 					String message = "Cannot find image, URL is empty";
 					String title = "Empty URL";
 
@@ -625,7 +627,7 @@ public class StateLoader {
 		SceneGraph.setSectionIntervalBottom(trackId, sectionId, intervalBottom);
 
 		// java side section information
-		if (destTrack == null) {
+		if (destTrack == null) { // suppressed dead code warning - destTrack could be null
 			System.err.println("--->[WARN] CurrentTrack TrackSceneNode is null, return IGNORE");
 			return IGNORE;
 		}

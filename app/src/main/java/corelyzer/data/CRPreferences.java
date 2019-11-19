@@ -556,7 +556,7 @@ public class CRPreferences {
 	private void saveDirectoryConfig() {
 		try {
 			// Store off the default tex block directory
-			File f = new File(this.config_Directory + "/" + this.directoryConfigFileName);
+			File f = new File(this.config_Directory + "/" + CRPreferences.directoryConfigFileName);
 			FileWriter fw = new FileWriter(f);
 			// String tbdir =
 			// corelyzer.helper.SceneGraph.getTexBlockDirectory();

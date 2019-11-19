@@ -12,8 +12,6 @@ import java.util.Vector;
 import javax.swing.*;
 import javax.swing.event.*;
 
-import java.util.*;
-
 import net.miginfocom.swing.MigLayout;
 
 import corelyzer.data.*;
@@ -27,8 +25,10 @@ import corelyzer.util.FileUtility;
 // names. Users can then reorder these images as they wish before loading occurs.
 
 public class CRLoadImageWizard extends JDialog {
+	public static final long serialVersionUID = 1L;
+
 	public static void main(final String[] args) {
-		File testFile = new File("/Users/bgrivna/Documents/Corelyzer/Core Repository/GLAD6/images/GLAD6-BOS04-3C-1H-1.BMP");
+		File testFile = new File("/Users/lcdev/Documents/Corelyzer/Core Repository/GLAD6/images/GLAD6-BOS04-3C-1H-1.BMP");
 		Vector<File> testFileVec = new Vector<File>();
 		testFileVec.add( testFile );
 		CRLoadImageWizard dialog = new CRLoadImageWizard(null, testFileVec);
@@ -392,7 +392,7 @@ public class CRLoadImageWizard extends JDialog {
 							progress.setString("Loading " + imageFile.getName() );
 							
 							final ImagePropertyTable.ImageProperties imageProps = sectionElt.getImageProperties();
-							boolean isVertical = imageProps.orientation.equals("Vertical");
+							// boolean isVertical = imageProps.orientation.equals("Vertical");
 							//System.out.println(imageFile.getName() + " depth pixels = " + 
 							//		SceneGraph.getImageDepthPix( imageFile.toString(), isVertical ));
 							
@@ -435,64 +435,64 @@ public class CRLoadImageWizard extends JDialog {
 		session.sortTracks();
 	}
 	
-	private void initializeSectionImageProperties()
-	{
-		for ( Vector<TrackSectionListElement> track : trackSectionModel.getTrackSectionVector() )
-		{
-			float curDepth = 0.0f;
-			for ( int secIndex = 1; secIndex < track.size(); secIndex++ )
-			{
-				TrackSectionListElement section = track.elementAt( secIndex );
-				if ( !section.isNew() ) {
-					curDepth = section.getImageProperties().depth + section.getImageProperties().length;
-				} else {
-					// new section, default length and depth
-					section.getImageProperties().depth = curDepth;
-					section.getImageProperties().length = 1.5f; // meters
+	// private void initializeSectionImageProperties()
+	// {
+	// 	for ( Vector<TrackSectionListElement> track : trackSectionModel.getTrackSectionVector() )
+	// 	{
+	// 		float curDepth = 0.0f;
+	// 		for ( int secIndex = 1; secIndex < track.size(); secIndex++ )
+	// 		{
+	// 			TrackSectionListElement section = track.elementAt( secIndex );
+	// 			if ( !section.isNew() ) {
+	// 				curDepth = section.getImageProperties().depth + section.getImageProperties().length;
+	// 			} else {
+	// 				// new section, default length and depth
+	// 				section.getImageProperties().depth = curDepth;
+	// 				section.getImageProperties().length = 1.5f; // meters
 					
-					section.getImageProperties().orientation = sectionListPane.getOrientation();
-					section.getImageProperties().dpix = sectionListPane.getDPIX();
-					section.getImageProperties().dpiy = sectionListPane.getDPIY();
+	// 				section.getImageProperties().orientation = sectionListPane.getOrientation();
+	// 				section.getImageProperties().dpix = sectionListPane.getDPIX();
+	// 				section.getImageProperties().dpiy = sectionListPane.getDPIY();
 
-					// attempt to determine section's actual length
-					File imageFile = section.getImageFile();
-					if ( imageFile != null ) {
-						final boolean isVertical = section.getImageProperties().orientation.equals("Vertical");
-						final float depthDPI = isVertical ? section.getImageProperties().dpiy :
-							section.getImageProperties().dpix;
-						final int lengthInPix = SceneGraph.getImageDepthPix( imageFile.toString(), isVertical );
-						section.getImageProperties().length = (( lengthInPix / depthDPI ) * 2.54f ) / 100.0f;
-					} else {
-						System.out.println("New section has null imageFile");
-					}
+	// 				// attempt to determine section's actual length
+	// 				File imageFile = section.getImageFile();
+	// 				if ( imageFile != null ) {
+	// 					final boolean isVertical = section.getImageProperties().orientation.equals("Vertical");
+	// 					final float depthDPI = isVertical ? section.getImageProperties().dpiy :
+	// 						section.getImageProperties().dpix;
+	// 					final int lengthInPix = SceneGraph.getImageDepthPix( imageFile.toString(), isVertical );
+	// 					section.getImageProperties().length = (( lengthInPix / depthDPI ) * 2.54f ) / 100.0f;
+	// 				} else {
+	// 					System.out.println("New section has null imageFile");
+	// 				}
 					
-					curDepth += section.getImageProperties().length;
+	// 				curDepth += section.getImageProperties().length;
 					
-					// if necessary, push subsequent pre-existing sections deeper to create space
-					// TODO: only push if there isn't sufficient space for the new core to be
-					// added without overlapping.
-					boolean firstSubSec = true;
-					float depthOffset = 0.0f;
-					for ( int subSecIndex = secIndex + 1; subSecIndex < track.size(); subSecIndex++ ) {
-						TrackSectionListElement subSection = track.elementAt( subSecIndex );
-						if ( !subSection.isNew() )
-						{
-							if ( firstSubSec )
-							{
-								depthOffset = curDepth - subSection.getImageProperties().depth;
-								subSection.getImageProperties().depth = curDepth;
-								firstSubSec = false;
-							}
-							else
-							{
-								subSection.getImageProperties().depth += depthOffset;
-							}
-						}
-					}
-				}
-			}
-		}
-	}
+	// 				// if necessary, push subsequent pre-existing sections deeper to create space
+	// 				// TODO: only push if there isn't sufficient space for the new core to be
+	// 				// added without overlapping.
+	// 				boolean firstSubSec = true;
+	// 				float depthOffset = 0.0f;
+	// 				for ( int subSecIndex = secIndex + 1; subSecIndex < track.size(); subSecIndex++ ) {
+	// 					TrackSectionListElement subSection = track.elementAt( subSecIndex );
+	// 					if ( !subSection.isNew() )
+	// 					{
+	// 						if ( firstSubSec )
+	// 						{
+	// 							depthOffset = curDepth - subSection.getImageProperties().depth;
+	// 							subSection.getImageProperties().depth = curDepth;
+	// 							firstSubSec = false;
+	// 						}
+	// 						else
+	// 						{
+	// 							subSection.getImageProperties().depth += depthOffset;
+	// 						}
+	// 					}
+	// 				}
+	// 			}
+	// 		}
+	// 	}
+	// }
 	
 	private ImagePropertyTable.ImageProperties getSectionProperties( final int trackId, final int sectionId )
 	{
@@ -511,11 +511,10 @@ public class CRLoadImageWizard extends JDialog {
 	}
 }
 
-
 class SectionListPane extends JPanel implements ListSelectionListener {
 	private JButton renameButton, deleteButton, moveUpButton, moveDownButton, moveToTrackButton, newButton;
 	private JScrollPane tslScrollPane;
-	private JComboBox orientationComboBox;
+	private JComboBox<String> orientationComboBox;
 	private JTextField dpiXField, dpiYField;
 	private JList trackSectionList;
 	private TrackSectionListModel trackSectionModel;

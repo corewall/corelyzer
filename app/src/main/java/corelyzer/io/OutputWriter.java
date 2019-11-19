@@ -54,8 +54,6 @@ import corelyzer.util.FileUtility;
 import corelyzer.util.PropertyListUtility;
 
 public class OutputWriter {
-
-	Vector datasetNames;
 	CorelyzerApp app;
 	String projectname;
 	String site;
@@ -615,26 +613,19 @@ public class OutputWriter {
 
 		Vector<Float> v = new Vector<Float>(indexDepthHash.keySet());
 		Collections.sort(v);
-		Iterator it = v.iterator();
-
-		String name, url;
-		File annotfile;
-		String annotation;
-		String annotationHeader;
-
+		Iterator<Float> it = v.iterator();
 		while (it.hasNext()) {
 			float depth = (Float) it.next();
 			int i = indexDepthHash.get(depth);
 
-			name = SceneGraph.getCoreSectionMarkerLocal(trackid, secid, i);
-			url = SceneGraph.getCoreSectionMarkerURL(trackid, secid, i);
+			String name = SceneGraph.getCoreSectionMarkerLocal(trackid, secid, i);
 
 			String label = SceneGraph.getCoreSectionMarkerText(trackid, secid, i);
 
 			// for now, just use local copy of annotation html
-			annotfile = new File(name);
-			annotation = "";
-			annotationHeader = "";
+			File annotfile = new File(name);
+			String annotation = "";
+			String annotationHeader = "";
 
 			if (annotfile.exists()) {
 				// read annotation html file to string

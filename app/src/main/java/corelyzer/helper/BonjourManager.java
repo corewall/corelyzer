@@ -24,7 +24,7 @@ import com.apple.dnssd.TXTRecord;
 
 import corelyzer.ui.CorelyzerApp;
 
-public class BonjourManager extends DefaultListModel implements ResolveListener, BrowseListener, RegisterListener, Runnable {
+public class BonjourManager extends DefaultListModel<Object> implements ResolveListener, BrowseListener, RegisterListener, Runnable {
 	/**
 	 * 
 	 */
@@ -51,15 +51,16 @@ public class BonjourManager extends DefaultListModel implements ResolveListener,
 
 	int servicePort = 17799;
 
-	private final Vector addCache, removeCache;
+	private final Vector<BrowserListElem> addCache;
+	private final Vector<String> removeCache;
 
 	JMenu rootMenu;
 
 	BonjourManager bonjourManager;
 
 	public BonjourManager() {
-		addCache = new Vector();
-		removeCache = new Vector();
+		addCache = new Vector<BrowserListElem>();
+		removeCache = new Vector<String>();
 
 		initBonjour();
 

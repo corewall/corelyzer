@@ -22,10 +22,12 @@
  * cavern@evl.uic.edu
  *
  *****************************************************************************/
-/* Deprecated: this class is replaced by CRAnnotationWindow.java
- *              Except, session client plugin is still referencing to this.
- * */
 
+
+ // DEPRECATED: this class is replaced by CRAnnotationWindow.java
+ // Except session client plugin still refers to it.
+ // 11/18/2019 brg: Does session client plugin still exist? Can't find source in repo.
+ 
 package corelyzer.ui.annotation.freeform;
 
 import java.awt.BorderLayout;
@@ -291,7 +293,7 @@ public class AnnotationWindow extends AbstractAnnotationDialog implements Action
 	JButton browserBtn;
 	JButton deleteBtn;
 
-	JComboBox groups;
+	JComboBox<String> groups;
 	// int trackId, sectionId, markerId;
 	String datasetName, sectionName;
 	/** Annotation's X position */
@@ -342,7 +344,7 @@ public class AnnotationWindow extends AbstractAnnotationDialog implements Action
 	/** Performs user interface actions for closing, submitting, etc. */
 	public void actionPerformed(final ActionEvent e) {
 		if (e.getSource() instanceof JComboBox) {
-			JComboBox cb = (JComboBox) e.getSource();
+			JComboBox<String> cb = (JComboBox<String>) e.getSource();
 
 			// String groupName = (String) cb.getSelectedItem();
 			group = cb.getSelectedIndex();
@@ -983,7 +985,7 @@ public class AnnotationWindow extends AbstractAnnotationDialog implements Action
 				groupTypes.add(ChatGroup.getGroupName(i));
 			}
 
-			groups = new JComboBox(groupTypes);
+			groups = new JComboBox<String>(groupTypes);
 			groups.addActionListener(this);
 			p.add(groups);
 		}

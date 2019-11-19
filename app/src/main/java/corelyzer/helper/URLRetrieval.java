@@ -31,7 +31,6 @@ import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -136,13 +135,10 @@ public class URLRetrieval extends Thread {
 		int iread = 0;
 
 		// OPEN STREAMS
-
 		try {
-
 			remote = new URL(url);
 			uc = remote.openConnection();
 			fos = new FileOutputStream(local_copy);
-			new DataOutputStream(fos);
 			dis = new DataInputStream(uc.getInputStream());
 
 			int len = uc.getContentLength();

@@ -83,7 +83,7 @@ public class FreeformAnnotationTableModel extends AbstractTableModel {
 	}
 
 	@Override
-	public Class getColumnClass(final int col) {
+	public Class<?> getColumnClass(final int col) {
 		return getValueAt(0, col).getClass();
 	}
 

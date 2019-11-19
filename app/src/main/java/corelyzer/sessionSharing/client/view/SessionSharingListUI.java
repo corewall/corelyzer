@@ -268,7 +268,7 @@ public class SessionSharingListUI extends JDialog {
 			private static final long serialVersionUID = 1L;
 
 			@Override
-			public Class getColumnClass(final int column) {
+			public Class<?> getColumnClass(final int column) {
 				return getValueAt(0, column).getClass();
 			}
 		};

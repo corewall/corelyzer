@@ -50,7 +50,7 @@ public class CRNavigationSetupDialog extends JDialog {
 	private JPanel contentPane;
 	private JButton buttonOK;
 	private JButton buttonCancel;
-	private JComboBox waypointTypeComboBox;
+	private JComboBox<String> waypointTypeComboBox;
 	private JTextField pauseTextField;
 	private JCheckBox autoScaleCheckBox;
 
@@ -151,8 +151,8 @@ public class CRNavigationSetupDialog extends JDialog {
 		final Spacer spacer2 = new Spacer();
 		panel3.add(spacer2, new GridConstraints(4, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1,
 				GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
-		waypointTypeComboBox = new JComboBox();
-		final DefaultComboBoxModel defaultComboBoxModel1 = new DefaultComboBoxModel();
+		waypointTypeComboBox = new JComboBox<String>();
+		final DefaultComboBoxModel<String> defaultComboBoxModel1 = new DefaultComboBoxModel<String>();
 		defaultComboBoxModel1.addElement("Lithology (freeform)");
 		defaultComboBoxModel1.addElement("Educational (freeform)");
 		defaultComboBoxModel1.addElement("Operational (freeform)");
@@ -189,7 +189,7 @@ public class CRNavigationSetupDialog extends JDialog {
 		for (int i = 0; i < ChatGroup.getNumberOfGroups(); i++) {
 			types.add(ChatGroup.getGroupName(i));
 		}
-		ComboBoxModel model = new DefaultComboBoxModel(types);
+		ComboBoxModel<String> model = new DefaultComboBoxModel<String>(types);
 		this.waypointTypeComboBox.setModel(model);
 	}
 

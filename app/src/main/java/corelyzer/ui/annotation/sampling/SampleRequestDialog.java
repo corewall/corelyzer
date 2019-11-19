@@ -374,7 +374,7 @@ public class SampleRequestDialog extends AbstractAnnotationDialog {
 		return anno_dir + sp + filename;
 	}
 
-	public Hashtable getAttributes() {
+	public Hashtable<String, String> getAttributes() {
 		return attribs;
 	}
 

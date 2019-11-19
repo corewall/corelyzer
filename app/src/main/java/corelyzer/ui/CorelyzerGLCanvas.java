@@ -1317,10 +1317,10 @@ public class CorelyzerGLCanvas implements GLEventListener, MouseListener, MouseW
 						// moving graph instead of whole section
 						SceneGraph.moveSectionGraph(selectedTrack, selectedTrackSection, tX, tY);
 					} else {
-						Object[] sections = CorelyzerApp.getApp().getSectionList().getSelectedValues();
-						int[] secids = new int[sections.length];
-						for (int i = 0; i < sections.length; i++) {
-							CoreSection cs = (CoreSection)sections[i];
+						List<CoreSection> sections = CorelyzerApp.getApp().getSectionList().getSelectedValuesList();
+						int[] secids = new int[sections.size()];
+						for (int i = 0; i < sections.size(); i++) {
+							CoreSection cs = (CoreSection)sections.get(i);
 							secids[i] = (cs != null ? cs.getId() : -1);
 						}
 						SceneGraph.moveSections(selectedTrack, secids, tX, tY);
@@ -1696,7 +1696,7 @@ public class CorelyzerGLCanvas implements GLEventListener, MouseListener, MouseW
 
 			// update ui
 			CorelyzerApp.getApp().getTrackList().setSelectedIndex(selectedTrackIndex);
-			JList secList = CorelyzerApp.getApp().getSectionList();
+			JList<CoreSection> secList = CorelyzerApp.getApp().getSectionList();
 			boolean selected = secList.isSelectedIndex(selectedTrackSectionIndex);
 			List<Integer> indices = new ArrayList<Integer>();
 			indices.addAll(Arrays.asList(ArrayUtils.toObject(secList.getSelectedIndices())));

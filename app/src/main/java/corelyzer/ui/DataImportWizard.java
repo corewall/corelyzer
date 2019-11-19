@@ -31,8 +31,6 @@ import java.awt.Frame;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
 import java.io.BufferedReader;
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -56,7 +54,6 @@ import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
-import javax.swing.ListSelectionModel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.DocumentEvent;
@@ -375,6 +372,7 @@ public class DataImportWizard extends JDialog implements ActionListener, ChangeL
 
 				lineCount++;
 			} // end input file line-reading while loop
+			reader.close();
 
 			System.out.println("---> " + lineCount + " lines scanned.");
 			progress.setIndeterminate(true);
@@ -771,6 +769,7 @@ public class DataImportWizard extends JDialog implements ActionListener, ChangeL
 
 				count++;
 			} // end of while loop
+			reader.close();
 
 			System.out.println("---> " + count + " lines scaned.");
 			progress.setIndeterminate(true);
@@ -853,7 +852,8 @@ public class DataImportWizard extends JDialog implements ActionListener, ChangeL
 	JTextField label_number, unit_number;
 
 	JTextField name_prefix, name_column, depth_column;
-	JComboBox fsComboBox, depthModeComboBox;
+	JComboBox<FieldSeparator> fsComboBox;
+	JComboBox<DepthMode> depthModeComboBox;
 
 	CheckBoxList columnList;
 
@@ -943,6 +943,7 @@ public class DataImportWizard extends JDialog implements ActionListener, ChangeL
 				curNum++;
 			}
 			line = curLine;
+			br.close();
 		} catch (IOException e) {
 			
 		}
@@ -976,7 +977,7 @@ public class DataImportWizard extends JDialog implements ActionListener, ChangeL
 		JButton fileBtn = new JButton("Select...");
 		fileBtn.addActionListener(this);
 
-		this.fsComboBox = new JComboBox();
+		this.fsComboBox = new JComboBox<FieldSeparator>();
 		fsComboBox.setEditable(false);
 		for (FieldSeparator fs : FieldSeparator.values()) {
 			fsComboBox.addItem(fs);
@@ -1012,7 +1013,7 @@ public class DataImportWizard extends JDialog implements ActionListener, ChangeL
 
 		// depth, section name column, prefix
 		depth_column = new JTextField("2");
-		depthModeComboBox = new JComboBox();
+		depthModeComboBox = new JComboBox<DepthMode>();
 		for (DepthMode dm : DepthMode.values()) {
 			depthModeComboBox.addItem(dm);
 		}
@@ -1333,6 +1334,7 @@ public class DataImportWizard extends JDialog implements ActionListener, ChangeL
 				}
 				count++;
 			}
+			reader.close();
 
 		} catch (Exception e) {
 			System.err.println("Error! Cannot access input file");

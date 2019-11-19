@@ -52,11 +52,8 @@ import javax.swing.SwingUtilities;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
-import org.apache.xerces.parsers.DOMParser;
-
 import corelyzer.data.CRPreferences;
 import corelyzer.data.CoreSection;
-import corelyzer.data.CoreSectionImage;
 import corelyzer.data.CorelyzerXMLDataHandler;
 import corelyzer.data.SAXWellLogDataSet;
 import corelyzer.data.Session;
@@ -822,13 +819,14 @@ public class CorelyzerAppController implements ActionListener {
 		return view.preferences().download_Directory;
 	}
 
-	private int getSelectedSection() {
-		CRDefaultListModel sectionsListModel = listModels.getListModel(CRListModels.SECTION);
+	// 11/18/2019 brg unused
+	// private int getSelectedSection() {
+	// 	CRDefaultListModel sectionsListModel = listModels.getListModel(CRListModels.SECTION);
 
-		int idx = view.getSectionList().getSelectedIndex();
-		CoreSectionImage cs = (CoreSectionImage) sectionsListModel.elementAt(idx);
-		return cs.getId();
-	}
+	// 	int idx = view.getSectionList().getSelectedIndex();
+	// 	CoreSectionImage cs = (CoreSectionImage) sectionsListModel.elementAt(idx);
+	// 	return cs.getId();
+	// }
 
 	public int getSelectedTrack() { // return native track id
 		CRDefaultListModel trackListModel = listModels.getListModel(CRListModels.TRACK);
@@ -1063,7 +1061,6 @@ public class CorelyzerAppController implements ActionListener {
 
 		// Only check XML now
 		try {
-			//DOMParser parser = new DOMParser();
 			SAXParser parser = SAXParserFactory.newInstance().newSAXParser();
 			CorelyzerXMLDataHandler handler = new CorelyzerXMLDataHandler();
 			//parser.setFeature("http://apache.org/xml/features/dom/" + "include-ignorable-whitespace", false);
@@ -1828,12 +1825,11 @@ public class CorelyzerAppController implements ActionListener {
 		TrackSceneNode t = (TrackSceneNode) trackListModel.getElementAt(selectedTrackIdx);
 		CoreSection cs = (CoreSection) sectionsListModel.getElementAt(selectedSectionIdx);
 
-		int imageId = SceneGraph.getImageIdForSection(t.getId(), cs.getId());
-
-		int csImgId = -1;
-		if (cs.hasImage()) {
-			csImgId = cs.getCoreSectionImage().getId();
-		}
+		// int imageId = SceneGraph.getImageIdForSection(t.getId(), cs.getId());
+		// int csImgId = -1;
+		// if (cs.hasImage()) {
+		// 	csImgId = cs.getCoreSectionImage().getId();
+		// }
 
 		// Duplicate select section and sample texture model in native
 		// scenegraph
@@ -1957,7 +1953,7 @@ public class CorelyzerAppController implements ActionListener {
 			return;
 		}
 
-		int t = view.getTrackList().getSelectedIndex();
+		// int t = view.getTrackList().getSelectedIndex();
 		int d = view.getDataFileList().getSelectedIndex();
 
 		// GraphDialog graphDialog = new GraphDialog("Graph Dialog");

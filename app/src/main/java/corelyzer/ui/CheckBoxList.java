@@ -5,14 +5,12 @@ package corelyzer.ui;
  */
 
 import java.awt.Component;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+
 import java.util.Vector;
 
 import javax.swing.JCheckBox;
 import javax.swing.JList;
 import javax.swing.ListCellRenderer;
-import javax.swing.ListSelectionModel;
 import javax.swing.UIManager;
 import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
@@ -24,10 +22,9 @@ import javax.swing.event.ListSelectionListener;
  * A class that extends the JList class so that a listing of selectable items
  * with checkboxes next to them to help indicate that they have been selected.
  */
-public class CheckBoxList extends JList implements ListSelectionListener {
-	protected class CellRenderer implements ListCellRenderer {
-
-		public Component getListCellRendererComponent(final JList list, final Object value, final int index, final boolean isSelected,
+public class CheckBoxList extends JList<JCheckBox> implements ListSelectionListener {
+	protected class CellRenderer implements ListCellRenderer<JCheckBox> {
+		public Component getListCellRendererComponent(final JList<? extends JCheckBox> list, final JCheckBox value, final int index, final boolean isSelected,
 				final boolean cellHasFocus) {
 			JCheckBox checkbox = (JCheckBox) value;
 			checkbox.setBackground(isSelected ? getSelectionBackground() : getBackground());

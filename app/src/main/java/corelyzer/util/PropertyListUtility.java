@@ -140,7 +140,7 @@ public class PropertyListUtility {
 
 		Hashtable<String, String> aHash = PropertyListUtility.generateHashtableFromFile(aFile);
 
-		for (Map.Entry s : aHash.entrySet()) {
+		for (Map.Entry<String, String> s : aHash.entrySet()) {
 			String prop = (String) s.getKey();
 			String value = (String) s.getValue();
 
@@ -159,7 +159,7 @@ public class PropertyListUtility {
 				+ "\t\t<font color=\"#FFCC00\">\n" + "\t\tProperty\n" + "                </font>\n" + "\t      </td>\n" + "\t      <td bgcolor=\"#222222\">\n"
 				+ "\t\t<font color=\"#FFCC00\">\n" + "\t\tValue\n" + "                </font>\n" + "\t      </td>" + "\t    </tr>\n";
 
-		for (Map.Entry s : aHash.entrySet()) {
+		for (Map.Entry<String, String> s : aHash.entrySet()) {
 			String prop = (String) s.getKey();
 			String value = (String) s.getValue();
 

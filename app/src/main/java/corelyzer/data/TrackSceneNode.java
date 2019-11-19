@@ -59,9 +59,9 @@ public class TrackSceneNode implements Comparable<TrackSceneNode> {
 	CoreSectionImage[] selectedSection;
 
 	/** hashtable for section name (key) and coresection (value) */
-	Hashtable secnameHash;
+	Hashtable<String, CoreSection> secnameHash;
 	/** hashtable for section id (key) and coresection (value) */
-	Hashtable secidHash;
+	Hashtable<Integer, CoreSection> secidHash;
 
 	/**
 	 * Constructor
@@ -75,8 +75,8 @@ public class TrackSceneNode implements Comparable<TrackSceneNode> {
 		this.secVec = new Vector<CoreSection>();
 		this.zOrder = new Vector<Integer>();
 		trackId = id;
-		secnameHash = new Hashtable();
-		secidHash = new Hashtable();
+		secnameHash = new Hashtable<String, CoreSection>();
+		secidHash = new Hashtable<Integer, CoreSection>();
 	}
 
 	/**
@@ -289,10 +289,9 @@ public class TrackSceneNode implements Comparable<TrackSceneNode> {
 	}
 
 	public void removeAllCoreSection() {
-
 		// remove graph in the section first
 		CoreSection sec = null;
-		Enumeration en = this.secVec.elements();
+		Enumeration<CoreSection> en = this.secVec.elements();
 		while (en.hasMoreElements()) {
 			sec = (CoreSection) en.nextElement();
 			sec.removeAllGraph();
@@ -306,7 +305,6 @@ public class TrackSceneNode implements Comparable<TrackSceneNode> {
 	}
 
 	public void removeCoreSection(final CoreSection sec) {
-
 		if (sec == null) {
 			return;
 		}

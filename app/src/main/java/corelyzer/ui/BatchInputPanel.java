@@ -11,17 +11,19 @@ import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
 
-import net.miginfocom.swing.MigLayout;
+// import net.miginfocom.swing.MigLayout;
 
 import corelyzer.data.ImagePropertyTable;
 
 public class BatchInputPanel extends JPanel {
 	
+	public static final long serialVersionUID = 1L;
+
 	private ImagePropertyTable imageTable; // table to which batch settings will be applied
 	
 	public JCheckBox useBatchInputCheckbox;
 	public JLabel orientationLabel;
-	public JComboBox orientationComboBox;
+	public JComboBox<String> orientationComboBox;
 	public JLabel lengthLabel;
 	public JTextField lengthField;
 	public JLabel dpiXLabel;
@@ -139,9 +141,9 @@ public class BatchInputPanel extends JPanel {
 //		final Spacer spacer4 = new Spacer();
 //		applyPanel.add(spacer4, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL,
 //				GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
-		orientationComboBox = new JComboBox();
+		orientationComboBox = new JComboBox<String>();
 		orientationComboBox.setEnabled(false);
-		final DefaultComboBoxModel defaultComboBoxModel1 = new DefaultComboBoxModel();
+		final DefaultComboBoxModel<String> defaultComboBoxModel1 = new DefaultComboBoxModel<String>();
 		defaultComboBoxModel1.addElement("Horizontal");
 		defaultComboBoxModel1.addElement("Vertical");
 		defaultComboBoxModel1.addElement("[Blank]");

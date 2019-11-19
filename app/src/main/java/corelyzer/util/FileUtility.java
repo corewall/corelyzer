@@ -46,7 +46,6 @@ import java.util.zip.ZipInputStream;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.LookAndFeel;
-import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
@@ -58,7 +57,6 @@ import corelyzer.data.CoreSectionImage;
 import corelyzer.data.ImagePropertyTable;
 import corelyzer.data.TrackSceneNode;
 import corelyzer.data.coregraph.CoreGraph;
-import corelyzer.data.lists.CRDefaultListModel;
 import corelyzer.graphics.SceneGraph;
 import corelyzer.helper.ExampleFileFilter;
 import corelyzer.helper.FilenameExtensionFilter;
@@ -81,17 +79,21 @@ public class FileUtility {
 	static public boolean copyFile(final String src, final String dst) {
 		try {
 			// Create channel on the source
-			FileChannel srcChannel = new FileInputStream(src).getChannel();
+			FileInputStream fis = new FileInputStream(src);
+			FileChannel srcChannel = fis.getChannel();
 
 			// Create channel on the destination
-			FileChannel dstChannel = new FileOutputStream(dst).getChannel();
+			FileOutputStream fos = new FileOutputStream(dst);
+			FileChannel dstChannel = fos.getChannel();
 
 			// Copy file contents from source to destination
 			dstChannel.transferFrom(srcChannel, 0, srcChannel.size());
 
 			// Close the channels
 			srcChannel.close();
+			fis.close();
 			dstChannel.close();
+			fos.close();
 
 			return true;
 		} catch (IOException e) {
@@ -175,6 +177,7 @@ public class FileUtility {
 		int x = fis.available();
 		byte b[] = new byte[x];
 		fis.read(b);
+		fis.close();
 		return new String(b);
 	}
 
@@ -502,7 +505,7 @@ public class FileUtility {
 		imageFileFilter.addExtension("tif");
 		imageFileFilter.addExtension("tiff");
 		imageFileFilter.addExtension("bmp");
-		imageFileFilter.addExtension("jp2"); // jpeg2000
+		//imageFileFilter.addExtension("jp2"); // jpeg2000
 
 		// 2/2/2012 brg: Sorting filenames properly, i.e. [file1, file2, file3, file20], not [file1, file2, file20, file3],
 		// is tricky. Ended up with a mixed solution: using a funky JFileChooser subclass trick on Windows to override the

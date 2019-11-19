@@ -15,6 +15,8 @@ import net.miginfocom.swing.MigLayout;
 
 public class TrimDialog extends JDialog
 {
+	public static final long serialVersionUID = 1L;
+	
 	public static void main(final String[] args) {
 		try {
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
@@ -30,11 +32,11 @@ public class TrimDialog extends JDialog
 	}
 	
 	private JPanel contentPane;
-	private JComboBox trimTypeBox;
+	private JComboBox<String> trimTypeBox;
 	private JTextField trimField;
 	private JLabel fromToLabel;
-	private JComboBox beginEndBox;
-	private JComboBox affectedSectionsBox;
+	private JComboBox<String> beginEndBox;
+	private JComboBox<String> affectedSectionsBox;
 	private JButton applyButton, closeButton;
 	private int selectedTrack = -1, selectedTrackSection = -1;
 	
@@ -59,8 +61,8 @@ public class TrimDialog extends JDialog
 	{
 		contentPane = new JPanel(new MigLayout());
 		
-		trimTypeBox = new JComboBox();
-		final DefaultComboBoxModel trimTypeModel = new DefaultComboBoxModel();
+		trimTypeBox = new JComboBox<String>();
+		final DefaultComboBoxModel<String> trimTypeModel = new DefaultComboBoxModel<String>();
 		trimTypeModel.addElement("Trim");
 		trimTypeModel.addElement("Add");
 		trimTypeBox.setModel(trimTypeModel);
@@ -72,8 +74,8 @@ public class TrimDialog extends JDialog
 
 		fromToLabel = new JLabel("cm from");
 		
-		beginEndBox = new JComboBox();
-		final DefaultComboBoxModel beginEndModel = new DefaultComboBoxModel();
+		beginEndBox = new JComboBox<String>();
+		final DefaultComboBoxModel<String> beginEndModel = new DefaultComboBoxModel<String>();
 		beginEndModel.addElement("bottom of");
 		beginEndModel.addElement("top of");
 		beginEndBox.setModel(beginEndModel);
@@ -81,8 +83,8 @@ public class TrimDialog extends JDialog
 			public void actionPerformed(ActionEvent e) { updateTrimField();	}
 		});
 		
-		affectedSectionsBox = new JComboBox();
-		final DefaultComboBoxModel affectedSectionsModel = new DefaultComboBoxModel();
+		affectedSectionsBox = new JComboBox<String>();
+		final DefaultComboBoxModel<String> affectedSectionsModel = new DefaultComboBoxModel<String>();
 		affectedSectionsModel.addElement("selected and deeper sections");
 		affectedSectionsModel.addElement("selected section only");
 		affectedSectionsBox.setModel(affectedSectionsModel);

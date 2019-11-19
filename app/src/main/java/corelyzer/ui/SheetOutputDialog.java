@@ -26,6 +26,8 @@ import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
 
 import corelyzer.controller.SheetOutputController;
+import corelyzer.data.CoreSection;
+import corelyzer.data.TrackSceneNode;
 
 public class SheetOutputDialog extends JDialog {
 	/**
@@ -44,13 +46,13 @@ public class SheetOutputDialog extends JDialog {
 	private JPanel contentPane;
 	private JButton buttonOK;
 	private JButton buttonCancel;
-	private JComboBox trackComboBox;
+	private JComboBox<TrackSceneNode> trackComboBox;
 	private JTextField projectNameField;
 	private JTextField siteNameField;
 	private JTextField holeNameField;
-	private JComboBox sectionComboBox;
+	private JComboBox<CoreSection> sectionComboBox;
 	private JCheckBox isAllSectionsCheckBox;
-	private JComboBox dateFormatComboBox;
+	private JComboBox<String> dateFormatComboBox;
 	private JTextField exampleDateField;
 
 	private JCheckBox isAllTracksCheckBox;
@@ -213,7 +215,7 @@ public class SheetOutputDialog extends JDialog {
 		panel4.setLayout(new GridLayoutManager(2, 1, new Insets(0, 0, 0, 0), -1, -1));
 		panel3.add(panel4, new GridConstraints(1, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK
 				| GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
-		sectionComboBox = new JComboBox();
+		sectionComboBox = new JComboBox<CoreSection>();
 		sectionComboBox.setToolTipText("List of core sections");
 		panel4.add(sectionComboBox, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL,
 				GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
@@ -244,8 +246,8 @@ public class SheetOutputDialog extends JDialog {
 		panel7.setLayout(new GridLayoutManager(1, 1, new Insets(0, 0, 0, 0), -1, -1));
 		panel5.add(panel7, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK
 				| GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
-		dateFormatComboBox = new JComboBox();
-		final DefaultComboBoxModel defaultComboBoxModel1 = new DefaultComboBoxModel();
+		dateFormatComboBox = new JComboBox<String>();
+		final DefaultComboBoxModel<String> defaultComboBoxModel1 = new DefaultComboBoxModel<String>();
 		defaultComboBoxModel1.addElement("Use Original");
 		defaultComboBoxModel1.addElement("MM/dd/yyyy");
 		defaultComboBoxModel1.addElement("yyyy.MM.dd");
@@ -257,8 +259,8 @@ public class SheetOutputDialog extends JDialog {
 		panel8.setLayout(new GridLayoutManager(2, 1, new Insets(0, 0, 0, 0), -1, -1));
 		panel3.add(panel8, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK
 				| GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
-		trackComboBox = new JComboBox();
-		final DefaultComboBoxModel defaultComboBoxModel2 = new DefaultComboBoxModel();
+		trackComboBox = new JComboBox<TrackSceneNode>();
+		final DefaultComboBoxModel<TrackSceneNode> defaultComboBoxModel2 = new DefaultComboBoxModel<TrackSceneNode>();
 		trackComboBox.setModel(defaultComboBoxModel2);
 		trackComboBox.setToolTipText("List of tracks");
 		panel8.add(trackComboBox, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL,
@@ -281,7 +283,7 @@ public class SheetOutputDialog extends JDialog {
 		return controller;
 	}
 
-	public JComboBox getDateFormatComboBox() {
+	public JComboBox<String> getDateFormatComboBox() {
 		return dateFormatComboBox;
 	}
 
@@ -297,7 +299,7 @@ public class SheetOutputDialog extends JDialog {
 		return projectNameField;
 	}
 
-	public JComboBox getSectionComboBox() {
+	public JComboBox<CoreSection> getSectionComboBox() {
 		return sectionComboBox;
 	}
 
@@ -305,7 +307,7 @@ public class SheetOutputDialog extends JDialog {
 		return siteNameField;
 	}
 
-	public JComboBox getTrackComboBox() {
+	public JComboBox<TrackSceneNode> getTrackComboBox() {
 		return trackComboBox;
 	}
 

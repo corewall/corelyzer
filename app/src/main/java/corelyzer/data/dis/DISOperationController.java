@@ -24,26 +24,18 @@
  *****************************************************************************/
 package corelyzer.data.dis;
 
-import java.awt.Color;
 import java.awt.Window;
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Random;
-import java.util.Vector;
 
 import javax.swing.JOptionPane;
 import javax.swing.table.TableModel;
 
-import corelyzer.data.CoreSection;
-import corelyzer.data.CoreSectionGraph;
 import corelyzer.data.Session;
 import corelyzer.data.TrackSceneNode;
-import corelyzer.data.UnitLength;
 import corelyzer.data.WellLogDataSet;
-import corelyzer.data.WellLogTable;
 import corelyzer.data.coregraph.CoreGraph;
-import corelyzer.graphics.SceneGraph;
 import corelyzer.io.CRDISDepthValueDataLoader;
 import corelyzer.remoteControl.server.controller.ControlServerApplication;
 import corelyzer.remoteControl.server.controller.actions.LoadDISSectionAction;

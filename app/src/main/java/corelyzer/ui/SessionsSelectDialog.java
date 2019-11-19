@@ -13,7 +13,6 @@ import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
-import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.KeyStroke;
@@ -24,10 +23,12 @@ import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
 
-class CheckBoxListModel implements ListModel {
+import corelyzer.data.lists.CRDefaultListModel;
+
+class CheckBoxListModel implements ListModel<JCheckBox> {
 	Vector<JCheckBox> sessions;
 
-	public CheckBoxListModel(final ListModel m) {
+	public CheckBoxListModel(final CRDefaultListModel m) {
 		if (m == null) {
 			return;
 		}
@@ -44,7 +45,7 @@ class CheckBoxListModel implements ListModel {
 		// do nothing
 	}
 
-	public Object getElementAt(final int i) {
+	public JCheckBox getElementAt(final int i) {
 		if (sessions == null) {
 			return null;
 		} else {
@@ -82,8 +83,7 @@ public class SessionsSelectDialog extends JDialog {
 	private JButton buttonOK;
 	private JButton buttonCancel;
 	private JScrollPane checkListScrollPane;
-
-	private JList sessList;
+	private CheckBoxList sessList;
 
 	private boolean isCancelled = false;
 

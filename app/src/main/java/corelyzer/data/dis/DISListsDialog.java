@@ -64,11 +64,11 @@ public class DISListsDialog extends JDialog {
 	private JButton disRootChangeButton;
 	private JTabbedPane tabbedPane;
 	private JTable imageSectionTable;
-	private JComboBox disExportFileComboBox;
-	private JComboBox downholeLogDirComboBox;
-	private JComboBox msclDirComboBox;
-	private JList msclList;
-	private JList downholeLogList;
+	private JComboBox<String> disExportFileComboBox;
+	private JComboBox<String> downholeLogDirComboBox;
+	private JComboBox<String> msclDirComboBox;
+	private JList<String> msclList;
+	private JList<String> downholeLogList;
 
 	final static String DIS_EXPORT_SUFFIX = "_dis.xml";
 	final static String MSCL_SUFFIX = "_MSCL.xml";
@@ -213,7 +213,7 @@ public class DISListsDialog extends JDialog {
 				| GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0,
 				false));
 		scrollPane1.setViewportView(imageSectionTable);
-		disExportFileComboBox = new JComboBox();
+		disExportFileComboBox = new JComboBox<String>();
 		panel4.add(disExportFileComboBox, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL,
 				GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
 		final JPanel panel5 = new JPanel();
@@ -227,14 +227,14 @@ public class DISListsDialog extends JDialog {
 		panel5.add(scrollPane2, new GridConstraints(1, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK
 				| GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0,
 				false));
-		downholeLogList = new JList();
+		downholeLogList = new JList<String>();
 		downholeLogList.setSelectionMode(0);
 		scrollPane2.setViewportView(downholeLogList);
 		final JLabel label4 = new JLabel();
 		label4.setText("Log files: ");
 		panel5.add(label4, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED,
 				GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-		downholeLogDirComboBox = new JComboBox();
+		downholeLogDirComboBox = new JComboBox<String>();
 		panel5.add(downholeLogDirComboBox, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL,
 				GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
 		final JPanel panel6 = new JPanel();
@@ -248,14 +248,14 @@ public class DISListsDialog extends JDialog {
 		panel6.add(scrollPane3, new GridConstraints(1, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK
 				| GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0,
 				false));
-		msclList = new JList();
+		msclList = new JList<String>();
 		msclList.setSelectionMode(0);
 		scrollPane3.setViewportView(msclList);
 		final JLabel label6 = new JLabel();
 		label6.setText("Log files: ");
 		panel6.add(label6, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED,
 				GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-		msclDirComboBox = new JComboBox();
+		msclDirComboBox = new JComboBox<String>();
 		panel6.add(msclDirComboBox, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL,
 				GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
 		final JPanel panel7 = new JPanel();
@@ -634,7 +634,7 @@ public class DISListsDialog extends JDialog {
 	}
 
 	private void updateDISExportTab(final String disRootString) {
-		DefaultComboBoxModel model = new DefaultComboBoxModel();
+		DefaultComboBoxModel<String> model = new DefaultComboBoxModel<String>();
 
 		String sp = System.getProperty("file.separator");
 		String exportDirString = disRootString + sp + DISListsDialog.DIS_EXPORT_DIRNAME;
@@ -656,7 +656,7 @@ public class DISListsDialog extends JDialog {
 	}
 
 	private void updateDownholeLogTab(final String disRootString) {
-		DefaultComboBoxModel model = new DefaultComboBoxModel();
+		DefaultComboBoxModel<String> model = new DefaultComboBoxModel<String>();
 
 		String sp = System.getProperty("file.separator");
 		String downholeLogPath = disRootString + sp + DOWNHOLELOG_DIRNAME;
@@ -670,13 +670,13 @@ public class DISListsDialog extends JDialog {
 		if (!downholeLogDir.exists()) {
 			JOptionPane.showMessageDialog(this, "'" + downholeLogDir + "' doesn't exist.");
 
-			DefaultListModel listModel = new DefaultListModel();
+			DefaultListModel<String> listModel = new DefaultListModel<String>();
 			downholeLogList.setModel(listModel);
 
 			return;
 		}
 
-		DefaultListModel listModel = new DefaultListModel();
+		DefaultListModel<String> listModel = new DefaultListModel<String>();
 
 		for (File f : downholeLogDir.listFiles()) {
 			if (f.exists() && f.isFile()) {
@@ -689,7 +689,7 @@ public class DISListsDialog extends JDialog {
 	}
 
 	private void updateMSCLTab(final String disRootString) {
-		DefaultComboBoxModel model = new DefaultComboBoxModel();
+		DefaultComboBoxModel<String> model = new DefaultComboBoxModel<String>();
 
 		String sp = System.getProperty("file.separator");
 		String msclLogPath = disRootString + sp + MSCL_DIRNAME;
@@ -703,13 +703,13 @@ public class DISListsDialog extends JDialog {
 		if (!msclDir.exists()) {
 			JOptionPane.showMessageDialog(this, "'" + msclDir + "' doesn't exist.");
 
-			DefaultListModel listModel = new DefaultListModel();
+			DefaultListModel<String> listModel = new DefaultListModel<String>();
 			msclList.setModel(listModel);
 
 			return;
 		}
 
-		DefaultListModel listModel = new DefaultListModel();
+		DefaultListModel<String> listModel = new DefaultListModel<String>();
 
 		for (File f : msclDir.listFiles()) {
 			if (f.exists() && f.isFile()) {

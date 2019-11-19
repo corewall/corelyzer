@@ -26,7 +26,7 @@ public class CorelyzerPluginManager {
 	private Vector<CorelyzerPlugin> pluginObject;
 	private Vector<String> pluginClassNames;
 	private Vector<String> pluginMenuNames;
-	private final Vector<LinkedList> eventRegistry;
+	private final Vector<LinkedList<CorelyzerPlugin>> eventRegistry;
 	private final String[] startupArgs;
 
 	// --------------------------------------------------------------
@@ -37,9 +37,9 @@ public class CorelyzerPluginManager {
 	public CorelyzerPluginManager(final String[] pluginNames) {
 
 		// create the event registry system
-		eventRegistry = new Vector<LinkedList>();
+		eventRegistry = new Vector<LinkedList<CorelyzerPlugin>>();
 		for (int i = 0; i < CorelyzerPluginEvent.NUMBER_OF_EVENTS; i++) {
-			eventRegistry.add(new LinkedList());
+			eventRegistry.add(new LinkedList<CorelyzerPlugin>());
 		}
 
 		startupArgs = pluginNames;
@@ -89,7 +89,7 @@ public class CorelyzerPluginManager {
 		}
 
 		CorelyzerPlugin p;
-		LinkedList l = eventRegistry.elementAt(type);
+		LinkedList<CorelyzerPlugin> l = eventRegistry.elementAt(type);
 		Object[] v = l.toArray();
 
 		for (int i = 0; i < v.length; i++) {
@@ -114,7 +114,7 @@ public class CorelyzerPluginManager {
 		}
 
 		CorelyzerPluginEvent e = new CorelyzerPluginEvent(type, desc);
-		LinkedList l = eventRegistry.elementAt(type);
+		LinkedList<CorelyzerPlugin> l = eventRegistry.elementAt(type);
 		Object[] v = l.toArray();
 
 		// System.out.println("# plugins registered for event: " + v.size());
@@ -201,7 +201,7 @@ public class CorelyzerPluginManager {
 
 				URLClassLoader cl = URLClassLoader.newInstance(new URL[] { jarfile });
 
-				Class c = cl.loadClass(mainClass);
+				Class<?> c = cl.loadClass(mainClass);
 
 				CorelyzerPlugin p = (CorelyzerPlugin) c.newInstance();
 				p.pluginId = pluginObject.size();

@@ -100,7 +100,7 @@ public class SectionImagePropertyDialog extends JDialog {
 	private JLabel widthLabel;
 	private JTextField widthField;
 	private JLabel orientationLabel;
-	private JComboBox orientationBox;
+	private JComboBox<String> orientationBox;
 	private JPanel visIntervalPanel;
 	private JTextField topDepthField;
 	private JTextField intervalTopField;
@@ -113,7 +113,7 @@ public class SectionImagePropertyDialog extends JDialog {
 	private JTextField incField;
 	private JRadioButton useMeasureButton;
 	private JRadioButton useDPIButton;
-	private JComboBox applyTargetOption;
+	private JComboBox<String> applyTargetOption;
 	private JButton nextButton;
 	private JButton previousButton;
 	private JLabel bottomVisLabel;
@@ -425,11 +425,11 @@ public class SectionImagePropertyDialog extends JDialog {
 		depthOrientationPanel.setBorder(dopBorder);	
 		
 		orientationLabel = new JLabel("Original Orientation:");
-		orientationBox = new JComboBox();
+		orientationBox = new JComboBox<String>();
 		final String orntTip = new String("Orientation of source image file");
 		orientationLabel.setToolTipText(orntTip);
 		orientationBox.setToolTipText(orntTip);
-		final DefaultComboBoxModel orientationBoxModel = new DefaultComboBoxModel();
+		final DefaultComboBoxModel<String> orientationBoxModel = new DefaultComboBoxModel<String>();
 		orientationBoxModel.addElement("Horizontal");
 		orientationBoxModel.addElement("Vertical");
 		orientationBox.setModel(orientationBoxModel);
@@ -496,9 +496,9 @@ public class SectionImagePropertyDialog extends JDialog {
 		degreeIncButton = new JButton(incIcon);
 		degreeIncButton.setToolTipText("Increase Rotation");
 		
-		applyTargetOption = new JComboBox();
+		applyTargetOption = new JComboBox<String>();
 		applyTargetOption.setEnabled(true);
-		final DefaultComboBoxModel applyTargetModel = new DefaultComboBoxModel();
+		final DefaultComboBoxModel<String> applyTargetModel = new DefaultComboBoxModel<String>();
 		applyTargetModel.addElement("This section only");
 		applyTargetModel.addElement("All selected sections");
 		applyTargetOption.setModel(applyTargetModel);

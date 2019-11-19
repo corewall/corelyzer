@@ -910,7 +910,7 @@ public class ClastInfoDialog extends AbstractAnnotationDialog implements ActionL
 		return anno_dir + sp + filename;
 	}
 
-	public Hashtable getClastAttributes() {
+	public Hashtable<String, String> getClastAttributes() {
 		return attribs;
 	}
 
@@ -957,7 +957,7 @@ public class ClastInfoDialog extends AbstractAnnotationDialog implements ActionL
 		}
 
 		ButtonModel aModel = aGroup.getSelection();
-		Enumeration e = aGroup.getElements();
+		Enumeration<AbstractButton> e = aGroup.getElements();
 
 		while (e.hasMoreElements()) {
 			JToggleButton b = (JToggleButton) e.nextElement();

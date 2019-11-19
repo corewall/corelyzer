@@ -57,7 +57,7 @@ public class ImageSplitDialog extends JDialog {
 	private TripleSlider intervalSlider;
 	private JCheckBox copyToAnotherTrackCheckBox;
 
-	private JComboBox trackListComboBox;
+	private JComboBox<Object> trackListComboBox;
 	int trackId = -1;
 	int sectionId = -1;
 
@@ -200,7 +200,7 @@ public class ImageSplitDialog extends JDialog {
 		copyToAnotherTrackCheckBox.setText("Copy to another track?");
 		panel6.add(copyToAnotherTrackCheckBox, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE,
 				GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-		trackListComboBox = new JComboBox();
+		trackListComboBox = new JComboBox<Object>();
 		trackListComboBox.setEditable(true);
 		trackListComboBox.setEnabled(false);
 		panel6.add(trackListComboBox, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL,
@@ -343,7 +343,7 @@ public class ImageSplitDialog extends JDialog {
 	}
 
 	public void setListModel(final CRDefaultListModel model) {
-		DefaultComboBoxModel cbModel = new DefaultComboBoxModel();
+		DefaultComboBoxModel<Object> cbModel = new DefaultComboBoxModel<Object>();
 
 		for (int i = 0; i < model.size(); i++) {
 			cbModel.addElement(model.elementAt(i));

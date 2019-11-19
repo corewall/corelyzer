@@ -75,7 +75,7 @@ public class CRToolPalette extends JFrame implements ActionListener {
 	private JButton quitButton;
 	private JLabel usageLabel;
 	private JButton helpButton;
-	private JComboBox measurefield;
+	private JComboBox<String> measurefield;
 	private JTextArea measureText;
 	private JPanel measurePane;
 	private JPanel toolPane;
@@ -330,8 +330,8 @@ public class CRToolPalette extends JFrame implements ActionListener {
 						| GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null,
 						0, false));
 		panel2.setBorder(BorderFactory.createTitledBorder("Measure History"));
-		measurefield = new JComboBox();
-		final DefaultComboBoxModel defaultComboBoxModel1 = new DefaultComboBoxModel();
+		measurefield = new JComboBox<String>();
+		final DefaultComboBoxModel<String> defaultComboBoxModel1 = new DefaultComboBoxModel<String>();
 		measurefield.setModel(defaultComboBoxModel1);
 		panel2.add(measurefield, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL,
 				GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));

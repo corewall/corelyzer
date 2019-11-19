@@ -74,7 +74,7 @@ public class ImagePropertyTable extends JTable {
 		getColumnModel().getColumn(5).setPreferredWidth( 40 );
 
 		// JComboBox column
-		JComboBox comboBox = new JComboBox();
+		JComboBox<String> comboBox = new JComboBox<String>();
 		comboBox.addItem(ImagePropertyTableModel.HORIZONTAL);
 		comboBox.addItem(ImagePropertyTableModel.VERTICAL);
 		TableColumn col = getColumnModel().getColumn(1);

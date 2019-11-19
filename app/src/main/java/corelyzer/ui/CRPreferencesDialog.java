@@ -41,8 +41,6 @@ import javax.swing.event.ChangeListener;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
 
-import java.awt.Font;
-
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
@@ -78,7 +76,7 @@ public class CRPreferencesDialog extends JDialog implements ChangeListener, Wind
 	private JCheckBox autoCheckVersion;
 	private JButton canvasBackgroundColorButton;
 	private JCheckBox check_gridEnabled;
-	private JComboBox field_gridType;
+	private JComboBox<String> field_gridType;
 	private JButton grid_colorbtn;
 	private JFormattedTextField field_gridSpace;
 	private JFormattedTextField field_gridThickness;
@@ -412,8 +410,8 @@ public class CRPreferencesDialog extends JDialog implements ChangeListener, Wind
 		label4.setText("Grid Space: ");
 		panel8.add(label4, new GridConstraints(2, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED,
 				GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-		field_gridType = new JComboBox();
-		final DefaultComboBoxModel defaultComboBoxModel1 = new DefaultComboBoxModel();
+		field_gridType = new JComboBox<String>();
+		final DefaultComboBoxModel<String> defaultComboBoxModel1 = new DefaultComboBoxModel<String>();
 		defaultComboBoxModel1.addElement("Basic Cross");
 		defaultComboBoxModel1.addElement("Horizontal Lines");
 		defaultComboBoxModel1.addElement("Vertical Lines");

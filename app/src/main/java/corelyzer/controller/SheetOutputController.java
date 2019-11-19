@@ -30,7 +30,6 @@ import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import javax.swing.JComboBox;
 import javax.swing.JOptionPane;
 
 import corelyzer.data.CoreSection;
@@ -75,8 +74,7 @@ public class SheetOutputController implements ActionListener {
 
 	public void actionPerformed(final ActionEvent actionEvent) {
 		if (actionEvent.getSource().equals(view.getTrackComboBox())) {
-			JComboBox cb = (JComboBox) actionEvent.getSource();
-			int idx = cb.getSelectedIndex();
+			final int idx = view.getTrackComboBox().getSelectedIndex();
 
 			if (idx < 0) {
 				return;
@@ -91,7 +89,7 @@ public class SheetOutputController implements ActionListener {
 			view.getSectionComboBox().removeAllItems();
 			for (int i = 0; i < ssize; i++) {
 				cs = tt.getCoreSection(i);
-				view.getSectionComboBox().addItem(cs.getName());
+				view.getSectionComboBox().addItem(cs);
 			}
 
 			this.selectedTrackListId = idx; // java index
@@ -101,8 +99,7 @@ public class SheetOutputController implements ActionListener {
 				view.getSectionComboBox().setSelectedIndex(0);
 			}
 		} else if (actionEvent.getSource().equals(view.getSectionComboBox())) {
-			JComboBox cb = (JComboBox) actionEvent.getSource();
-			int idx = cb.getSelectedIndex();
+			final int idx = view.getSectionComboBox().getSelectedIndex();
 
 			if (idx < 0 || this.selectedTrackListId < 0) {
 				return;
@@ -119,8 +116,7 @@ public class SheetOutputController implements ActionListener {
 			this.selectedSectionListId = idx; // java index
 			this.selectedSectionId = cs.getId(); // native index
 		} else if (actionEvent.getSource().equals(view.getDateFormatComboBox())) {
-			JComboBox cb = (JComboBox) actionEvent.getSource();
-			int idx = cb.getSelectedIndex();
+			final int idx = view.getDateFormatComboBox().getSelectedIndex();
 
 			if (idx < 0) {
 				return;
@@ -129,7 +125,7 @@ public class SheetOutputController implements ActionListener {
 			if (idx == 0) {
 				this.dateformat = "MM/dd/yy";
 			} else {
-				this.dateformat = (String) cb.getSelectedItem();
+				this.dateformat = (String) view.getDateFormatComboBox().getSelectedItem();
 			}
 
 			SimpleDateFormat format = new SimpleDateFormat(dateformat + " '-' " + timeformat);

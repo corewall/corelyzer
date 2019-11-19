@@ -362,8 +362,8 @@ public class CoreGraph {
 		this.currentSessionIdx = idx;
 
 		Session s = sessionVec.elementAt(currentSessionIdx);
-		Vector tracks = s.getTrackSceneNodes();
-		Vector datasets = s.getDatasets();
+		Vector<TrackSceneNode> tracks = s.getTrackSceneNodes();
+		Vector<WellLogDataSet> datasets = s.getDatasets();
 
 		if (!tracks.isEmpty()) {
 			this.setCurrentTrackIdx(tracks.size() - 1);

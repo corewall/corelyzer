@@ -27,8 +27,6 @@ package corelyzer.ui;
 
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.Dimension;
-import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
@@ -36,7 +34,6 @@ import java.awt.event.FocusListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.text.DecimalFormat;
 import java.util.Random;
 import java.util.Vector;
 
@@ -64,16 +61,11 @@ import javax.swing.event.TableModelListener;
 
 import net.miginfocom.swing.MigLayout;
 
-import com.intellij.uiDesigner.core.GridConstraints;
-import com.intellij.uiDesigner.core.GridLayoutManager;
-import com.intellij.uiDesigner.core.Spacer;
-
 import corelyzer.data.CheckBoxTable;
 import corelyzer.data.CoreSection;
 import corelyzer.data.CoreSectionGraph;
 import corelyzer.data.Session;
 import corelyzer.data.TrackSceneNode;
-import corelyzer.data.UnitLength;
 import corelyzer.data.WellLogDataSet;
 import corelyzer.data.WellLogTable;
 import corelyzer.data.coregraph.CoreGraph;
@@ -104,11 +96,11 @@ public class CRGraphDialog extends JFrame {
 
 	private JPanel contentPane;
 	private JButton applyButton, closeButton, selectAllButton;
-	private JComboBox datasetList;
-	private JList sectionsList;
+	private JComboBox<WellLogDataSet> datasetList;
+	private JList<String> sectionsList;
 	private JLabel sectionsListLabel;
 	private JCheckBox ifCollapseGraphs;
-	private JComboBox typeList;
+	private JComboBox<String> typeList;
 	private JTextField scaleMinText, scaleMaxText;
 	private JTextField excludeMinText, excludeMaxText;
 	private JCheckBox leaveGapsBox;
@@ -117,8 +109,8 @@ public class CRGraphDialog extends JFrame {
 
 	// 9/30/2011 brg: Why are we maintaining member variables that never
 	// change and can easily be acessed w/ foo.getModel()?
-	DefaultComboBoxModel datasetModel;
-	DefaultListModel sectionsListModel;
+	DefaultComboBoxModel<WellLogDataSet> datasetModel;
+	DefaultListModel<String> sectionsListModel;
 
 	// View (for scaling)
 	Vector<Float> scaleMinVals, scaleMaxVals;
@@ -216,9 +208,8 @@ public class CRGraphDialog extends JFrame {
 		contentPane = new JPanel(new MigLayout("", "[grow]", "[][grow][][]"));		
 		contentPane.add(new JLabel("Choose a dataset:"), "split 2");
 		
-		datasetList = new JComboBox();
-		final DefaultComboBoxModel datasetComboBoxModel = new DefaultComboBoxModel();
-		datasetComboBoxModel.addElement("RGR_TEST.xml");
+		datasetList = new JComboBox<WellLogDataSet>();
+		final DefaultComboBoxModel<WellLogDataSet> datasetComboBoxModel = new DefaultComboBoxModel<WellLogDataSet>();
 		datasetList.setModel(datasetComboBoxModel);
 		contentPane.add(datasetList, "wrap, growx");
 		
@@ -231,8 +222,8 @@ public class CRGraphDialog extends JFrame {
 		sectionsListLabel.setToolTipText( sectionSelectionToolTip );
 		graphSecsPanel.add(sectionsListLabel, "wrap");
 		
-		sectionsList = new JList();
-		sectionsList.setModel( new DefaultListModel() );
+		sectionsList = new JList<String>();
+		sectionsList.setModel( new DefaultListModel<String>() );
 		sectionsList.setToolTipText( sectionSelectionToolTip );
 		final JScrollPane sectionsScrollPane = new JScrollPane();
 		sectionsScrollPane.setViewportView( sectionsList );
@@ -261,8 +252,8 @@ public class CRGraphDialog extends JFrame {
 
 		JPanel graphPropsPanel = new JPanel(new MigLayout("fillx, wrap 4, insets 5", "[][grow][][grow]", "")); 
 		graphPropsPanel.add( new JLabel("Graph type:"));
-		typeList = new JComboBox();
-		final DefaultComboBoxModel graphTypeComboBoxModel = new DefaultComboBoxModel();
+		typeList = new JComboBox<String>();
+		final DefaultComboBoxModel<String> graphTypeComboBoxModel = new DefaultComboBoxModel<String>();
 		graphTypeComboBoxModel.addElement("Line");
 		graphTypeComboBoxModel.addElement("Point");
 		graphTypeComboBoxModel.addElement("Cross point");
@@ -367,12 +358,12 @@ public class CRGraphDialog extends JFrame {
 		return -1;
 	}
 	
-	// find data table ID for the specified section
-	private int getTableIndex(final int sectionId) {
-		String secname = this.sectionsList.getModel().getElementAt(sectionId).toString();
+	// find data table ID for the specified section - currently unused
+	// private int getTableIndex(final int sectionId) {
+	// 	String secname = this.sectionsList.getModel().getElementAt(sectionId).toString();
 		
-		return getTableIndexByName( secname );
-	}
+	// 	return getTableIndexByName( secname );
+	// }
 
 	private void ifCollapseAction() {
 		SwingUtilities.invokeLater(new Runnable() {
@@ -398,7 +389,7 @@ public class CRGraphDialog extends JFrame {
 
 	private void myInit() {
 		// data
-		this.datasetModel = new DefaultComboBoxModel();
+		this.datasetModel = new DefaultComboBoxModel<WellLogDataSet>();
 		this.datasetList.setModel(datasetModel);
 		this.datasetList.addActionListener(new ActionListener() {
 
@@ -407,7 +398,7 @@ public class CRGraphDialog extends JFrame {
 			}
 		});
 
-		this.sectionsListModel = new DefaultListModel();
+		this.sectionsListModel = new DefaultListModel<String>();
 		this.sectionsList.setModel(this.sectionsListModel);
 		this.sectionsList.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 		this.sectionsList.addListSelectionListener(new ListSelectionListener() {
@@ -659,10 +650,6 @@ public class CRGraphDialog extends JFrame {
 					if ( gp == null )
 						continue;
 					
-					// If the dataset table contains section depth offset, use it.
-					WellLogDataSet ds = (WellLogDataSet) this.datasetModel.getSelectedItem();
-					WellLogTable table = ds.getTable( gp.dataTableId );
-					
 					final int gid = SceneGraph.addLineGraphToSection( gp.trackId, gp.sectionId, gp.datasetId, gp.dataTableId, row );
 					if ( gid == -1 ) {
 						System.out.println("- Creating graph, but gid is: " + gid);
@@ -888,23 +875,15 @@ public class CRGraphDialog extends JFrame {
 		// ids are based on java code might not same as native index
 		// this results from deletion feature of tracks and sections
 		// find native code index first
-		int tid, sid;
-		tid = sid = -1;
-		int i, j, tsize, ssize;
 		boolean found = false;
 		CRDefaultListModel tmodel = CorelyzerApp.getApp().getTrackListModel();
-		tsize = tmodel.getSize();
-		TrackSceneNode tt;
-		CoreSection cs;
-		for (i = 0; i < tsize; i++) {
+		final int tsize = tmodel.getSize();
+		for (int i = 0; i < tsize; i++) {
 			if (trackId == i) {
-				tt = (TrackSceneNode) tmodel.elementAt(i);
-				tid = tt.getId();
-				ssize = tt.getNumCores();
-				for (j = 0; j < ssize; j++) {
-					cs = tt.getCoreSection(j);
+				TrackSceneNode tt = (TrackSceneNode) tmodel.elementAt(i);
+				final int ssize = tt.getNumCores();
+				for (int j = 0; j < ssize; j++) {
 					if (sectionId == j) {
-						sid = cs.getId();
 						found = true;
 						break;
 					}
@@ -917,7 +896,7 @@ public class CRGraphDialog extends JFrame {
 			// end of index matching
 		}
 
-		this.sectionsList.setSelectedIndex( sectionId );
+		this.sectionsList.setSelectedIndex(sectionId);
 		this.onSectionsListChanged();
 	}
 
@@ -1064,7 +1043,6 @@ public class CRGraphDialog extends JFrame {
 		Vector<Color> colors = CRGraphDialog.colorsManager.getColorVector( ds );
 		
 		final WellLogTable t = ds.getTable( 0 ); // only used to get field count and names, any table will do so use the first
-		Random generator = new Random(System.currentTimeMillis());
 		for (int j = 0; j < t.getNumFields(); j++)
 		{
 			final boolean checkShowGraph = showGraphVals.elementAt( j ).booleanValue();

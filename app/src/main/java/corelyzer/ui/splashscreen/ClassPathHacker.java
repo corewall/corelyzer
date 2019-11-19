@@ -31,22 +31,21 @@ import java.net.URL;
 import java.net.URLClassLoader;
 
 public class ClassPathHacker {
-
-	private static final Class[] parameters = new Class[] { URL.class };
+	private static final Class<?>[] parameters = new Class[] { URL.class };
 
 	public static void addFile(final File f) throws IOException {
 		addURL(f.toURI().toURL());
-	}// end method
+	}
 
 	public static void addFile(final String s) throws IOException {
 		File f = new File(s);
 		addFile(f);
-	}// end method
+	}
 
 	public static void addURL(final URL u) throws IOException {
 
 		URLClassLoader sysloader = (URLClassLoader) ClassLoader.getSystemClassLoader();
-		Class sysclass = URLClassLoader.class;
+		Class<?> sysclass = URLClassLoader.class;
 
 		try {
 			Method method = sysclass.getDeclaredMethod("addURL", parameters);
@@ -55,8 +54,6 @@ public class ClassPathHacker {
 		} catch (Throwable t) {
 			t.printStackTrace();
 			throw new IOException("Error, could not add URL to system classloader");
-		}// end try catch
-
-	}// end method
-
-}// end class
+		}
+	}
+}

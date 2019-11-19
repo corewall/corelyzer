@@ -130,7 +130,7 @@ public abstract class CorelyzerPlugin {
 	final public void renderRectangle(final int freeDraw, final int canvas, final int track, final int section, final float x, final float y, final float w,
 			final float h, final float scale) {
 
-		Vector canvasVec = CorelyzerApp.getApp().getCanvasVec();
+		Vector<CorelyzerGLCanvas> canvasVec = CorelyzerApp.getApp().getCanvasVec();
 		if (canvas < 0 || canvas > canvasVec.size() - 1) {
 			return;
 		}

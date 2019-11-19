@@ -164,17 +164,21 @@ public class CRExporter extends JDialog implements ActionListener {
 	private void copyFile(final String src, final String dst) {
 		try {
 			// Create channel on the source
-			FileChannel srcChannel = new FileInputStream(src).getChannel();
+			FileInputStream fis = new FileInputStream(src);
+			FileChannel srcChannel = fis.getChannel();
 
 			// Create channel on the destination
-			FileChannel dstChannel = new FileOutputStream(dst).getChannel();
+			FileOutputStream fos = new FileOutputStream(dst);
+			FileChannel dstChannel = fos.getChannel();
 
 			// Copy file contents from source to destination
 			dstChannel.transferFrom(srcChannel, 0, srcChannel.size());
 
 			// Close the channels
 			srcChannel.close();
+			fis.close();
 			dstChannel.close();
+			fos.close();
 		} catch (IOException e) {
 			System.err.println("--- Exception in copying files: " + src + ", " + dst + ", " + e);
 			JOptionPane.showMessageDialog(this, "Copy file " + src + " failed");

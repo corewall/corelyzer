@@ -534,8 +534,7 @@ public class LIMSImageryDirectory {
 		System.out.println("- Loading listing file: '" + fileStr + "'");
 		sectionListFileStr = fileStr;
 
-		try {
-			BufferedReader reader = new BufferedReader(new FileReader(f));
+		try (BufferedReader reader = new BufferedReader(new FileReader(f))) {
 			// ignore 1st line header/labels
 			reader.readLine();
 

@@ -47,6 +47,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.List;
 import java.util.StringTokenizer;
 import java.util.Vector;
 import java.util.prefs.Preferences;
@@ -55,10 +56,6 @@ import javax.help.CSH;
 import javax.help.HelpBroker;
 import javax.help.HelpSet;
 import javax.help.HelpSetException;
-//import javax.media.opengl.GLProfile;
-//import javax.media.opengl.awt.GLCanvas;
-//import javax.media.opengl.GLCapabilities;
-//import javax.media.opengl.GLContext;
 import com.jogamp.opengl.GLProfile;
 import com.jogamp.opengl.awt.GLCanvas;
 import com.jogamp.opengl.GLCapabilities;
@@ -82,7 +79,7 @@ import javax.swing.WindowConstants;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
-import org.apache.http.NameValuePair;
+// import org.apache.http.NameValuePair;
 
 import com.brsanthu.googleanalytics.*;
 import com.install4j.api.launcher.StartupNotification;
@@ -297,12 +294,12 @@ public class CorelyzerApp extends WindowAdapter implements MouseListener, Startu
 	JFrame mainFrame;
 	String baseTitle; // mainFrame title i.e. "Corelyzer [version]"
 	JPanel rootPanel;
-	JList sessionList;
-	JList trackList;
+	JList<Session> sessionList;
+	JList<TrackSceneNode> trackList;
 
-	JList sectionList;
-	JList dataFileList;
-	JList fieldList;
+	JList<CoreSection> sectionList;
+	JList<WellLogDataSet> dataFileList;
+	JList<String> fieldList;
 
 	JMenu friendsMenu;
 
@@ -489,7 +486,8 @@ public class CorelyzerApp extends WindowAdapter implements MouseListener, Startu
 
 				// track launch
 				GoogleAnalytics ga = new GoogleAnalytics("UA-88247383-1");
-				GoogleAnalyticsResponse response = ga.post(new PageViewHit("http://www.laccore.org", "launch: UUID=" + uuid));
+				ga.post(new PageViewHit("http://www.laccore.org", "launch: UUID=" + uuid));
+				// GoogleAnalyticsResponse response = ga.post(new PageViewHit("http://www.laccore.org", "launch: UUID=" + uuid));
 //				for (NameValuePair kvp : response.getPostedParms()) {
 //					System.out.println("key: " + kvp.getName() + ", value: "+ kvp.getValue());
 //				}
@@ -546,9 +544,9 @@ public class CorelyzerApp extends WindowAdapter implements MouseListener, Startu
 		SceneGraph.setCanvasRowcAndColumn(nrows, ncols);
 		
 		sharedContext = null;
-		int r, c, canvasNum = 0;
-		for (r = 0; r < nrows; r++) {
-			for (c = 0; c < ncols; c++) {
+		// int canvasNum = 0;
+		for (int r = 0; r < nrows; r++) {
+			for (int c = 0; c < ncols; c++) {
 				// Allow alpha GL context
 				GLProfile profile = GLProfile.getDefault();
 				GLCapabilities cap = new GLCapabilities( profile );//GLProfile.getDefault() );
@@ -598,9 +596,9 @@ public class CorelyzerApp extends WindowAdapter implements MouseListener, Startu
 					}
 				});
 				
-				canvasNum++;
 				
 				windowVec.add(win);
+				// canvasNum++;
 				// win.setName("canvas" + Integer.toString(canvasNum));
 
 				final float px = tileWidth * c + (borderLeft + borderRight) * screenDpiX * c;
@@ -642,7 +640,7 @@ public class CorelyzerApp extends WindowAdapter implements MouseListener, Startu
 
 	// Called by the PluginManager to create the menu items to
 	// select which plugin window to pull up
-	public void createPluginMenuItems(final Vector pluginNames) {
+	public void createPluginMenuItems(final Vector<String> pluginNames) {
 		JMenuItem pluginMenuItem;
 		for (int k = 0; k < pluginNames.size(); k++) {
 			pluginMenuItem = new JMenuItem((String) pluginNames.elementAt(k));
@@ -718,7 +716,7 @@ public class CorelyzerApp extends WindowAdapter implements MouseListener, Startu
 	}
 
 	// Returns the JList object holding the datafile names
-	public JList getDataFileList() {
+	public JList<WellLogDataSet> getDataFileList() {
 		return dataFileList;
 	}
 
@@ -736,7 +734,7 @@ public class CorelyzerApp extends WindowAdapter implements MouseListener, Startu
 	}
 
 	// Returns the JList object holding the datafile's field names
-	public JList getFieldList() {
+	public JList<String> getFieldList() {
 		return fieldList;
 	}
 
@@ -852,7 +850,7 @@ public class CorelyzerApp extends WindowAdapter implements MouseListener, Startu
 	// --------------------------------------------------------------
 
 	// Returns the JList object holding the selected tracks's section names
-	public JList getSectionList() {
+	public JList<CoreSection> getSectionList() {
 		return sectionList;
 	}
 
@@ -886,7 +884,7 @@ public class CorelyzerApp extends WindowAdapter implements MouseListener, Startu
 		return trackList.getSelectedIndex();
 	}
 
-	public JList getSessionList() {
+	public JList<Session> getSessionList() {
 		return sessionList;
 	}
 
@@ -910,7 +908,7 @@ public class CorelyzerApp extends WindowAdapter implements MouseListener, Startu
 	}
 
 	// Returns the JList object holding the track names
-	public JList getTrackList() {
+	public JList<TrackSceneNode> getTrackList() {
 		return trackList;
 	}
 
@@ -1041,6 +1039,7 @@ public class CorelyzerApp extends WindowAdapter implements MouseListener, Startu
 	public void mouseExited(final MouseEvent e) {
 	}
 
+	@SuppressWarnings({"unchecked"})
 	public void mousePressed(final MouseEvent e) {
 		// From JDK Doc
 		// Note: Popup menus are triggered differently on different systems.
@@ -1052,7 +1051,7 @@ public class CorelyzerApp extends WindowAdapter implements MouseListener, Startu
 
 		if (actionSource instanceof JList) {
 			// find the index of the clicked item in the JList
-			int index = ((JList) e.getSource()).locationToIndex(e.getPoint());
+			int index = ((JList<Object>) e.getSource()).locationToIndex(e.getPoint());
 			if (index < 0) {
 				return;
 			}
@@ -1074,7 +1073,7 @@ public class CorelyzerApp extends WindowAdapter implements MouseListener, Startu
 
 					sessionPopupMenu.show(e.getComponent(), p.x, p.y);
 				} else if (actionSource.equals(trackList)) {
-					((JList) e.getSource()).setSelectedIndex(index);
+					((JList<TrackSceneNode>) e.getSource()).setSelectedIndex(index);
 
 					// Update context-aware show/hide
 					TrackSceneNode t = (TrackSceneNode) trackList.getSelectedValue();
@@ -1091,13 +1090,14 @@ public class CorelyzerApp extends WindowAdapter implements MouseListener, Startu
 					JPopupMenu menu = sectionListPopupMenu(rows);
 					menu.show(e.getComponent(), p.x, p.y);
 				} else if (actionSource.equals(dataFileList)) {
-					((JList) e.getSource()).setSelectedIndex(index);
+					((JList<WellLogDataSet>) e.getSource()).setSelectedIndex(index);
 					dataPopupMenu.show(e.getComponent(), p.x, p.y);
 				}
 			}
 		}
 	}
 
+	@SuppressWarnings({"unchecked"})
 	public void mouseReleased(final MouseEvent e) {
 		// From JDK Doc
 		// Note: Popup menus are triggered differently on different systems.
@@ -1109,7 +1109,7 @@ public class CorelyzerApp extends WindowAdapter implements MouseListener, Startu
 
 		if (actionSource instanceof JList) {
 			// find the index of the clicked item in the JList
-			int index = ((JList) e.getSource()).locationToIndex(e.getPoint());
+			int index = ((JList<Object>) e.getSource()).locationToIndex(e.getPoint());
 			if (index < 0) {
 				return;
 			}
@@ -1131,7 +1131,7 @@ public class CorelyzerApp extends WindowAdapter implements MouseListener, Startu
 
 					sessionPopupMenu.show(e.getComponent(), p.x, p.y);
 				} else if (actionSource.equals(trackList)) {
-					((JList) e.getSource()).setSelectedIndex(index);
+					((JList<TrackSceneNode>) e.getSource()).setSelectedIndex(index);
 
 					// Update context-aware show/hide
 					TrackSceneNode t = (TrackSceneNode) trackList.getSelectedValue();
@@ -1148,7 +1148,7 @@ public class CorelyzerApp extends WindowAdapter implements MouseListener, Startu
 					JPopupMenu menu = sectionListPopupMenu(rows);
 					menu.show(e.getComponent(), p.x, p.y);
 				} else if (actionSource.equals(dataFileList)) {
-					((JList) e.getSource()).setSelectedIndex(index);
+					((JList<WellLogDataSet>) e.getSource()).setSelectedIndex(index);
 					dataPopupMenu.show(e.getComponent(), p.x, p.y);
 				}
 			}
@@ -2075,7 +2075,7 @@ public class CorelyzerApp extends WindowAdapter implements MouseListener, Startu
 		// add lists/panels
 		JPanel sessionPanel = new JPanel(new GridLayout(1, 1));
 		sessionPanel.setBorder(BorderFactory.createTitledBorder("Session"));
-		sessionList = new JList(getSessionListModel());
+		sessionList = new JList<Session>(getSessionListModel());
 		sessionList.setName("SessionList");
 		sessionList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		sessionList.addListSelectionListener(new ListSelectionListener() {
@@ -2094,7 +2094,7 @@ public class CorelyzerApp extends WindowAdapter implements MouseListener, Startu
 
 		JPanel trackPanel = new JPanel(new GridLayout(1, 1));
 		trackPanel.setBorder(BorderFactory.createTitledBorder("Track"));
-		trackList = new JList(getTrackListModel());
+		trackList = new JList<TrackSceneNode>(getTrackListModel());
 		trackList.setName("TrackList");
 		trackList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		trackList.addListSelectionListener(new ListSelectionListener() {
@@ -2114,7 +2114,7 @@ public class CorelyzerApp extends WindowAdapter implements MouseListener, Startu
 
 		JPanel sectionsPanel = new JPanel(new GridLayout(1, 1));
 		sectionsPanel.setBorder(BorderFactory.createTitledBorder("Sections"));
-		sectionList = new JList(getSectionListModel());
+		sectionList = new JList<CoreSection>(getSectionListModel());
 		sectionList.setName("SectionList");
 		sectionList.addListSelectionListener(new ListSelectionListener() {
 			public void valueChanged(final ListSelectionEvent event) {
@@ -2130,7 +2130,7 @@ public class CorelyzerApp extends WindowAdapter implements MouseListener, Startu
 
 		JPanel dataFilesPanel = new JPanel(new GridLayout(1, 1));
 		dataFilesPanel.setBorder(BorderFactory.createTitledBorder("Data Files"));
-		dataFileList = new JList(getDataFileListModel());
+		dataFileList = new JList<WellLogDataSet>(getDataFileListModel());
 		dataFileList.setName("DatafileList");
 		dataFileList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		dataFileList.addListSelectionListener(new ListSelectionListener() {
@@ -2149,7 +2149,7 @@ public class CorelyzerApp extends WindowAdapter implements MouseListener, Startu
 
 		JPanel fieldsPanel = new JPanel(new GridLayout(1, 1));
 		fieldsPanel.setBorder(BorderFactory.createTitledBorder("Fields"));
-		fieldList = new JList(getFieldListModel());
+		fieldList = new JList<String>(getFieldListModel());
 		fieldList.setName("FieldList");
 		fieldList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		fieldList.addListSelectionListener(new ListSelectionListener() {
@@ -2270,10 +2270,10 @@ public class CorelyzerApp extends WindowAdapter implements MouseListener, Startu
 	
 	private void updateHighlightedSections() {
 		// gather native section IDs from selected CoreSections
-		Object[] sections = sectionList.getSelectedValues();
-		int[] secids = new int[sections.length];
-		for (int i = 0; i < sections.length; i++) {
-			CoreSection cs = (CoreSection)sections[i];
+		List<CoreSection> sections = sectionList.getSelectedValuesList();
+		int[] secids = new int[sections.size()];
+		for (int i = 0; i < sections.size(); i++) {
+			CoreSection cs = sections.get(i);
 			secids[i] = (cs != null ? cs.getId() : -1);
 		}
 		

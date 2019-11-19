@@ -32,7 +32,7 @@ public class DepthPatternPanel extends CoreImageConfigurationPanel implements Co
 	private JLabel depthInstructionsLabel;
 	private JTextField filenameText;
 	private JLabel patternLabel;
-	private JComboBox patternCombo;
+	private JComboBox<String> patternCombo;
 
 	/**
 	 * Create a new DepthPatternPanel.
@@ -90,7 +90,7 @@ public class DepthPatternPanel extends CoreImageConfigurationPanel implements Co
 		patternLabel = new JLabel("Pattern:");
 
 		// create our pattern combobox
-		patternCombo = new JComboBox(PATTERNS);
+		patternCombo = new JComboBox<String>(PATTERNS);
 		patternCombo.setEditable(true);
 		patternCombo.setEnabled(false);
 		patternCombo.addActionListener(new ActionListener() {

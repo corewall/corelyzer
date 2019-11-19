@@ -32,7 +32,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Hashtable;
 import java.util.LinkedList;
-import java.util.Vector;
 
 import org.apache.xerces.dom.DocumentImpl;
 import org.apache.xml.serialize.OutputFormat;
@@ -53,7 +52,6 @@ import corelyzer.util.PropertyListUtility;
 
 public class StateWriter {
 	FileWriter stateFile;
-	Vector datasetNames;
 	String projectname = "";
 
 	CorelyzerApp app;
