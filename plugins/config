@@ -1,8 +1,9 @@
-#CW = /Users/julian/dev/EVL/corelyzer/branches/branch-1.3.1
-#CW = /Users/bgrivna/Desktop/brg/proj/corewall/corelyzer
-CW = /Developer_Disk/nonApple/corelyzer_pr
+#CW=/Users/lcdev/proj/corewall/corelyzer
 
-#CW=$(dirname `pwd`)
+ifndef CW
+$(error Error: Set the CW variable in config to the full path to your corelyzer directory)
+endif
+
 # brg 1/23/2012: Should match [root]/build.gradle allprojects.version.
 # Changing manually until I get plugins building under Gradle, at which
 # point we can import those settings and dispense with this.
