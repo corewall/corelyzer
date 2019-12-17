@@ -162,7 +162,7 @@ public class CRPreferences {
 		tmp_Directory = cache_Directory + sp + "tmp";
 
 		// UI preferences default
-		lockCoreSectionImage = true;
+		lockCoreSectionImage = false;
 
 		// Canvas Grid default
 		grid_show = false;
@@ -205,7 +205,6 @@ public class CRPreferences {
 		datastore_Directory = p.datastore_Directory;
 		texBlock_Directory = p.texBlock_Directory;
 		download_Directory = p.download_Directory;
-		datastore_Directory = p.datastore_Directory;
 		annotation_Directory = p.annotation_Directory;
 
 		lockCoreSectionImage = p.lockCoreSectionImage;
