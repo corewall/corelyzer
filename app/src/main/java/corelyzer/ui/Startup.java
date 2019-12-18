@@ -67,7 +67,7 @@ public class Startup implements FileFilter {
 		// mac case
 		else if (os.contains("Mac OS X")) {
 			cp = cp + fs + "./jars/mac/jogl.jar" + fs + "./jars/mac/xml-apis.jar" + fs + "./jars/mac/resolver.jar" + fs + "./Corelyzer.jar" + fs
-					+ "./jars/mac/xercesImpl.jar" + fs + "./jars/mac/quaqua.jar" + fs + "/System/Library/Java";
+					+ "./jars/mac/xercesImpl.jar" + fs + "/System/Library/Java";
 		}
 		// linux case
 		else {

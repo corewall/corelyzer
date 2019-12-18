@@ -45,9 +45,6 @@ import java.util.zip.ZipInputStream;
 
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
-import javax.swing.LookAndFeel;
-import javax.swing.UIManager;
-import javax.swing.UnsupportedLookAndFeelException;
 
 import com.jtechlabs.ui.widget.directorychooser.JDirectoryChooser;
 
@@ -103,7 +100,6 @@ public class FileUtility {
 		}
 	}
 
-	//
 	public static void createDirsIfNecessary(final File aDir) {
 		if (aDir.exists()) {
 			return;
@@ -512,26 +508,10 @@ public class FileUtility {
 		// sort algorithm, and Quaqua on Mac. (The subclass trick works on Mac too, but the dialog looks unacceptably
 		// strange while Quaqua's looks very nice.)
 		JFileChooser chooser = null;
-		LookAndFeel oldLAF = null;
 		
 		final boolean MAC_OS_X = System.getProperty("os.name").toLowerCase().startsWith("mac os x");
 		if ( MAC_OS_X )
 		{
-			// 2016 BRG: QuaQua is dead, be done with it.
-			// 2/2/2012 brg: On Mac, use Quaqua file chooser to sort image files
-			// properly: 
-			oldLAF = UIManager.getLookAndFeel();
-
-			try {
-				UIManager.setLookAndFeel("ch.randelshofer.quaqua.QuaquaLookAndFeel");
-			} catch (ClassNotFoundException cnfe) {
-				try {
-					UIManager.setLookAndFeel("ch.randelshofer.quaqua.QuaquaLookAndFeel15");
-				} catch (Exception e) {
-					System.out.println("Couldn't set Quaqua LAF - Java 1.5 or 1.6 required");
-				}
-			} catch (Exception e) { System.out.println("Couldn't set Quaqua LAF"); }
-
 			chooser = new JFileChooser();
 		}
 		else // Windows
@@ -546,15 +526,6 @@ public class FileUtility {
 		chooser.setMultiSelectionEnabled(true);
 		int returnVal = chooser.showOpenDialog(parent);
 
-		if ( MAC_OS_X ) // restore original look and feel
-		{
-			try {
-				UIManager.setLookAndFeel( oldLAF );
-			} catch (UnsupportedLookAndFeelException e) {
-				System.out.println("Couldn't restore original LAF");
-			}
-		}
-		
 		File[] selectedFiles = null;
 		if (returnVal == JFileChooser.APPROVE_OPTION) {
 			selectedFiles = chooser.getSelectedFiles();

@@ -2,6 +2,7 @@ package corelyzer.ui;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Insets;
 import java.awt.Point;
@@ -15,6 +16,7 @@ import java.awt.event.WindowListener;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
 
 import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
@@ -35,7 +37,6 @@ import javax.swing.JRadioButton;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
-import javax.swing.UIManager;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.HyperlinkEvent;
@@ -72,7 +73,6 @@ public class CRPreferencesDialog extends JDialog implements ChangeListener, Wind
 	private JTabbedPane stageTab;
 	private JEditorPane desc_textpane;
 	private JCheckBox lockCoreSectionImage;
-	private JCheckBox useQuaqua;
 	private JCheckBox autoCheckVersion;
 	private JButton canvasBackgroundColorButton;
 	private JCheckBox check_gridEnabled;
@@ -373,12 +373,6 @@ public class CRPreferencesDialog extends JDialog implements ChangeListener, Wind
 		lockCoreSectionImage.setToolTipText("Cores loaded while this option is enabled cannot be moved up or down stratigraphically");
 		panel7.add(lockCoreSectionImage, new GridConstraints(2, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE,
 				GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-		useQuaqua = new JCheckBox();
-		useQuaqua.setEnabled(false);
-		useQuaqua.setText("Use Quaqua look and feel");
-		useQuaqua.setToolTipText("When enabled, makes buttons etc. look more 'Mac-like' in OS X 10.3 and earlier.");
-		panel7.add(useQuaqua, new GridConstraints(3, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK
-				| GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));		
 		
 		JLabel tooltipInfoText = new JLabel("Mouse over text for descriptions.");
 		tooltipInfoText.setFont( tooltipInfoText.getFont().deriveFont( 11.0f ));
@@ -817,9 +811,6 @@ public class CRPreferencesDialog extends JDialog implements ChangeListener, Wind
 		// UIs
 		this.prefs.lockCoreSectionImage = lockCoreSectionImage.isSelected();
 		this.prefs.setAutoCheckVersion(this.autoCheckVersion.isSelected());
-		if (MAC_OS_X) {
-			this.prefs.setUseQuaqua(useQuaqua.isSelected());
-		}
 
 		// Grids
 		this.prefs.grid_show = check_gridEnabled.isSelected();
@@ -882,17 +873,6 @@ public class CRPreferencesDialog extends JDialog implements ChangeListener, Wind
 		}
 		SceneGraph.unlock();
 		app.updateGLWindows();
-
-		// Apply Quaqua Look and Feel if it's selected
-		if (MAC_OS_X && prefs.getUseQuaqua()) {
-			System.setProperty("Quaqua.tabLayoutPolicy", "wrap");
-
-			try {
-				UIManager.setLookAndFeel("ch.randelshofer.quaqua.QuaquaLookAndFeel");
-			} catch (Exception e) {
-				System.err.println("Exception in setting LAF: " + e);
-			}
-		}
 
 		// sharing server address and port number
 		prefs.setProperty("sessionSharing.serverAddress", this.serverAddressTextField.getText());
@@ -961,11 +941,6 @@ public class CRPreferencesDialog extends JDialog implements ChangeListener, Wind
 		// Update UI Panel
 		this.lockCoreSectionImage.setSelected(prefs.lockCoreSectionImage);
 		this.autoCheckVersion.setSelected(prefs.getAutoCheckVersion());
-
-		if (MAC_OS_X) {
-			this.useQuaqua.setEnabled(true);
-			this.useQuaqua.setSelected(prefs.getUseQuaqua());
-		}
 
 		// Update Grid
 		this.check_gridEnabled.setSelected(prefs.grid_show);

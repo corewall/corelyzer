@@ -354,16 +354,6 @@ public class CorelyzerApp extends WindowAdapter implements MouseListener, Startu
 			System.exit(0);
 		}
 
-		// Test Quaqua Look and Feel
-		/*
-		 * if (prefs.getUseQuaqua()) {
-		 * System.setProperty("Quaqua.tabLayoutPolicy", "wrap");
-		 *
-		 * try { UIManager.setLookAndFeel(
-		 * "ch.randelshofer.quaqua.QuaquaLookAndFeel"); } catch (Exception e) {
-		 * System.err.println("Exception in setting LAF: " + e); } }
-		 */
-
 		String[] plugins = initPlugins();
 
 		CorelyzerApp myApp = new CorelyzerApp(plugins, prefs);

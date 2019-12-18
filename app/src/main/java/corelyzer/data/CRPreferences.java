@@ -103,7 +103,6 @@ public class CRPreferences {
 	public int column_offset;
 
 	// UI Enhancement
-	public boolean useQuaqua = false;
 	public boolean autoCheckVersion = true;
 
 	// session file History
@@ -208,7 +207,6 @@ public class CRPreferences {
 		annotation_Directory = p.annotation_Directory;
 
 		lockCoreSectionImage = p.lockCoreSectionImage;
-		useQuaqua = p.useQuaqua;
 		autoCheckVersion = p.autoCheckVersion;
 
 		grid_show = p.grid_show;
@@ -295,10 +293,6 @@ public class CRPreferences {
 
 	public Vector<String> getSessionHistory() {
 		return sessionHistory;
-	}
-
-	public boolean getUseQuaqua() {
-		return this.useQuaqua;
 	}
 
 	private void initDefaultValues() {
@@ -492,7 +486,7 @@ public class CRPreferences {
 				if (toks[0].trim().equalsIgnoreCase("lockCoreSectionImage")) {
 					this.lockCoreSectionImage = toks[1].trim().equalsIgnoreCase("true");
 				} else if (toks[0].trim().equalsIgnoreCase("usequaqua")) {
-					this.useQuaqua = toks[1].trim().equalsIgnoreCase("true");
+					System.out.println("---> Ignoring obsolete Quaqua UI config option");
 				} else if (toks[0].trim().equalsIgnoreCase("autocheckversion")) {
 					this.autoCheckVersion = toks[1].trim().equalsIgnoreCase("true");
 				} else if (toks[0].trim().equalsIgnoreCase("canvas_bgcolor_r")) {
@@ -652,9 +646,6 @@ public class CRPreferences {
 			line = "lockCoreSectionImage = " + this.lockCoreSectionImage + "\n";
 			fw.write(line, 0, line.length());
 
-			line = "useQuaqua = " + this.useQuaqua + "\n";
-			fw.write(line, 0, line.length());
-
 			line = "autoCheckVersion = " + this.autoCheckVersion + "\n";
 			fw.write(line, 0, line.length());
 
@@ -707,7 +698,6 @@ public class CRPreferences {
 		// Migrate to Java Preferences too
 		if (this.prefs != null) {
 			prefs.putBoolean("ui.lockSection", this.lockCoreSectionImage);
-			prefs.putBoolean("ui.useQuaqua", this.useQuaqua);
 			prefs.putBoolean("ui.autoCheckVersion", this.autoCheckVersion);
 
 			prefs.putFloat("ui.canvas_bgcolor_r", this.bgcolor[0]);
@@ -750,9 +740,5 @@ public class CRPreferences {
 
 	public void setSessionHistory(final Vector<String> aHistory) {
 		this.sessionHistory = aHistory;
-	}
-
-	public void setUseQuaqua(final boolean b) {
-		useQuaqua = b;
 	}
 }
