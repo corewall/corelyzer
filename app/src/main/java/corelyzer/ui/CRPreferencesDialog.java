@@ -15,7 +15,8 @@ import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.io.File;
 import java.io.IOException;
-import java.net.URL;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 
 import javax.swing.BorderFactory;
@@ -26,7 +27,6 @@ import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
-import javax.swing.JEditorPane;
 import javax.swing.JFormattedTextField;
 import javax.swing.JFrame;
 import javax.swing.JFileChooser;
@@ -39,8 +39,6 @@ import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-import javax.swing.event.HyperlinkEvent;
-import javax.swing.event.HyperlinkListener;
 
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
@@ -71,7 +69,6 @@ public class CRPreferencesDialog extends JDialog implements ChangeListener, Wind
 	private JButton buttonCancel;
 	private JButton helpButton;
 	private JTabbedPane stageTab;
-	private JEditorPane desc_textpane;
 	private JCheckBox lockCoreSectionImage;
 	private JCheckBox autoCheckVersion;
 	private JButton canvasBackgroundColorButton;
@@ -87,7 +84,6 @@ public class CRPreferencesDialog extends JDialog implements ChangeListener, Wind
 	private JButton tmpBtn;
 	private JTextField field_tmpdir;
 	private JPanel displayPanel;
-	private JPanel descriptionPane;
 	private JCheckBox autoZoomCheckBox;
 	private JRadioButton horiDepthRadioButton;
 	private JRadioButton vertDepthRadioButton;
@@ -320,17 +316,10 @@ public class CRPreferencesDialog extends JDialog implements ChangeListener, Wind
 		panel3.add(stageTab, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK
 				| GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, new Dimension(200,
 				200), null, 0, false));
-		descriptionPane = new JPanel();
-		descriptionPane.setLayout(new GridLayoutManager(1, 1, new Insets(0, 0, 0, 0), -1, -1));
-		stageTab.addTab("Description", descriptionPane);
-		descriptionPane.setBorder(BorderFactory.createTitledBorder(""));
-		descriptionPane.add(desc_textpane, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH,
-				GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_WANT_GROW, null, new Dimension(150, 50), null, 0, false));
 		
 		// Main Directories tab panel (I <3 MigLayout, especially compared to the surrounding GridLayout chaos).
 		final JPanel dirPanel = new JPanel();
 		dirPanel.setLayout(new MigLayout());
-		stageTab.addTab("Directories", dirPanel);
 		dirPanel.setBorder(BorderFactory.createTitledBorder(""));
 		
 		final JLabel imgLabel = new JLabel("Image Cache: ");
@@ -362,11 +351,10 @@ public class CRPreferencesDialog extends JDialog implements ChangeListener, Wind
 
 	
 		// Display tab
-		stageTab.addTab("Display", displayPanel);
 		displayPanel.setBorder(BorderFactory.createTitledBorder(""));
 		final JPanel panel7 = new JPanel();
 		panel7.setLayout(new GridLayoutManager(12, 1, new Insets(0, 0, 0, 0), -1, -1));
-		stageTab.addTab("User Interface", panel7);
+
 		panel7.setBorder(BorderFactory.createTitledBorder(""));
 		lockCoreSectionImage = new JCheckBox();
 		lockCoreSectionImage.setText("Lock depth of core section images after loading");
@@ -501,7 +489,6 @@ public class CRPreferencesDialog extends JDialog implements ChangeListener, Wind
 				GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
 		final JPanel panel11 = new JPanel();
 		panel11.setLayout(new GridLayoutManager(2, 4, new Insets(0, 0, 0, 0), -1, -1));
-		stageTab.addTab("Session Sharing", panel11);
 		final JLabel label7 = new JLabel();
 		label7.setText("Sharing Server: ");
 		panel11.add(label7, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED,
@@ -525,85 +512,49 @@ public class CRPreferencesDialog extends JDialog implements ChangeListener, Wind
 				GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(79, 28), null, 0, false));
 		final JPanel panel12 = new JPanel();
 		panel12.setLayout(new GridLayoutManager(3, 3, new Insets(0, 0, 0, 0), -1, -1));
-		stageTab.addTab("DIS", panel12);
 		final JLabel label9 = new JLabel();
 		label9.setText("Local path prefix: ");
 		panel12.add(label9, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED,
-				GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+		GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
 		final Spacer spacer10 = new Spacer();
 		panel12.add(spacer10, new GridConstraints(2, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1,
-				GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
+		GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
 		disPrefixTextField = new JTextField();
 		disPrefixTextField.setEditable(false);
 		disPrefixTextField.setHorizontalAlignment(11);
 		disPrefixTextField.setText("");
 		panel12.add(disPrefixTextField, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL,
-				GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
+		GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
 		disPrefixSelectButton = new JButton();
 		disPrefixSelectButton.setText("Select...");
 		panel12.add(disPrefixSelectButton, new GridConstraints(0, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL,
-				GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+		GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
 		final JLabel label10 = new JLabel();
 		label10.setText("Dictionary definition: ");
 		panel12.add(label10, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED,
-				GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+		GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
 		dictDefFileTextField = new JTextField();
 		dictDefFileTextField.setEditable(false);
 		dictDefFileTextField.setHorizontalAlignment(11);
 		panel12.add(dictDefFileTextField, new GridConstraints(1, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL,
-				GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
+		GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
 		dictDefFileSelectButton = new JButton();
 		dictDefFileSelectButton.setText("Select...");
 		panel12.add(dictDefFileSelectButton, new GridConstraints(1, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL,
-				GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+		GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
 		ButtonGroup buttonGroup;
 		buttonGroup = new ButtonGroup();
 		buttonGroup.add(horiDepthRadioButton);
 		buttonGroup.add(vertDepthRadioButton);
+
+		stageTab.addTab("User Interface", panel7);
+		stageTab.addTab("Displays", displayPanel);
+		stageTab.addTab("Directories", dirPanel);		
+		stageTab.addTab("Session Sharing", panel11);
+		stageTab.addTab("DIS", panel12);
 	}
 
-	private void create_desc_panel() {
-		desc_textpane = new JEditorPane();
-		desc_textpane.setEditable(false);
-		desc_textpane.addHyperlinkListener(new HyperlinkListener() {
-			public void hyperlinkUpdate(final HyperlinkEvent hyperlinkEvent) {
-				if (hyperlinkEvent.getEventType().equals(HyperlinkEvent.EventType.ACTIVATED)) {
-
-					String app;
-					String url = hyperlinkEvent.getURL().toString();
-
-					try {
-						if (System.getProperty("os.name").toLowerCase().contains("windows")) {
-							app = "cmd.exe /c explorer " + url;
-							Runtime.getRuntime().exec(app);
-						} else {
-							app = "open";
-							String[] cmd = { app, url };
-							Runtime.getRuntime().exec(cmd);
-						}
-					} catch (IOException e) {
-						JOptionPane.showMessageDialog(CorelyzerApp.getApp().getMainFrame(), "Cannot open the link in your browser");
-					}
-
-				}
-			}
-		});
-
-		File f_cwd = new File(".");
-		String cwd = "";
-		try {
-			cwd = f_cwd.getCanonicalPath();
-		} catch (IOException e) {
-			System.err.println("This should not happen.");
-		}
-
-		String url = "file:///" + cwd + "/resources/preferences_desc.html";
-		try {
-			desc_textpane.setPage(new URL(url));
-		} catch (Exception e) {
-			System.err.println("Error! Cannot find preferences description.");
-		}
-	}
+	
 
 	private JPanel create_display_panel() {
 		JPanel p = new JPanel(new BorderLayout());
@@ -619,9 +570,6 @@ public class CRPreferencesDialog extends JDialog implements ChangeListener, Wind
 	private void createUIComponents() {
 		// color chooser
 		grid_color = new Color(200, 200, 200);
-
-		// create description panel
-		this.create_desc_panel();
 
 		// create display panel
 		this.displayPanel = this.create_display_panel();
@@ -696,20 +644,15 @@ public class CRPreferencesDialog extends JDialog implements ChangeListener, Wind
 	}
 
 	private void onHelp() {
+		String url = null;
 		try {
-			// Centralized URLs in external cofigs
-			String app;
-			String url = "http://www.corewall.org/wiki/";
-			if (System.getProperty("os.name").toLowerCase().contains("windows")) {
-				app = "cmd.exe /c explorer " + url;
-				Runtime.getRuntime().exec(app);
-			} else {
-				app = "open";
-				String[] cmd = { app, url };
-				Runtime.getRuntime().exec(cmd);
-			}
+			url = "http://csdco.umn.edu/resources/software/corelyzer";
+			URI uri = new URI(url);
+			java.awt.Desktop.getDesktop().browse(uri);
 		} catch (IOException ex) {
-			System.err.println("IOException in help button");
+			System.err.println("IOException trying to browse to " + url + " from About Dialog");
+		} catch (URISyntaxException urie) {
+			System.err.println("URI Syntax Exception parsing " + url + ":" + urie.getMessage());
 		}
 	}
 
@@ -913,21 +856,6 @@ public class CRPreferencesDialog extends JDialog implements ChangeListener, Wind
 			cwd = f_cwd.getCanonicalPath();
 		} catch (IOException e) {
 			System.err.println("This should not happen.");
-		}
-
-		String url;
-		if (prefs.isInited) {
-			buttonCancel.setEnabled(true);
-			url = "file:///" + cwd + "/resources/preferences_desc.html";
-		} else {
-
-			url = "file:///" + cwd + "/resources/preferences_init.html";
-		}
-
-		try {
-			desc_textpane.setPage(new URL(url));
-		} catch (Exception e) {
-			System.err.println("Error! Cannot find preferences " + "init description: " + url);
 		}
 
 		// Update Directory Panel
