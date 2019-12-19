@@ -1,6 +1,5 @@
 package corelyzer.ui;
 
-import java.awt.Canvas;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
@@ -25,6 +24,7 @@ import javax.swing.JDialog;
 import javax.swing.JFormattedTextField;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JPanel;
 import javax.swing.SpringLayout;
 import javax.swing.WindowConstants;
 
@@ -37,19 +37,15 @@ import corelyzer.data.CRPreferences;
  * This class will save settings for loading in the future as defaults.
  */
 public class DisplayConfig extends WindowAdapter {
-
-	/** This class draw the configuration by extending the Canvas class. */
-	class ConfigCanvas extends Canvas {
-		/**
-		 * 
-		 */
+	
+	// Custom component to draw rectangles illustrating current display arrangement
+	class DisplayConfigPanel extends JPanel {
 		private static final long serialVersionUID = 6783717557196622580L;
 		private int numberOfRows = 1;
 		private int numberOfColumns = 1;
 		private final int seam = 5;
 
-		public ConfigCanvas() {
-		}
+		public DisplayConfigPanel() {}
 
 		public void changeTileConfig(final int _numberOfRows, final int _numberOfColumns) {
 			this.numberOfRows = _numberOfRows;
@@ -79,22 +75,15 @@ public class DisplayConfig extends WindowAdapter {
 				tileH *= sfac;
 			}
 
-			for (int i = 0; i < numberOfRows; i++) {
-				for (int j = 0; j < numberOfColumns; j++) {
-					g2d.drawRect(seam + j * tileW, seam + i * tileH, tileW, tileH);
-
-					/*
-					 * g2d.setColor( new Color(0.8f, 0.8f, 0.8f) );
-					 * g2d.fillRect(seam+j*tileW+seam, seam+i*tileH+seam,
-					 * tileW-seam, tileH-seam);
-					 */
+			for (int ridx = 0; ridx < numberOfRows; ridx++) {
+				for (int cidx = 0; cidx < numberOfColumns; cidx++) {
+					g2d.drawRect(seam + cidx * tileW, seam + ridx * tileH, tileW, tileH);
 				}
 			}
-
 		}
 
 		@Override
-		public void paint(final Graphics g) {
+		public void paintComponent(Graphics g) {
 			Graphics2D g2d = (Graphics2D) g;
 			g2d.setColor(new Color(0.5f, 0.5f, 0.5f));
 			g2d.fillRect(0, 0, getWidth(), getHeight());
@@ -104,12 +93,12 @@ public class DisplayConfig extends WindowAdapter {
 		}
 	}
 
+
 	/**
 	 * Sends the results to the CorelyzerApp object and saves the settings for
 	 * the future.
 	 */
 	class OkListener implements ActionListener {
-
 		public void actionPerformed(final ActionEvent e) {
 			if (app == null) {
 				System.out.println("Display OK: Null app pointer!");
@@ -139,7 +128,6 @@ public class DisplayConfig extends WindowAdapter {
 			dlg.setVisible(false);
 			app.getMainFrame().setVisible(true);
 			app.getToolFrame().setVisible(true);
-
 		}
 	}
 
@@ -148,41 +136,20 @@ public class DisplayConfig extends WindowAdapter {
 	 * for property changes in rows, column, etc.
 	 */
 	class TileConfigListener implements PropertyChangeListener {
-
 		public void propertyChange(final PropertyChangeEvent evt) {
 			// call canvas to update its rows and cols values
 			int n_row = Integer.parseInt(rows.getValue().toString());
 			int n_col = Integer.parseInt(cols.getValue().toString());
-			cnvs.changeTileConfig(n_row, n_col);
+			configCanvas.changeTileConfig(n_row, n_col);
 		}
 	}
 
 	CorelyzerApp app;
-
-	ConfigCanvas cnvs;
-
+	DisplayConfigPanel configCanvas;
 	JButton okbtn;
-
 	JDialog dlg;
-
-	JFormattedTextField rows;
-
-	JFormattedTextField cols;
-
-	JFormattedTextField width;
-
-	JFormattedTextField height;
-
-	JFormattedTextField borderLeft;
-
-	JFormattedTextField borderRight;
-
-	JFormattedTextField borderDown;
-	JFormattedTextField borderUp;
-	JFormattedTextField dpix;
-	JFormattedTextField dpiy;
-	JFormattedTextField column_offset;
-	JFormattedTextField row_offset;
+	JFormattedTextField rows, cols, width, height, borderLeft, borderRight;
+	JFormattedTextField borderDown, borderUp, dpix, dpiy, column_offset, row_offset;
 
 	public DisplayConfig() {
 		dlg = new JDialog((JFrame) null, "Corelyzer Display Configuration");
@@ -199,10 +166,10 @@ public class DisplayConfig extends WindowAdapter {
 
 		app = CorelyzerApp.getApp();
 
-		cnvs = new ConfigCanvas();
-		cnvs.setPreferredSize(new Dimension(370, 370));
-		dlg.getContentPane().add(cnvs);
-		PositionWidget(cnvs, layout, 15, 15);
+		configCanvas = new DisplayConfigPanel();
+		configCanvas.setPreferredSize(new Dimension(370, 370));
+		dlg.getContentPane().add(configCanvas);
+		PositionWidget(configCanvas, layout, 15, 15);
 
 		// parameters
 		DecimalFormat twosig = new DecimalFormat("#.00");
@@ -587,6 +554,5 @@ public class DisplayConfig extends WindowAdapter {
 		app.createGLWindows();
 		app.getMainFrame().setVisible(true);
 		app.getToolFrame().setVisible(true);
-
 	}
 }
