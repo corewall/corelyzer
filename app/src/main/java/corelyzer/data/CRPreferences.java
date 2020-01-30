@@ -383,7 +383,8 @@ public class CRPreferences {
 							 "datastore dir: " + datastore_Directory,
 							 "texBlock dir: " + texBlock_Directory,
 							 "download dir: " + download_Directory,
-							 "annotation dir: " + annotation_Directory };
+							 "annotation dir: " + annotation_Directory,
+							 "temp dir:" + tmp_Directory };
 		return "--- Corelyzer Directories ---\n" + StringUtils.join(dirStrs, "\n");
 	}
 	

@@ -81,8 +81,6 @@ public class CRPreferencesDialog extends JDialog implements ChangeListener, Wind
 	private JTextField field_imgblock;
 	private JButton downBtn;
 	private JTextField field_download;
-	private JButton tmpBtn;
-	private JTextField field_tmpdir;
 	private JPanel displayPanel;
 	private JCheckBox autoZoomCheckBox;
 	private JRadioButton horiDepthRadioButton;
@@ -177,12 +175,6 @@ public class CRPreferencesDialog extends JDialog implements ChangeListener, Wind
 			}
 		});
 		
-		tmpBtn.addActionListener(new ActionListener() {
-			public void actionPerformed(final ActionEvent event) {
-				onChooseDir(field_tmpdir);
-			}
-		});
-
 		check_gridEnabled.addActionListener(new ActionListener() {
 			public void actionPerformed(final ActionEvent event) {
 				onCheckGrid();
@@ -319,7 +311,7 @@ public class CRPreferencesDialog extends JDialog implements ChangeListener, Wind
 		
 		// Main Directories tab panel (I <3 MigLayout, especially compared to the surrounding GridLayout chaos).
 		final JPanel dirPanel = new JPanel();
-		dirPanel.setLayout(new MigLayout());
+		dirPanel.setLayout(new MigLayout("fillx"));
 		dirPanel.setBorder(BorderFactory.createTitledBorder(""));
 		
 		final JLabel imgLabel = new JLabel("Image Cache: ");
@@ -332,23 +324,13 @@ public class CRPreferencesDialog extends JDialog implements ChangeListener, Wind
 		field_download = new JTextField();
 		field_download.setEnabled(false);
 		
-		final JLabel tmpLabel = new JLabel("Temporary Files: ");
-		tmpBtn = new JButton("Select...");
-		field_tmpdir = new JTextField();
-		field_tmpdir.setEnabled(false);
+		dirPanel.add(imgLabel, "split 2");
+		dirPanel.add(imgBtn, "align left, wrap");
+		dirPanel.add(field_imgblock, "growx, wrap");
 		
-		dirPanel.add(imgLabel);
-		dirPanel.add(imgBtn, "wrap");
-		dirPanel.add(field_imgblock, "span, growx, wrap");
-		
-		dirPanel.add(downLabel, "gaptop 20px");
-		dirPanel.add(downBtn, "wrap");
-		dirPanel.add(field_download, "span, growx, wrap");
-
-		dirPanel.add(tmpLabel, "gaptop 20px");
-		dirPanel.add(tmpBtn, "wrap");
-		dirPanel.add(field_tmpdir, "span, growx, wrap");
-
+		dirPanel.add(downLabel, "split 2, gaptop 20px");
+		dirPanel.add(downBtn, "align left, wrap");
+		dirPanel.add(field_download, "growx");
 	
 		// Display tab
 		displayPanel.setBorder(BorderFactory.createTitledBorder(""));
@@ -744,7 +726,6 @@ public class CRPreferencesDialog extends JDialog implements ChangeListener, Wind
 		// Dirs
 		this.prefs.texBlock_Directory = makeDirectory(field_imgblock.getText());
 		this.prefs.download_Directory = makeDirectory(field_download.getText());
-		this.prefs.tmp_Directory = makeDirectory(field_tmpdir.getText());
 
 		// Display
 		if (dpcfg.getPreferences(prefs)) {
@@ -861,7 +842,6 @@ public class CRPreferencesDialog extends JDialog implements ChangeListener, Wind
 		// Update Directory Panel
 		this.field_imgblock.setText(prefs.texBlock_Directory);
 		this.field_download.setText(prefs.download_Directory);
-		this.field_tmpdir.setText(prefs.tmp_Directory);
 
 		// Update Display Panel
 		dpcfg.setPreferences(prefs);
