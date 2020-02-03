@@ -27,6 +27,7 @@ package corelyzer.ui;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Frame;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
@@ -38,6 +39,8 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 import java.util.Vector;
 
 import javax.swing.BorderFactory;
@@ -53,11 +56,14 @@ import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
+import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.table.AbstractTableModel;
+import javax.swing.table.TableCellRenderer;
 
 import net.miginfocom.swing.MigLayout;
 
@@ -69,6 +75,10 @@ import org.w3c.dom.Element;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamWriter;
 import javanet.staxutils.IndentingXMLStreamWriter;
+
+import com.opencsv.CSVReader;
+import com.opencsv.exceptions.CsvException;
+import com.opencsv.exceptions.CsvValidationException;
 
 import corelyzer.helper.ExampleFileFilter;
 
@@ -815,13 +825,13 @@ public class DataImportWizard extends JDialog implements ActionListener, ChangeL
 	public static void main(final String[] args) {
 		DataImportWizard wiz = new DataImportWizard(null);
 		wiz.setRunningMode(RunMode.STANDALONE);
-		
-		if (args.length < 1) {
-			System.out.println("Usage: java corelyzer.ui.DataImportWizard <input>.");
-			System.exit(0);
-		}
 
-		if (args[0] != null) {
+		final String inputFile = "/Users/lcdev/proj/corewall/corewall_data/Corelyzer/318-U1357/data/318-U1357-GRA-AB.csv";
+		if (args.length < 1) {
+			wiz.setInputFile(inputFile);
+			// System.out.println("Usage: java corelyzer.ui.DataImportWizard <input>.");
+			// System.exit(0);
+		} else if (args[0] != null) {
 			System.out.println("arg " + 0 + ": " + args[0]);
 			wiz.setInputFile(args[0]);
 		}
@@ -838,7 +848,8 @@ public class DataImportWizard extends JDialog implements ActionListener, ChangeL
 
 	JButton nextBtn, backBtn, cancelBtn;
 	JTabbedPane stageTab;
-	LineNumberedPaper fileContent;
+	// LineNumberedPaper fileContent;
+	JTable fileContent;
 	/**
 	 * Parse information Parse file 'inputFile', using specified delimiter. Data
 	 * starts from 'start_row' to 'end_row'. Use 'label_row' as the labels for
@@ -1082,7 +1093,7 @@ public class DataImportWizard extends JDialog implements ActionListener, ChangeL
 		previewPanel.add(updatePreview);
 		snpp.add(previewPanel, "span, growx, wrap");
 		
-		panel.add(snpp);
+		// panel.add(snpp);
 		
 		return panel;
 	}
@@ -1104,37 +1115,41 @@ public class DataImportWizard extends JDialog implements ActionListener, ChangeL
 	private void loadInputFile(final File f) {
 		if (f.exists()) {
 			try {
-				FileReader fr = new FileReader(f);
-				this.fileContent.read(fr, null);
+				CSVReader reader = new CSVReader(new FileReader(f));
+				List<String[]> lines = reader.readAll();
+				reader.close();
+				fileContent.setModel(new OpenCSVTableModel(lines));
+
+				// if file is parsed successfully...
+				fileContent.getColumnModel().getColumn(0).setCellRenderer(new RowColumnNumberRenderer(false));
 				this.fileLabel.setText(f.getName());
-				this.end_number.setText(String.valueOf(getDefaultEndLine()));
-				updateSectionNamePreview();
-			} catch (FileNotFoundException ex) {
-				System.err.println("Error: File not found " + f);
-			} catch (IOException ex) {
-				System.err.println("Error: IO Exception " + f);
+				this.end_number.setText(Integer.toString(this.fileContent.getModel().getRowCount()));
+			} catch (IOException e) {
+				System.out.println("IOException: " + e.getMessage());
+			} catch (CsvException e) {
+				System.out.println("CSVException: " + e.getMessage());
 			}
 		}
 	}
 	
 	// return last data line, ignoring empty lines at end of file
-	private int getDefaultEndLine() {
-		final int lastLine = this.fileContent.getLineCount();
-		int dataEndLine = lastLine;
-		try {
-			for (int curLine = lastLine; curLine >= 1; curLine--) {
-				final int start = this.fileContent.getLineStartOffset(curLine - 1);
-				final int end = this.fileContent.getLineEndOffset(curLine - 1);
-				if (this.fileContent.getText(start, end - start).trim().length() == 0)
-					dataEndLine = curLine - 1;
-				else
-					break;
-			}
-		} catch (Exception e) {
-			System.err.println("Error finding last data line: " + e.getMessage());
-		}
-		return dataEndLine;
-	}
+	// private int getDefaultEndLine() {
+	// 	return this.fileContent.getRowCount();
+	// 	// int dataEndLine = lastLine;
+	// 	// try {
+	// 	// 	for (int curLine = lastLine; curLine >= 1; curLine--) {
+	// 	// 		final int start = this.fileContent.getLineStartOffset(curLine - 1);
+	// 	// 		final int end = this.fileContent.getLineEndOffset(curLine - 1);
+	// 	// 		if (this.fileContent.getText(start, end - start).trim().length() == 0)
+	// 	// 			dataEndLine = curLine - 1;
+	// 	// 		else
+	// 	// 			break;
+	// 	// 	}
+	// 	// } catch (Exception e) {
+	// 	// 	System.err.println("Error finding last data line: " + e.getMessage());
+	// 	// }
+	// 	// return lastLine;
+	// }
 	
 	private String getFieldSeparatorChar() {
 		String fs = "";
@@ -1290,10 +1305,15 @@ public class DataImportWizard extends JDialog implements ActionListener, ChangeL
 		this.add(stageTab, BorderLayout.NORTH);
 
 		// Text area to show file content
-		fileContent = new LineNumberedPaper(10, 10);
-		fileContent.setEditable(false);
-		fileContent.setBackground(new Color(254, 255, 182));
-		JScrollPane sp = new JScrollPane(fileContent);
+		// fileContent = new LineNumberedPaper(10, 10);
+		// fileContent.setEditable(false);
+		// fileContent.setBackground(new Color(254, 255, 182));
+		fileContent = new JTable();
+		fileContent.setShowGrid(true);
+		fileContent.setGridColor(Color.GRAY);
+		fileContent.getTableHeader().setDefaultRenderer(new RowColumnNumberRenderer(true));
+		fileContent.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+		JScrollPane sp = new JScrollPane(fileContent, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
 		sp.setBorder(BorderFactory.createTitledBorder("File Content"));
 		this.add(sp, BorderLayout.CENTER);
 	}
@@ -1352,3 +1372,52 @@ public class DataImportWizard extends JDialog implements ActionListener, ChangeL
 		columnList.updateUI();
 	}
 }
+
+// Model data parsed by OpenCSV. Display row number in first column.
+class OpenCSVTableModel extends AbstractTableModel {
+	static final public long serialVersionUID = -1L;
+	private List<String[]> data;
+	public OpenCSVTableModel(List<String[]> data) {
+		this.data = data;
+	}
+
+	public String getColumnName(int col) {
+		if (col == 0) {
+			return "Row\\Column";
+		} else {
+			return new Integer(col).toString();
+		}
+	}
+	public int getRowCount() {
+		return data.size();
+	}
+	public int getColumnCount() { 
+		return data.get(0).length + 1;
+	}
+	public Object getValueAt(int row, int col) {
+		return col == 0 ? new Integer(row + 1).toString() : data.get(row)[col - 1];
+	}
+	public boolean isCellEditable(int row, int col) { return false; }
+	public void setValueAt(Object value, int row, int col) { return; }
+}
+
+
+class RowColumnNumberRenderer extends JLabel implements TableCellRenderer {
+	public final static long serialVersionUID = -1L;
+    public RowColumnNumberRenderer(boolean border) {
+		if (border) {
+			setBorder(BorderFactory.createEtchedBorder());
+		}
+		setForeground(Color.BLACK);
+		setBackground(new Color(222,222,222));
+		setOpaque(true);
+		setHorizontalAlignment(JLabel.CENTER);
+    }
+     
+    @Override
+	public Component getTableCellRendererComponent(JTable table, Object value,
+		boolean isSelected, boolean hasFocus, int row, int column) {
+        setText(value.toString());
+        return this;
+    }
+ }
