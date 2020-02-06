@@ -33,14 +33,11 @@ import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.BufferedReader;
-import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
+
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.List;
-import java.util.Map;
 import java.util.Vector;
 
 import javax.swing.BorderFactory;
@@ -53,7 +50,6 @@ import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTable;
@@ -67,20 +63,16 @@ import javax.swing.table.TableCellRenderer;
 
 import net.miginfocom.swing.MigLayout;
 
-import org.apache.xerces.dom.DocumentImpl;
-import org.apache.xml.serialize.OutputFormat;
-import org.apache.xml.serialize.XMLSerializer;
-import org.w3c.dom.Element;
 
-import javax.xml.stream.XMLOutputFactory;
-import javax.xml.stream.XMLStreamWriter;
-import javanet.staxutils.IndentingXMLStreamWriter;
-
+import com.opencsv.CSVParser;
+import com.opencsv.CSVParserBuilder;
 import com.opencsv.CSVReader;
+import com.opencsv.CSVReaderBuilder;
 import com.opencsv.exceptions.CsvException;
-import com.opencsv.exceptions.CsvValidationException;
 
 import corelyzer.helper.ExampleFileFilter;
+import corelyzer.data.DepthMode;
+import corelyzer.data.TabularToXMLConversion;
 
 /**
  * A text data import wizard that let user specify what their table data looks
@@ -92,17 +84,6 @@ import corelyzer.helper.ExampleFileFilter;
  * column 4. Check the columns that needs to be imported. AND Go!
  **/
 public class DataImportWizard extends JDialog implements ActionListener, ChangeListener {
-	public static enum DepthMode {
-		SECTION_DEPTH, ACCUM_DEPTH;
-		
-		public String toString() {
-			if (this.ordinal() == 0)
-				return "Section Depth";
-			else
-				return "Accumulated Depth";
-		}
-	}
-
 	public static enum FieldSeparator {
 		COMMA, TAB, SPACE;
 		
@@ -124,703 +105,8 @@ public class DataImportWizard extends JDialog implements ActionListener, ChangeL
 	 * 
 	 */
 	private static final long serialVersionUID = 2750206706267241630L;
+	private static File lastInputFileDirectory = null;
 
-	// Define auto-sections contains 1000 rows per section
-	public static int maxSamplesPerSection = 300;
-
-	/**
-	 * Allow user use selected columns to compose a section name for example:
-	 * prefix="glad-3A" pattern="7,2,-,9" return: "glad-3A-$7$2-$9"
-	 * 
-	 * @param prefix
-	 *            Section name prefix
-	 * @param line
-	 *            The whole line of original data
-	 * @param fs
-	 *            Field separator
-	 * @param pattern
-	 *            Suffix pattern
-	 * @return Composite section name
-	 */
-	private static String compositeSectionName(final String prefix, final String line, final String fs, final String pattern) {
-		if (pattern == null || pattern.equals("")) {
-			return prefix;
-		}
-
-		String[] tuples = pattern.split(",");
-		String[] fields = line.split(fs);
-		String suffix = "";
-
-		for (String tuple : tuples) {
-			tuple = tuple.trim();
-
-			if (isInteger(tuple)) {
-				// user input ordering starts from 1
-				int order = Integer.parseInt(tuple) - 1;
-
-				if (fields.length >= 0 && order >= 0 && order < fields.length) {
-					suffix += fields[order].trim();
-				} /*
-				 * else { ; // ignore out of bound tuple assignment }
-				 */
-			} else {
-				suffix += tuple;
-			}
-		}
-
-		if (prefix.equals("")) {
-			return suffix;
-		} else {
-			return prefix + "-" + suffix;
-		}
-	}
-
-	public static void convert(final File fin, final File fout, final String fs, final String prefix, final int start, final int end, final int label,
-			final int unit, final String name, final int depth, final Vector<Integer> vals, final DepthMode dm, final boolean useCustomizedSectionName,
-			final float ignoreValue) {
-		convert(null, fin, fout, fs, prefix, start, end, label, unit, name, depth, vals, dm, useCustomizedSectionName, ignoreValue);
-	}
-
-	public static void sax_convert(final File fin, final File fout, final String fs, final String prefix, final int start, final int end, final int label,
-			final int unit, final String name, final int depth, final Vector<Integer> vals, final DepthMode dm, final boolean useCustomizedSectionName,
-			final float ignoreValue)
-	{
-		sax_convert(null, fin, fout, fs, prefix, start, end, label, unit, name, depth, vals, dm, useCustomizedSectionName, ignoreValue);
-	}
-	
-	private static void writeNewSection( IndentingXMLStreamWriter ixmlWriter, final float depthOffset, final String currentSection, 
-			final String depthUnit,	final Vector<Integer> vals, final String[] units, final String[] labels)
-	{
-		try { 
-			ixmlWriter.writeStartElement("section");
-			
-			ixmlWriter.writeAttribute("offset", Float.toString(depthOffset));
-			
-			ixmlWriter.writeStartElement("id");
-			ixmlWriter.writeCharacters(currentSection);
-			ixmlWriter.writeEndElement();
-
-			ixmlWriter.writeStartElement("depth_unit");
-			ixmlWriter.writeCharacters( depthUnit );
-			ixmlWriter.writeEndElement();
-			
-			// add fields block
-			for (int i = 0; i < vals.size(); i++) {
-				ixmlWriter.writeEmptyElement("field");
-
-				int val_idx = vals.elementAt(i);
-				String _unit = val_idx < units.length ? units[val_idx].trim() : "";
-				ixmlWriter.writeAttribute("localid", String.valueOf(i));
-				ixmlWriter.writeAttribute("name", labels[val_idx].trim());
-				ixmlWriter.writeAttribute("units", _unit);
-			}
-		} catch (Exception e) {
-			System.out.println("Exception in writeNewSection: " + e.getMessage());
-		}
-	}
-	
-	private static void writeDepthAndSensors( IndentingXMLStreamWriter ixmlWriter, final String depth, final Vector<Integer> vals,
-			final String[] tuples, final float ignoreValue )
-	{
-		try {
-			ixmlWriter.writeStartElement("depth");
-			ixmlWriter.writeCharacters(depth);
-			ixmlWriter.writeEndElement(); // <depth>
-	
-			for (int i = 0; i < vals.size(); i++) {
-				String value = tuples[vals.elementAt(i)].trim();
-	
-				if (value.equals("")) {
-					System.out.println("---> Ignore empty " + "value string.");
-					// continue;
-				} else {
-					float floatValue;
-	
-					if (value.contains(",")) {
-						value = value.replace(",", ".");
-					}
-	
-					try {
-						floatValue = Float.valueOf(value);
-					} catch (NumberFormatException e) {
-						// Not a number should just ignore it
-						System.err.println("---> Ignore malformed " + "numbers: " + value);
-						floatValue = Float.NaN;
-					}
-	
-					// Ignore NaN and the ignoreValue match
-					if (floatValue == ignoreValue) {
-						continue;
-					}
-	
-					ixmlWriter.writeStartElement("sensor");
-					ixmlWriter.writeAttribute("id", "" + i);
-					ixmlWriter.writeCharacters(value);
-					ixmlWriter.writeEndElement(); // <sensor>
-				}
-			}
-		} catch (Exception e) {
-			System.out.println("Exception in writeDepthAndSensors(): " + e.getMessage());
-		}
-	}
-	
-	public static void sax_convert(final JDialog owner, final File fin, final File fout, final String fs, final String prefix, final int start, final int end,
-			final int label, final int unit, final String name, final int depth, final Vector<Integer> vals, final DepthMode dm,
-			final boolean useCustomizedSectionName, final float ignoreValue) {
-		System.out.println("Converting...");
-
-		// ProgressDialog progress = new ProgressDialog();
-		CorelyzerApp app = CorelyzerApp.getApp();
-		JProgressBar progress = app.getProgressUI();
-		progress.setString("Converting data");
-		progress.setValue(0);
-		progress.setMaximum(end);
-		progress.setString("");
-		// progress.setVisible(true);
-
-		// prepare XML writer
-		
-		XMLStreamWriter baseXmlWriter = null;
-		IndentingXMLStreamWriter ixmlWriter = null;
-		try {
-			FileOutputStream fos = new FileOutputStream( fout );
-			BufferedOutputStream bos = new BufferedOutputStream( fos );
-			baseXmlWriter = XMLOutputFactory.newInstance().createXMLStreamWriter( bos, "utf-8" );
-			ixmlWriter = new IndentingXMLStreamWriter( baseXmlWriter );
-		} catch ( Exception e ) {
-			System.out.println("Exception converting raw data file to XML: " + e.getMessage() );
-		}
-
-		// line counter
-		int lineCount = 0;
-		boolean needNewSection = true;
-
-		// Vars for auto-section-definition
-		int currentSectionSeqNumber = -1;
-		int currentSectionSamplesCount = 0;
-		float currentSectionDepthOffset = 0.0f;
-
-		try {
-			ixmlWriter.writeStartDocument("utf-8", "1.0");
-			ixmlWriter.writeStartElement("corewall_data");
-
-			// read input file line by line
-			BufferedReader reader = new BufferedReader(new FileReader(fin));
-
-			String curInputLine;
-			String[] labels = {};
-			String[] units = {};
-			String currentSection = "";
-
-			while ((curInputLine = reader.readLine()) != null) {
-				progress.setValue(lineCount);
-
-				// Put it this way in case someone doesn't have a unit line,
-				// he/she will use the label line directly
-				if (lineCount == unit) { // unit
-					units = curInputLine.split(fs);
-				}
-				if (lineCount == label) { // label
-					labels = curInputLine.split(fs);
-				}
-				
-				if (lineCount >= start && lineCount <= end)
-				{
-					String[] tuples = curInputLine.split(fs);
-					String depth_value = tuples[depth].trim();
-					if (depth_value.contains(",")) {
-						depth_value = depth_value.replace(",", ".");
-					}
-
-					if (dm == DepthMode.ACCUM_DEPTH) {
-						if ( needNewSection )
-							currentSectionDepthOffset = Float.valueOf(depth_value);
-						
-						float sectionDepth = Float.valueOf(depth_value) - currentSectionDepthOffset;
-						depth_value = String.valueOf(sectionDepth);
-					}
-
-					if ( needNewSection )
-					{	
-						System.out.println("---> New section at line #" + lineCount);
-
-						if (useCustomizedSectionName) {
-							currentSection = compositeSectionName(prefix, curInputLine, fs, name);
-						} else {
-							currentSectionSeqNumber++;
-							currentSection = prefix + "-" + currentSectionSeqNumber;
-							currentSectionSamplesCount = 0;
-						}
-
-						final String depthUnit = units[depth].trim();
-						writeNewSection( ixmlWriter, currentSectionDepthOffset, currentSection, depthUnit, vals, units, labels );
-						
-						needNewSection = false;
-					}
-
-					writeDepthAndSensors( ixmlWriter, depth_value, vals, tuples, ignoreValue );
-					
-					// time to start a new section?
-					if ( useCustomizedSectionName ) {
-						String mysec = compositeSectionName(prefix, curInputLine, fs, name);
-						needNewSection = !mysec.equals(currentSection);
-					} else {
-						currentSectionSamplesCount++;
-						needNewSection = currentSectionSamplesCount >= maxSamplesPerSection;
-					}
-					
-					// if so, make sure we end the current section
-					if ( needNewSection )
-					{
-						ixmlWriter.writeEndElement(); // <section>
- 
-						// flush buffered writer periodically or buffer will become ginormous
-						// and cause OutOfMemoryErrors.
-						ixmlWriter.flush();
-					}
-				}
-
-				lineCount++;
-			} // end input file line-reading while loop
-			reader.close();
-
-			System.out.println("---> " + lineCount + " lines scanned.");
-			progress.setIndeterminate(true);
-			progress.setString("Writing to output file...");
-
-			ixmlWriter.writeEndElement(); // <corelyzer_data>
-			ixmlWriter.writeEndDocument();
-			ixmlWriter.flush();
-			ixmlWriter.close();
-
-			progress.setIndeterminate(false);
-			progress.setString("Writing to output file... done");
-
-		} catch (Exception e) {
-			// System.err.println("Conversion Error! " + e);
-			JOptionPane.showMessageDialog(owner, "Conversion Error!\n" + e);
-			e.printStackTrace();
-		}
-
-		// progress.dispose();
-		progress.setString("Done");
-		progress.setValue(0);
-
-		System.out.println("---> Done!");
-	}
-	
-	public static void convert(final JDialog owner, final File fin, final File fout, final String fs, final String prefix, final int start, final int end,
-			final int label, final int unit, final String name, final int depth, final Vector<Integer> vals, final DepthMode dm,
-			final boolean useCustomizedSectionName, final float ignoreValue) {
-		System.out.println("Converting...");
-
-		// ProgressDialog progress = new ProgressDialog();
-		CorelyzerApp app = CorelyzerApp.getApp();
-		JProgressBar progress = app.getProgressUI();
-		progress.setString("Converting data");
-		progress.setValue(0);
-		progress.setMaximum(end);
-		progress.setString("");
-		// progress.setVisible(true);
-
-		// prepare XML writer
-		DocumentImpl doc = new DocumentImpl();
-		Element root;
-		Element section_e = doc.createElement("test");
-
-		// line counter
-		int count = 0;
-
-		// Vars for auto-section-definition
-		int currentSectionSeqNumber = -1;
-		int currentSectionSamplesCount = 0;
-		float currentSectionDepthOffset = 0.0f;
-		boolean isOffsetDefined;
-
-		// State var for identifying sections
-		boolean inSection = false;
-
-		String line;
-		String[] labels = {};
-		String[] units = {};
-		String currentSection = "";
-
-		try {
-			doc = new DocumentImpl();
-			root = doc.createElement("corewall_data");
-
-			if (root == null) {
-				System.out.println("NULL!!!");
-			}
-			doc.appendChild(root);
-
-			// read input file line by line
-			BufferedReader reader = new BufferedReader(new FileReader(fin));
-
-			while ((line = reader.readLine()) != null) {
-				progress.setValue(count);
-
-				// Put it this way in case someone doesn't have a unit line,
-				// he/she will use the label line directly
-				if (count == unit) { // unit
-					units = line.split(fs);
-				}
-
-				if (count == label) { // label
-					labels = line.split(fs);
-				} else {
-					if (count < start || count > end) {
-						// skip to next line
-						count++;
-						continue;
-					} else {
-						if (!inSection) {
-							// A new section
-							System.out.println("---> New section at line #" + count);
-
-							isOffsetDefined = false;
-
-							section_e = doc.createElement("section");
-							root.appendChild(section_e);
-							inSection = true;
-
-							if (useCustomizedSectionName) {
-								currentSection = compositeSectionName(prefix, line, fs, name);
-							} else {
-								currentSectionSeqNumber++;
-								currentSectionSamplesCount++;
-								currentSection = prefix + "-" + currentSectionSeqNumber;
-							}
-
-							System.out.println("---> New section [" + currentSection + " created from the beginning");
-
-							// add id block
-							Element id_e = doc.createElement("id");
-							id_e.setTextContent(currentSection);
-							section_e.appendChild(id_e);
-
-							// add depth_unit block
-							Element depthunit_e = doc.createElement("depth_unit");
-							String depth_unit = units[depth].trim();
-							depthunit_e.setTextContent(depth_unit);
-							section_e.appendChild(depthunit_e);
-
-							// add fields block
-							for (int i = 0; i < vals.size(); i++) {
-								Element val_e = doc.createElement("field");
-
-								int val_idx = vals.elementAt(i);
-								val_e.setAttribute("localid", String.valueOf(i));
-								val_e.setAttribute("name", labels[val_idx].trim());
-
-								String _unit = val_idx < units.length ? units[val_idx].trim() : "";
-
-								val_e.setAttribute("units", _unit);
-
-								section_e.appendChild(val_e);
-							}
-
-							// add a depth + several sensors
-							String[] tuples = line.split(fs);
-
-							// depth
-							Element depth_e = doc.createElement("depth");
-
-							String depth_value = tuples[depth].trim();
-							if (depth_value.contains(",")) {
-								depth_value = depth_value.replace(",", ".");
-							}
-
-							// Remember the 1st depth value as the section's
-							// depth offset
-							if (dm == DepthMode.ACCUM_DEPTH) {
-								if (!isOffsetDefined) {
-									section_e.setAttribute("offset", depth_value);
-									currentSectionDepthOffset = Float.valueOf(depth_value);
-									isOffsetDefined = true;
-								}
-
-								float sectionDepth = Float.valueOf(depth_value) - currentSectionDepthOffset;
-
-								depth_value = String.valueOf(sectionDepth);
-							}
-
-							depth_e.setTextContent(depth_value);
-							section_e.appendChild(depth_e);
-
-							// sensors - brg DUPLICATION
-							for (int i = 0; i < vals.size(); i++) {
-								String value = tuples[vals.elementAt(i)].trim();
-
-								if (value.equals("")) {
-									System.out.println("---> Ignore empty " + "value string.");
-									// continue;
-								} else {
-									float floatValue;
-
-									if (value.contains(",")) {
-										value = value.replace(",", ".");
-									}
-
-									try {
-										floatValue = Float.valueOf(value);
-									} catch (NumberFormatException e) {
-										// Not a number should just ignore it
-										System.err.println("---> Ignore malformed " + "numbers: " + value);
-										floatValue = Float.NaN;
-									}
-
-									// Ignore NaN and the ignoreValue match
-									if (floatValue == ignoreValue) {
-										continue;
-									}
-
-									Element value_e = doc.createElement("sensor");
-									value_e.setAttribute("id", "" + i);
-									value_e.setTextContent(value);
-									section_e.appendChild(value_e);
-								}
-							}
-
-						} else {
-							// switch to a new section?
-							boolean isStillInCurrentSection;
-
-							if (useCustomizedSectionName) {
-								String mysec = compositeSectionName(prefix, line, fs, name);
-								isStillInCurrentSection = mysec.equals(currentSection);
-							} else {
-								isStillInCurrentSection = currentSectionSamplesCount < maxSamplesPerSection;
-							}
-
-							if (isStillInCurrentSection) {
-								// Still within a section
-								String[] tuples = line.split(fs);
-
-								if (!useCustomizedSectionName) {
-									currentSectionSamplesCount++;
-								}
-
-								// depth
-								Element depth_e = doc.createElement("depth");
-
-								String depth_value = tuples[depth].trim();
-								if (depth_value.contains(",")) {
-									depth_value = depth_value.replace(",", ".");
-								}
-
-								// Offset "currentSectionDepthOffset" to
-								// to generate the section depth
-								if (dm == DepthMode.ACCUM_DEPTH) {
-									float sectionDepth = Float.valueOf(depth_value) - currentSectionDepthOffset;
-									depth_value = String.valueOf(sectionDepth);
-								}
-
-								depth_e.setTextContent(depth_value);
-								section_e.appendChild(depth_e);
-
-								// sensors - brg DUPLICATION
-								for (int i = 0; i < vals.size(); i++) {
-
-									// Give a special value for missing cells?
-									String value;
-									if (vals.elementAt(i) < tuples.length) {
-										value = tuples[vals.elementAt(i)].trim();
-									} else {
-										value = null;
-									}
-
-									if (value == null || value.trim().equals("")) {
-										System.out.println("---> Ignore empty value " + "string.");
-										// continue;
-									} else {
-										float floatValue;
-
-										if (value.contains(",")) {
-											value = value.replace(",", ".");
-										}
-
-										try {
-											floatValue = Float.valueOf(value);
-										} catch (NumberFormatException e) {
-											// Not a number just ignore it
-											System.err.println("---> Ignore malformed " + "numbers: " + value);
-											floatValue = Float.NaN;
-										}
-
-										// Ignore NaN and the ignoreValue match
-										if (floatValue == ignoreValue) {
-											continue;
-										}
-
-										Element value_e = doc.createElement("sensor");
-										value_e.setAttribute("id", "" + i);
-										value_e.setTextContent(value);
-										section_e.appendChild(value_e);
-									}
-								}
-
-							} else {
-								// A new section
-								System.out.println("---> Switch to New section at line #" + count);
-								isOffsetDefined = false;
-
-								section_e = doc.createElement("section");
-								root.appendChild(section_e);
-								inSection = true;
-
-								if (useCustomizedSectionName) {
-									currentSection = compositeSectionName(prefix, line, fs, name);
-								} else {
-									currentSectionSeqNumber++;
-									currentSection = prefix + "-" + currentSectionSeqNumber;
-
-									currentSectionSamplesCount = 0;
-								}
-
-								System.out.println("---> Another New section [" + currentSection + " created from the last entry of " + "last section");
-								System.out.println("Java VM Heap Size: " + (int)(Runtime.getRuntime().totalMemory() / 1024) + "kB");
-
-								// add id block
-								Element id_e = doc.createElement("id");
-								id_e.setTextContent(currentSection);
-								section_e.appendChild(id_e);
-
-								// add depth_unit block
-								Element depthunit_e = doc.createElement("depth_unit");
-								String depth_unit = units[depth].trim();
-								depthunit_e.setTextContent(depth_unit);
-								section_e.appendChild(depthunit_e);
-
-								// add fields block
-								for (int i = 0; i < vals.size(); i++) {
-									Element val_e = doc.createElement("field");
-
-									int val_idx = vals.elementAt(i);
-
-									val_e.setAttribute("localid", String.valueOf(i));
-									val_e.setAttribute("name", labels[val_idx].trim());
-
-									String _unit = val_idx < units.length ? units[val_idx].trim() : "";
-
-									val_e.setAttribute("units", _unit);
-
-									section_e.appendChild(val_e);
-								}
-
-								// depth & sensors
-								// Still within a section
-								// brg: -1 arg ensures all delimiters are parsed and included in resulting array...without
-								// this arg, tuples can be shorter than vals array resulting in ArrayOutOfBoundsExceptions.
-								String[] tuples = line.split(fs, -1);
-
-								// depth
-								Element depth_e = doc.createElement("depth");
-
-								String depth_value = tuples[depth].trim();
-								if (depth_value.contains(",")) {
-									depth_value = depth_value.replace(",", ".");
-								}
-
-								// Remember the 1st depth value as the section's
-								// depth offset
-								if (dm == DepthMode.ACCUM_DEPTH) {
-									if (!isOffsetDefined) {
-										section_e.setAttribute("offset", depth_value);
-										currentSectionDepthOffset = Float.valueOf(depth_value);
-										isOffsetDefined = true;
-									}
-
-									float sectionDepth = Float.valueOf(depth_value) - currentSectionDepthOffset;
-
-									depth_value = String.valueOf(sectionDepth);
-								}
-
-								depth_e.setTextContent(depth_value);
-								section_e.appendChild(depth_e);
-
-								// sensors
-								for (int i = 0; i < vals.size(); i++) {
-									String value = tuples[vals.elementAt(i)].trim();
-
-									if (value.equals("")) {
-										System.out.println("---> Ignore empty value " + "string.");
-										// continue;
-									} else {
-										float floatValue;
-
-										if (value.contains(",")) {
-											value = value.replace(",", ".");
-										}
-
-										try {
-											floatValue = Float.valueOf(value);
-										} catch (NumberFormatException e) {
-											// Not a number just ignore it
-											System.err.println("---> Ignore malformed " + "numbers: " + value);
-											floatValue = Float.NaN;
-										}
-
-										// Ignore NaN and the ignoreValue match
-										if (floatValue == ignoreValue) {
-											continue;
-										}
-
-										Element value_e = doc.createElement("sensor");
-										value_e.setAttribute("id", "" + i);
-										value_e.setTextContent(value);
-										section_e.appendChild(value_e);
-									} // end of value-null check
-								} // end of for loop
-							} // end of if-isStillInSection check
-						} // end of if-insection-check
-					} // end of if-line-count-range check
-				} // end of if-label-line check
-
-				count++;
-			} // end of while loop
-			reader.close();
-
-			System.out.println("---> " + count + " lines scaned.");
-			progress.setIndeterminate(true);
-			progress.setString("Writing to output file...");
-
-			// Write to file
-			OutputFormat format = new OutputFormat(doc);
-			format.setIndenting(true);
-
-			XMLSerializer serializer = new XMLSerializer(new FileOutputStream(fout), format);
-
-			serializer.serialize(doc);
-
-			progress.setIndeterminate(false);
-			progress.setString("Writing to output file... done");
-
-			/*
-			 * FileOutputStream fos = new FileOutputStream(fout);
-			 * XMLWriter.write(doc, fos); fos.flush(); fos.close();
-			 */
-		} catch (Exception e) {
-			// System.err.println("Conversion Error! " + e);
-			JOptionPane.showMessageDialog(owner, "Conversion Error!\n" + e);
-			e.printStackTrace();
-		}
-
-		// progress.dispose();
-		progress.setString("Done");
-		progress.setValue(0);
-
-		System.out.println("---> Done!");
-	}
-
-	private static boolean isInteger(final String str) {
-		try {
-			Integer.parseInt(str);
-			return true;
-		} catch (NumberFormatException e) {
-			return false;
-		}
-	}
 
 	public static void main(final String[] args) {
 		DataImportWizard wiz = new DataImportWizard(null);
@@ -838,6 +124,9 @@ public class DataImportWizard extends JDialog implements ActionListener, ChangeL
 
 		wiz.setVisible(true);
 	}
+
+	// Data as parsed by OpenCSV
+	List<String[]> parsedData = null;
 
 	// Running mode information
 	RunMode mode = RunMode.CORELYZER;
@@ -920,6 +209,7 @@ public class DataImportWizard extends JDialog implements ActionListener, ChangeL
 			JFileChooser chooser = new JFileChooser();
 			chooser.setDialogTitle("Select import file");
 			chooser.setMultiSelectionEnabled(false);
+			chooser.setCurrentDirectory(DataImportWizard.lastInputFileDirectory);
 			int returnVal = chooser.showOpenDialog(this);
 
 			if (returnVal == JFileChooser.APPROVE_OPTION) {
@@ -970,7 +260,7 @@ public class DataImportWizard extends JDialog implements ActionListener, ChangeL
 			String line = getInputFileLine(startLine);
 			String fs = getFieldSeparatorChar();
 			String pattern = name_column.getText();
-			String compName = compositeSectionName(prefix, line, fs, pattern);
+			String compName = TabularToXMLConversion.compositeSectionName(prefix, line, fs, pattern);
 			if (compName.length() > 0)
 				previewStr = compName;
 		}
@@ -993,6 +283,12 @@ public class DataImportWizard extends JDialog implements ActionListener, ChangeL
 		for (FieldSeparator fs : FieldSeparator.values()) {
 			fsComboBox.addItem(fs);
 		}
+		fsComboBox.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				System.out.println("Delimiter changed, reprocessing...");
+				setInputFile(inputFile); // reprocess current input file with new delimiter
+			}
+		});
 		
 		fipp.add(new JLabel("Selected File: "));
 		fipp.add(fileLabel);
@@ -1033,67 +329,74 @@ public class DataImportWizard extends JDialog implements ActionListener, ChangeL
 		dipp.add(new JLabel("Depth Mode: "));
 		dipp.add(depthModeComboBox, "growx, wrap");
 		
+		final JLabel name_label = new JLabel("Section Name Column: ");
+		name_column = new JTextField("1");
+		JButton multiColumnButton = new JButton("Multiple Section Columns...");
+		// JPanel sectionNamePanel = new JPanel(new MigLayout("insets 5"));
+		dipp.add(name_label);
+		dipp.add(name_column, "growx");
+		dipp.add(multiColumnButton, "span 2, wrap, align center");
+		// dipp.add(sectionNamePanel, "growx, span, wrap");
+
 		// value to ignore
-		dipp.add(new JLabel("Exclude Specific Value: "), "span 4, split 2");
+		dipp.add(new JLabel("Ignore Values: "), "span 4, split 2");
 		ignore_values = new JTextField("");
 		dipp.add(ignore_values, "growx");
 
 		panel.add(dipp);
 		
 		// Section Name subpanel
-		JPanel snpp = new JPanel(new MigLayout("insets 5", "[grow]", ""));
-		snpp.setBorder(BorderFactory.createTitledBorder("Section Name"));
+		// JPanel snpp = new JPanel(new MigLayout("insets 5", "[grow]", ""));
+		// snpp.setBorder(BorderFactory.createTitledBorder("Section Name"));
 		
-		final String snht = new String("<html>If your data includes a column with full section names, " +
-				"enter the column number in the Column/Pattern field. " +
-				"If components of the section name are in separate columns, " +
-				"they can be flexibly combined by entering a pattern of column numbers " +
-				"and separators. This pattern will be applied per-row. " +
-				"The contents of the Prefix field, if any, will be prepended with a trailing hyphen.<br/>" +
-				"Examples:<ul><li>  1,-,2 with no Prefix: '[col1]-[col2]'</li>" +
-				"<li>3,2,-,4  with Prefix BOB: 'BOB-[col3][col2]-[col4]'</li>" +
-				"<li>7,@@@,1,2,3 with Prefix hello: 'hello-[col7]@@@[col1][col2][col3]'</li></ul></html>");
-		final JLabel sectionNameHelpText = new JLabel(snht);
-		snpp.add(sectionNameHelpText, "span");
+		// final String snht = new String("<html>If your data includes a column with full section names, " +
+		// 		"enter the column number in the Column/Pattern field. " +
+		// 		"If components of the section name are in separate columns, " +
+		// 		"they can be flexibly combined by entering a pattern of column numbers " +
+		// 		"and separators. This pattern will be applied per-row. " +
+		// 		"The contents of the Prefix field, if any, will be prepended with a trailing hyphen.<br/>" +
+		// 		"Examples:<ul><li>  1,-,2 with no Prefix: '[col1]-[col2]'</li>" +
+		// 		"<li>3,2,-,4  with Prefix BOB: 'BOB-[col3][col2]-[col4]'</li>" +
+		// 		"<li>7,@@@,1,2,3 with Prefix hello: 'hello-[col7]@@@[col1][col2][col3]'</li></ul></html>");
+		// final JLabel sectionNameHelpText = new JLabel(snht);
+		// snpp.add(sectionNameHelpText, "span");
 		
-		final JLabel name_label = new JLabel("Column/Pattern: ");
-		name_column = new JTextField("1");
 		
 		final JLabel prefix_label = new JLabel("Prefix: ");
 		name_prefix = new JTextField();
 		
-		DocumentListener dl = new DocumentListener() {
-			public void changedUpdate(DocumentEvent e) { updateSectionNamePreview(); }
-			public void insertUpdate(DocumentEvent e) { updateSectionNamePreview(); }
-			public void removeUpdate(DocumentEvent e) {updateSectionNamePreview(); }
-		};
+		// DocumentListener dl = new DocumentListener() {
+		// 	public void changedUpdate(DocumentEvent e) { updateSectionNamePreview(); }
+		// 	public void insertUpdate(DocumentEvent e) { updateSectionNamePreview(); }
+		// 	public void removeUpdate(DocumentEvent e) {updateSectionNamePreview(); }
+		// };
 		
-		name_column.getDocument().addDocumentListener(dl);
-		name_prefix.getDocument().addDocumentListener(dl);
+		// name_column.getDocument().addDocumentListener(dl);
+		// name_prefix.getDocument().addDocumentListener(dl);
 
-		JPanel secDataPanel = new JPanel(new MigLayout("", "[][grow]15[][grow]", ""));
-		secDataPanel.add(name_label);
-		secDataPanel.add(name_column, "growx, wmin 150");
-		secDataPanel.add(prefix_label);
-		secDataPanel.add(name_prefix, "growx, wmin 150");
-		snpp.add(secDataPanel, "wrap");
+		// JPanel secDataPanel = new JPanel(new MigLayout("", "[][grow]15[][grow]", ""));
+		// secDataPanel.add(name_label);
+		// secDataPanel.add(name_column, "growx, wmin 150");
+		// secDataPanel.add(prefix_label);
+		// secDataPanel.add(name_prefix, "growx, wmin 150");
+		// snpp.add(secDataPanel, "wrap");
 		
-		JPanel previewPanel = new JPanel(new MigLayout("insets 5", "[grow][]", ""));
-		previewPanel.setBorder(BorderFactory.createTitledBorder("Section Name Preview"));
-		sectionNamePreview = new JLabel();
-		java.awt.Font curFont = sectionNamePreview.getFont();
-		sectionNamePreview.setFont(curFont.deriveFont(java.awt.Font.BOLD));
-		previewPanel.add(sectionNamePreview, "grow");
-		JButton updatePreview = new JButton("Update Preview");
-		updatePreview.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				updateSectionNamePreview();
-			}
-		});
-		previewPanel.add(updatePreview);
-		snpp.add(previewPanel, "span, growx, wrap");
+		// JPanel previewPanel = new JPanel(new MigLayout("insets 5", "[grow][]", ""));
+		// previewPanel.setBorder(BorderFactory.createTitledBorder("Section Name Preview"));
+		// sectionNamePreview = new JLabel();
+		// java.awt.Font curFont = sectionNamePreview.getFont();
+		// sectionNamePreview.setFont(curFont.deriveFont(java.awt.Font.BOLD));
+		// previewPanel.add(sectionNamePreview, "grow");
+		// JButton updatePreview = new JButton("Update Preview");
+		// updatePreview.addActionListener(new ActionListener() {
+		// 	public void actionPerformed(ActionEvent e) {
+		// 		updateSectionNamePreview();
+		// 	}
+		// });
+		// previewPanel.add(updatePreview);
+		// snpp.add(previewPanel, "span, growx, wrap");
 		
-		// panel.add(snpp);
+		// panel.add(sectionNamePanel);
 		
 		return panel;
 	}
@@ -1115,10 +418,13 @@ public class DataImportWizard extends JDialog implements ActionListener, ChangeL
 	private void loadInputFile(final File f) {
 		if (f.exists()) {
 			try {
-				CSVReader reader = new CSVReader(new FileReader(f));
-				List<String[]> lines = reader.readAll();
+				CSVParser parser = new CSVParserBuilder().withSeparator(getFieldSeparatorChar().charAt(0)).build();
+				CSVReader reader = new CSVReaderBuilder(new FileReader(f)).withCSVParser(parser).build();
+				parsedData = reader.readAll();
+				// System.out.println("Parsed data has " + lines.get(0).length + " columns");
+				// System.out.println("Parsed first data row has " + lines.get(2).length + " columns");
 				reader.close();
-				fileContent.setModel(new OpenCSVTableModel(lines));
+				fileContent.setModel(new OpenCSVTableModel(parsedData));
 
 				// if file is parsed successfully...
 				fileContent.getColumnModel().getColumn(0).setCellRenderer(new RowColumnNumberRenderer(false));
@@ -1178,7 +484,7 @@ public class DataImportWizard extends JDialog implements ActionListener, ChangeL
 			return;
 		}
 
-		// make sure outputFile end with .xml
+		// make sure outputFile ends with .xml
 		outputFile = chooser.getSelectedFile().getAbsoluteFile();
 		String path = outputFile.getAbsolutePath();
 		path = path.replace('\\', '/');
@@ -1201,17 +507,17 @@ public class DataImportWizard extends JDialog implements ActionListener, ChangeL
 
 		try {
 			// Users assume line/column numbers starts from '1' instead of '0'
-			int start = Integer.parseInt(this.start_number.getText()) - 1;
-			int end = Integer.parseInt(this.end_number.getText()) - 1;
-			int label = Integer.parseInt(this.label_number.getText()) - 1;
-			int unit = Integer.parseInt(this.unit_number.getText()) - 1;
+			final int startLine = Integer.parseInt(this.start_number.getText()) - 1;
+			final int endLine = Integer.parseInt(this.end_number.getText()) - 1;
+			final int labelLine = Integer.parseInt(this.label_number.getText()) - 1;
+			final int unitLine = Integer.parseInt(this.unit_number.getText()) - 1;
 
-			final String fs = getFieldSeparatorChar();
-			String prefix = name_prefix.getText();
-			String name = name_column.getText();
-			int depth = Integer.parseInt(this.depth_column.getText()) - 1;
+			// final String fs = getFieldSeparatorChar();
+			final String prefix = name_prefix.getText();
+			final String sectionNameCol = name_column.getText();
+			final int depthCol = Integer.parseInt(this.depth_column.getText()) - 1;
 
-			boolean useCustomizedSectionName = (prefix.length() > 0 || name.length() > 0);
+			final boolean useCustomizedSectionName = (prefix.length() > 0 || sectionNameCol.length() > 0);
 			DepthMode dm = (DepthMode) depthModeComboBox.getSelectedItem();
 
 			float ignoreValue;
@@ -1232,7 +538,7 @@ public class DataImportWizard extends JDialog implements ActionListener, ChangeL
 			}
 
 			// might need a progress thingy
-			convert(inputFile, outputFile, fs, prefix, start, end, label, unit, name, depth, vals, dm, useCustomizedSectionName, ignoreValue);
+			TabularToXMLConversion.convertOpenCSV(this, this.parsedData, outputFile, prefix, startLine, endLine, labelLine, unitLine, sectionNameCol, depthCol, vals, dm, useCustomizedSectionName, ignoreValue);
 		} catch (NumberFormatException ex) {
 			JOptionPane.showMessageDialog(this, "One or more fields contains an invalid number");
 			return;
@@ -1253,6 +559,7 @@ public class DataImportWizard extends JDialog implements ActionListener, ChangeL
 
 	public void setInputFile(final File f) {
 		this.inputFile = f;
+		DataImportWizard.lastInputFileDirectory = new File(f.getAbsolutePath());
 		loadInputFile(this.inputFile);
 	}
 
@@ -1274,7 +581,7 @@ public class DataImportWizard extends JDialog implements ActionListener, ChangeL
 
 	private void setupUI() {
 		this.setTitle("Plain Text Data Import");
-		this.setSize(600, 800);
+		this.setSize(600, 600);
 		this.setLocation(400, 50);
 
 		// layout
@@ -1315,6 +622,7 @@ public class DataImportWizard extends JDialog implements ActionListener, ChangeL
 		fileContent.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 		JScrollPane sp = new JScrollPane(fileContent, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
 		sp.setBorder(BorderFactory.createTitledBorder("File Content"));
+		sp.setBackground(p.getBackground()); // override default white backvground with root panel's background
 		this.add(sp, BorderLayout.CENTER);
 	}
 
@@ -1395,7 +703,15 @@ class OpenCSVTableModel extends AbstractTableModel {
 		return data.get(0).length + 1;
 	}
 	public Object getValueAt(int row, int col) {
-		return col == 0 ? new Integer(row + 1).toString() : data.get(row)[col - 1];
+		if (col == 0) {
+			return new Integer(row + 1).toString();
+		 } else {
+			final int adjCol = col - 1;
+			if (data.get(row).length > (adjCol)) {
+				return data.get(row)[adjCol];
+			}
+		 }
+		 return "";
 	}
 	public boolean isCellEditable(int row, int col) { return false; }
 	public void setValueAt(Object value, int row, int col) { return; }

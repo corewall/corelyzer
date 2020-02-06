@@ -30,8 +30,10 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.Vector;
 
+import corelyzer.data.DepthMode;
+import corelyzer.data.TabularToXMLConversion;
+
 import corelyzer.ui.CorelyzerApp;
-import corelyzer.ui.DataImportWizard;
 import corelyzer.util.FileUtility;
 
 public class CRDepthValueDataLoader {
@@ -125,8 +127,8 @@ public class CRDepthValueDataLoader {
 		// String name, int depth, Vector<Integer> vals,
 		// DepthMode dm, boolean useCustomizedSectionName,
 		// float ignoreValue)
-		DataImportWizard.convert(f, outputFile, fs, prefix, dataStart, dataEnd, startingLine, unitLabel, null, depthColumn, vals,
-				DataImportWizard.DepthMode.ACCUM_DEPTH, false, -999.2500f);
+		TabularToXMLConversion.convert(f, outputFile, fs, prefix, dataStart, dataEnd, startingLine, unitLabel, null, depthColumn, vals,
+				DepthMode.ACCUM_DEPTH, false, -999.2500f);
 
 		return outputFile;
 	}

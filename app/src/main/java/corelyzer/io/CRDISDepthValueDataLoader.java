@@ -36,7 +36,9 @@ import java.util.Vector;
 import corelyzer.data.CRPreferences;
 import corelyzer.data.CoreSection;
 import corelyzer.data.CoreSectionGraph;
+import corelyzer.data.DepthMode;
 import corelyzer.data.Session;
+import corelyzer.data.TabularToXMLConversion;
 import corelyzer.data.TrackSceneNode;
 import corelyzer.data.UnitLength;
 import corelyzer.data.WellLogDataSet;
@@ -44,7 +46,6 @@ import corelyzer.data.WellLogTable;
 import corelyzer.data.coregraph.CoreGraph;
 import corelyzer.graphics.SceneGraph;
 import corelyzer.ui.CorelyzerApp;
-import corelyzer.ui.DataImportWizard;
 import corelyzer.util.FileUtility;
 
 /*
@@ -294,8 +295,8 @@ public class CRDISDepthValueDataLoader {
 
 //		DataImportWizard.convert(f, outputFile, this.fileSeparator, sectionPrefix, this.dataStartLine, this.dataEndLine, this.labelLine, this.unitLine, null,
 //				this.depthColumn, vals, DataImportWizard.DepthMode.ACCUM_DEPTH, false, -999.2500f);
-		DataImportWizard.sax_convert(f, outputFile, this.fileSeparator, sectionPrefix, this.dataStartLine, this.dataEndLine, this.labelLine, this.unitLine, null,
-				this.depthColumn, vals, DataImportWizard.DepthMode.ACCUM_DEPTH, false, -999.2500f);
+		TabularToXMLConversion.sax_convert(f, outputFile, this.fileSeparator, sectionPrefix, this.dataStartLine, this.dataEndLine, this.labelLine, this.unitLine, null,
+				this.depthColumn, vals, DepthMode.ACCUM_DEPTH, false, -999.2500f);
 
 		return outputFile;
 	}
