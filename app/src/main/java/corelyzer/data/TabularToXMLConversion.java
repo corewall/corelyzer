@@ -20,7 +20,7 @@ import org.w3c.dom.Element;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamWriter;
 import javanet.staxutils.IndentingXMLStreamWriter;
-
+import corelyzer.data.tabular.OpenCSVParser;
 import corelyzer.ui.CorelyzerApp;
 
 
@@ -120,13 +120,13 @@ public class TabularToXMLConversion {
 		sax_convert(null, fin, fout, fs, prefix, start, end, label, unit, name, depth, vals, dm, useCustomizedSectionName, ignoreValue);
 	}
 	
-	private static void writeNewSection(IndentingXMLStreamWriter ixmlWriter, final float depthOffset, final String currentSection, 
+	private static void writeNewSection(IndentingXMLStreamWriter ixmlWriter, final String depthOffset, final String currentSection, 
 			final String depthUnit,	final Vector<Integer> vals, final String[] units, final String[] labels)
 	{
 		try { 
 			ixmlWriter.writeStartElement("section");
 			
-			ixmlWriter.writeAttribute("offset", Float.toString(depthOffset));
+			ixmlWriter.writeAttribute("offset", depthOffset);
 			
 			ixmlWriter.writeStartElement("id");
 			ixmlWriter.writeCharacters(currentSection);
@@ -220,7 +220,7 @@ public class TabularToXMLConversion {
 		try {
 			FileOutputStream fos = new FileOutputStream(fout);
 			BufferedOutputStream bos = new BufferedOutputStream(fos);
-			baseXmlWriter = XMLOutputFactory.newInstance().createXMLStreamWriter(bos, "utf-8");
+			baseXmlWriter = XMLOutputFactory.newInstance().createXMLStreamWriter(bos, "UTF-8");
 			ixmlWriter = new IndentingXMLStreamWriter(baseXmlWriter);
 		} catch (Exception e) {
             System.out.println("Exception converting raw data file to XML: " + e.getMessage());
@@ -237,7 +237,7 @@ public class TabularToXMLConversion {
 		float currentSectionDepthOffset = 0.0f;
 
 		try {
-			ixmlWriter.writeStartDocument("utf-8", "1.0");
+			ixmlWriter.writeStartDocument("UTF-8", "1.0");
             ixmlWriter.writeStartElement("corewall_data");
             
             int curLine = 0;
@@ -252,21 +252,42 @@ public class TabularToXMLConversion {
 				// he/she will use the label line directly
 				if (curLine == unitLine) { // unit
                     units = table.get(curLine);
-                    continue;
 				}
 				if (curLine == labelLine) { // label
                     labels = table.get(curLine);
-                    continue;
                 }
-                if (curLine < startLine) {
+                if (curLine < startLine || curLine == unitLine || curLine == labelLine) {
                     continue;
+				}
+				
+				String[] tuples = table.get(curLine);
+
+                // time to start a new section?
+                if (useCustomizedSectionName) {
+                    String mysec = compositeSectionName(prefix, tuples, sectionNameCol);
+					needNewSection = !mysec.equals(currentSection);
+					// System.out.println("curLine = " + curLine + ": current section = " + currentSection + ", composite = " + mysec + ". New section = " + needNewSection);
+                } else {
+                    currentSectionSamplesCount++;
+                    needNewSection = currentSectionSamplesCount >= maxSamplesPerSection;
+                }
+                
+                // if so, make sure we end the current section
+                if (needNewSection && currentSection != "")
+                {
+                    ixmlWriter.writeEndElement(); // <section>
+
+                    // flush buffered writer periodically or buffer will become ginormous
+                    // and cause OutOfMemoryErrors.
+                    ixmlWriter.flush();
                 }
 
-                String[] tuples = table.get(curLine);
                 String depth_value = tuples[depthCol].trim();
                 if (depth_value.contains(",")) {
                     depth_value = depth_value.replace(",", ".");
                 }
+
+                final String sectionOffsetString = depth_value;
 
                 if (dm == DepthMode.ACCUM_DEPTH) {
                     if (needNewSection)
@@ -278,7 +299,7 @@ public class TabularToXMLConversion {
 
                 if (needNewSection)
                 {	
-                    System.out.println("---> New section at line # (0-based)" + curLine);
+                    System.out.println("---> New section at line # (0-based) " + curLine);
 
                     if (useCustomizedSectionName) {
                         currentSection = compositeSectionName(prefix, tuples, sectionNameCol);
@@ -289,31 +310,12 @@ public class TabularToXMLConversion {
                     }
 
                     final String depthUnit = units[depthCol].trim();
-                    writeNewSection(ixmlWriter, currentSectionDepthOffset, currentSection, depthUnit, vals, units, labels);
+                    writeNewSection(ixmlWriter, sectionOffsetString, currentSection, depthUnit, vals, units, labels);
                     
                     needNewSection = false;
                 }
 
                 writeDepthAndSensors(ixmlWriter, depth_value, vals, tuples, ignoreValue);
-                
-                // time to start a new section?
-                if (useCustomizedSectionName) {
-                    String mysec = compositeSectionName(prefix, tuples, sectionNameCol);
-                    needNewSection = !mysec.equals(currentSection);
-                } else {
-                    currentSectionSamplesCount++;
-                    needNewSection = currentSectionSamplesCount >= maxSamplesPerSection;
-                }
-                
-                // if so, make sure we end the current section
-                if (needNewSection)
-                {
-                    ixmlWriter.writeEndElement(); // <section>
-
-                    // flush buffered writer periodically or buffer will become ginormous
-                    // and cause OutOfMemoryErrors.
-                    ixmlWriter.flush();
-                }
             }
 			// progress.setIndeterminate(true);
 			// progress.setString("Writing to output file...");
@@ -428,7 +430,7 @@ public class TabularToXMLConversion {
 						}
 
 						final String depthUnit = units[depth].trim();
-						writeNewSection( ixmlWriter, currentSectionDepthOffset, currentSection, depthUnit, vals, units, labels );
+						writeNewSection(ixmlWriter, depth_value, currentSection, depthUnit, vals, units, labels);
 						
 						needNewSection = false;
 					}
@@ -490,12 +492,12 @@ public class TabularToXMLConversion {
 		System.out.println("Converting...");
 
 		// ProgressDialog progress = new ProgressDialog();
-		CorelyzerApp app = CorelyzerApp.getApp();
-		JProgressBar progress = app.getProgressUI();
-		progress.setString("Converting data");
-		progress.setValue(0);
-		progress.setMaximum(end);
-		progress.setString("");
+		// CorelyzerApp app = CorelyzerApp.getApp();
+		// JProgressBar progress = app.getProgressUI();
+		// progress.setString("Converting data");
+		// progress.setValue(0);
+		// progress.setMaximum(end);
+		// progress.setString("");
 		// progress.setVisible(true);
 
 		// prepare XML writer
@@ -533,7 +535,7 @@ public class TabularToXMLConversion {
 			BufferedReader reader = new BufferedReader(new FileReader(fin));
 
 			while ((line = reader.readLine()) != null) {
-				progress.setValue(count);
+				// progress.setValue(count);
 
 				// Put it this way in case someone doesn't have a unit line,
 				// he/she will use the label line directly
@@ -857,19 +859,20 @@ public class TabularToXMLConversion {
 			reader.close();
 
 			System.out.println("---> " + count + " lines scaned.");
-			progress.setIndeterminate(true);
-			progress.setString("Writing to output file...");
+			// progress.setIndeterminate(true);
+			// progress.setString("Writing to output file...");
 
 			// Write to file
 			OutputFormat format = new OutputFormat(doc);
-			format.setIndenting(true);
+            format.setIndenting(true);
+            format.setIndent(2);
 
 			XMLSerializer serializer = new XMLSerializer(new FileOutputStream(fout), format);
 
 			serializer.serialize(doc);
 
-			progress.setIndeterminate(false);
-			progress.setString("Writing to output file... done");
+			// progress.setIndeterminate(false);
+			// progress.setString("Writing to output file... done");
 
 			/*
 			 * FileOutputStream fos = new FileOutputStream(fout);
@@ -882,8 +885,8 @@ public class TabularToXMLConversion {
 		}
 
 		// progress.dispose();
-		progress.setString("Done");
-		progress.setValue(0);
+		// progress.setString("Done");
+		// progress.setValue(0);
 
 		System.out.println("---> Done!");
 	}
@@ -896,4 +899,111 @@ public class TabularToXMLConversion {
 			return false;
 		}
     }
+
+    public static void main(String[] args) {
+        // Testing...parse same file with equivalent parameters with old and new method,
+		// hopefully get the same resulting XML.
+		
+		// Set up proper testing framework and directory structure???
+		// Simpler option: pass path to testdata dir in main() args from launch.json...but this doesn't seem to work, WTF???
+		if (args.length == 0) {
+			System.out.println("Required argument: path to testdata dir");
+			return;
+		} else {
+			System.out.println("args[0] = " + args[0]);
+		}
+		final File testdataDir = new File(args[0]);
+		// System.out.println("root testdata dir = " + testdataDir.getAbsolutePath());
+		// test1 - single section, labelLine = 0 (no unitLine), import single value (column 11, Bulk Density (GRA))
+        {
+			File f = new File(testdataDir, "318-U1357-GRA-AB_secnames_1sec.csv");
+			if (f.exists()) {
+				System.out.println("It exists! " + f.getAbsolutePath());
+			} else {
+				System.out.println("Doesn't exist! " + f.getAbsolutePath());
+			}
+            Vector<Integer> vals = new Vector<Integer>();
+            vals.add(new Integer(11));
+            test(f, "/Users/lcdev/Desktop/test1", ",", "", 1, 60, 0, 0, "1", 9, vals, DepthMode.ACCUM_DEPTH, true, Float.NaN);
+        }
+
+		// test2 - as above with unitLine = 1
+        {
+            File f = new File(testdataDir, "318-U1357-GRA-AB_secnames_1sec_unitsrow.csv");
+            Vector<Integer> vals = new Vector<Integer>();
+            vals.add(new Integer(11));
+            test(f, "/Users/lcdev/Desktop/test2", ",", "", 2, 61, 0, 1, "1", 9, vals, DepthMode.ACCUM_DEPTH, true, Float.NaN);
+		}
+		
+		// test3 - as above with DepthMode.SECTION_DEPTH
+        {
+            File f = new File(testdataDir, "318-U1357-GRA-AB_secnames_1sec_unitsrow.csv");
+            Vector<Integer> vals = new Vector<Integer>();
+            vals.add(new Integer(11));
+            test(f, "/Users/lcdev/Desktop/test3", ",", "", 2, 61, 0, 1, "1", 9, vals, DepthMode.SECTION_DEPTH, true, Float.NaN);
+		}
+
+		// test4 - goofy out-of-order section 1, labelLine = 0 unitLine = 1
+        {
+            File f = new File(testdataDir, "318-U1357-GRA-AB_secnames_1sec_out_of_order.csv");
+            Vector<Integer> vals = new Vector<Integer>();
+            vals.add(new Integer(11));
+            test(f, "/Users/lcdev/Desktop/test4", ",", "", 2, 121, 0, 1, "1", 9, vals, DepthMode.ACCUM_DEPTH, true, Float.NaN);
+		}		
+
+		// test5 - two sections, labelLine = 0 unitLine = 1
+        {
+            File f = new File(testdataDir, "318-U1357-GRA-AB_secnames_2secs.csv");
+            Vector<Integer> vals = new Vector<Integer>();
+            vals.add(new Integer(11));
+            test(f, "/Users/lcdev/Desktop/test5", ",", "", 2, 244, 0, 1, "1", 9, vals, DepthMode.ACCUM_DEPTH, true, Float.NaN);
+		}
+		
+		// test6 - many sections and cores, labelLine = 0, unitLine = 1
+		{
+            File f = new File(testdataDir, "318-U1357-GRA-AB_secnames.csv");
+            Vector<Integer> vals = new Vector<Integer>();
+            vals.add(new Integer(11));
+            test(f, "/Users/lcdev/Desktop/test6", ",", "", 2, 2392, 0, 1, "1", 9, vals, DepthMode.ACCUM_DEPTH, true, Float.NaN);
+		}		
+
+		// test7 - many sections and cores, properly sorted! labelLine = 0, unitLine = 1
+		{
+            File f = new File(testdataDir, "318-U1357-GRA-AB_secnames_sorted.csv");
+            Vector<Integer> vals = new Vector<Integer>();
+            vals.add(new Integer(11));
+            test(f, "/Users/lcdev/Desktop/test7", ",", "", 2, 2392, 0, 1, "1", 9, vals, DepthMode.ACCUM_DEPTH, true, Float.NaN);
+		}		
+	
+    }
+
+    public static void test(File inFile, String baseOutPath, String delimiter, String prefix, int startLine,
+        int endLine, int labelLine, int unitLine, String sectionNameCol, int depthCol, Vector<Integer> vals,
+        DepthMode dm, boolean customSectionName, float ignoreVal) {
+        oldConvert(inFile, baseOutPath, delimiter, prefix, startLine, endLine, labelLine, unitLine, sectionNameCol, depthCol, vals, dm, customSectionName, ignoreVal);
+        newConvert(inFile, baseOutPath, delimiter, prefix, startLine, endLine, labelLine, unitLine, sectionNameCol, depthCol, vals, dm, customSectionName, ignoreVal);
+        // do a manual diff for now...
+    }
+
+    public static void oldConvert(File inFile, String baseOutPath, String delimiter, String prefix, int startLine,
+        int endLine, int labelLine, int unitLine, String sectionNameCol, int depthCol, Vector<Integer> vals,
+        DepthMode dm, boolean customSectionName, float ignoreVal)
+    {
+        File outFile = new File(baseOutPath + "_old.xml");
+        TabularToXMLConversion.convert(inFile, outFile, delimiter, prefix, startLine, endLine, labelLine, unitLine, sectionNameCol, depthCol, vals, DepthMode.ACCUM_DEPTH, customSectionName, ignoreVal);
+    }
+
+    public static void newConvert(File inFile, String baseOutPath, String delimiter, String prefix, int startLine,
+        int endLine, int labelLine, int unitLine, String sectionNameCol, int depthCol, Vector<Integer> vals,
+        DepthMode dm, boolean customSectionName, float ignoreVal)
+    {
+        try {
+            List<String[]> parsedData = OpenCSVParser.parseCSV(inFile, delimiter.charAt(0));
+            File outFile = new File(baseOutPath + "_new.xml");
+            TabularToXMLConversion.convertOpenCSV(null, parsedData, outFile, prefix, startLine, endLine, labelLine, unitLine, sectionNameCol, depthCol, vals, DepthMode.ACCUM_DEPTH, customSectionName, ignoreVal);
+        } catch (Exception e) {
+            System.out.println("Oh dear. " + e.getMessage());
+        }
+    }
+
 }

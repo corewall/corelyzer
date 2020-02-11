@@ -63,16 +63,12 @@ import javax.swing.table.TableCellRenderer;
 
 import net.miginfocom.swing.MigLayout;
 
-
-import com.opencsv.CSVParser;
-import com.opencsv.CSVParserBuilder;
-import com.opencsv.CSVReader;
-import com.opencsv.CSVReaderBuilder;
 import com.opencsv.exceptions.CsvException;
 
 import corelyzer.helper.ExampleFileFilter;
 import corelyzer.data.DepthMode;
 import corelyzer.data.TabularToXMLConversion;
+import corelyzer.data.tabular.OpenCSVParser;
 
 /**
  * A text data import wizard that let user specify what their table data looks
@@ -112,7 +108,7 @@ public class DataImportWizard extends JDialog implements ActionListener, ChangeL
 		DataImportWizard wiz = new DataImportWizard(null);
 		wiz.setRunningMode(RunMode.STANDALONE);
 
-		final String inputFile = "/Users/lcdev/proj/corewall/corewall_data/Corelyzer/318-U1357/data/318-U1357-GRA-AB.csv";
+		final String inputFile = "/Users/lcdev/proj/corewall/corewall_data/Corelyzer/318-U1357/data/318-U1357-GRA-AB_secnames_sorted.csv";
 		if (args.length < 1) {
 			wiz.setInputFile(inputFile);
 			// System.out.println("Usage: java corelyzer.ui.DataImportWizard <input>.");
@@ -338,12 +334,6 @@ public class DataImportWizard extends JDialog implements ActionListener, ChangeL
 		dipp.add(multiColumnButton, "span 2, wrap, align center");
 		// dipp.add(sectionNamePanel, "growx, span, wrap");
 
-		// value to ignore
-		dipp.add(new JLabel("Ignore Values: "), "span 4, split 2");
-		ignore_values = new JTextField("");
-		dipp.add(ignore_values, "growx");
-
-		panel.add(dipp);
 		
 		// Section Name subpanel
 		// JPanel snpp = new JPanel(new MigLayout("insets 5", "[grow]", ""));
@@ -365,15 +355,15 @@ public class DataImportWizard extends JDialog implements ActionListener, ChangeL
 		final JLabel prefix_label = new JLabel("Prefix: ");
 		name_prefix = new JTextField();
 		
-		// DocumentListener dl = new DocumentListener() {
-		// 	public void changedUpdate(DocumentEvent e) { updateSectionNamePreview(); }
-		// 	public void insertUpdate(DocumentEvent e) { updateSectionNamePreview(); }
-		// 	public void removeUpdate(DocumentEvent e) {updateSectionNamePreview(); }
-		// };
+		DocumentListener dl = new DocumentListener() {
+			public void changedUpdate(DocumentEvent e) { updateSectionNamePreview(); }
+			public void insertUpdate(DocumentEvent e) { updateSectionNamePreview(); }
+			public void removeUpdate(DocumentEvent e) {updateSectionNamePreview(); }
+		};
 		
-		// name_column.getDocument().addDocumentListener(dl);
-		// name_prefix.getDocument().addDocumentListener(dl);
-
+		name_column.getDocument().addDocumentListener(dl);
+		name_prefix.getDocument().addDocumentListener(dl);
+		
 		// JPanel secDataPanel = new JPanel(new MigLayout("", "[][grow]15[][grow]", ""));
 		// secDataPanel.add(name_label);
 		// secDataPanel.add(name_column, "growx, wmin 150");
@@ -381,22 +371,30 @@ public class DataImportWizard extends JDialog implements ActionListener, ChangeL
 		// secDataPanel.add(name_prefix, "growx, wmin 150");
 		// snpp.add(secDataPanel, "wrap");
 		
-		// JPanel previewPanel = new JPanel(new MigLayout("insets 5", "[grow][]", ""));
-		// previewPanel.setBorder(BorderFactory.createTitledBorder("Section Name Preview"));
-		// sectionNamePreview = new JLabel();
-		// java.awt.Font curFont = sectionNamePreview.getFont();
-		// sectionNamePreview.setFont(curFont.deriveFont(java.awt.Font.BOLD));
-		// previewPanel.add(sectionNamePreview, "grow");
-		// JButton updatePreview = new JButton("Update Preview");
-		// updatePreview.addActionListener(new ActionListener() {
-		// 	public void actionPerformed(ActionEvent e) {
-		// 		updateSectionNamePreview();
-		// 	}
-		// });
-		// previewPanel.add(updatePreview);
+		JPanel previewPanel = new JPanel(new MigLayout("insets 5", "[grow][]", ""));
+		previewPanel.setBorder(BorderFactory.createTitledBorder("Section Name Preview"));
+		sectionNamePreview = new JLabel();
+		java.awt.Font curFont = sectionNamePreview.getFont();
+		sectionNamePreview.setFont(curFont.deriveFont(java.awt.Font.BOLD));
+		previewPanel.add(sectionNamePreview, "grow");
+		JButton updatePreview = new JButton("Update Preview");
+		updatePreview.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				updateSectionNamePreview();
+			}
+		});
+		previewPanel.add(updatePreview);
+		dipp.add(previewPanel, "growx, span 4, split 2, wrap");
+		// panel.add(previewPanel);
 		// snpp.add(previewPanel, "span, growx, wrap");
 		
 		// panel.add(sectionNamePanel);
+		// value to ignore
+		dipp.add(new JLabel("Ignore Values: "), "span 4, split 2");
+		ignore_values = new JTextField("");
+		dipp.add(ignore_values, "growx");
+
+		panel.add(dipp);
 		
 		return panel;
 	}
@@ -418,18 +416,14 @@ public class DataImportWizard extends JDialog implements ActionListener, ChangeL
 	private void loadInputFile(final File f) {
 		if (f.exists()) {
 			try {
-				CSVParser parser = new CSVParserBuilder().withSeparator(getFieldSeparatorChar().charAt(0)).build();
-				CSVReader reader = new CSVReaderBuilder(new FileReader(f)).withCSVParser(parser).build();
-				parsedData = reader.readAll();
-				// System.out.println("Parsed data has " + lines.get(0).length + " columns");
-				// System.out.println("Parsed first data row has " + lines.get(2).length + " columns");
-				reader.close();
+				parsedData = OpenCSVParser.parseCSV(f, getFieldSeparatorChar().charAt(0));
 				fileContent.setModel(new OpenCSVTableModel(parsedData));
 
 				// if file is parsed successfully...
 				fileContent.getColumnModel().getColumn(0).setCellRenderer(new RowColumnNumberRenderer(false));
 				this.fileLabel.setText(f.getName());
 				this.end_number.setText(Integer.toString(this.fileContent.getModel().getRowCount()));
+				this.pack(); // resize window to fit updated filename JLabel
 			} catch (IOException e) {
 				System.out.println("IOException: " + e.getMessage());
 			} catch (CsvException e) {
@@ -473,13 +467,57 @@ public class DataImportWizard extends JDialog implements ActionListener, ChangeL
 	}
 
 	private void onFinish() {
+		// Gather indices of data types to be imported
+		Vector<Integer> vals = new Vector<Integer>();
+		for (int i = 0; i < columnListModel.size(); i++) {
+			JCheckBox c = columnListModel.elementAt(i);
+			if (c.isSelected()) {
+				vals.add(i);
+			}
+		}
+		if (vals.size() == 0) {
+			JOptionPane.showMessageDialog(this, "Select at least one data column to import.");
+			return;
+		}
+		
+		int startLine, endLine, labelLine, unitLine, depthCol;
+		try {
+			// Convert 1-based user-facing line numbers to 0-based for processing
+			startLine = Integer.parseInt(this.start_number.getText()) - 1;
+			endLine = Integer.parseInt(this.end_number.getText()) - 1;
+			labelLine = Integer.parseInt(this.label_number.getText()) - 1;
+			unitLine = Integer.parseInt(this.unit_number.getText()) - 1;
+			depthCol = Integer.parseInt(this.depth_column.getText()) - 1;
+		}  catch (NumberFormatException ex) {
+			JOptionPane.showMessageDialog(this, "One or more fields contains an invalid number");
+			return;
+		}
+
+		final String prefix = name_prefix.getText();
+		final String sectionNameCol = name_column.getText();
+		final boolean useCustomizedSectionName = (prefix.length() > 0 || sectionNameCol.length() > 0);
+		DepthMode dm = (DepthMode) depthModeComboBox.getSelectedItem();
+
+		float ignoreValue = Float.NaN;
+		String inputText = ignore_values.getText();
+		if (inputText.length() > 0) {
+			if (inputText.contains(",")) {
+				inputText = inputText.replace(",", ".");
+			}
+
+			try {
+				ignoreValue = Float.valueOf(inputText);
+			} catch (NumberFormatException e) {
+				JOptionPane.showMessageDialog(this, "Invalid ignore value '" + inputText + "'");
+				return;
+			}
+		}
+
 		// Ask for output filename and save the file
 		ExampleFileFilter xmlFilter = new ExampleFileFilter("xml", "XML file");
-
 		JFileChooser chooser = new JFileChooser("Select Export Filename");
 		chooser.setFileFilter(xmlFilter);
 		int retVal = chooser.showSaveDialog(this);
-
 		if (retVal != JFileChooser.APPROVE_OPTION) {
 			return;
 		}
@@ -495,54 +533,8 @@ public class DataImportWizard extends JDialog implements ActionListener, ChangeL
 		}
 		System.out.println("---> You choose to export to file: " + outputFile);
 
-		// Collect field values
-		Vector<Integer> vals = new Vector<Integer>();
-		for (int i = 0; i < columnListModel.size(); i++) {
-			JCheckBox c = columnListModel.elementAt(i);
-
-			if (c.isSelected()) {
-				vals.add(i);
-			}
-		}
-
-		try {
-			// Users assume line/column numbers starts from '1' instead of '0'
-			final int startLine = Integer.parseInt(this.start_number.getText()) - 1;
-			final int endLine = Integer.parseInt(this.end_number.getText()) - 1;
-			final int labelLine = Integer.parseInt(this.label_number.getText()) - 1;
-			final int unitLine = Integer.parseInt(this.unit_number.getText()) - 1;
-
-			// final String fs = getFieldSeparatorChar();
-			final String prefix = name_prefix.getText();
-			final String sectionNameCol = name_column.getText();
-			final int depthCol = Integer.parseInt(this.depth_column.getText()) - 1;
-
-			final boolean useCustomizedSectionName = (prefix.length() > 0 || sectionNameCol.length() > 0);
-			DepthMode dm = (DepthMode) depthModeComboBox.getSelectedItem();
-
-			float ignoreValue;
-			String inputText = ignore_values.getText();
-			if (inputText.length() > 0) {
-				if (inputText.contains(",")) {
-					inputText = inputText.replace(",", ".");
-				}
-
-				try {
-					ignoreValue = Float.valueOf(inputText);
-				} catch (NumberFormatException e) {
-					JOptionPane.showMessageDialog(this, "Input ignore value error");
-					return;
-				}
-			} else {
-				ignoreValue = Float.NaN;
-			}
-
-			// might need a progress thingy
-			TabularToXMLConversion.convertOpenCSV(this, this.parsedData, outputFile, prefix, startLine, endLine, labelLine, unitLine, sectionNameCol, depthCol, vals, dm, useCustomizedSectionName, ignoreValue);
-		} catch (NumberFormatException ex) {
-			JOptionPane.showMessageDialog(this, "One or more fields contains an invalid number");
-			return;
-		}
+		// might need a progress thingy
+		TabularToXMLConversion.convertOpenCSV(this, this.parsedData, outputFile, prefix, startLine, endLine, labelLine, unitLine, sectionNameCol, depthCol, vals, dm, useCustomizedSectionName, ignoreValue);
 
 		if (this.mode == RunMode.CORELYZER) {
 			Runnable r = new Runnable() {
