@@ -856,6 +856,7 @@ public class CorelyzerAppController implements ActionListener {
 
 			if (selectedFile.exists()) {
 				DataImportWizard wiz = new DataImportWizard(view.getMainFrame());
+				wiz.setModal(true);
 				wiz.setInputFile(selectedFile);
 				wiz.setVisible(true);
 			}

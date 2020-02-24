@@ -493,6 +493,12 @@ public class DataImportWizard extends JDialog implements ActionListener, ChangeL
 			return;
 		}
 
+		if (endLine >= parsedData.size()) {
+			String msg = "Data End Line " + this.end_number.getText() + " exceeds the number of lines in the file (" + parsedData.size() + ").";
+			JOptionPane.showMessageDialog(this, msg);
+			return;
+		}
+
 		final String prefix = name_prefix.getText();
 		final String sectionNameCol = name_column.getText();
 		final boolean useCustomizedSectionName = (prefix.length() > 0 || sectionNameCol.length() > 0);
@@ -533,7 +539,10 @@ public class DataImportWizard extends JDialog implements ActionListener, ChangeL
 		}
 		System.out.println("---> You choose to export to file: " + outputFile);
 
-		// might need a progress thingy
+		// todo - try/catch; progress indicator; don't dispose until process succeeds
+		// (otherwise user has to re-enter everything from scratch)
+		// passive warning about unmatched section names (in Section Name preview?)
+		// ProgressDialog progDlg = new ProgressDialog();
 		TabularToXMLConversion.convertOpenCSV(this, this.parsedData, outputFile, prefix, startLine, endLine, labelLine, unitLine, sectionNameCol, depthCol, vals, dm, useCustomizedSectionName, ignoreValue);
 
 		if (this.mode == RunMode.CORELYZER) {

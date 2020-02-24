@@ -176,8 +176,9 @@ public class TabularToXMLConversion {
 						floatValue = Float.valueOf(value);
 					} catch (NumberFormatException e) {
 						// Not a number should just ignore it
-						System.err.println("---> Ignore malformed " + "numbers: " + value);
-						floatValue = Float.NaN;
+						System.err.println("---> Ignore malformed " + "number: " + value);
+						// floatValue = Float.NaN;
+						continue;
 					}
 	
 					// Ignore NaN and the ignoreValue match
@@ -299,20 +300,20 @@ public class TabularToXMLConversion {
 
                 if (needNewSection)
                 {	
-                    System.out.println("---> New section at line # (0-based) " + curLine);
-
-                    if (useCustomizedSectionName) {
-                        currentSection = compositeSectionName(prefix, tuples, sectionNameCol);
+					if (useCustomizedSectionName) {
+						currentSection = compositeSectionName(prefix, tuples, sectionNameCol);
                     } else {
-                        currentSectionSeqNumber++;
+						currentSectionSeqNumber++;
                         currentSection = prefix + "-" + currentSectionSeqNumber;
                         currentSectionSamplesCount = 0;
                     }
-
+					
                     final String depthUnit = units[depthCol].trim();
                     writeNewSection(ixmlWriter, sectionOffsetString, currentSection, depthUnit, vals, units, labels);
                     
-                    needNewSection = false;
+					needNewSection = false;
+					
+					System.out.println("---> New section " + currentSection + " at (0-based) line " + curLine);
                 }
 
                 writeDepthAndSensors(ixmlWriter, depth_value, vals, tuples, ignoreValue);
@@ -901,11 +902,10 @@ public class TabularToXMLConversion {
     }
 
     public static void main(String[] args) {
-        // Testing...parse same file with equivalent parameters with old and new method,
+        // Testing...import same file + parameters with old and new method,
 		// hopefully get the same resulting XML.
 		
-		// Set up proper testing framework and directory structure???
-		// Simpler option: pass path to testdata dir in main() args from launch.json...but this doesn't seem to work, WTF???
+		// TODO: Set up proper testing framework and directory structure???
 		if (args.length == 0) {
 			System.out.println("Required argument: path to testdata dir");
 			return;
@@ -973,8 +973,47 @@ public class TabularToXMLConversion {
             Vector<Integer> vals = new Vector<Integer>();
             vals.add(new Integer(11));
             test(f, "/Users/lcdev/Desktop/test7", ",", "", 2, 2392, 0, 1, "1", 9, vals, DepthMode.ACCUM_DEPTH, true, Float.NaN);
-		}		
-	
+		}	
+
+		// test8 - single section, single imported data column, first row of that column is blank
+		// this should be fine in oldConvert() and newConvert()
+		{
+            File f = new File(testdataDir, "318-U1357-GRA-AB_secnames_1sec_blankfirstrow.csv");
+            Vector<Integer> vals = new Vector<Integer>();
+			vals.add(new Integer(11));
+			// vals.add(new Integer(17));
+            test(f, "/Users/lcdev/Desktop/test8", ",", "", 1, 60, 0, 0, "1", 9, vals, DepthMode.ACCUM_DEPTH, true, Float.NaN);
+		}
+
+		// test9 - single section, two imported data columns, first row of last imported column is blank
+		// this should cause the oldConvert() method to fail - newConvert() should work correctly, ignoring the blank value
+		// in first imported row and gather values in subsequent rows
+		{
+            File f = new File(testdataDir, "318-U1357-GRA-AB_secnames_1sec_blankfirstrow.csv");
+            Vector<Integer> vals = new Vector<Integer>();
+			vals.add(new Integer(11));
+			vals.add(new Integer(16));
+            test(f, "/Users/lcdev/Desktop/test9", ",", "", 1, 60, 0, 0, "1", 9, vals, DepthMode.ACCUM_DEPTH, true, Float.NaN);
+		}
+
+		// test10 - MSCL data for DSCI February 2020 class, ensure identical result from old and new conversion
+		{
+            File f = new File(testdataDir, "MCC_MSCL-S_Feldman.csv");
+			Vector<Integer> vals = new Vector<Integer>();
+			for (int i = 8; i <= 16; i++) {
+				vals.add(new Integer(i));
+			}
+            test(f, "/Users/lcdev/Desktop/test10", ",", "", 1, 5810, 0, 0, "1", 7, vals, DepthMode.ACCUM_DEPTH, true, Float.NaN);
+		}
+		
+		// test11 - XYZ data for DSCI February 2020 class, ensure identical result from old and new conversion
+		{
+            File f = new File(testdataDir, "MCC_MSCL-XYZ_Feldman.csv");
+            Vector<Integer> vals = new Vector<Integer>();
+			vals.add(new Integer(8)); // Laser Profiler
+			vals.add(new Integer(9)); // MS
+            test(f, "/Users/lcdev/Desktop/test11", ",", "", 1, 5400, 0, 0, "1", 7, vals, DepthMode.ACCUM_DEPTH, true, Float.NaN);
+		}
     }
 
     public static void test(File inFile, String baseOutPath, String delimiter, String prefix, int startLine,
