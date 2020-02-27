@@ -147,7 +147,7 @@ public class DataImportWizard extends JDialog implements ActionListener, ChangeL
 	JTextField start_number, end_number, ignore_values;
 	JTextField label_number, unit_number;
 
-	JTextField name_prefix, name_column, depth_column;
+	JTextField name_column, depth_column;
 	JComboBox<FieldSeparator> fsComboBox;
 	JComboBox<DepthMode> depthModeComboBox;
 
@@ -252,7 +252,7 @@ public class DataImportWizard extends JDialog implements ActionListener, ChangeL
 		String previewStr = "[can't create preview]";
 		final int startLine = getDataStartLine();
 		if (startLine != -1) {
-			String prefix = name_prefix.getText();
+			String prefix = "";
 			String line = getInputFileLine(startLine);
 			String fs = getFieldSeparatorChar();
 			String pattern = name_column.getText();
@@ -295,26 +295,26 @@ public class DataImportWizard extends JDialog implements ActionListener, ChangeL
 		panel.add(fipp);
 		
 		// Data Import Parameters Panel
-		JPanel dipp = new JPanel(new MigLayout("insets 5", "[][grow]15[][grow]", ""));
+		JPanel dipp = new JPanel(new MigLayout("insets 5", "[][grow]15[][grow]", "[][][]15[][]"));
 		dipp.setBorder(BorderFactory.createTitledBorder("Data Import Parameters"));
 		
-		// data start/end
+		// Data start/end rows
 		start_number = new JTextField("3");
 		end_number = new JTextField();
-		dipp.add(new JLabel("Data Start Line: "));
+		dipp.add(new JLabel("Data Start Row: "));
 		dipp.add(start_number, "growx");
-		dipp.add(new JLabel("Data End Line: "));
+		dipp.add(new JLabel("Data End Row: "));
 		dipp.add(end_number, "growx, wrap");		
 
-		// label, units
+		// Label, units rows
 		label_number = new JTextField("1");
 		unit_number = new JTextField("2");
-		dipp.add(new JLabel("Fields Line: "));
+		dipp.add(new JLabel("Fields Row: "));
 		dipp.add(label_number, "growx");
-		dipp.add(new JLabel("Units Line: "));
+		dipp.add(new JLabel("Units Row: "));
 		dipp.add(unit_number, "growx, wrap");
 
-		// depth, section name column, prefix
+		// Depth Column and Mode
 		depth_column = new JTextField("2");
 		depthModeComboBox = new JComboBox<DepthMode>();
 		for (DepthMode dm : DepthMode.values()) {
@@ -325,77 +325,44 @@ public class DataImportWizard extends JDialog implements ActionListener, ChangeL
 		dipp.add(new JLabel("Depth Mode: "));
 		dipp.add(depthModeComboBox, "growx, wrap");
 		
+		// Section Name Column and preview
 		final JLabel name_label = new JLabel("Section Name Column: ");
 		name_column = new JTextField("1");
-		JButton multiColumnButton = new JButton("Multiple Section Columns...");
-		// JPanel sectionNamePanel = new JPanel(new MigLayout("insets 5"));
-		dipp.add(name_label);
-		dipp.add(name_column, "growx");
-		dipp.add(multiColumnButton, "span 2, wrap, align center");
-		// dipp.add(sectionNamePanel, "growx, span, wrap");
-
 		
-		// Section Name subpanel
-		// JPanel snpp = new JPanel(new MigLayout("insets 5", "[grow]", ""));
-		// snpp.setBorder(BorderFactory.createTitledBorder("Section Name"));
-		
-		// final String snht = new String("<html>If your data includes a column with full section names, " +
-		// 		"enter the column number in the Column/Pattern field. " +
-		// 		"If components of the section name are in separate columns, " +
-		// 		"they can be flexibly combined by entering a pattern of column numbers " +
-		// 		"and separators. This pattern will be applied per-row. " +
-		// 		"The contents of the Prefix field, if any, will be prepended with a trailing hyphen.<br/>" +
-		// 		"Examples:<ul><li>  1,-,2 with no Prefix: '[col1]-[col2]'</li>" +
-		// 		"<li>3,2,-,4  with Prefix BOB: 'BOB-[col3][col2]-[col4]'</li>" +
-		// 		"<li>7,@@@,1,2,3 with Prefix hello: 'hello-[col7]@@@[col1][col2][col3]'</li></ul></html>");
-		// final JLabel sectionNameHelpText = new JLabel(snht);
-		// snpp.add(sectionNameHelpText, "span");
-		
-		
-		final JLabel prefix_label = new JLabel("Prefix: ");
-		name_prefix = new JTextField();
-		
+		// Section name preview update listeners
 		DocumentListener dl = new DocumentListener() {
 			public void changedUpdate(DocumentEvent e) { updateSectionNamePreview(); }
 			public void insertUpdate(DocumentEvent e) { updateSectionNamePreview(); }
 			public void removeUpdate(DocumentEvent e) {updateSectionNamePreview(); }
 		};
-		
+
+		start_number.getDocument().addDocumentListener(dl);
 		name_column.getDocument().addDocumentListener(dl);
-		name_prefix.getDocument().addDocumentListener(dl);
-		
-		// JPanel secDataPanel = new JPanel(new MigLayout("", "[][grow]15[][grow]", ""));
-		// secDataPanel.add(name_label);
-		// secDataPanel.add(name_column, "growx, wmin 150");
-		// secDataPanel.add(prefix_label);
-		// secDataPanel.add(name_prefix, "growx, wmin 150");
-		// snpp.add(secDataPanel, "wrap");
-		
+
+		dipp.add(name_label, "aligny center");
+		dipp.add(name_column, "growx, aligny center, wmin 150");
+
 		JPanel previewPanel = new JPanel(new MigLayout("insets 5", "[grow][]", ""));
 		previewPanel.setBorder(BorderFactory.createTitledBorder("Section Name Preview"));
 		sectionNamePreview = new JLabel();
 		java.awt.Font curFont = sectionNamePreview.getFont();
 		sectionNamePreview.setFont(curFont.deriveFont(java.awt.Font.BOLD));
 		previewPanel.add(sectionNamePreview, "grow");
-		JButton updatePreview = new JButton("Update Preview");
+		JButton updatePreview = new JButton("Update");
 		updatePreview.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				updateSectionNamePreview();
 			}
 		});
 		previewPanel.add(updatePreview);
-		dipp.add(previewPanel, "growx, span 4, split 2, wrap");
-		// panel.add(previewPanel);
-		// snpp.add(previewPanel, "span, growx, wrap");
-		
-		// panel.add(sectionNamePanel);
-		// value to ignore
-		dipp.add(new JLabel("Ignore Values: "), "span 4, split 2");
-		ignore_values = new JTextField("");
-		dipp.add(ignore_values, "growx");
-
+		dipp.add(previewPanel, "span 2, growx, wrap");
 		panel.add(dipp);
-		
+
+		// Values to ignore
+		dipp.add(new JLabel("Values to Ignore: "), "span 4, split 2");
+		ignore_values = new JTextField("");
+		dipp.add(ignore_values, "growx, wrap");
+
 		return panel;
 	}
 
@@ -423,6 +390,7 @@ public class DataImportWizard extends JDialog implements ActionListener, ChangeL
 				fileContent.getColumnModel().getColumn(0).setCellRenderer(new RowColumnNumberRenderer(false));
 				this.fileLabel.setText(f.getName());
 				this.end_number.setText(Integer.toString(this.fileContent.getModel().getRowCount()));
+				updateSectionNamePreview();
 				this.pack(); // resize window to fit updated filename JLabel
 			} catch (IOException e) {
 				System.out.println("IOException: " + e.getMessage());
@@ -431,25 +399,6 @@ public class DataImportWizard extends JDialog implements ActionListener, ChangeL
 			}
 		}
 	}
-	
-	// return last data line, ignoring empty lines at end of file
-	// private int getDefaultEndLine() {
-	// 	return this.fileContent.getRowCount();
-	// 	// int dataEndLine = lastLine;
-	// 	// try {
-	// 	// 	for (int curLine = lastLine; curLine >= 1; curLine--) {
-	// 	// 		final int start = this.fileContent.getLineStartOffset(curLine - 1);
-	// 	// 		final int end = this.fileContent.getLineEndOffset(curLine - 1);
-	// 	// 		if (this.fileContent.getText(start, end - start).trim().length() == 0)
-	// 	// 			dataEndLine = curLine - 1;
-	// 	// 		else
-	// 	// 			break;
-	// 	// 	}
-	// 	// } catch (Exception e) {
-	// 	// 	System.err.println("Error finding last data line: " + e.getMessage());
-	// 	// }
-	// 	// return lastLine;
-	// }
 	
 	private String getFieldSeparatorChar() {
 		String fs = "";
@@ -499,9 +448,8 @@ public class DataImportWizard extends JDialog implements ActionListener, ChangeL
 			return;
 		}
 
-		final String prefix = name_prefix.getText();
 		final String sectionNameCol = name_column.getText();
-		final boolean useCustomizedSectionName = (prefix.length() > 0 || sectionNameCol.length() > 0);
+		final boolean useCustomizedSectionName = (sectionNameCol.length() > 0);
 		DepthMode dm = (DepthMode) depthModeComboBox.getSelectedItem();
 
 		float ignoreValue = Float.NaN;
@@ -543,7 +491,7 @@ public class DataImportWizard extends JDialog implements ActionListener, ChangeL
 		// (otherwise user has to re-enter everything from scratch)
 		// passive warning about unmatched section names (in Section Name preview?)
 		// ProgressDialog progDlg = new ProgressDialog();
-		TabularToXMLConversion.convertOpenCSV(this, this.parsedData, outputFile, prefix, startLine, endLine, labelLine, unitLine, sectionNameCol, depthCol, vals, dm, useCustomizedSectionName, ignoreValue);
+		TabularToXMLConversion.convertOpenCSV(this, this.parsedData, outputFile, "", startLine, endLine, labelLine, unitLine, sectionNameCol, depthCol, vals, dm, useCustomizedSectionName, ignoreValue);
 
 		if (this.mode == RunMode.CORELYZER) {
 			Runnable r = new Runnable() {
