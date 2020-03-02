@@ -153,7 +153,7 @@ public class DataImportWizard extends JDialog implements ActionListener, ChangeL
 
 	CheckBoxList columnList;
 
-	Vector<JCheckBox> columnListModel;
+	Vector<DataColumnCheckBox> columnListModel;
 
 	File inputFile, outputFile;
 
@@ -370,7 +370,7 @@ public class DataImportWizard extends JDialog implements ActionListener, ChangeL
 		JPanel p = new JPanel(new BorderLayout());
 		p.setBorder(BorderFactory.createTitledBorder("Select Data Columns for Import"));
 
-		columnListModel = new Vector<JCheckBox>();
+		columnListModel = new Vector<DataColumnCheckBox>();
 		columnList = new CheckBoxList();
 		columnList.setListData(columnListModel);
 
@@ -419,15 +419,16 @@ public class DataImportWizard extends JDialog implements ActionListener, ChangeL
 		// Gather indices of data types to be imported
 		Vector<Integer> vals = new Vector<Integer>();
 		for (int i = 0; i < columnListModel.size(); i++) {
-			JCheckBox c = columnListModel.elementAt(i);
+			DataColumnCheckBox c = columnListModel.elementAt(i);
 			if (c.isSelected()) {
-				vals.add(i);
+				vals.add(c.getDataColumn());
 			}
 		}
 		if (vals.size() == 0) {
 			JOptionPane.showMessageDialog(this, "Select at least one data column to import.");
 			return;
 		}
+		System.out.println("Selected data import column indices (zero-based) = " + vals);
 		
 		int startLine, endLine, labelLine, unitLine, depthCol;
 		try {
@@ -438,13 +439,7 @@ public class DataImportWizard extends JDialog implements ActionListener, ChangeL
 			unitLine = Integer.parseInt(this.unit_number.getText()) - 1;
 			depthCol = Integer.parseInt(this.depth_column.getText()) - 1;
 		}  catch (NumberFormatException ex) {
-			JOptionPane.showMessageDialog(this, "One or more fields contains an invalid number");
-			return;
-		}
-
-		if (endLine >= parsedData.size()) {
-			String msg = "Data End Line " + this.end_number.getText() + " exceeds the number of lines in the file (" + parsedData.size() + ").";
-			JOptionPane.showMessageDialog(this, msg);
+			JOptionPane.showMessageDialog(this, "One or more fields contains an invalid number: " + ex.getMessage());
 			return;
 		}
 
@@ -491,7 +486,8 @@ public class DataImportWizard extends JDialog implements ActionListener, ChangeL
 		// (otherwise user has to re-enter everything from scratch)
 		// passive warning about unmatched section names (in Section Name preview?)
 		// ProgressDialog progDlg = new ProgressDialog();
-		TabularToXMLConversion.convertOpenCSV(this, this.parsedData, outputFile, "", startLine, endLine, labelLine, unitLine, sectionNameCol, depthCol, vals, dm, useCustomizedSectionName, ignoreValue);
+		TabularToXMLConversion.convertOpenCSV(this, this.parsedData, outputFile, "", startLine, endLine,
+			labelLine, unitLine, sectionNameCol, depthCol, vals, dm, useCustomizedSectionName, ignoreValue);
 
 		if (this.mode == RunMode.CORELYZER) {
 			Runnable r = new Runnable() {
@@ -518,7 +514,6 @@ public class DataImportWizard extends JDialog implements ActionListener, ChangeL
 
 	public void setRunningMode(final RunMode m) {
 		this.mode = m;
-
 		if (mode == RunMode.CORELYZER) {
 			cancelBtn.setText("Cancel");
 		} else if (mode == RunMode.STANDALONE) {
@@ -560,10 +555,7 @@ public class DataImportWizard extends JDialog implements ActionListener, ChangeL
 		stageTab.addChangeListener(this);
 		this.add(stageTab, BorderLayout.NORTH);
 
-		// Text area to show file content
-		// fileContent = new LineNumberedPaper(10, 10);
-		// fileContent.setEditable(false);
-		// fileContent.setBackground(new Color(254, 255, 182));
+		// Table displaying parsed file contents
 		fileContent = new JTable();
 		fileContent.setShowGrid(true);
 		fileContent.setGridColor(Color.GRAY);
@@ -591,41 +583,119 @@ public class DataImportWizard extends JDialog implements ActionListener, ChangeL
 		}
 	}
 
-	private void updateSelectedColumnList() {
-		columnListModel.clear();
+	private boolean isValidPositiveInteger(String str) {
+		try {
+			final int val = Integer.parseInt(str);
+			if (val <= 0) {
+				return false;
+			} else {
+				return true;
+			}
+		} catch (NumberFormatException e) {
+			return false;
+		}
+	}
 
-		if (label_number.getText().equals("")) {
+	private int getIntegerValue(String str) throws NumberFormatException {
+		int result = 0;
+		try {
+			result = Integer.parseInt(str);
+			return result;
+		} catch (NumberFormatException e) {
+			throw e;
+		}
+	}
+
+	private boolean isValidNumber(String str) {
+		try {
+			Float.parseFloat(str);
+			return true;
+		} catch (NumberFormatException e) {
+			return false;
+		}
+	}
+
+	private boolean isValidNumberOrEmpty(String str) {
+		if (str.equals("") || isValidNumber(str)) {
+			return true;
+		}
+		return false;
+	}
+
+	private boolean isValidDataColumn(int col, int startRow, int endRow) {
+		for (int row = startRow; row <= endRow; row++) {
+			if (!isValidNumberOrEmpty(this.parsedData.get(row)[col])) {
+				System.out.println("Invalid data value found at row " + row + " col " +
+					col + ", excluding this column from import list");
+				return false;
+			}
+		}
+		return true;
+	}
+
+	private boolean validateIntegerField(JTextField field, String fieldName) {
+		if (!isValidPositiveInteger(field.getText())) {
+			JOptionPane.showMessageDialog(this, fieldName + " requires a positive integer value.");
+			return false;
+		}
+		return true;
+	}
+
+	private void updateSelectedColumnList() {
+		// todo: if we do most of our validation here, should probably pop a progress dialog
+		// to account for slowness in parsing very large data files
+
+		columnListModel.clear();		
+
+		JTextField[] integerFields = { label_number, start_number, end_number, depth_column };
+		String[] integerFieldNames = { "Fields Row", "Data Start Row", "Data End Row", "Depth Column" }; // todo: constants
+		for (int fieldIdx = 0; fieldIdx < integerFields.length; fieldIdx++) {
+			if (!validateIntegerField(integerFields[fieldIdx], integerFieldNames[fieldIdx])) {
+				return;
+			}
+		}
+
+		// ensure depth column is all numeric with no blanks
+		int depthCol, fieldsRow, startRow, endRow;
+		try {
+			depthCol = getIntegerValue(depth_column.getText()) - 1;
+			fieldsRow = getIntegerValue(label_number.getText()) - 1;
+			startRow = getIntegerValue(start_number.getText()) - 1;
+			endRow = getIntegerValue(end_number.getText()) - 1;
+
+			if (endRow >= parsedData.size()) {
+				String msg = "Data End Line " + this.end_number.getText() + " exceeds the number of lines in the file (" + parsedData.size() + ").";
+				JOptionPane.showMessageDialog(this, msg);
+				return;
+			}
+
+			for (int row = startRow; row <= endRow; row++) {
+				final String strVal = this.parsedData.get(row)[depthCol];
+				if (!isValidNumber(strVal)) {
+					final String depthColName = this.parsedData.get(fieldsRow)[depthCol];
+					JOptionPane.showMessageDialog(this, "Invalid depth '" + strVal + "' found at row " +
+						(row + 1) + " of Depth Column '" + depthColName + "'");
+					return;
+				}
+			}
+		} catch (NumberFormatException e) {
+			JOptionPane.showMessageDialog(this, "Invalid row or column number found: " + e.getMessage());
 			return;
 		}
 
-		int label_line_number = Integer.parseInt(label_number.getText());
-		int count = 1;
-		String label_line = "";
-
-		try {
-			BufferedReader reader = new BufferedReader(new FileReader(this.inputFile));
-
-			while ((label_line = reader.readLine()) != null) {
-				if (count == label_line_number) {
-					break;
+		// only add checkboxes for columns with numeric values or blanks in startRow
+		// through endRow range
+		for (int col = 0; col < this.parsedData.get(0).length; col++) {
+			if (col == depthCol) { continue; } // ignore depth column
+			if (isValidDataColumn(col, startRow, endRow)) {
+				String colLabel = this.parsedData.get(fieldsRow)[col];
+				if (colLabel.equals("")) { // use column # for label if empty
+					colLabel = "[Column " + (col + 1) + "]";
 				}
-				count++;
-			}
-			reader.close();
-
-		} catch (Exception e) {
-			System.err.println("Error! Cannot access input file");
-		}
-
-		if (label_line != null && !label_line.equals("")) {
-			final String fs = getFieldSeparatorChar();
-			String[] tuples = label_line.split(fs);
-
-			for (String tuple : tuples) {
-				JCheckBox c = new JCheckBox(tuple);
-				columnListModel.addElement(c);
+				columnListModel.addElement(new DataColumnCheckBox(colLabel, col));
 			}
 		}
+
 		columnList.updateUI();
 	}
 }
@@ -666,7 +736,7 @@ class OpenCSVTableModel extends AbstractTableModel {
 	public void setValueAt(Object value, int row, int col) { return; }
 }
 
-
+// render row & column number cells with gray background a la Excel
 class RowColumnNumberRenderer extends JLabel implements TableCellRenderer {
 	public final static long serialVersionUID = -1L;
     public RowColumnNumberRenderer(boolean border) {
@@ -685,4 +755,17 @@ class RowColumnNumberRenderer extends JLabel implements TableCellRenderer {
         setText(value.toString());
         return this;
     }
- }
+}
+
+// Track the data column corresponding to the label derived from specified fieldsRow.
+// Now that we exclude non-numeric columns, we can no longer rely on the checkbox's
+// index in the list matching its column in the tabular data source.
+class DataColumnCheckBox extends JCheckBox {
+	public final static long serialVersionUID = -1L;
+	private int dataColumn = -1;
+	public DataColumnCheckBox(String label, int dataColumn) {
+		super(label);
+		this.dataColumn = dataColumn;
+	}
+	public int getDataColumn() { return dataColumn; }
+}
