@@ -74,13 +74,9 @@ public class TabularToXMLConversion {
 		}
 	}
 
-	public static String compositeSectionName(final String prefix, final String[] tuples, final String pattern) {
-		if (pattern == null || pattern.equals("")) {
-			return prefix;
-		}
-
+	public static String compositeSectionName(final String[] tuples, final String pattern) {
 		String[] patternTuples = pattern.split(",");
-		String suffix = "";
+		String sectionName = "";
 
 		for (String pt : patternTuples) {
 			pt = pt.trim();
@@ -90,20 +86,15 @@ public class TabularToXMLConversion {
 				int order = Integer.parseInt(pt) - 1;
 
 				if (tuples.length >= 0 && order >= 0 && order < tuples.length) {
-					suffix += tuples[order].trim();
+					sectionName += tuples[order].trim();
 				} /*
 				 * else { ; // ignore out of bound pattern tuple assignment }
 				 */
 			} else {
-				suffix += pt;
+				sectionName += pt;
 			}
 		}
-
-		if (prefix.equals("")) {
-			return suffix;
-		} else {
-			return prefix + "-" + suffix;
-		}
+		return sectionName;
 	}
 
     
@@ -199,9 +190,9 @@ public class TabularToXMLConversion {
 
     // Line numbers are 0-based. Client is responsible for adjusting user-facing
     // (presumably 1-based) line numbers before passing to convert() method.
-    public static void convertOpenCSV(final JDialog owner, List<String[]> table, final File fout, final String prefix, final int startLine, final int endLine,
+    public static void convertOpenCSV(final JDialog owner, List<String[]> table, final File fout, final int startLine, final int endLine,
         final int labelLine, final int unitLine, final String sectionNameCol, final int depthCol, final Vector<Integer> vals, final DepthMode dm,
-        final boolean useCustomizedSectionName, final float ignoreValue)
+        final float ignoreValue)
     {
 		System.out.println("Converting...");
 
@@ -229,14 +220,6 @@ public class TabularToXMLConversion {
             return;
         }
         
-		// line counter
-		boolean needNewSection = true;
-
-		// Vars for auto-section-definition
-		int currentSectionSeqNumber = -1;
-		int currentSectionSamplesCount = 0;
-		float currentSectionDepthOffset = 0.0f;
-
 		try {
 			ixmlWriter.writeStartDocument("UTF-8", "1.0");
             ixmlWriter.writeStartElement("corewall_data");
@@ -245,6 +228,7 @@ public class TabularToXMLConversion {
 			String[] labels = {};
 			String[] units = {};
             String currentSection = "";
+			float currentSectionDepthOffset = 0.0f;
             
             for (curLine = 0; curLine <= endLine; curLine++) {
 				// progress.setValue(curLine);
@@ -264,23 +248,14 @@ public class TabularToXMLConversion {
 				String[] tuples = table.get(curLine);
 
                 // time to start a new section?
-                if (useCustomizedSectionName) {
-                    String mysec = compositeSectionName(prefix, tuples, sectionNameCol);
-					needNewSection = !mysec.equals(currentSection);
-					// System.out.println("curLine = " + curLine + ": current section = " + currentSection + ", composite = " + mysec + ". New section = " + needNewSection);
-                } else {
-                    currentSectionSamplesCount++;
-                    needNewSection = currentSectionSamplesCount >= maxSamplesPerSection;
-                }
+				String mysec = compositeSectionName(tuples, sectionNameCol);
+				boolean needNewSection = !mysec.equals(currentSection);
                 
                 // if so, make sure we end the current section
                 if (needNewSection && currentSection != "")
                 {
-                    ixmlWriter.writeEndElement(); // <section>
-
-                    // flush buffered writer periodically or buffer will become ginormous
-                    // and cause OutOfMemoryErrors.
-                    ixmlWriter.flush();
+                    ixmlWriter.writeEndElement(); // </section>
+                    ixmlWriter.flush(); // flush buffered writer regularly to avoid OutOfMemoryErrors
                 }
 
                 String depth_value = tuples[depthCol].trim();
@@ -300,13 +275,7 @@ public class TabularToXMLConversion {
 
                 if (needNewSection)
                 {	
-					if (useCustomizedSectionName) {
-						currentSection = compositeSectionName(prefix, tuples, sectionNameCol);
-                    } else {
-						currentSectionSeqNumber++;
-                        currentSection = prefix + "-" + currentSectionSeqNumber;
-                        currentSectionSamplesCount = 0;
-                    }
+					currentSection = compositeSectionName(tuples, sectionNameCol);
 					
                     final String depthUnit = units[depthCol].trim();
                     writeNewSection(ixmlWriter, sectionOffsetString, currentSection, depthUnit, vals, units, labels);
@@ -321,7 +290,7 @@ public class TabularToXMLConversion {
 			// progress.setIndeterminate(true);
 			// progress.setString("Writing to output file...");
 
-			ixmlWriter.writeEndElement(); // <corelyzer_data>
+			ixmlWriter.writeEndElement(); // </corelyzer_data>
 			ixmlWriter.writeEndDocument();
 			ixmlWriter.flush();
 			ixmlWriter.close();
@@ -1020,7 +989,7 @@ public class TabularToXMLConversion {
         int endLine, int labelLine, int unitLine, String sectionNameCol, int depthCol, Vector<Integer> vals,
         DepthMode dm, boolean customSectionName, float ignoreVal) {
         oldConvert(inFile, baseOutPath, delimiter, prefix, startLine, endLine, labelLine, unitLine, sectionNameCol, depthCol, vals, dm, customSectionName, ignoreVal);
-        newConvert(inFile, baseOutPath, delimiter, prefix, startLine, endLine, labelLine, unitLine, sectionNameCol, depthCol, vals, dm, customSectionName, ignoreVal);
+        newConvert(inFile, baseOutPath, delimiter, startLine, endLine, labelLine, unitLine, sectionNameCol, depthCol, vals, dm, ignoreVal);
         // do a manual diff for now...
     }
 
@@ -1032,14 +1001,14 @@ public class TabularToXMLConversion {
         TabularToXMLConversion.convert(inFile, outFile, delimiter, prefix, startLine, endLine, labelLine, unitLine, sectionNameCol, depthCol, vals, DepthMode.ACCUM_DEPTH, customSectionName, ignoreVal);
     }
 
-    public static void newConvert(File inFile, String baseOutPath, String delimiter, String prefix, int startLine,
+    public static void newConvert(File inFile, String baseOutPath, String delimiter, int startLine,
         int endLine, int labelLine, int unitLine, String sectionNameCol, int depthCol, Vector<Integer> vals,
-        DepthMode dm, boolean customSectionName, float ignoreVal)
+        DepthMode dm, float ignoreVal)
     {
         try {
             List<String[]> parsedData = OpenCSVParser.parseCSV(inFile, delimiter.charAt(0));
             File outFile = new File(baseOutPath + "_new.xml");
-            TabularToXMLConversion.convertOpenCSV(null, parsedData, outFile, prefix, startLine, endLine, labelLine, unitLine, sectionNameCol, depthCol, vals, DepthMode.ACCUM_DEPTH, customSectionName, ignoreVal);
+            TabularToXMLConversion.convertOpenCSV(null, parsedData, outFile, startLine, endLine, labelLine, unitLine, sectionNameCol, depthCol, vals, DepthMode.ACCUM_DEPTH, ignoreVal);
         } catch (Exception e) {
             System.out.println("Oh dear. " + e.getMessage());
         }

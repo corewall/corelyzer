@@ -226,39 +226,16 @@ public class DataImportWizard extends JDialog implements ActionListener, ChangeL
 		return result;
 	}
 	
-	// return contents at specified line number (1-based)
-	private String getInputFileLine(final int lineNumber) {
-		String line = null;
-		int curNum = 1;
-		try {
-			BufferedReader br = new BufferedReader(new FileReader(this.inputFile));
-			String curLine = "";
-			while (curLine != null) {
-				curLine = br.readLine();
-				if (curNum == lineNumber)
-					break;
-				curNum++;
-			}
-			line = curLine;
-			br.close();
-		} catch (IOException e) {
-			
-		}
-		
-		return line;
-	}
-	
 	private void updateSectionNamePreview() {
 		String previewStr = "[can't create preview]";
 		final int startLine = getDataStartLine();
 		if (startLine != -1) {
-			String prefix = "";
-			String line = getInputFileLine(startLine);
-			String fs = getFieldSeparatorChar();
+			final String[] line = this.parsedData.get(startLine);
 			String pattern = name_column.getText();
-			String compName = TabularToXMLConversion.compositeSectionName(prefix, line, fs, pattern);
-			if (compName.length() > 0)
+			String compName = TabularToXMLConversion.compositeSectionName(line, pattern);
+			if (compName.length() > 0) {
 				previewStr = compName;
+			}
 		}
 		sectionNamePreview.setText(previewStr);
 	}
@@ -444,7 +421,6 @@ public class DataImportWizard extends JDialog implements ActionListener, ChangeL
 		}
 
 		final String sectionNameCol = name_column.getText();
-		final boolean useCustomizedSectionName = (sectionNameCol.length() > 0);
 		DepthMode dm = (DepthMode) depthModeComboBox.getSelectedItem();
 
 		float ignoreValue = Float.NaN;
@@ -486,8 +462,8 @@ public class DataImportWizard extends JDialog implements ActionListener, ChangeL
 		// (otherwise user has to re-enter everything from scratch)
 		// passive warning about unmatched section names (in Section Name preview?)
 		// ProgressDialog progDlg = new ProgressDialog();
-		TabularToXMLConversion.convertOpenCSV(this, this.parsedData, outputFile, "", startLine, endLine,
-			labelLine, unitLine, sectionNameCol, depthCol, vals, dm, useCustomizedSectionName, ignoreValue);
+		TabularToXMLConversion.convertOpenCSV(this, this.parsedData, outputFile, startLine, endLine,
+			labelLine, unitLine, sectionNameCol, depthCol, vals, dm, ignoreValue);
 
 		if (this.mode == RunMode.CORELYZER) {
 			Runnable r = new Runnable() {
