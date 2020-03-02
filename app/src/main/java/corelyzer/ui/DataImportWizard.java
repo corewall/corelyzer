@@ -81,15 +81,18 @@ import corelyzer.data.tabular.OpenCSVParser;
  **/
 public class DataImportWizard extends JDialog implements ActionListener, ChangeListener {
 	public static enum FieldSeparator {
-		COMMA, TAB, SPACE;
+		COMMA, TAB, SPACE, SEMICOLON;
 		
 		public String toString() {
-			if (this.ordinal() == 0)
+			if (this.ordinal() == 0) {
 				return "Comma";
-			else if (this.ordinal() == 1)
+			} else if (this.ordinal() == 1) {
 				return "Tab";
-			else // (this.ordinal() == 2)
+			} else if (this.ordinal() == 2) {
 				return "Space";
+			} else { // (this.ordinal() == 3) {
+				return "Semicolon";
+			}
 		}
 	}
 
@@ -386,6 +389,8 @@ public class DataImportWizard extends JDialog implements ActionListener, ChangeL
 			fs = "\t";
 		} else if (fSeparator == FieldSeparator.SPACE) {
 			fs = " ";
+		} else if (fSeparator == FieldSeparator.SEMICOLON) {
+			fs = ";";
 		} else {
 			fs = " ";
 		}
