@@ -32,11 +32,11 @@ import java.awt.Frame;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.BufferedReader;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.io.File;
-
-import java.io.FileReader;
 import java.io.IOException;
+
 import java.util.List;
 import java.util.Vector;
 
@@ -54,12 +54,14 @@ import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
+import javax.swing.ProgressMonitor;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableCellRenderer;
+import javax.swing.SwingWorker;
 
 import net.miginfocom.swing.MigLayout;
 
@@ -111,7 +113,8 @@ public class DataImportWizard extends JDialog implements ActionListener, ChangeL
 		DataImportWizard wiz = new DataImportWizard(null);
 		wiz.setRunningMode(RunMode.STANDALONE);
 
-		final String inputFile = "/Users/lcdev/proj/corewall/corewall_data/Corelyzer/318-U1357/data/318-U1357-GRA-AB_secnames_sorted.csv";
+		// final String inputFile = "/Users/lcdev/proj/corewall/corewall_data/Corelyzer/318-U1357/data/318-U1357-GRA-AB_secnames_sorted.csv";
+		final String inputFile = "/Users/lcdev/Desktop/import data testing/MEXI_XYZ.csv";
 		if (args.length < 1) {
 			wiz.setInputFile(inputFile);
 			// System.out.println("Usage: java corelyzer.ui.DataImportWizard <input>.");
@@ -149,14 +152,17 @@ public class DataImportWizard extends JDialog implements ActionListener, ChangeL
 	JLabel fileLabel, sectionNamePreview;
 	JTextField start_number, end_number, ignore_values;
 	JTextField label_number, unit_number;
-
 	JTextField name_column, depth_column;
+	final String FieldsRowLabel = "Fields Row", DataStartRowLabel = "Data Start Row",
+		DataEndRowLabel = "Data End Row", DepthColLabel = "Depth Column";
+	
 	JComboBox<FieldSeparator> fsComboBox;
 	JComboBox<DepthMode> depthModeComboBox;
 
 	CheckBoxList columnList;
 
 	Vector<DataColumnCheckBox> columnListModel;
+	ProgressMonitor progressMonitor;
 
 	File inputFile, outputFile;
 
@@ -281,15 +287,15 @@ public class DataImportWizard extends JDialog implements ActionListener, ChangeL
 		// Data start/end rows
 		start_number = new JTextField("3");
 		end_number = new JTextField();
-		dipp.add(new JLabel("Data Start Row: "));
+		dipp.add(new JLabel(DataStartRowLabel + ": "));
 		dipp.add(start_number, "growx");
-		dipp.add(new JLabel("Data End Row: "));
+		dipp.add(new JLabel(DataEndRowLabel + ": "));
 		dipp.add(end_number, "growx, wrap");		
 
 		// Label, units rows
 		label_number = new JTextField("1");
 		unit_number = new JTextField("2");
-		dipp.add(new JLabel("Fields Row: "));
+		dipp.add(new JLabel(FieldsRowLabel + ": "));
 		dipp.add(label_number, "growx");
 		dipp.add(new JLabel("Units Row: "));
 		dipp.add(unit_number, "growx, wrap");
@@ -300,7 +306,7 @@ public class DataImportWizard extends JDialog implements ActionListener, ChangeL
 		for (DepthMode dm : DepthMode.values()) {
 			depthModeComboBox.addItem(dm);
 		}
-		dipp.add(new JLabel("Depth Column: "));
+		dipp.add(new JLabel(DepthColLabel + ": "));
 		dipp.add(depth_column, "growx");
 		dipp.add(new JLabel("Depth Mode: "));
 		dipp.add(depthModeComboBox, "growx, wrap");
@@ -334,6 +340,7 @@ public class DataImportWizard extends JDialog implements ActionListener, ChangeL
 				updateSectionNamePreview();
 			}
 		});
+		updatePreview.setFocusable(false);
 		previewPanel.add(updatePreview);
 		dipp.add(previewPanel, "span 2, growx, wrap");
 		panel.add(dipp);
@@ -605,7 +612,8 @@ public class DataImportWizard extends JDialog implements ActionListener, ChangeL
 
 	private boolean isValidDataColumn(int col, int startRow, int endRow) {
 		for (int row = startRow; row <= endRow; row++) {
-			if (!isValidNumberOrEmpty(this.parsedData.get(row)[col])) {
+			final String cellStr = this.parsedData.get(row)[col];
+			if (!isValidNumberOrEmpty(cellStr)) {
 				System.out.println("Invalid data value found at row " + row + " col " +
 					col + ", excluding this column from import list");
 				return false;
@@ -623,33 +631,30 @@ public class DataImportWizard extends JDialog implements ActionListener, ChangeL
 	}
 
 	private void updateSelectedColumnList() {
-		// todo: if we do most of our validation here, should probably pop a progress dialog
-		// to account for slowness in parsing very large data files
-
-		columnListModel.clear();		
-
+		columnListModel.clear();
 		JTextField[] integerFields = { label_number, start_number, end_number, depth_column };
-		String[] integerFieldNames = { "Fields Row", "Data Start Row", "Data End Row", "Depth Column" }; // todo: constants
+		String[] integerFieldNames = { FieldsRowLabel, DataStartRowLabel, DataEndRowLabel, DepthColLabel };
 		for (int fieldIdx = 0; fieldIdx < integerFields.length; fieldIdx++) {
 			if (!validateIntegerField(integerFields[fieldIdx], integerFieldNames[fieldIdx])) {
 				return;
 			}
 		}
 
-		// ensure depth column is all numeric with no blanks
+		// validate inputs
 		int depthCol, fieldsRow, startRow, endRow;
 		try {
 			depthCol = getIntegerValue(depth_column.getText()) - 1;
 			fieldsRow = getIntegerValue(label_number.getText()) - 1;
 			startRow = getIntegerValue(start_number.getText()) - 1;
 			endRow = getIntegerValue(end_number.getText()) - 1;
-
-			if (endRow >= parsedData.size()) {
-				String msg = "Data End Line " + this.end_number.getText() + " exceeds the number of lines in the file (" + parsedData.size() + ").";
+			
+			if (endRow >= parsedData.size()) { // is data end row beyond end of file?
+				String msg = DataEndRowLabel + " " + this.end_number.getText() + " exceeds the number of lines in the file (" + parsedData.size() + ").";
 				JOptionPane.showMessageDialog(this, msg);
 				return;
 			}
-
+			
+			// ensure depth column is all numeric with no blanks
 			for (int row = startRow; row <= endRow; row++) {
 				final String strVal = this.parsedData.get(row)[depthCol];
 				if (!isValidNumber(strVal)) {
@@ -664,20 +669,41 @@ public class DataImportWizard extends JDialog implements ActionListener, ChangeL
 			return;
 		}
 
-		// only add checkboxes for columns with numeric values or blanks in startRow
-		// through endRow range
-		for (int col = 0; col < this.parsedData.get(0).length; col++) {
-			if (col == depthCol) { continue; } // ignore depth column
-			if (isValidDataColumn(col, startRow, endRow)) {
-				String colLabel = this.parsedData.get(fieldsRow)[col];
-				if (colLabel.equals("")) { // use column # for label if empty
-					colLabel = "[Column " + (col + 1) + "]";
+		// Add checkboxes for columns with numeric values or blanks in startRow
+		// through endRow range.
+		// (Inner class so we have access to method-local variables, neat!)
+		class ValidateDataColumnsTask extends SwingWorker<Void, Void> {
+			@Override
+			public Void doInBackground() {
+				final int colCount = parsedData.get(0).length;
+				for (int col = 0; col < colCount && !isCancelled(); col++) {
+					setProgress((int)(col/(float)colCount * 100.0f));
+					if (col == depthCol) { continue; } // ignore depth column
+					if (isValidDataColumn(col, startRow, endRow)) {
+						String colLabel = parsedData.get(fieldsRow)[col];
+						if (colLabel.equals("")) { // use column # for label if empty
+							colLabel = "[Column " + (col + 1) + "]";
+						}
+						columnListModel.addElement(new DataColumnCheckBox(colLabel, col));
+					}
 				}
-				columnListModel.addElement(new DataColumnCheckBox(colLabel, col));
+				return null;
+			}
+	
+			@Override
+			public void done() {
+				columnList.updateUI();
+				progressMonitor.close();
 			}
 		}
 
-		columnList.updateUI();
+		progressMonitor = new ProgressMonitor(stageTab, "Finding valid data columns...", null, 0, 100);
+		progressMonitor.setProgress(0);
+		progressMonitor.setMillisToDecideToPopup(100);
+		progressMonitor.setMillisToPopup(0);
+		ValidateDataColumnsTask task = new ValidateDataColumnsTask();
+		task.addPropertyChangeListener(new ImportTaskProgressListener(task, "Completed %d%%.\n", progressMonitor));
+		task.execute();
 	}
 }
 
@@ -749,4 +775,29 @@ class DataColumnCheckBox extends JCheckBox {
 		this.dataColumn = dataColumn;
 	}
 	public int getDataColumn() { return dataColumn; }
+}
+
+// listener for potentially long-running tasks
+class ImportTaskProgressListener implements PropertyChangeListener {
+	SwingWorker<?,?> task;
+	String progressFormatString;
+	ProgressMonitor monitor;
+	public ImportTaskProgressListener(SwingWorker<?,?> task, String progressFormatString, ProgressMonitor monitor) {
+		this.task = task;
+		this.progressFormatString = progressFormatString;
+		this.monitor = monitor;
+	}
+	public void propertyChange(PropertyChangeEvent evt) {
+		if ("progress" == evt.getPropertyName()) {
+			int progress = (Integer) evt.getNewValue();
+			monitor.setProgress(progress);
+			String message = String.format(progressFormatString, progress);
+			monitor.setNote(message);
+			if (monitor.isCanceled() || task.isDone()) {
+				if (monitor.isCanceled()) {
+					task.cancel(true);
+				}
+			}
+		}
+	}
 }
