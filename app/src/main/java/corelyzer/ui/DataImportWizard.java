@@ -71,6 +71,7 @@ import corelyzer.helper.ExampleFileFilter;
 import corelyzer.data.DepthMode;
 import corelyzer.data.TabularToXMLConversion;
 import corelyzer.data.tabular.OpenCSVParser;
+import corelyzer.data.tabular.TaskProgressListener;
 
 /**
  * A text data import wizard that let user specify what their table data looks
@@ -81,7 +82,7 @@ import corelyzer.data.tabular.OpenCSVParser;
  * 3. Select the section-number/'label text' column Select the section depth
  * column 4. Check the columns that needs to be imported. AND Go!
  **/
-public class DataImportWizard extends JDialog implements ActionListener, ChangeListener {
+public class DataImportWizard extends JDialog implements ActionListener, ChangeListener, PropertyChangeListener {
 	public static enum FieldSeparator {
 		COMMA, TAB, SPACE, SEMICOLON;
 		
@@ -162,6 +163,7 @@ public class DataImportWizard extends JDialog implements ActionListener, ChangeL
 	CheckBoxList columnList;
 
 	Vector<DataColumnCheckBox> columnListModel;
+	SwingWorker<Boolean,Void> convertTask;
 	ProgressMonitor progressMonitor;
 
 	File inputFile, outputFile;
@@ -470,23 +472,66 @@ public class DataImportWizard extends JDialog implements ActionListener, ChangeL
 		}
 		System.out.println("---> You choose to export to file: " + outputFile);
 
-		// todo - try/catch; progress indicator; don't dispose until process succeeds
-		// (otherwise user has to re-enter everything from scratch)
-		// passive warning about unmatched section names (in Section Name preview?)
-		// ProgressDialog progDlg = new ProgressDialog();
-		TabularToXMLConversion.convertOpenCSV(this, this.parsedData, outputFile, startLine, endLine,
+		convertTask = TabularToXMLConversion.createConvertTask(this, this.parsedData, outputFile, startLine, endLine,
 			labelLine, unitLine, sectionNameCol, depthCol, vals, dm, ignoreValue);
 
-		if (this.mode == RunMode.CORELYZER) {
-			Runnable r = new Runnable() {
-				public void run() {
-					CorelyzerApp.getApp().loadData(outputFile);
+		progressMonitor = new ProgressMonitor(stageTab, "Converting tabular data to XML...", null, 0, 100);
+		progressMonitor.setProgress(0);
+		progressMonitor.setMillisToDecideToPopup(500);
+		progressMonitor.setMillisToPopup(0);
+		convertTask.addPropertyChangeListener(this);
+		convertTask.execute();
+
+		// if (this.mode == RunMode.CORELYZER) {
+		// 	Runnable r = new Runnable() {
+		// 		public void run() {
+		// 			CorelyzerApp.getApp().loadData(outputFile);
+		// 		}
+		// 	};
+		// 	new Thread(r).start();
+		// 	dispose();
+		// } else { // standalone mode
+		// 	JOptionPane.showMessageDialog(this, "Conversion Done", "Done", JOptionPane.INFORMATION_MESSAGE);
+		// }
+	}
+
+	public void propertyChange(PropertyChangeEvent evt) {
+        System.out.println("Property change: " + evt.toString());
+		if ("progress" == evt.getPropertyName()) {
+			int progress = (Integer) evt.getNewValue();
+			progressMonitor.setProgress(progress);
+			String message = String.format("%d%% complete...", progress);
+			progressMonitor.setNote(message);
+			if (progressMonitor.isCanceled()) {
+				if (progressMonitor.isCanceled()) {
+					convertTask.cancel(true);
 				}
-			};
-			new Thread(r).start();
-			dispose();
-		} else { // standalone mode
-			JOptionPane.showMessageDialog(this, "Conversion Done", "Done", JOptionPane.INFORMATION_MESSAGE);
+			}
+		} else if ("state" == evt.getPropertyName()) {
+			if (convertTask.isDone()) {
+				try {
+					if (convertTask.get()) {
+						// conversion succeeded, load the generated XML data and close the dialog
+						if (this.mode == RunMode.CORELYZER) {
+							dispose();
+							Runnable r = new Runnable() {
+								public void run() { CorelyzerApp.getApp().loadData(outputFile);	}
+							};
+							new Thread(r).start();
+						} else {
+							JOptionPane.showMessageDialog(this, "Conversion Done", "Done", JOptionPane.INFORMATION_MESSAGE);
+						}
+					} else {
+						JOptionPane.showMessageDialog(this, "Conversion Failed", "Done", JOptionPane.INFORMATION_MESSAGE);
+					}
+				} catch (Exception e) {
+					// should never get here; the task is complete and thus won't throw an exception
+					System.out.println("Completed(?) conversion somehow threw an exception: " + e.getMessage());
+				}
+			}
+		}
+		if (convertTask.isDone()) {
+			progressMonitor.close();
 		}
 	}
 
@@ -693,7 +738,6 @@ public class DataImportWizard extends JDialog implements ActionListener, ChangeL
 			@Override
 			public void done() {
 				columnList.updateUI();
-				progressMonitor.close();
 			}
 		}
 
@@ -702,7 +746,7 @@ public class DataImportWizard extends JDialog implements ActionListener, ChangeL
 		progressMonitor.setMillisToDecideToPopup(100);
 		progressMonitor.setMillisToPopup(0);
 		ValidateDataColumnsTask task = new ValidateDataColumnsTask();
-		task.addPropertyChangeListener(new ImportTaskProgressListener(task, "Completed %d%%.\n", progressMonitor));
+		task.addPropertyChangeListener(new TaskProgressListener(task, "Completed %d%%.\n", progressMonitor));
 		task.execute();
 	}
 }
@@ -778,26 +822,26 @@ class DataColumnCheckBox extends JCheckBox {
 }
 
 // listener for potentially long-running tasks
-class ImportTaskProgressListener implements PropertyChangeListener {
-	SwingWorker<?,?> task;
-	String progressFormatString;
-	ProgressMonitor monitor;
-	public ImportTaskProgressListener(SwingWorker<?,?> task, String progressFormatString, ProgressMonitor monitor) {
-		this.task = task;
-		this.progressFormatString = progressFormatString;
-		this.monitor = monitor;
-	}
-	public void propertyChange(PropertyChangeEvent evt) {
-		if ("progress" == evt.getPropertyName()) {
-			int progress = (Integer) evt.getNewValue();
-			monitor.setProgress(progress);
-			String message = String.format(progressFormatString, progress);
-			monitor.setNote(message);
-			if (monitor.isCanceled() || task.isDone()) {
-				if (monitor.isCanceled()) {
-					task.cancel(true);
-				}
-			}
-		}
-	}
-}
+// class ImportTaskProgressListener implements PropertyChangeListener {
+// 	SwingWorker<?,?> task;
+// 	String progressFormatString;
+// 	ProgressMonitor monitor;
+// 	public ImportTaskProgressListener(SwingWorker<?,?> task, String progressFormatString, ProgressMonitor monitor) {
+// 		this.task = task;
+// 		this.progressFormatString = progressFormatString;
+// 		this.monitor = monitor;
+// 	}
+// 	public void propertyChange(PropertyChangeEvent evt) {
+// 		if ("progress" == evt.getPropertyName()) {
+// 			int progress = (Integer) evt.getNewValue();
+// 			monitor.setProgress(progress);
+// 			String message = String.format(progressFormatString, progress);
+// 			monitor.setNote(message);
+// 			if (monitor.isCanceled() || task.isDone()) {
+// 				if (monitor.isCanceled()) {
+// 					task.cancel(true);
+// 				}
+// 			}
+// 		}
+// 	}
+// }

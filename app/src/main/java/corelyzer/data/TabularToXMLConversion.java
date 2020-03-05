@@ -1,5 +1,7 @@
 package corelyzer.data;
 
+import java.awt.Component;
+
 import java.io.BufferedReader;
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -11,6 +13,7 @@ import java.util.Vector;
 import javax.swing.JDialog;
 import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
+import javax.swing.SwingWorker;
 
 import org.apache.xerces.dom.DocumentImpl;
 import org.apache.xml.serialize.OutputFormat;
@@ -186,128 +189,135 @@ public class TabularToXMLConversion {
 		} catch (Exception e) {
 			System.out.println("Exception in writeDepthAndSensors(): " + e.getMessage());
 		}
-    }
+	}
+
+    public static SwingWorker<Boolean,Void> createConvertTask(final Component owner, List<String[]> table, final File fout, final int startLine, final int endLine,
+        final int labelLine, final int unitLine, final String sectionNameCol, final int depthCol, final Vector<Integer> vals, final DepthMode dm,
+		final float ignoreValue)
+	{
+		class ConvertToXMLTask extends SwingWorker<Boolean,Void> {
+			@Override
+			public Boolean doInBackground() {
+				System.out.println("Converting...");
+
+				// prepare XML writer
+				XMLStreamWriter baseXmlWriter = null;
+				IndentingXMLStreamWriter ixmlWriter = null;
+				try {
+					FileOutputStream fos = new FileOutputStream(fout);
+					BufferedOutputStream bos = new BufferedOutputStream(fos);
+					baseXmlWriter = XMLOutputFactory.newInstance().createXMLStreamWriter(bos, "UTF-8");
+					ixmlWriter = new IndentingXMLStreamWriter(baseXmlWriter);
+				} catch (Exception e) {
+					System.out.println("Exception converting raw data file to XML: " + e.getMessage());
+					// pop error dialog? throw exception back to client?
+					return false;
+				}
+				
+				try {
+					ixmlWriter.writeStartDocument("UTF-8", "1.0");
+					ixmlWriter.writeStartElement("corewall_data");
+					
+					int curLine = 0;
+					String[] labels = {};
+					String[] units = {};
+					String currentSection = "";
+					float currentSectionDepthOffset = 0.0f;
+					
+					for (curLine = 0; curLine <= endLine && !isCancelled(); curLine++) {
+						if (curLine % 100 == 0) {
+							setProgress((int)(curLine/(float)endLine * 100.0f));
+						}
+						
+						// Put it this way in case someone doesn't have a unit line,
+						// he/she will use the label line directly
+						if (curLine == unitLine) { // unit
+							units = table.get(curLine);
+						}
+						if (curLine == labelLine) { // label
+							labels = table.get(curLine);
+						}
+						if (curLine < startLine || curLine == unitLine || curLine == labelLine) {
+							continue;
+						}
+						
+						String[] tuples = table.get(curLine);
+
+						// time to start a new section?
+						String mysec = compositeSectionName(tuples, sectionNameCol);
+						boolean needNewSection = !mysec.equals(currentSection);
+						
+						// if so, make sure we end the current section
+						if (needNewSection && currentSection != "")
+						{
+							ixmlWriter.writeEndElement(); // </section>
+							ixmlWriter.flush(); // flush buffered writer regularly to avoid OutOfMemoryErrors
+						}
+
+						String depth_value = tuples[depthCol].trim();
+						if (depth_value.contains(",")) {
+							depth_value = depth_value.replace(",", ".");
+						}
+
+						final String sectionOffsetString = depth_value;
+
+						if (dm == DepthMode.ACCUM_DEPTH) {
+							if (needNewSection)
+								currentSectionDepthOffset = Float.valueOf(depth_value);
+							
+							float sectionDepth = Float.valueOf(depth_value) - currentSectionDepthOffset;
+							depth_value = String.valueOf(sectionDepth);
+						}
+
+						if (needNewSection)
+						{	
+							currentSection = compositeSectionName(tuples, sectionNameCol);
+							
+							final String depthUnit = units[depthCol].trim();
+							writeNewSection(ixmlWriter, sectionOffsetString, currentSection, depthUnit, vals, units, labels);
+							
+							needNewSection = false;
+							
+							System.out.println("---> New section " + currentSection + " at (0-based) line " + curLine);
+						}
+
+						writeDepthAndSensors(ixmlWriter, depth_value, vals, tuples, ignoreValue);
+					}
+
+					ixmlWriter.writeEndElement(); // </corelyzer_data>
+					ixmlWriter.writeEndDocument();
+					ixmlWriter.flush();
+					ixmlWriter.close();
+				} catch (Exception e) {
+					if (owner != null) {
+						JOptionPane.showMessageDialog(owner, "Conversion Error!\n" + e);
+					}
+					e.printStackTrace();
+					return false;
+				}
+				System.out.println("---> Done!");
+				return true;
+			}
+		}
+		return new ConvertToXMLTask();
+	}
+	
 
     // Line numbers are 0-based. Client is responsible for adjusting user-facing
     // (presumably 1-based) line numbers before passing to convert() method.
-    public static void convertOpenCSV(final JDialog owner, List<String[]> table, final File fout, final int startLine, final int endLine,
+    public static boolean convertOpenCSV(final Component owner, List<String[]> table, final File fout, final int startLine, final int endLine,
         final int labelLine, final int unitLine, final String sectionNameCol, final int depthCol, final Vector<Integer> vals, final DepthMode dm,
         final float ignoreValue)
     {
-		System.out.println("Converting...");
-
-        // brg 2/5/2020 worth using progress bar?
-		// ProgressDialog progress = new ProgressDialog();
-		// CorelyzerApp app = CorelyzerApp.getApp();
-		// JProgressBar progress = app.getProgressUI();
-		// progress.setString("Converting data");
-		// progress.setValue(0);
-		// progress.setMaximum(endLine);
-		// progress.setString("");
-		// progress.setVisible(true);
-
-		// prepare XML writer
-		XMLStreamWriter baseXmlWriter = null;
-		IndentingXMLStreamWriter ixmlWriter = null;
+		SwingWorker<Boolean,Void> convertTask = createConvertTask(owner, table, fout, startLine, endLine, labelLine, unitLine, sectionNameCol, depthCol, vals, dm, ignoreValue);
+		convertTask.execute();
+		boolean success = false;
 		try {
-			FileOutputStream fos = new FileOutputStream(fout);
-			BufferedOutputStream bos = new BufferedOutputStream(fos);
-			baseXmlWriter = XMLOutputFactory.newInstance().createXMLStreamWriter(bos, "UTF-8");
-			ixmlWriter = new IndentingXMLStreamWriter(baseXmlWriter);
+			success = convertTask.get(); // wait for convertTask to complete
 		} catch (Exception e) {
-            System.out.println("Exception converting raw data file to XML: " + e.getMessage());
-            // pop error dialog? throw exception back to client?
-            return;
-        }
-        
-		try {
-			ixmlWriter.writeStartDocument("UTF-8", "1.0");
-            ixmlWriter.writeStartElement("corewall_data");
-            
-            int curLine = 0;
-			String[] labels = {};
-			String[] units = {};
-            String currentSection = "";
-			float currentSectionDepthOffset = 0.0f;
-            
-            for (curLine = 0; curLine <= endLine; curLine++) {
-				// progress.setValue(curLine);
-
-				// Put it this way in case someone doesn't have a unit line,
-				// he/she will use the label line directly
-				if (curLine == unitLine) { // unit
-                    units = table.get(curLine);
-				}
-				if (curLine == labelLine) { // label
-                    labels = table.get(curLine);
-                }
-                if (curLine < startLine || curLine == unitLine || curLine == labelLine) {
-                    continue;
-				}
-				
-				String[] tuples = table.get(curLine);
-
-                // time to start a new section?
-				String mysec = compositeSectionName(tuples, sectionNameCol);
-				boolean needNewSection = !mysec.equals(currentSection);
-                
-                // if so, make sure we end the current section
-                if (needNewSection && currentSection != "")
-                {
-                    ixmlWriter.writeEndElement(); // </section>
-                    ixmlWriter.flush(); // flush buffered writer regularly to avoid OutOfMemoryErrors
-                }
-
-                String depth_value = tuples[depthCol].trim();
-                if (depth_value.contains(",")) {
-                    depth_value = depth_value.replace(",", ".");
-                }
-
-                final String sectionOffsetString = depth_value;
-
-                if (dm == DepthMode.ACCUM_DEPTH) {
-                    if (needNewSection)
-                        currentSectionDepthOffset = Float.valueOf(depth_value);
-                    
-                    float sectionDepth = Float.valueOf(depth_value) - currentSectionDepthOffset;
-                    depth_value = String.valueOf(sectionDepth);
-                }
-
-                if (needNewSection)
-                {	
-					currentSection = compositeSectionName(tuples, sectionNameCol);
-					
-                    final String depthUnit = units[depthCol].trim();
-                    writeNewSection(ixmlWriter, sectionOffsetString, currentSection, depthUnit, vals, units, labels);
-                    
-					needNewSection = false;
-					
-					System.out.println("---> New section " + currentSection + " at (0-based) line " + curLine);
-                }
-
-                writeDepthAndSensors(ixmlWriter, depth_value, vals, tuples, ignoreValue);
-            }
-			// progress.setIndeterminate(true);
-			// progress.setString("Writing to output file...");
-
-			ixmlWriter.writeEndElement(); // </corelyzer_data>
-			ixmlWriter.writeEndDocument();
-			ixmlWriter.flush();
-			ixmlWriter.close();
-
-			// progress.setIndeterminate(false);
-			// progress.setString("Writing to output file... done");
-        } catch (Exception e) {
-			// System.err.println("Conversion Error! " + e);
-			JOptionPane.showMessageDialog(owner, "Conversion Error!\n" + e);
-			e.printStackTrace();
-        }
-
-		// progress.dispose();
-		// progress.setString("Done");
-		// progress.setValue(0);
-
-		System.out.println("---> Done!");        
+			System.out.println("Conversion failed: " + e.getMessage());
+		}
+		return success;
     }
 
 	
