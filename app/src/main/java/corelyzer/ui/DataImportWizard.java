@@ -674,7 +674,7 @@ public class DataImportWizard extends JDialog implements ActionListener, ChangeL
 		for (int row = startRow; row <= endRow; row++) {
 			final String cellStr = this.parsedData.get(row)[col];
 			if (!isValidNumberOrEmpty(cellStr)) {
-				System.out.println("Invalid data value found at row " + row + " col " +
+				System.out.println("Invalid data value '" + cellStr + "' found at row " + row + " col " +
 					col + ", excluding this column from import list");
 				return false;
 			}
