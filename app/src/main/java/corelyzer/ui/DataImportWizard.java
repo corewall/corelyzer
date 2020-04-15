@@ -727,40 +727,57 @@ public class DataImportWizard extends JDialog implements ActionListener, ChangeL
 			return;
 		}
 
+		final int colCount = parsedData.get(0).length;
+		for (int col = 0; col < colCount; col++) {
+			if (col == depthCol) { continue; } // ignore depth column
+			String colLabel = parsedData.get(fieldsRow)[col];
+			if (colLabel.equals("")) { // use column # for label if empty
+				colLabel = "[Column " + (col + 1) + "]";
+			}
+			columnListModel.addElement(new DataColumnCheckBox(colLabel, col));
+		}
+		columnList.updateUI();
+
+		// brg 4/15/2020
+		// We decided not to do this validation in 2.1. Corelyzer handles non-numeric values by
+		// ignoring them when plotting, and we don't want to prevent users from plotting what
+		// they want. In a future version, add UI to make better use of this,
+		// indicating locations of non-numeric values in a separate list or the like.
+		//
 		// Add checkboxes for columns with numeric values or blanks in startRow
 		// through endRow range.
 		// (Inner class so we have access to method-local variables, neat!)
-		class ValidateDataColumnsTask extends SwingWorker<Void, Void> {
-			@Override
-			public Void doInBackground() {
-				final int colCount = parsedData.get(0).length;
-				for (int col = 0; col < colCount && !isCancelled(); col++) {
-					setProgress((int)(col/(float)colCount * 100.0f));
-					if (col == depthCol) { continue; } // ignore depth column
-					if (isValidDataColumn(col, startRow, endRow)) {
-						String colLabel = parsedData.get(fieldsRow)[col];
-						if (colLabel.equals("")) { // use column # for label if empty
-							colLabel = "[Column " + (col + 1) + "]";
-						}
-						columnListModel.addElement(new DataColumnCheckBox(colLabel, col));
-					}
-				}
-				return null;
-			}
+		// class ValidateDataColumnsTask extends SwingWorker<Void, Void> {
+		// 	@Override
+		// 	public Void doInBackground() {
+		// 		final int colCount = parsedData.get(0).length;
+		// 		for (int col = 0; col < colCount && !isCancelled(); col++) {
+		// 			setProgress((int)(col/(float)colCount * 100.0f));
+		// 			if (col == depthCol) { continue; } // ignore depth column
+		// 			if (isValidDataColumn(col, startRow, endRow)) {
+		// 				String colLabel = parsedData.get(fieldsRow)[col];
+		// 				if (colLabel.equals("")) { // use column # for label if empty
+		// 					colLabel = "[Column " + (col + 1) + "]";
+		// 				}
+		// 				columnListModel.addElement(new DataColumnCheckBox(colLabel, col));
+		// 			}
+		// 		}
+		// 		return null;
+		// 	}
 	
-			@Override
-			public void done() {
-				columnList.updateUI();
-			}
-		}
+		// 	@Override
+		// 	public void done() {
+		// 		columnList.updateUI();
+		// 	}
+		// }
 
-		progressMonitor = new ProgressMonitor(stageTab, "Finding valid data columns...", null, 0, 100);
-		progressMonitor.setProgress(0);
-		progressMonitor.setMillisToDecideToPopup(100);
-		progressMonitor.setMillisToPopup(0);
-		ValidateDataColumnsTask task = new ValidateDataColumnsTask();
-		task.addPropertyChangeListener(new TaskProgressListener(task, "Completed %d%%.\n", progressMonitor));
-		task.execute();
+		// progressMonitor = new ProgressMonitor(stageTab, "Finding valid data columns...", null, 0, 100);
+		// progressMonitor.setProgress(0);
+		// progressMonitor.setMillisToDecideToPopup(100);
+		// progressMonitor.setMillisToPopup(0);
+		// ValidateDataColumnsTask task = new ValidateDataColumnsTask();
+		// task.addPropertyChangeListener(new TaskProgressListener(task, "Completed %d%%.\n", progressMonitor));
+		// task.execute();
 	}
 }
 
