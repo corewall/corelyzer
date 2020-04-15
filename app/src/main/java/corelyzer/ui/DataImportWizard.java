@@ -349,7 +349,7 @@ public class DataImportWizard extends JDialog implements ActionListener, ChangeL
 		panel.add(dipp);
 
 		// Values to ignore
-		dipp.add(new JLabel("Values to Ignore: "), "span 4, split 2");
+		dipp.add(new JLabel("Value to Ignore: "), "span 4, split 2");
 		ignore_values = new JTextField("");
 		dipp.add(ignore_values, "growx, wrap");
 
