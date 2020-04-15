@@ -495,18 +495,6 @@ public class DataImportWizard extends JDialog implements ActionListener, ChangeL
 		progressMonitor.setMillisToPopup(0);
 		convertTask.addPropertyChangeListener(this);
 		convertTask.execute();
-
-		// if (this.mode == RunMode.CORELYZER) {
-		// 	Runnable r = new Runnable() {
-		// 		public void run() {
-		// 			CorelyzerApp.getApp().loadData(outputFile);
-		// 		}
-		// 	};
-		// 	new Thread(r).start();
-		// 	dispose();
-		// } else { // standalone mode
-		// 	JOptionPane.showMessageDialog(this, "Conversion Done", "Done", JOptionPane.INFORMATION_MESSAGE);
-		// }
 	}
 
 	public void propertyChange(PropertyChangeEvent evt) {
