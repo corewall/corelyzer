@@ -140,7 +140,6 @@ public class DataImportWizard extends JDialog implements ActionListener, ChangeL
 
 	JButton nextBtn, backBtn, cancelBtn;
 	JTabbedPane stageTab;
-	// LineNumberedPaper fileContent;
 	JTable fileContent;
 	/**
 	 * Parse information Parse file 'inputFile', using specified delimiter. Data
