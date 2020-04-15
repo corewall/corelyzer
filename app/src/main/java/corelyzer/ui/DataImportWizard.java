@@ -508,7 +508,8 @@ public class DataImportWizard extends JDialog implements ActionListener, ChangeL
 				}
 			}
 		} else if ("state" == evt.getPropertyName()) {
-			if (convertTask.isDone()) {
+			final SwingWorker.StateValue state = ((SwingWorker.StateValue)evt.getNewValue());
+			if (convertTask.isDone() && state == SwingWorker.StateValue.DONE) {
 				try {
 					if (convertTask.get()) {
 						// conversion succeeded, load the generated XML data and close the dialog
