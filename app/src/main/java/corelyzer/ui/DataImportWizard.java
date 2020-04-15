@@ -228,20 +228,21 @@ public class DataImportWizard extends JDialog implements ActionListener, ChangeL
 		}
 	}
 	
-	private int getDataStartLine() {
+	// returns zero-based number of first row of data, or -1 if Data Start Row input is invalid.
+	private int getDataStartRow() {
 		int result = -1;
 		try {
-			int start = Integer.parseInt(this.start_number.getText());
-			result = start;
+			final int start = Integer.parseInt(this.start_number.getText());
+			result = start - 1; // zero-base
 		} catch (NumberFormatException e) {}
 		return result;
 	}
 	
 	private void updateSectionNamePreview() {
 		String previewStr = "[can't create preview]";
-		final int startLine = getDataStartLine();
-		if (startLine != -1) {
-			final String[] line = this.parsedData.get(startLine);
+		final int startRow = getDataStartRow();
+		if (startRow != -1 && startRow >= 0 && startRow < this.parsedData.size()) {
+			final String[] line = this.parsedData.get(startRow);
 			String pattern = name_column.getText();
 			String compName = TabularToXMLConversion.compositeSectionName(line, pattern);
 			if (compName.length() > 0) {
