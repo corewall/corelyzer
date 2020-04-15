@@ -358,7 +358,7 @@ public class DataImportWizard extends JDialog implements ActionListener, ChangeL
 
 	private JPanel createFieldSelectionPanel() {
 		JPanel p = new JPanel(new BorderLayout());
-		p.setBorder(BorderFactory.createTitledBorder("Select Data Columns for Import"));
+		p.add(new JLabel("Select Data Columns to Import. Shift-click to select multiple items."), BorderLayout.NORTH);
 
 		columnListModel = new Vector<DataColumnCheckBox>();
 		columnList = new CheckBoxList();
