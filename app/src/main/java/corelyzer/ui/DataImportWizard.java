@@ -708,8 +708,18 @@ public class DataImportWizard extends JDialog implements ActionListener, ChangeL
 			startRow = getIntegerValue(start_number.getText()) - 1;
 			endRow = getIntegerValue(end_number.getText()) - 1;
 			
+			if (endRow < startRow) {
+				String msg = DataEndRowLabel + " must be >= to " + DataStartRowLabel;
+				JOptionPane.showMessageDialog(this, msg);
+				return;
+			}
 			if (endRow >= parsedData.size()) { // is data end row beyond end of file?
 				String msg = DataEndRowLabel + " " + this.end_number.getText() + " exceeds the number of lines in the file (" + parsedData.size() + ").";
+				JOptionPane.showMessageDialog(this, msg);
+				return;
+			}
+			if (depthCol >= parsedData.get(0).length) { // is depth col in column range?
+				String msg = DepthColLabel + " " + depth_column.getText() + " exceeds the number of columns in the file (" + parsedData.get(0).length + ").";
 				JOptionPane.showMessageDialog(this, msg);
 				return;
 			}
