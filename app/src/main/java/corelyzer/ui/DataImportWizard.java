@@ -374,6 +374,7 @@ public class DataImportWizard extends JDialog implements ActionListener, ChangeL
 		if (f.exists()) {
 			try {
 				parsedData = OpenCSVParser.parseCSV(f, getFieldSeparatorChar().charAt(0));
+				reduceParsedDataWhitespace();
 				fileContent.setModel(new OpenCSVTableModel(parsedData));
 
 				// if file is parsed successfully...
@@ -386,6 +387,18 @@ public class DataImportWizard extends JDialog implements ActionListener, ChangeL
 				System.out.println("IOException: " + e.getMessage());
 			} catch (CsvException e) {
 				System.out.println("CSVException: " + e.getMessage());
+			}
+		}
+	}
+
+	// for cells with only whitespace, reduce to empty string
+	private void reduceParsedDataWhitespace() {
+		for (String[] row : this.parsedData) {
+			for (int idx = 0; idx < row.length; idx++) {
+				final String whitespaceStripped = row[idx].replaceAll("\\s", "");
+				if (whitespaceStripped.equals("")) {
+					row[idx] = whitespaceStripped;
+				}
 			}
 		}
 	}
