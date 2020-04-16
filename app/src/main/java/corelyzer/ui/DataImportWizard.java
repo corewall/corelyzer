@@ -625,6 +625,7 @@ public class DataImportWizard extends JDialog implements ActionListener, ChangeL
 
 		// Table displaying parsed file contents
 		fileContent = new JTable();
+		fileContent.getTableHeader().setReorderingAllowed(false);
 		fileContent.setShowGrid(true);
 		fileContent.setGridColor(Color.GRAY);
 		fileContent.getTableHeader().setDefaultRenderer(new RowColumnNumberRenderer(true));
