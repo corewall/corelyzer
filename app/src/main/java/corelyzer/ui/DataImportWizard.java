@@ -149,10 +149,11 @@ public class DataImportWizard extends JDialog implements ActionListener, ChangeL
 	 * value of the core section. Vector 'dataColumns' will be checked columns
 	 * to get data values.
 	 */
-	JLabel fileLabel, sectionNamePreview;
+	JLabel fileLabel, sectionNamePreview, unitRowLabel;
 	JTextField start_number, end_number, ignore_values;
 	JTextField label_number, unit_number;
 	JTextField name_column, depth_column;
+	JCheckBox unitRowCheckbox;
 	final String FieldsRowLabel = "Fields Row", DataStartRowLabel = "Data Start Row",
 		DataEndRowLabel = "Data End Row", DepthColLabel = "Depth Column";
 	
@@ -299,8 +300,21 @@ public class DataImportWizard extends JDialog implements ActionListener, ChangeL
 		unit_number = new JTextField("2");
 		dipp.add(new JLabel(FieldsRowLabel + ": "));
 		dipp.add(label_number, "growx");
-		dipp.add(new JLabel("Units Row: "));
+		unit_number = new JTextField("2");
+		unitRowCheckbox = new JCheckBox("", true);
+		unitRowLabel = new JLabel("Units Row: ");
+		dipp.add(unitRowCheckbox, "split 2, gapright 0px");
+		dipp.add(unitRowLabel);
 		dipp.add(unit_number, "growx, wrap");
+
+		// enable/disable Units Row label and field depending on checkbox state
+		unitRowCheckbox.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				final boolean enable = ((JCheckBox)e.getSource()).isSelected();
+				unitRowLabel.setEnabled(enable);
+				unit_number.setEnabled(enable);
+			}
+		});
 
 		// Depth Column and Mode
 		depth_column = new JTextField("2");
@@ -453,7 +467,11 @@ public class DataImportWizard extends JDialog implements ActionListener, ChangeL
 			startLine = Integer.parseInt(this.start_number.getText()) - 1;
 			endLine = Integer.parseInt(this.end_number.getText()) - 1;
 			labelLine = Integer.parseInt(this.label_number.getText()) - 1;
-			unitLine = Integer.parseInt(this.unit_number.getText()) - 1;
+			if (unitRowCheckbox.isSelected()) {
+				unitLine = Integer.parseInt(this.unit_number.getText()) - 1;
+			} else {
+				unitLine = labelLine;
+			}
 			depthCol = Integer.parseInt(this.depth_column.getText()) - 1;
 		}  catch (NumberFormatException ex) {
 			JOptionPane.showMessageDialog(this, "One or more fields contains an invalid number: " + ex.getMessage());
