@@ -84,6 +84,7 @@ import corelyzer.ui.annotation.AnnotationTypeDirectory;
 import corelyzer.util.FileUtility;
 import corelyzer.util.StringUtility;
 
+
 public class CorelyzerAppController implements ActionListener {
 	// handy utilities
 	static boolean MAC_OS_X = System.getProperty("os.name").toLowerCase().startsWith("mac os x");
