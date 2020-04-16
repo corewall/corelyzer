@@ -419,6 +419,19 @@ public class DataImportWizard extends JDialog implements ActionListener, ChangeL
 		return fs;
 	}
 
+	// Get default XML export destination.
+	private File getExportDir() {
+		File exportDir = null;
+		final String curSessionStr = CorelyzerApp.getApp().getCurrentSessionFile();
+		if (!curSessionStr.equals("")) {
+			final File curSessionFile = new File(curSessionStr);
+			exportDir = curSessionFile.getParentFile();
+		} else { // use input file directory
+			exportDir = this.inputFile.getParentFile();
+		}
+		return exportDir;
+	}
+
 	private void onFinish() {
 		// Gather indices of data types to be imported
 		Vector<Integer> vals = new Vector<Integer>();
@@ -469,6 +482,7 @@ public class DataImportWizard extends JDialog implements ActionListener, ChangeL
 		ExampleFileFilter xmlFilter = new ExampleFileFilter("xml", "XML file");
 		JFileChooser chooser = new JFileChooser("Select Export Filename");
 		chooser.setFileFilter(xmlFilter);
+		chooser.setCurrentDirectory(getExportDir());
 		int retVal = chooser.showSaveDialog(this);
 		if (retVal != JFileChooser.APPROVE_OPTION) {
 			return;
