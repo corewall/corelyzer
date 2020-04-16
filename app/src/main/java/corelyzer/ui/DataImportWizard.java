@@ -114,8 +114,8 @@ public class DataImportWizard extends JDialog implements ActionListener, ChangeL
 		DataImportWizard wiz = new DataImportWizard(null);
 		wiz.setRunningMode(RunMode.STANDALONE);
 
-		// final String inputFile = "/Users/lcdev/proj/corewall/corewall_data/Corelyzer/318-U1357/data/318-U1357-GRA-AB_secnames_sorted.csv";
-		final String inputFile = "/Users/lcdev/Desktop/import data testing/MEXI_XYZ.csv";
+		final String inputFile = "/Users/lcdev/proj/corewall/corewall_data/Corelyzer/318-U1357/data/318-U1357-GRA-AB_secnames_sorted.csv";
+		// final String inputFile = "/Users/lcdev/Desktop/import data testing/MEXI_XYZ.csv";
 		if (args.length < 1) {
 			wiz.setInputFile(inputFile);
 			// System.out.println("Usage: java corelyzer.ui.DataImportWizard <input>.");
@@ -297,7 +297,6 @@ public class DataImportWizard extends JDialog implements ActionListener, ChangeL
 
 		// Label, units rows
 		label_number = new JTextField("1");
-		unit_number = new JTextField("2");
 		dipp.add(new JLabel(FieldsRowLabel + ": "));
 		dipp.add(label_number, "growx");
 		unit_number = new JTextField("2");
@@ -435,7 +434,8 @@ public class DataImportWizard extends JDialog implements ActionListener, ChangeL
 
 	// Get default XML export destination.
 	private File getExportDir() {
-		File exportDir = null;
+		File exportDir = new File("");
+		if (this.mode == RunMode.STANDALONE) { return exportDir; }
 		final String curSessionStr = CorelyzerApp.getApp().getCurrentSessionFile();
 		if (!curSessionStr.equals("")) {
 			final File curSessionFile = new File(curSessionStr);
@@ -528,6 +528,7 @@ public class DataImportWizard extends JDialog implements ActionListener, ChangeL
 		convertTask.execute();
 	}
 
+	// Handle progress during XML conversion.
 	public void propertyChange(PropertyChangeEvent evt) {
         System.out.println("Property change: " + evt.toString());
 		if ("progress" == evt.getPropertyName()) {
@@ -634,6 +635,7 @@ public class DataImportWizard extends JDialog implements ActionListener, ChangeL
 		this.add(sp, BorderLayout.CENTER);
 	}
 
+	// selected tab changed
 	public void stateChanged(final ChangeEvent e) {
 		Object source = e.getSource();
 
