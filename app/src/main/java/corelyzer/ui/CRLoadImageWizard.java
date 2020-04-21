@@ -626,10 +626,10 @@ class SectionListPane extends JPanel implements ListSelectionListener {
 	
 	private void doRenameTrack()
 	{
-		String newTrackName = JOptionPane.showInputDialog( this, "Please enter new track name", "[new name]" );
-		if ( newTrackName != null )
-		{
-			trackSectionModel.renameTrack( trackSectionList.getSelectedIndex(), newTrackName );
+		final String curName = ((TrackSectionListElement)trackSectionList.getSelectedValue()).getName();
+		String newTrackName = JOptionPane.showInputDialog(this, "Enter a track name:", curName);
+		if (newTrackName != null && !newTrackName.equals("")) {
+			trackSectionModel.renameTrack(trackSectionList.getSelectedIndex(), newTrackName);
 			trackSectionList.repaint();
 		}
 	}
@@ -831,8 +831,11 @@ class SectionListPane extends JPanel implements ListSelectionListener {
 		newButton = new JButton("New Track");
 		newButton.addActionListener( new ActionListener() {
 			public void actionPerformed(ActionEvent event) {
-				trackSectionModel.newTrack();
-				trackSectionList.repaint();
+				String name = JOptionPane.showInputDialog(newButton.getParent(), "Enter a track name:", "New Track");
+				if (name != null && !name.equals("")) {
+					trackSectionModel.newTrack(name);
+					trackSectionList.repaint();
+				}
 			}
 		});
 		this.add(newButton, "growx");
@@ -1002,13 +1005,12 @@ class TrackSectionListModel extends AbstractListModel
 			tsVec.elementAt( p.x ).elementAt( p.y ).setName( newTrackName );
 	}
 	
-	public void newTrack()
+	public void newTrack(final String name)
 	{
 		final int origSize = this.getSize();
 		Vector<TrackSectionListElement> newTrack = new Vector<TrackSectionListElement>();
-		final String name = "New Track" + newTrackCount++;
-		newTrack.add( new TrackSectionListElement( name, true, true ));
-		tsVec.add( newTrack );
+		newTrack.add(new TrackSectionListElement(name, true, true));
+		tsVec.add(newTrack);
 
 		fireIntervalAdded(this, origSize, origSize);
 	}
