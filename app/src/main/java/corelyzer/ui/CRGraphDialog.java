@@ -38,6 +38,7 @@ import java.util.Random;
 import java.util.Vector;
 
 import javax.swing.DefaultComboBoxModel;
+import javax.swing.DefaultListCellRenderer;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -97,7 +98,8 @@ public class CRGraphDialog extends JFrame {
 	private JPanel contentPane;
 	private JButton applyButton, closeButton, selectAllButton;
 	private JComboBox<WellLogDataSet> datasetList;
-	private JList<String> sectionsList;
+	private JLabel datasetInfoLabel, unmatchedImageLabel;
+	private JList<GraphSectionListItem> sectionsList;
 	private JLabel sectionsListLabel;
 	private JCheckBox ifCollapseGraphs;
 	private JComboBox<String> typeList;
@@ -110,7 +112,7 @@ public class CRGraphDialog extends JFrame {
 	// 9/30/2011 brg: Why are we maintaining member variables that never
 	// change and can easily be acessed w/ foo.getModel()?
 	DefaultComboBoxModel<WellLogDataSet> datasetModel;
-	DefaultListModel<String> sectionsListModel;
+	DefaultListModel<GraphSectionListItem> sectionsListModel;
 
 	// View (for scaling)
 	Vector<Float> scaleMinVals, scaleMaxVals;
@@ -149,14 +151,12 @@ public class CRGraphDialog extends JFrame {
 		getRootPane().setDefaultButton(applyButton);
 
 		applyButton.addActionListener(new ActionListener() {
-
 			public void actionPerformed(final ActionEvent e) {
 				onApply();
 			}
 		});
 
 		closeButton.addActionListener(new ActionListener() {
-
 			public void actionPerformed(final ActionEvent e) {
 				onCancel();
 			}
@@ -170,7 +170,6 @@ public class CRGraphDialog extends JFrame {
 
 		setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
 		addWindowListener(new WindowAdapter() {
-
 			@Override
 			public void windowClosing(final WindowEvent e) {
 				onCancel();
@@ -178,14 +177,12 @@ public class CRGraphDialog extends JFrame {
 		});
 
 		contentPane.registerKeyboardAction(new ActionListener() {
-
 			public void actionPerformed(final ActionEvent e) {
 				onCancel();
 			}
 		}, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
 
 		typeList.addActionListener(new ActionListener() {
-
 			public void actionPerformed(final ActionEvent event) {
 				//System.out.println("Type List action: " + event.getActionCommand());
 				onTypeListAction();
@@ -212,6 +209,12 @@ public class CRGraphDialog extends JFrame {
 		final DefaultComboBoxModel<WellLogDataSet> datasetComboBoxModel = new DefaultComboBoxModel<WellLogDataSet>();
 		datasetList.setModel(datasetComboBoxModel);
 		contentPane.add(datasetList, "wrap, growx");
+
+		datasetInfoLabel = new JLabel();
+		unmatchedImageLabel = new JLabel();
+		unmatchedImageLabel.setForeground(Color.RED);
+		contentPane.add(datasetInfoLabel, "split 2");
+		contentPane.add(unmatchedImageLabel, "growx, wrap");
 		
 		// tweak tooltip for platform: on Mac, Command-click toggles selection; on Win, Control-click
 		final String toggleKeyStr = CorelyzerApp.isOSX() ? new String("Command") : new String("Control");
@@ -222,9 +225,10 @@ public class CRGraphDialog extends JFrame {
 		sectionsListLabel.setToolTipText( sectionSelectionToolTip );
 		graphSecsPanel.add(sectionsListLabel, "wrap");
 		
-		sectionsList = new JList<String>();
-		sectionsList.setModel( new DefaultListModel<String>() );
+		sectionsList = new JList<GraphSectionListItem>();
+		sectionsList.setModel(new DefaultListModel<GraphSectionListItem>());
 		sectionsList.setToolTipText( sectionSelectionToolTip );
+		sectionsList.setCellRenderer(new GraphSectionListItemRenderer());
 		final JScrollPane sectionsScrollPane = new JScrollPane();
 		sectionsScrollPane.setViewportView( sectionsList );
 		graphSecsPanel.add(sectionsScrollPane, "grow");
@@ -398,7 +402,7 @@ public class CRGraphDialog extends JFrame {
 			}
 		});
 
-		this.sectionsListModel = new DefaultListModel<String>();
+		this.sectionsListModel = new DefaultListModel<GraphSectionListItem>();
 		this.sectionsList.setModel(this.sectionsListModel);
 		this.sectionsList.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 		this.sectionsList.addListSelectionListener(new ListSelectionListener() {
@@ -552,12 +556,21 @@ public class CRGraphDialog extends JFrame {
 			}
 		}
 
+		int missingImageCount = 0;
 		this.sectionsListModel.removeAllElements();
 		for (int i = 0; i < ds.getNumTables(); i++) {
-			String name = ds.getTable(i).getName();
-			this.sectionsListModel.addElement(name);
+			final String name = ds.getTable(i).getName();
+			final boolean imageExists = dataSectionHasCorrespondingImage(name);
+			if (!imageExists) { missingImageCount++; }
+			this.sectionsListModel.addElement(new GraphSectionListItem(name, imageExists));
 		}
-
+		String datasetInfoStr = "Contains " + this.sectionsListModel.getSize() + " sections.";
+		datasetInfoLabel.setText(datasetInfoStr);
+		if (missingImageCount > 0) {
+			unmatchedImageLabel.setText("No corresponding image found for " + missingImageCount + " section(s).");
+		} else {
+			unmatchedImageLabel.setText("");
+		}
 		this.sectionsList.setSelectedIndex(0);
 		
 		fieldsTable.tableChanged(new TableModelEvent(fieldsTable.getModel()));
@@ -1080,11 +1093,33 @@ public class CRGraphDialog extends JFrame {
 				final WellLogDataSet ds = (WellLogDataSet) this.datasetList.getSelectedItem();
 				gpResult = new GraphParams( tnode.getId(), cs.getId(), ds.getId(), dataTableId );
 				break;
+			} else {
+				// no corresponding core image, but we can still gather dataset parameters
+				final int dataTableId = this.getTableIndexByName(sectionName);
+				if ( dataTableId == -1 ) return null;
+				
+				final WellLogDataSet ds = (WellLogDataSet) this.datasetList.getSelectedItem();
+				gpResult = new GraphParams(-1, -1, ds.getId(), dataTableId);
 			}
 		}
 		
 		return gpResult;
-	}	
+	}
+
+	private boolean dataSectionHasCorrespondingImage(final String sectionName) {
+		boolean found = false;
+		CRDefaultListModel tmodel = CorelyzerApp.getApp().getTrackListModel();
+		for (int trackIdx = 0; trackIdx < tmodel.size(); trackIdx++)
+		{
+			TrackSceneNode tnode = (TrackSceneNode)tmodel.elementAt(trackIdx);
+			final CoreSection cs = tnode.getCoreSection(sectionName);
+			if (cs != null) {
+				found = true;
+				break;
+			}
+		}
+		return found;
+	}
 }
 
 // Convenience class that aggregates values needed to query SceneGraph about graphs
@@ -1184,4 +1219,29 @@ class GraphColorsManager
 	
 	Vector<Vector<Color>> colorVec;
 	Vector<String> nameVec;
+}
+
+// Track data section name and existence of corresponding image section name
+class GraphSectionListItem {
+	private String name;
+	private boolean correspondingImageExists;
+	public GraphSectionListItem(String name, boolean correspondingImageExists) {
+		this.name = name;
+		this.correspondingImageExists = correspondingImageExists;
+	}
+	public String toString() { return this.name; }
+	public boolean imageExists() { return this.correspondingImageExists; }
+}
+
+// Draw data's section name in red if there is no corresponding section image of the same name
+class GraphSectionListItemRenderer extends DefaultListCellRenderer {
+	public static final long serialVersionUID = -1L;
+	public Component getListCellRendererComponent(final JList list, final Object value, final int index, final boolean isSelected,
+			final boolean cellHasFocus)
+	{
+		JLabel label = (JLabel)super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+		GraphSectionListItem item = (GraphSectionListItem)value;
+		if (!item.imageExists()) { label.setForeground(Color.RED); }
+		return label;
+	}	
 }
