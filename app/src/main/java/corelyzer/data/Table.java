@@ -102,11 +102,13 @@ public class Table {
 	}
 
 	public float getColumnMax(final int field) {
+		// 0th elt of colData is depth, field + 1 for data elt
 		int maxIndex = colData[field + 1].maxIndex;
 		return maxIndex < 0 ? 0.0f : colData[field + 1].dataArray[maxIndex];
 	}
 
 	public float getColumnMin(final int field) {
+		// 0th elt of colData is depth, field + 1 for data elt
 		int minIndex = colData[field + 1].minIndex;
 		return minIndex < 0 ? 0.0f : colData[field + 1].dataArray[minIndex];
 	}
