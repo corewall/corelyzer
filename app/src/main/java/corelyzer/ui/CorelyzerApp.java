@@ -134,10 +134,10 @@ public class CorelyzerApp extends WindowAdapter implements MouseListener, Startu
 			final int majorVersion = Integer.parseInt( st.nextToken() );
 			final int minorVersion = Integer.parseInt( st.nextToken() );
 			
-			if ( !MAC_OS_X && majorVersion <= 1 && minorVersion <= 6 )
+			if (majorVersion <= 1 && (minorVersion != 8))
 			{
-				JOptionPane.showMessageDialog( null, "Detected Java version " + javaVersion + ":\n" +
-						"Java 1.7 or later is recommended for use with this version of Corelyzer." );
+				JOptionPane.showMessageDialog(null, "Detected Java version " + javaVersion + ":\n" +
+						"Java 8 is recommended for use with this version of Corelyzer.");
 			}
 		}
 	}
