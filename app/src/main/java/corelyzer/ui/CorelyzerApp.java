@@ -1468,13 +1468,7 @@ public class CorelyzerApp extends WindowAdapter implements MouseListener, Startu
 		loadDataMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_D, MENU_MASK));
 		loadDataMenuItem.addActionListener(new ActionListener() {
 			public void actionPerformed(final ActionEvent event) {
-				Runnable r = new Runnable() {
-					public void run() {
-						controller.loadData();
-					}
-				};
-
-				new Thread(r).start();
+				controller.loadData();
 			}
 		});
 		loadDataMenu.add(loadDataMenuItem);
