@@ -18,6 +18,8 @@ import corelyzer.data.*;
 import corelyzer.data.coregraph.*;
 import corelyzer.graphics.SceneGraph;
 import corelyzer.util.FileUtility;
+import corelyzer.util.identity.SectionIDParser;
+import corelyzer.util.identity.SectionIDParserFactory;
 
 // This "wizard" attempts to simplify the section image loading process. It allows multiple
 // tracks to be created and populated in a single transaction. It makes best guesses as to
@@ -221,6 +223,7 @@ public class CRLoadImageWizard extends JDialog {
 		Vector<String> apparentTrack = new Vector<String>(); // one per vector (each corresponds to a track) in tsVec
 		Vector<String> trackNameVec = new Vector<String>();
 		Vector<String> sectionNameVec = new Vector<String>();
+		SectionIDParser idParser = null;
 		
 		// First, build vector of vectors of existing tracks and sections, one vector per track
 		CoreGraph cg = CoreGraph.getInstance();
@@ -239,10 +242,13 @@ public class CRLoadImageWizard extends JDialog {
 				for ( CoreSection cs : tsn.getCoreSections() )
 				{
 					if ( firstSection ) {
+						if (idParser == null) {
+							idParser = SectionIDParserFactory.getMatchingParser(cs.getName());
+						}
 						// make best guess of track name based on name of first section in each
 						// track: thus the Nth element of apparentTrack corresponds to the
 						// Nth element (a track) in tsVec.
-						final String fullTrackID = FileUtility.parseFullTrackID( cs.getName() );
+						final String fullTrackID = idParser.getFullHoleID(cs.getName());
 						if ( fullTrackID == null ) {
 							// couldn't parse track out of filename
 							apparentTrack.add( null );
@@ -287,9 +293,11 @@ public class CRLoadImageWizard extends JDialog {
 			System.out.println("Processing " + curFile.getName() + "...");
 			final String strippedFilename = FileUtility.stripExtension( curFile.getName() );
 			TrackSectionListElement newSection = new TrackSectionListElement( strippedFilename, true, false, curFile );
+			if (idParser == null) {
+				idParser = SectionIDParserFactory.getMatchingParser(strippedFilename);
+			}
 			
-			
-			final String fullTrackID = FileUtility.parseFullTrackID( strippedFilename );
+			final String fullTrackID = idParser.getFullHoleID(strippedFilename);
 			System.out.println("track name = " + fullTrackID);
 			if ( fullTrackID == null )
 			{
@@ -326,7 +334,8 @@ public class CRLoadImageWizard extends JDialog {
 				trackVec.insertElementAt( new TrackSectionListElement( trackNameVec.elementAt( oldTrackIndex ), false, true ), 0 );
 				oldTrackIndex++;
 			} else {
-				String newTrackName = FileUtility.parseFullTrackID( trackVec.elementAt( 0 ).getName() );
+				if (idParser == null) { idParser = SectionIDParserFactory.getMatchingParser(trackVec.elementAt(0).getName()); }
+				String newTrackName = idParser.getFullHoleID(trackVec.elementAt( 0 ).getName());
 				if ( newTrackName == null )
 					newTrackName = "New Track" + newTrackIndex++;
 				trackVec.insertElementAt( new TrackSectionListElement( newTrackName, true, true ), 0 );
