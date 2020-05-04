@@ -343,20 +343,12 @@ public class DataImportWizard extends JDialog implements ActionListener, ChangeL
 		dipp.add(name_label, "aligny center");
 		dipp.add(name_column, "growx, aligny center, wmin 150");
 
-		JPanel previewPanel = new JPanel(new MigLayout("insets 5", "[grow][]", ""));
+		JPanel previewPanel = new JPanel(new MigLayout("insets 5", "[grow]", ""));
 		previewPanel.setBorder(BorderFactory.createTitledBorder("Section Name Preview"));
 		sectionNamePreview = new JLabel();
 		java.awt.Font curFont = sectionNamePreview.getFont();
 		sectionNamePreview.setFont(curFont.deriveFont(java.awt.Font.BOLD));
-		previewPanel.add(sectionNamePreview, "grow");
-		JButton updatePreview = new JButton("Update");
-		updatePreview.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				updateSectionNamePreview();
-			}
-		});
-		updatePreview.setFocusable(false);
-		previewPanel.add(updatePreview);
+		previewPanel.add(sectionNamePreview, "alignx left, grow");
 		dipp.add(previewPanel, "span 2, growx, wrap");
 		panel.add(dipp);
 
