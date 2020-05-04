@@ -87,10 +87,11 @@ public class AboutDialog extends JDialog implements ActionListener {
 		add(sep, "growx");
 		
 		// Java Runtime info
+		final String jreArch = System.getProperty("os.arch").contains("64") ? "64-bit" : "32-bit";
 		String javaVersion = System.getProperty("java.version");
 		String javaVendor = System.getProperty("java.vendor");
 		String javaHome = System.getProperty("java.home");
-		add(new JLabel("Running Java " + javaVersion + " (" + javaVendor + ")"));
+		add(new JLabel("Running Java " + javaVersion + " (" + jreArch + ", " + javaVendor + ")"));
 		add(new JLabel("Java home: " + javaHome));
 
 		pack();
