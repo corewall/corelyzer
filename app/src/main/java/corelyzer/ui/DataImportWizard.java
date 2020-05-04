@@ -72,7 +72,6 @@ import corelyzer.util.FileUtility;
 import corelyzer.data.DepthMode;
 import corelyzer.data.TabularToXMLConversion;
 import corelyzer.data.tabular.OpenCSVParser;
-import corelyzer.data.tabular.TaskProgressListener;
 
 
 // A text data import wizard allowing users to specify delimiter,
@@ -211,15 +210,9 @@ public class DataImportWizard extends JDialog implements ActionListener, ChangeL
 			System.out.println("---> Finish: start convert, save, load data");
 			onFinish();
 		} else if (command.equals("Select...")) {
-			JFileChooser chooser = new JFileChooser();
-			chooser.setDialogTitle("Select import file");
-			chooser.setMultiSelectionEnabled(false);
-			chooser.setCurrentDirectory(DataImportWizard.lastInputFileDirectory);
-			int returnVal = chooser.showOpenDialog(this);
-
-			if (returnVal == JFileChooser.APPROVE_OPTION) {
-				File f = chooser.getSelectedFile();
-				this.setInputFile(f);
+			String selectedFile = FileUtility.selectASingleFile(this, "Select tabular data to import", null, FileUtility.LOAD);
+			if (selectedFile != null) {
+				this.setInputFile(new File(selectedFile));
 			}
 		} else {
 			System.err.println("WARNING: Action Command not Found " + command);

@@ -850,11 +850,9 @@ public class CorelyzerAppController implements ActionListener {
 
 	// Prepare and launch corelyzer.ui.DataImportWizard
 	public void importData() {
-		String selected = FileUtility.selectASingleFile(view.getMainFrame(), "Choose a text file", null, FileUtility.LOAD);
-
+		String selected = FileUtility.selectASingleFile(view.getMainFrame(), "Select tabular data to import", null, FileUtility.LOAD);
 		if (selected != null) {
 			File selectedFile = new File(selected);
-
 			if (selectedFile.exists()) {
 				DataImportWizard wiz = new DataImportWizard(view.getMainFrame());
 				wiz.setModal(true);
