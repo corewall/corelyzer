@@ -1438,10 +1438,12 @@ public class CorelyzerAppController implements ActionListener {
 	// --------------------------------------------------------------
 
 	public void quit() {
-		Object[] options = { "Save", "Don't Save", "Cancel" };
-
-		int sel = JOptionPane.showOptionDialog(view.getMainFrame(), "Do you want to save your " + "session before leaving " + "Corelyzer?",
-				"Exit Confirmation", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
+		int sel = 1;
+		if (view.getSessionList().getModel().getSize() > 0) {
+			Object[] options = { "Save", "Don't Save", "Cancel" };
+			sel = JOptionPane.showOptionDialog(view.getMainFrame(), "Do you want to save your " + "session before leaving " + "Corelyzer?",
+					"Exit Confirmation", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
+		}
 
 		switch (sel) {
 			case 0: // save to session file and quit
@@ -1449,19 +1451,18 @@ public class CorelyzerAppController implements ActionListener {
 					cleanThingsUp();
 					System.exit(0);
 				}
-
 				break;
 
 			case 1: // don't save, just quit
 				cleanThingsUp();
 				System.exit(0);
 
-			default:
+			default: // abort quit
 				view.getMainFrame().setVisible(true);
 				view.toolFrame.setVisible(true);
 				view.toolFrame.setAppFrameSelected(true);
 
-				// Hack way to stop quitting, only useful when Cmd+Q hit
+				// Hack way to stop quitting, only applies to Cmd+Q keystroke
 				if (MAC_OS_X) {
 					throw new IllegalStateException("Hack way to cancel quit");
 				}
