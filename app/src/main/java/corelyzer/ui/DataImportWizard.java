@@ -68,6 +68,7 @@ import net.miginfocom.swing.MigLayout;
 import com.opencsv.exceptions.CsvException;
 
 import corelyzer.helper.ExampleFileFilter;
+import corelyzer.util.FileUtility;
 import corelyzer.data.DepthMode;
 import corelyzer.data.TabularToXMLConversion;
 import corelyzer.data.tabular.OpenCSVParser;
@@ -158,6 +159,7 @@ public class DataImportWizard extends JDialog implements ActionListener, ChangeL
 		DataEndRowLabel = "Data End Row", DepthColLabel = "Depth Column";
 	
 	JComboBox<FieldSeparator> fsComboBox;
+	boolean suspendFieldSeparatorListener = false;
 	JComboBox<DepthMode> depthModeComboBox;
 
 	CheckBoxList columnList;
@@ -270,8 +272,9 @@ public class DataImportWizard extends JDialog implements ActionListener, ChangeL
 		}
 		fsComboBox.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				System.out.println("Delimiter changed, reprocessing...");
-				setInputFile(inputFile); // reprocess current input file with new delimiter
+				if (!suspendFieldSeparatorListener) {
+					loadInputFile(inputFile, false); // reprocess current input file with selected delimiter
+				}
 			}
 		});
 		
@@ -374,10 +377,20 @@ public class DataImportWizard extends JDialog implements ActionListener, ChangeL
 		return p;
 	}
 
-	private void loadInputFile(final File f) {
+	private void loadInputFile(final File f, final boolean detectSeparator) {
 		if (f.exists()) {
 			try {
-				parsedData = OpenCSVParser.parseCSV(f, getFieldSeparatorChar().charAt(0));
+				if (detectSeparator) {
+					final String ext = FileUtility.getExtension(f).toLowerCase();
+					if (ext.equals("tsv")) {
+						setFieldSeparatorChar('\t');
+					} else if (ext.equals("txt")) {
+						setFieldSeparatorChar(' ');
+					} else { // default to comma
+						setFieldSeparatorChar(',');
+					}
+				}
+				parsedData = OpenCSVParser.parseCSV(f, getFieldSeparatorChar());
 				reduceParsedDataWhitespace();
 				fileContent.setModel(new OpenCSVTableModel(parsedData));
 
@@ -407,21 +420,32 @@ public class DataImportWizard extends JDialog implements ActionListener, ChangeL
 		}
 	}
 	
-	private String getFieldSeparatorChar() {
-		String fs = "";
+	private char getFieldSeparatorChar() {
+		char fs = ','; // default
 		FieldSeparator fSeparator = (FieldSeparator) fsComboBox.getSelectedItem();
-		if (fSeparator == FieldSeparator.COMMA) {
-			fs = ",";
-		} else if (fSeparator == FieldSeparator.TAB) {
-			fs = "\t";
+		if (fSeparator == FieldSeparator.TAB) {
+			fs = '\t';
 		} else if (fSeparator == FieldSeparator.SPACE) {
-			fs = " ";
+			fs = ' ';
 		} else if (fSeparator == FieldSeparator.SEMICOLON) {
-			fs = ";";
-		} else {
-			fs = " ";
+			fs = ';';
 		}
 		return fs;
+	}
+
+	private void setFieldSeparatorChar(final char fschar) {
+		FieldSeparator fs = FieldSeparator.COMMA; // default
+		if (fschar == '\t') {
+			fs = FieldSeparator.TAB;
+		} else if (fschar == ';') {
+			fs = FieldSeparator.SEMICOLON;
+		} else if (fschar == ' ') {
+			fs = FieldSeparator.SPACE;
+		}
+		// stifle event when changing the combo box programmatically
+		suspendFieldSeparatorListener = true;
+		fsComboBox.setSelectedItem(fs);
+		suspendFieldSeparatorListener = false;
 	}
 
 	// Get default XML export destination.
@@ -565,7 +589,7 @@ public class DataImportWizard extends JDialog implements ActionListener, ChangeL
 	public void setInputFile(final File f) {
 		this.inputFile = f;
 		DataImportWizard.lastInputFileDirectory = new File(f.getAbsolutePath());
-		loadInputFile(this.inputFile);
+		loadInputFile(this.inputFile, true);
 	}
 
 	public void setInputFile(final String f) {
@@ -876,28 +900,3 @@ class DataColumnCheckBox extends JCheckBox {
 	}
 	public int getDataColumn() { return dataColumn; }
 }
-
-// listener for potentially long-running tasks
-// class ImportTaskProgressListener implements PropertyChangeListener {
-// 	SwingWorker<?,?> task;
-// 	String progressFormatString;
-// 	ProgressMonitor monitor;
-// 	public ImportTaskProgressListener(SwingWorker<?,?> task, String progressFormatString, ProgressMonitor monitor) {
-// 		this.task = task;
-// 		this.progressFormatString = progressFormatString;
-// 		this.monitor = monitor;
-// 	}
-// 	public void propertyChange(PropertyChangeEvent evt) {
-// 		if ("progress" == evt.getPropertyName()) {
-// 			int progress = (Integer) evt.getNewValue();
-// 			monitor.setProgress(progress);
-// 			String message = String.format(progressFormatString, progress);
-// 			monitor.setNote(message);
-// 			if (monitor.isCanceled() || task.isDone()) {
-// 				if (monitor.isCanceled()) {
-// 					task.cancel(true);
-// 				}
-// 			}
-// 		}
-// 	}
-// }
