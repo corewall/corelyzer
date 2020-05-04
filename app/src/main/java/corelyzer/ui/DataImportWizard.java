@@ -74,15 +74,11 @@ import corelyzer.data.TabularToXMLConversion;
 import corelyzer.data.tabular.OpenCSVParser;
 import corelyzer.data.tabular.TaskProgressListener;
 
-/**
- * A text data import wizard that let user specify what their table data looks
- * like, reference Microsoft Excel's "Text Import Wizard"
- * 
- * Steps: 0. Init, select the import file and the field separator 1. Select the
- * 'Start' and 'End' row number of data 2. Select the 'label row' and 'unit row'
- * 3. Select the section-number/'label text' column Select the section depth
- * column 4. Check the columns that needs to be imported. AND Go!
- **/
+
+// A text data import wizard allowing users to specify delimiter,
+// start/end row, fields and units rows, section name columns, etc
+// to properly convert tabular data to Corelyzer's XML data format.
+
 public class DataImportWizard extends JDialog implements ActionListener, ChangeListener, PropertyChangeListener {
 	public static enum FieldSeparator {
 		COMMA, TAB, SPACE, SEMICOLON;
