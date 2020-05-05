@@ -6,30 +6,30 @@
   <bookinfo>
     <title>Corelyzer User's Manual</title>
 
-    <authorgroup>
-	  <author>
-		<firstname>Brian</firstname>
-		<surname>Grivna</surname>
-		<email id="briansmail">brian.grivna at gmail</email>
-	  </author>
-    </authorgroup>
-
-    <date>06/21/2012</date>
-    <releaseinfo>Version 5, 06.21.2012</releaseinfo>
+    <date>5/5/2020</date>
+    <releaseinfo>Last Updated May 5, 2020</releaseinfo>
 
     <abstract>
       <para>
         <application>Corelyzer</application> 
         is a scalable, extensible visualization tool developed to enhance the 
-        study of geological cores. The strength of Corelyzer is the ability to 
-        display large sets of core imagery, with multi-sensor logs, annotations 
-        and plugin supported visuals alongside the core imagery. This
-        document describes how to download, setup and use the software.
+        study of geological cores. Corelyzer can 
+        display large sets of core imagery, with corresponding multi-sensor logs, annotations 
+        and plugin-supported visuals alongside. This
+        document describes how to download, configure, and use the software.
+      </para>
+      <para>
+        Corelyzer was originally developed by E. Ito, S. Higgins, C. Jenkins, J. Leigh,
+        and A. Johnson. CSDCO/LacCore developments have yielded major improvements to
+        Corelyzer in recent years through continual feedback from facility visitors
+        and the community at large. These efforts have enabled full utilization of the
+        software for every project team that visits the facility and by an increasing
+        range of institutions around the globe.
       </para>
     </abstract>
   </bookinfo>
   
-  <preface>
+  <!-- <preface>
     <title>About CoreWall</title>
 
       <para>
@@ -149,7 +149,7 @@
         <graphic fileref="images/corelyzerlogo.jpg" />
       </figure>
 
-  </preface>
+  </preface> -->
 
   <chapter>
     <title>Pre-installation Requirements</title>
@@ -157,38 +157,58 @@
     <sect1>
       <title>Hardware</title>
       <para>
-        Corelyzer takes advantage of hardware-accelerated
-        graphics. While a primarily 2D visualization program,
-        Corelyzer uses OpenGL to accelerate the rendering and take
-        advantage of modern day graphics boards. This means that
-        the performance of the application is not only dependent on
-        the speed of your CPU but also the power of your Graphics
-        Processing Unit (GPU). Any modern day graphics card that can
-        run video games from a few years back can easily run
-        Corelyzer. Currently the leaders in graphics card technologies 
-        are Nvidia and ATI.
+        Graphics: Corelyzer takes advantage of hardware-accelerated
+        graphics. While primarily a 2D visualization program,
+        Corelyzer uses OpenGL to accelerate rendering and take
+        advantage of modern day graphics boards. Thus
+        the performance of the application depends on both
+        the speed of your CPU and the power of your Graphics
+        Processing Unit (GPU). Modern graphics cards can run
+        Corelyzer without issue.
       </para>
 
       <para>
-        Corelyzer can use lots of hard drive space and main memory. It
-        is recommended to have at least 2GB of RAM on your machine if
-        you intend on looking at a hundred meters of high-resolution
-        core images, or more. Also note that Corelyzer
-        does not currently support heterogeneous display settings.
-		This means that if you have a
-        monitor that only goes up to 1280x1024 and another at
-        1600x1200, you will have to choose one or the other when
-        setting up your Corelyzer display settings when running the
-        application.
+        Storage: Corelyzer's performance is also closely tied to the speed of storage
+        devices. Solid state drives (SSDs) greatly improve performance over hard-disk
+        drives (HDDs), especially in large projects where the volume of imagery requires
+        frequent reads of cached data.
+      </para>
+
+      <para>
+        Memory: At least 2GB of RAM is recommended if
+        you intend to work with projects comprising 100+ meters of high-resolution
+        core images.
+      </para>
+      
+      <para>
+        Displays: Corelyzer does not currently support heterogeneous display settings.
+		    This means that if you have one
+        monitor at 1280x1024 resolution, and another at
+        1600x1200 resolution, you'll have to choose one or the other when
+        defining your Corelyzer display settings.
+      </para>
+    </sect1>
+    <sect1>
+      <title>Software</title>
+      <para>
+        Corelyzer makes use of the Java Runtime Environment (JRE) version 8,
+        which is bundled with the application.
       </para>
     </sect1>
 
-    <sect1>
+    <!-- <sect1>
       <title>Example Hardware Setups</title>
       <para>
-Corelyzer will work on most laptops or desktops built since ~2005, running Mac OS 10.5 or higher or Windows XP or higher, and is compatible with both 32-bit and 64-bit systems. To maximize performance, we suggest prioritizing high-end 3D graphics cards, processor speed, and RAM (in that order). Solid-state drives may offer a further performance boost. Larger monitors give more workspace and a better view, but performance does degrade somewhat as each monitor is added to the system. In multi-panel setups, monitors with thin bezel (border/edge strip) will provide a better experience.
+        Corelyzer will work on most modern laptops or desktops
+        running Windows (XP or higher) or Mac OSX/macOS (10.10 "Yosemite" or higher) with
+        64-bit processors. To maximize performance,
+        we suggest prioritizing high-end 3D graphics cards, Solid State Drive (SSD) storage,
+        processor speed, and RAM (in that order).
+        Larger monitors give more workspace and a better view, but performance does degrade
+        somewhat as each monitor is added to the system. In multi-panel setups, monitors with
+        thin bezel (border/edge strip) will provide a better experience.
 
-Some examples of CoreWall setups are described below. For more information, please contact the people listed.
+        Some examples of CoreWall setups are described below. For more information, please contact the people listed.
       </para>
 
       <sect2>
@@ -254,17 +274,15 @@ Some examples of CoreWall setups are described below. For more information, plea
         </figure>
       </sect2>
 
-    </sect1>
+    </sect1> -->
 
-    <sect1>
+    <!-- <sect1>
       <title>Software</title>
       <para>
-        Corelyzer makes use of the Java Runtime Environment (JRE). The
-		current version of Corelyzer requires Java 1.7 or greater, which can
-		be downloaded <ulink url="http://www.java.com/en/download/index.jsp">here</ulink>.
+        Corelyzer makes use of the Java Runtime Environment (JRE) version 8, which is bundled with the application.
       </para>
 
-    </sect1>
+    </sect1> -->
 
   </chapter>
 
@@ -277,8 +295,8 @@ Some examples of CoreWall setups are described below. For more information, plea
         You can download copies of the application for the following
         platforms at the main download page:  
         <ulink
-            url="http://www.corewall.org/downloads.html">
-          http://www.corewall.org/downloads.html
+            url="https://github.com/corewall/corelyzer/releases">
+          https://github.com/corewall/corelyzer/releases
           </ulink>.
       </para>
     </sect1>
@@ -289,29 +307,26 @@ Some examples of CoreWall setups are described below. For more information, plea
       <sect2>
         <title>Microsoft Windows Users</title>
         <para>
-		  Extract the downloaded .zip archive by right-clicking the
-		  file and select "Extract All...". Extract Corelyzer to the desired
-		  directory and double-click the Corelyzer icon to launch.
+          Extract the downloaded .zip archive by right-clicking the
+          file and selecting "Extract All...". Extract Corelyzer to the desired
+          directory and double-click the Corelyzer icon to launch.
         </para>
       </sect2>
 
       <sect2>
-        <title>Apple Mac OS X Users</title>
+        <title>Apple Mac OS X/macOS Users</title>
         <para>
-          If you use Safari browser, the application should be
-          downloaded and extracted in your "Downloads" directory. If
-          you use other browsers, please unzip the downloaded file
-          (double-click it) and you will get the application. 
+          Unzip the downloaded file by double-clicking and you'll see the application icon.
         </para>
 
         <para>
-          You can drag-and-drop the application in your
-          preferred disk location like the “/Applications” directory
-          or even your Desktop. Double click the icon will launch the
-          Corelyzer program.
+          You can drag the application to your
+          preferred disk location, like the Applications directory
+          or your Desktop. Double click the icon to launch
+          Corelyzer.
 
           <figure>
-            <title>Corelyzer in Mac OS X</title>
+            <title>Corelyzer in Mac OS X/macOS</title>
             <graphic fileref="images/mac_install.png" />
           </figure>
         </para>
@@ -321,12 +336,12 @@ Some examples of CoreWall setups are described below. For more information, plea
   </chapter>
 
   <chapter>
-    <title>Start Corelyzer</title>
+    <title>Running Corelyzer</title>
 
     <sect1>
       <title>Setting up the desktop environment</title>
       <para>
-        Before we start Corelyzer, we must first make sure our display
+        Before starting Corelyzer, you should first make sure your display
         settings are correct. On both the Mac and Windows, the default
         monitor should be the “upper left most monitor”.
       </para>
@@ -346,7 +361,7 @@ Some examples of CoreWall setups are described below. For more information, plea
         </para>
 
         <para>
-          Once opened, please go to the Settings tab. Here you will
+          Once opened, go to the Settings tab. Here you will
           see boxes with numbers representing the monitors connected
 		  to your machine. If you have a
           monitor that is not displaying your desktop then it will
@@ -354,12 +369,11 @@ Some examples of CoreWall setups are described below. For more information, plea
 		  is disabled. If the box
           indicates the monitor is disabled and you click on the box,
           you will be able to modify the options for that monitor. To
-          enabled the monitor, make sure that the check box next to
+          enable the monitor, make sure that the check box next to
           Extend my desktop... is checked. Do this for all the
-          monitors you would like to use, presumably all of them. Once
-          you have done that, click on the Apply button. If you did
-          this correctly, your desktop should be visible on all
-          the monitors. 
+          monitors you would like to use, presumably all of them. Then
+          click on the Apply button. Your desktop should be visible on
+          all the selected monitors. 
           
           <figure>
             <title>Display</title>
@@ -369,38 +383,34 @@ Some examples of CoreWall setups are described below. For more information, plea
 
         <para>
           Note: Some monitors need to be turned off and on again to
-          realize that they are enabled by Windows. Now that the
-          desktops are visible on your monitors, you will need to set
+          be recognized by Windows. Once the
+          desktop is visible on your monitors, you will need to set
           the display resolution for all of the monitors. Corelyzer
           requires that all monitors use the same resolution. Example resolutions
           are 1280x1024 and 1600x1200. There is a slider on your
           display settings dialog to modify the resolution. Once set
           for all monitors, click on the Apply button again. If you
           are prompted to restart your machine in order for the
-          changes to take affect, then do so. Otherwise, the
+          changes to take effect, then do so. Otherwise, the
           resolution of your monitors will change and you will be
           prompted to keep the settings or change them back. 
         </para>
 
         <para>
           Note: If your monitors do not support a particular
-          resolution they will likely display that or they will stay
-          black. If you do not like your settings, wait for some time
-          and Windows will revert back. After you have enabled your
-          monitors and configured their display settings, you should
+          resolution, they'll typically display a message to that effect,
+          or display nothing (black). After you have enabled your
+          monitors and configured their display settings,
           make sure that the layout of the monitors matches the layout
-          of the boxes in your display settings. First we need to
-          identify which box represents which monitor, and we can do
-          this by seeing what number has been assigned to each monitor
-          by Windows. To do this, click on the Identify button. When
-          you do this, your monitors will display a number indicating
-          which box refers to which monitor. If your monitors are
+          of the boxes in your display settings. Click the Identify
+          button, and note the number Windows assigns to each monitor.
+          If your monitors are
           ordered differently than the boxes that are shown on your
           display settings, then you will need to re-arrange your
-          monitors. This is easily done by clicking and dragging the
+          monitors. This is done by clicking and dragging the
           boxes in your settings window. Again, you should make sure
-          that the upper left most box matches with your upper left
-          most monitor and that monitor is enabled as your Primary
+          that the upper left most box matches your upper left
+          most monitor, and that monitor is enabled as your Primary
           Monitor.
         </para>
 
@@ -408,8 +418,8 @@ Some examples of CoreWall setups are described below. For more information, plea
           Note that the desktop numbering in Microsoft Windows
           depends on the order in which you've connected monitors to
           your graphics card(s). It may not appear in ascending
-          order from left to right. All you have to make sure is the
-          ordering is matched in the onscreen identify result and the
+          order from left to right. Ensure that your monitors' physical
+          arrangement matches the onscreen identify result and the
           display properties display, as shown in the following two
           screenshots.
 
@@ -427,12 +437,12 @@ Some examples of CoreWall setups are described below. For more information, plea
       </sect2>
 
       <sect2>
-        <title>Apple Mac OS X Users</title>
+        <title>Apple Mac OS X/macOS Users</title>
         <para>
-          To setup your monitors on your Mac you will need to get to
-          the display settings. To do this, open the Apple menu in the
+          To setup your monitors on your Mac, open the Displays
+          item in System Preferences. To do this, click the Apple menu in the
 		  upper-left of the screen and select "System Preferences". Then
-          choose "Displays" and you will see a dialog window on each
+          choose "Displays", and you will see a dialog window on each
           monitor that is connected to your machine.
 
           <figure>
@@ -452,16 +462,16 @@ Some examples of CoreWall setups are described below. For more information, plea
         </para>
 
         <para>
-          You will have to make sure the upper left
-          most monitor in your arrangement will be the main
-          monitor. On the Mac, the main monitor is visible in the
-          Arrangement tab as the box that contains a white rectangle
-          along the top of the box. To designate a different monitor
-          to be the main monitor, simply drag the white rectangle to
+          Make sure the upper left
+          most monitor in your arrangement is be the main
+          monitor. On Mac, the main monitor is visible in the
+          Arrangement tab as the box with a white rectangle
+          along its top. To designate a different monitor
+          to be the main monitor, drag the white rectangle to
           the box that should be the main monitor. This white
           rectangle is actually the menu bar you see on top of your
           monitor. Once the rectangle has been moved, the menu bar
-          will also move.
+          will move as well.
 
           <figure>
             <title>Arrange tab in Displays setting</title>
@@ -471,10 +481,10 @@ Some examples of CoreWall setups are described below. For more information, plea
         </para>
 
         <para>
-          If you are making a presentation then you may want to mirror
-          your display, but normally you don't want to mirror your
-          display so that you will have more screen real estate to
-          view your core images and data.
+          If you are making a presentation, then you may want to mirror
+          your display. Otherwise, it's best not to mirror your
+          display, so Corelyzer has more screen real estate in which to
+          draw core images and data.
         </para>
       </sect2>
     </sect1>
@@ -487,117 +497,28 @@ Some examples of CoreWall setups are described below. For more information, plea
 		Corelyzer Preferences dialog will appear, in which you
 		can specify your scratch disk location,
         display settings, and user interface features.
-
-        <figure>
+        <!-- <figure>
           <title>Corelyzer Preferences Window</title>
           <graphic fileref="images/corelyzer_preferences.png"  />
-        </figure>
+        </figure> -->
       </para>
 
       <sect2>
-        <title>Directories Panel</title>
-        <para>
-		  Image Block Directory: The first time you load a core section image, Corelyzer processes
-		  that image into a series of "blocks": sub-images at low, medium, and high resolutions.
-		  This processing is done in order to improve performance. Because this initial processing
-		  takes a fair amount of time, the "blocks" are stored locally in this directory for future
-		  use.
-		  
-          Download Directory: In this directory, Corelyzer stores local copies of images downloaded
-		  from remote servers.
-          <figure>
-            <title>Directories preferences</title>
-            <graphic fileref="images/corelyzer_directories.png" />
-          </figure>
-        </para>
-      </sect2>
-
-      <sect2>
-        <title>Display Preferences</title>
-        <para>
-          Here you can set the display configuration that Corelyzer will
-          use. More often than not you will have it match the display
-          configuration you setup with your operating system (See above
-          sections). After establishing inital settings, Corelyzer
-          will load the saved configurations on future launches without
-          popping up the preferences window.
-        </para>
-
-        <para>
-          <itemizedlist>
-
-            <listitem>
-              <para>
-                Rows, Columns: define how many monitors do you have
-                and how they are arranged.
-              </para>
-            </listitem>
-
-            <listitem>
-              <para>
-                Screen Width, Screen Height: define the size of
-                a single monitor in pixels. If you
-                start the Preferences configuration for the first
-                time, the full screen dimension will be used.
-              </para>
-            </listitem>
-
-            <listitem>
-              <para>
-                Screen DPI X, Screen DPI Y: DPI stands for "dots per
-                inch". These defines the mapping from pixels to
-                physical measurement. In most cases, you can leave
-                them as default values.
-              </para>
-            </listitem>
-
-            <listitem>
-              <para>
-                Column Offset, Row Offset: Defines the offsets of the
-                visualization area from the origin (upper-left corner
-                of the primary monitor).
-              </para>
-            </listitem>
-
-            <listitem>
-              <para>
-                Border Tickness: The visualization takes into account
-                the monitor border in tiled displays setup. In most
-                cases, you can leave them with the default values.
-              </para>
-            </listitem>
-
-          </itemizedlist>
-        </para>
-
-        <figure>
-          <title>Display Preferences</title>
-          <graphic fileref="images/corelyzer_display.png" />
-        </figure>
-      </sect2>
-
-      <sect2>
-        <title>User Interface Preferences</title>
+        <title>User Interface Panel</title>
         <para>
           <itemizedlist>
             <listitem>
               <para>
-                Auto check version in startup: Corelyzer will
-                automatically check for a newer version of the software at launch.
+                Automatically check for updates on startup: Corelyzer will
+                automatically check for the latest version of the software at launch.
               </para>
             </listitem>
 
             <listitem>
               <para>
                 Lock depth of core section images after loading: cores loaded while
-				this option is enabled cannot be moved up or down stratigraphically.
-              </para>
-            </listitem>
-
-            <listitem>
-              <para>
-                Use Quaqua look and feel: when enabled, makes user interface elements like
-				buttons and checkboxes look more "Mac-like" in OS X 10.3 and earlier.
+				this option is enabled cannot be moved up or down stratigraphically unless they
+        are manually unlocked.
               </para>
             </listitem>
 
@@ -611,7 +532,7 @@ Some examples of CoreWall setups are described below. For more information, plea
 
             <listitem>
               <para>
-                Show crosshair at origin: show the visualization canvas' origin axes.
+                Show crosshair at origin: show the visualization canvas's origin axes.
               </para>
             </listitem>
 
@@ -666,17 +587,100 @@ Some examples of CoreWall setups are described below. For more information, plea
         </para>
 
         <figure>
-          <title>User interface preferences</title>
+          <title>User interface panel</title>
           <graphic fileref="images/corelyzer_ui.png" />
         </figure>
       </sect2>
 
       <sect2>
-        <title>Session Sharing and DIS Preferences</title>
+        <title>Displays Panel</title>
         <para>
-          These 2 preference tabs customize functions for session
-          sharing and default annotation dictionary definition. You
-          can use the default values.
+          Here you can set the display configuration that Corelyzer will
+          use. Typically, it should match the display
+          configuration you set up with your operating system (see above
+          sections). After establishing inital settings, Corelyzer
+          will load the saved configurations on future launches without
+          showing the Preferences window.
+        </para>
+
+        <para>
+          <itemizedlist>
+
+            <listitem>
+              <para>
+                Rows, Columns: define how many monitors you have,
+                and how they are arranged.
+              </para>
+            </listitem>
+
+            <listitem>
+              <para>
+                Screen Width, Screen Height: define the size of
+                a single monitor in pixels. The first time Corelyzer
+                is launched, these settings will default to the full dimensions
+                of the primary display.
+              </para>
+            </listitem>
+
+            <listitem>
+              <para>
+                Screen DPI X, Screen DPI Y: DPI stands for "dots per
+                inch". These define the mapping from pixels to
+                physical measurement. In most cases, the default values
+                should work correctly.
+              </para>
+            </listitem>
+
+            <listitem>
+              <para>
+                Column Offset, Row Offset: Defines the offsets, in pixels,
+                of the visualization area from the origin (the upper-left corner
+                of the primary display).
+              </para>
+            </listitem>
+
+            <listitem>
+              <para>
+                Border Thickness: The visualization takes into account
+                the monitor border in tiled displays setup. In most
+                cases, the default values should work correctly.
+              </para>
+            </listitem>
+
+          </itemizedlist>
+        </para>
+
+        <figure>
+          <title>Displays panel</title>
+          <graphic fileref="images/corelyzer_display.png" />
+        </figure>
+      </sect2>
+
+      <sect2>
+        <title>Directories Panel</title>
+        <para>
+		  Image Cache: The first time you load a core section image, Corelyzer processes
+		  that image into a series of "blocks": sub-images at low, medium, and high resolutions.
+		  This processing is done in order to improve performance. Because this initial processing
+		  takes a fair amount of time, the "blocks" are stored locally in this directory for future
+		  use.
+		  
+          Downloads: Corelyzer stores local copies of images downloaded
+		  from remote servers in this directory.
+          <figure>
+            <title>Directories panel</title>
+            <graphic fileref="images/corelyzer_directories.png" />
+          </figure>
+        </para>
+      </sect2>
+
+
+      <sect2>
+        <title>Session Sharing and DIS Panels</title>
+        <para>
+          These panels, for advanced use cases, allow you to set up session
+          sharing and default annotation dictionary definition. For most users,
+          the settings here can be ignored.
         </para>
 
       </sect2>
@@ -694,7 +698,7 @@ Some examples of CoreWall setups are described below. For more information, plea
       </para>
 
       <figure>
-        <title>Initial Corelyzer screen</title>
+        <title>Initial Corelyzer appearance</title>
         <graphic fileref="images/corelyzer_init.png" />
       </figure>
 
@@ -716,8 +720,8 @@ Some examples of CoreWall setups are described below. For more information, plea
 
         <para>
           The Tool Palette contains frequently-used functions and modes. In
-          a multi-display setup, the Tool Palette will follow the
-          cursor from one display to another.
+          a multi-display setup, the Tool Palette will appear in the same
+          display as the mouse cursor.
         </para>
 
         <para>
@@ -730,33 +734,32 @@ Some examples of CoreWall setups are described below. For more information, plea
           <itemizedlist>
             <listitem>
               <para>
-                Normal mode: Use drag-and-drop
-                mouse gesture to pan and the mouse scroll wheel to
-                zoom/out the visualization area.
+                Normal mode: Dragging the mouse will pan the Visualization Canvas.
+                The mouse scroll wheel or a trackpad scroll gesture will zoom
+                the Visualization Canvas in and out.
               </para>
             </listitem>
 
             <listitem>
               <para>
-                Create annotation mode: Crop a rectangle area to
-                create annotation over loaded core images.
+                Create annotation mode: Select a rectanglar area in which to
+                create an annotation on loaded core images.
               </para>
             </listitem>
 
             <listitem>
               <para>
                 Modify annotation marker mode: Select and highlight a
-                created annotation to modify circled area and the
+                created annotation to modify the annotation area and the
                 annotation flag icon's position.
               </para>
             </listitem>
 
             <listitem>
               <para>
-                Measure mode: To specify the start and end of an
-                interested segment. The physical measurement will be
-                calculated based on the mapping information specified
-                in the Display settings of Preferences configuration.
+                Measure mode: Specify the start and end of a segment of interest.
+                The physical measurement will be calculated based on the Screen DPI X/Y
+                resolution values specified in the Displays panel of Preferences.
               </para>
             </listitem>
           </itemizedlist>
@@ -765,16 +768,16 @@ Some examples of CoreWall setups are described below. For more information, plea
           <itemizedlist>
             <listitem>
               <para>
-                Regular navigation cursor: Only the mouse cursor will
+                Regular navigation cursor: The standard arrow cursor will
                 be displayed in the visualization canvas.
               </para>
             </listitem>
 
             <listitem>
               <para>
-                CrossHair cursor: In additional to the mouse cursor, a
+                CrossHair cursor: In additional to standard arrow cursor, a
                 crosshair indicating the current depth will be displayed
-				in the visualization canvas.
+				        in the visualization canvas.
               </para>
             </listitem>
           </itemizedlist>
@@ -795,7 +798,7 @@ Some examples of CoreWall setups are described below. For more information, plea
 
             <listitem>
               <para>
-                Quit Corelyzer: Close Corelyzer application.
+                Quit Corelyzer: Close the Corelyzer application.
               </para>
             </listitem>
 
@@ -810,17 +813,17 @@ Some examples of CoreWall setups are described below. For more information, plea
 		  section images, and datasets.
         </para>
 
-        <sect2>
+        <!-- <sect2>
           <title>Menus</title>
           <para>
-            The menubar has "File", "Edit", "Share", "Plugins",
-            "Lists", "Tools" and "Help" menus. Each menu option will
+            The menubar has File, Edit, Share, Plugins,
+            Lists, and Help menus. Each menu option will
             be described in later chapters.
           </para>
-        </sect2>
+        </sect2> -->
 
         <sect2>
-          <title>Local (status)</title>
+          <title>Local</title>
           <para>
             Clicking on the "Local" item in the "My Core Repository"
             panel will show the currently-loaded sessions, tracks, 
@@ -831,11 +834,11 @@ Some examples of CoreWall setups are described below. For more information, plea
 
           <figure>
             <title>Session/iCores window</title>
-            <graphic fileref="images/icores_window.png"/>
+            <graphic fileref="images/icores_window.png"/> <!-- TODO update to remove Subscriptions? -->
           </figure>
         </sect2>
 
-        <sect2>
+        <!-- <sect2>
           <title>Subscriptions</title>
           <para>
             Corelyzer supports core data list syndication (CoreCast) via Atom
@@ -850,11 +853,11 @@ Some examples of CoreWall setups are described below. For more information, plea
             <graphic fileref="images/icores_feeds.png" />
           </figure>
 
-        </sect2>
+        </sect2> -->
       </sect1>
 
       <sect1>
-        <title>Visualization canvas</title>
+        <title>Visualization Canvas</title>
         <para>
           Core images, plotted data, etc. are displayed on the visualization canvas.
         </para>
@@ -863,13 +866,6 @@ Some examples of CoreWall setups are described below. For more information, plea
           <title>Visualization canvas with loaded core data</title>
           <graphic fileref="images/viz_canvas.png" />
         </figure>
-
-        <para>
-          A screen capture video of start and quit Corelyzer can be
-          found in this <ulink
-          url="http://www.evl.uic.edu/cavern/corewall/documents/movies/3.1-StartAndQuit.mov">link
-          online (size: 1.2MB)</ulink>.
-        </para>
       </sect1>
 
   </chapter>
@@ -877,7 +873,7 @@ Some examples of CoreWall setups are described below. For more information, plea
   <chapter>
     <title>Load Images</title>
     <para>
-		Before you proceed, make sure you know the following properties of the images to be loaded:
+		  Before you proceed, make sure you know the following properties of the images to be loaded:
 
         <itemizedlist>
           <listitem><para>Orientation: Are the images horizontally or vertically oriented?
@@ -891,21 +887,20 @@ Some examples of CoreWall setups are described below. For more information, plea
     </para>
 	
 	<para>
-		How do you determine the DPI of your image? This depends on the equipment in which the image was
-		retrieved. Most line-scan cameras that are manufactured
+		How do you determine the DPI of your image? This depends on the equipment used to capture the image.
+    Most line-scan cameras that are manufactured
 		for the creation of high-resolution images of core sections indicate DPI on their packaging,
-		but it seems that many don't save in the expected DPI. One method of ensuring a correct DPI is described in
+		but sometimes they don't save in the expected DPI. One method of ensuring a correct DPI is described in
 		<ulink url="apas02.html">Making Sure the DPI of an Image is Correct</ulink>. When loading images
 		you can also specify the length of a core section image, from which Corelyzer
 		can calculate the appropriate DPI value.
 	</para>
 
     <sect1>
-      <title>Load images from local files</title>
+      <title>Load local image files</title>
 		<para>
-			To start the image loading process, select the menu item "File > Load Images > Open
-			Local Image Files...". Choose the files you wish to load in the resulting dialog:
-			
+			To start the image loading process, select the menu item File > Load Images > Open
+			Image Files.... Select one or more files to load in the resulting dialog:
 			<figure>
 			  <title>Select image files to load</title>
 			  <graphic fileref="images/loadImages-1.png" />
@@ -925,7 +920,7 @@ Some examples of CoreWall setups are described below. For more information, plea
 			  <graphic fileref="images/loadImages-2.png" />
 			</figure>
 			
-			In Figure 5.2, note that the seven loaded sections have been organized into three tracks.
+			In Figure 5.2, note that the nine loaded sections have been organized into three tracks.
 			Tracks are indicated by "Track" prefixing their name and a beige background.
 			Note that all sections and tracks have a green dot to their left indicating that
 			they've just been loaded (sections) or created (tracks). Most operations in this
@@ -934,16 +929,17 @@ Some examples of CoreWall setups are described below. For more information, plea
 			
 			<itemizedlist>
 			  <listitem><para>Move Up/Down: Move selected sections up/down within a track or between tracks.</para></listitem>
+        <listitem><para>Move To Track...: Move selected sections to a specific track.</para></listitem>
 			  <listitem><para>Delete: Remove selected section or track from the list. Tracks containing
 				sections cannot be deleted until emptied.</para></listitem>
 			  <listitem><para>Rename Track: Rename selected track.</para></listitem>
 			  <listitem><para>New Track: Create a new track.</para></listitem>
 			</itemizedlist>
 			
-			Once the arrangement of sections and tracks is satisfactory, input your images' DPI values
+			Once the arrangement of sections and tracks is correct, input your images' DPI values
 			in the DPI X/Y fields.  Because DPI X and DPI Y are almost always the same, the value
 			entered	in the X field will be immediately copied into the Y field if it's blank. Orientation
-			defaults to Horizontal, change it to Vertical if necessary. Now that image properties and 
+			defaults to Horizontal; change it to Vertical if necessary. Now that image properties and 
 			section order have been established, Corelyzer can place sections in appropriate tracks and
 			position them end-to-end. To proceed, click the "Next >" button.
 			
@@ -954,14 +950,16 @@ Some examples of CoreWall setups are described below. For more information, plea
 			  <graphic fileref="images/loadImages-3.png" />
 			</figure>
 			
-			As you can see in the (rightmost) Depth column, the first three sections start from depth
-			zero: each is the first section in a new track.  The last four sections are part of the
-			third track: each is placed	at the bottommost depth of the preceding section.
+			As you can see in the (rightmost) Depth column, the first section of the 10A track starts
+      at depth zero. The following four sections are also part of the 10A track, so each is placed
+      at the end of the previous section. The next section is from a new track, 10B, thus it's
+      placed at depth zero. The final three sections are part of track 11A.  Starting from depth zero,
+		  each is placed at the bottommost depth of the preceding section.
 
 			<para>
 			The section image properties can be modified individually by selecting the cell you wish to change and
 			hitting the Return/Enter key, or by double-cliking the desired cell.  To modify
-			a value(s) for multiple sections, you can use the Batch Input controls below the section
+			values for multiple sections, you can use the Batch Input controls below the section
 			property table. Check the "Batch input..." checkbox to enable the controls, and enter
 			the desired settings. If you want to apply these settings to all sections in the table,
 			click the Apply to All Rows button. If you want to apply these settings only to certain
@@ -998,8 +996,14 @@ Some examples of CoreWall setups are described below. For more information, plea
 		</para>
 	</sect1>
 
-    <sect1>
+  <sect1>
+    <title>Load an Image Listing</title>
+    TODO
+  </sect1>
+
+    <!-- <sect1>
       <title>Load Images from online services</title>
+
       <para>
         Corelyzer includes a simple interface to retrieve high-resolution
 		core section images from online services like the IODP's Janus
@@ -1027,7 +1031,7 @@ Some examples of CoreWall setups are described below. For more information, plea
       <para>
         The user interface has been designed in a
         stream-lined manner. To bring up the plugin select the menu
-        item File->"Show IODP lists..."->"Image list from services"
+        item File > "Show IODP lists..." > "Image list from services"
         tab. 
         
         In order to get an image listing and load selected images:
@@ -1077,11 +1081,9 @@ Some examples of CoreWall setups are described below. For more information, plea
               url="http://www.evl.uic.edu/cavern/corewall/documents/movies/5.2-LoadJanusImages.mov">link
           online (size: 1.6MB)</ulink>.
         </para>
+    </sect1> -->
 
-
-    </sect1>
-
-    <sect1>
+    <!-- <sect1>
       <title>Load Images from CoreCast syndication feeds</title>
       <para>
         Corelyzer supports core data list syndication (CoreCast) via
@@ -1182,9 +1184,9 @@ Some examples of CoreWall setups are described below. For more information, plea
 
       </sect2>
 
-    </sect1>
+    </sect1> -->
 
-    <sect1>
+    <!-- <sect1>
       <title>Load images using IODP-formatted section list</title>
       <para>
         Click on the meun "File" -> "IODP" -> "Load section list" and
@@ -1303,209 +1305,241 @@ Some examples of CoreWall setups are described below. For more information, plea
             url="http://www.evl.uic.edu/cavern/corewall/documents/movies/LoadFromLoggingDB.mov">link
         online (size: 6MB in 1920x1200 resolution)</ulink>.
       </para>
-    </sect1>
+    </sect1> -->
 
   </chapter>
 
   <chapter>
     <title>Load and Plot Numerical Log Data</title>
 
-    <sect1>
-      <title>Native Corelyzer XML Format Dataset Files</title>
+    Log and sensor measurement data can be plotted alongside core imagery. When
+    provided with some basic parameters, Corelyzer can import data from comma-,
+    semicolon-, tab-, and/or space-separated value files. XML data that's already in the Corelyzer
+    format can be quickly loaded without additional input.
+
+    A Corelyzer-specific XML file will be generated when importing non-XML formats.
+
+    <sect1 id="sec.convertTabularData">
+      <title>Convert Tabular Data to XML</title>
 
       <para>
-        Corelyzer loads data using the Corelyzer
-        data XML schema (see appendix). A Corelyzer XML format datset
-        file can contain multiple fields in a single file. Data
-        files can be loaded at anytime during the execution of the
-        program. To do so you will need to choose the menu item under
-        "File -> Open Dataset Files" and a file selection dialog will
-        appear. Corelyzer data files are in XML and properly have a .xml
-        extension appended to them.
+        The Convert Tabular Data dialog allows you to flexibly import tabular data
+        such as a CSV (.csv, comma or
+        semicolon-separated values), TSV (.tsv, tab-separated values), text file (usually
+        .txt with space-separated values), or Geotek generated data (after pre-processing
+        and data cleaning) and convert it to Corelyzer's XML format.
       </para>
 
       <para>
-        Once a data file is selected, the Corelyzer application will
-        process the data and then update the Dataset and Fields list
-        boxes (click on the "Local" label in "My Core Repository" to
-        show the lists). If you load up multiple data files, you can
-        click on a dataset to view what fields were retrieved from the
-        data file.
+        Your tabular data should contain one or more numeric data columns, a column with depths,
+        and one or more columns identifying the core section from which the data was collected.
+        Conversion will be easiest if the core section identity is in a single column. However, it
+        is possible to combine components of a core section identity from multiple columns if needed.
       </para>
 
       <para>
-        A screen capture video of these actions can be found in this
-        <ulink
-            url="http://www.evl.uic.edu/cavern/corewall/documents/movies/6.1-LoadNativeData.mov">link
-        online (size: 868KB)</ulink>.
-      </para>
-
-    </sect1>
-
-    <sect1>
-      <title>Use Quick Data Import</title>
-      <para>
-        In many cases, numerical data are a list of depth-value pairs
-        for a single property. Use the "Quick Data Import" function,
-        you can import data files that can be easily edited or
-        generated by external programs like spreadsheet or even raw
-        text data files generated by multiple sensor core loggers.
-
-        The "Quick Data Import" function will accept plain text files
-        that follows the format described below.
+        CSV is the format most commonly imported with Convert Tabular Data.
+        If your data is in Excel (.xls or .xlsx) format, it can
+        be converted to CSV with Excel's File > Save As... option and selecting the 
+        "CSV" (Comma-separated Values, or Comma-delimited values) file format.
       </para>
 
       <para>
-        The plain text file should be in tsv (Tab-Separated-Values) or
-        csv (Comma-Separated-Values) formats (filename ended with .csv
-        or .tsv). The first line of the file will describe the meaning
-        of the values and its contents will also be used for data
-        field labels. The rest of the file should be one depth with
-        multiple values per line. And example .tsv plain text file
-        might look like this (values separated by tabs):
-        
-        <programlisting>
-MyDepth	Cr	Mg
-m	mg	ion
-0.1	0.1	0.4
-0.2	0.3	3.2
-0.3	0.5	-2.9
-0.4	3.2	4.22
-0.5	-2.1	-2.48
-0.6	4.7	-1.90
-0.7	-6.2	7.2
-0.8	1.33	5.0
-0.9	4.23	2.2
-1.0	5.0	-1.0          
-        </programlisting>
-
+        After selecting a file to convert, you'll provide the Convert Tabular Data dialog with the
+        parameters of your data to ensure it is converted to the Corelyzer XML format correctly and completely.
       </para>
 
-      <para>
-        To use "Quick Data Import", select the menu item from the
-        "File" menu. Corelyzer will popup a file selection dialog to
-        select the text file in the format described above.
-      </para>
-
-      <para>
-        A screen capture video of these actions can be found in this
-        <ulink
-            url="http://www.evl.uic.edu/cavern/corewall/documents/movies/6.2-LoadDataQuick.mov">link
-        online (size: 665KB)</ulink>.
-      </para>
-
-    </sect1>
-
-    <sect1>
-      <title>Use Custom Data Import</title>
-      <para>
-        In the case your data file is not in Corelyzer dataset XML
-        schema yet, you can use the “Custom Data Import” feature under
-        “File” menu to specify few parameters and have the program to
-        convert
-        your data file into Corelyzer dataset XML format. A user can
-        convert a plain text tabular data file or a Geotek generated
-        data (after pre-processing and data cleaning) to Corelyzer XML
-        data format and directly imported into Corelyzer working session.
-      </para>
-
-      <para>
-        Import parameters:
-        <itemizedlist>
-          <listitem>
-            <para>
-              File name: Original input file name. Use "File..." button
-              to select your input file.
-            </para>
-          </listitem>
-
-          <listitem>
-            <para>
-              Field Separator:
-              Input what is used to separate each fields in the input
-              file. Commonly used separator might be comma(,) for CSV
-              file. Or Tab(type in \t) delimited file.
-            </para>
-          </listitem>
-
-          <listitem>
-            <para>
-              Section Prefix:
-              The prefix used for naming each section
-            </para>
-          </listitem>
-
-          <listitem>
-            <para>
-              Start Line Number:
-              In the input file, the starting line number of data
-              values, starting from 1.
-
-            </para>
-          </listitem>
-
-          <listitem>
-            <para>
-              End Line Number:
-              In the input file, the ending line number of data values
-
-            </para>
-          </listitem>
-
-          <listitem>
-            <para>
-              Fields Label Line Number:
-              What is the line number for labels of each value in
-              columns.
-
-            </para>
-          </listitem>
-
-          <listitem>
-            <para>
-              Unit Label Line Number:
-              What is the line number for units of each value in columns. 
-              If there is no such line, just input the same line
-              number as "Field Label Line Number"
-
-            </para>
-          </listitem>
-
-          <listitem>
-            <para>
-              Name Column Number:
-              Which column field should be picked used as the name of
-              section.
-
-              The final section name will be composed with "Section
-              Prefix" and "Name Column Number".
-              A simple comma separated expression is allowed to
-              compose the section name.
-
-            </para>
-          </listitem>
-
-          <listitem>
-            <para>
-              Depth Column Number:
-              Which column will be treated as depth values. Column
-              index starts with 1.
-            </para>
-          </listitem>
-
-          <listitem>
-            <para>
-              Select Value Columns:
-              From previous inputs, the field labels will be
-              identified. Then you can check which fields do you want
-              to select to the final dataset file.
-            </para>
-          </listitem>
-
-        </itemizedlist>
-      </para>
-      
       <sect2>
+        <title>Opening the Convert Tabular Data Dialog</title>
+        <para>
+            Select the File > Load Data > Convert Tabular Data to XML... menu item.
+            Then select the data file to be imported.
+        </para>
+      </sect2>
+
+      <sect2>
+        <title>Using the Convert Tabular Data Dialog</title>
+        <para>
+          The first page of the dialog, Import Parameters, is divided into three main panels.
+          The functions of each panel are described below.
+        </para>
+
+        <figure>
+          <title>Convert Tabular Data, Import Parameters page</title>
+          <graphic fileref="images/convertTabular-params.png" />
+        </figure>
+
+        <para>
+          File Import Parameters:
+          <itemizedlist>
+            <listitem>
+              <para>
+                Selected File: selected input file name. Use the "Select..." button
+                to select a different input file.
+              </para>
+            </listitem>
+
+            <listitem>
+              <para>
+                Field Delimiter:
+                The character used to separate the components of each line in the input
+                file. Available separators are comma (,) or semicolon (;) for CSV
+                files, tab for TSV files, or space for raw text files. The initially
+                selected character is based on the input file name's extension:
+                comma for .csv, tab for .tsv, and space for .txt. For other extensions,
+                comma is the default.
+              </para>
+              <para>
+                When the selected character
+                is changed, the table of data in the File Content area will be updated
+                to reflect how each line is separated into components.
+              </para>
+            </listitem>
+          </itemizedlist>
+        </para>
+        
+        <para>
+          Data Import Parameters:
+          <para>
+            Using the row and column numbers in the File Content area, enter appropriate
+            values into these controls to import your data correctly and completely.
+          </para>
+          <itemizedlist>
+            <listitem>
+              <para>
+                Data Start Row:
+                The row with the first line of data values to be imported.
+              </para>
+            </listitem>
+
+            <listitem>
+              <para>
+                Data End Row:
+                The row with the last line of data values to be imported.
+                Initially set to the last line of the input file.
+                All rows from Data Start Row to Data End Row will be imported.
+              </para>
+            </listitem>
+
+            <listitem>
+              <para>
+                Fields Row:
+                The row with labels/fields for each data column.
+              </para>
+            </listitem>
+
+            <listitem>
+              <para>
+                Units Row:
+                If the input file has a separate row for units, check the
+                Units Row checkbox and enter the units row number.
+                If there's no units row, uncheck the checkbox.
+              </para>
+            </listitem>
+
+            <listitem>
+              <para>
+                Depth Column:
+                The column with depth values for each measurement.
+              </para>
+              <para>
+                If a units row is defined, the values in the depth column will use the
+                provided unit for the depth column. The following units
+                are recgonized by Corelyzer: mm, cm, m, in, ft, yd.
+                If no units row is defined, or the depth column unit is
+                blank or not recognized, meters will be used.
+              </para>
+            </listitem>
+            
+            <listitem>
+              <para>
+                Depth Mode:
+                <itemizedlist>
+                  <listitem>
+                    Section Depth: the depths in the Depth Column are relative to each section.
+                  </listitem>
+                  <listitem>
+                    Accumulated Depth: the depths in the Depth Column are total depth.
+                  </listitem>
+                </itemizedlist>
+              </para>
+            </listitem>
+
+            <listitem>
+              <para>
+                Section Name Column:
+                The column containing full section names. <emphasis>These names must match
+                the corresponding section images' names exactly for data to be plotted correctly.</emphasis>
+              </para>
+              <para>
+                If your data does not have a single column with full section names, you can combine
+                section name components by entering a comma-separated expression in the Section Name Column
+                field. <link linkend="sec.customSectionName">The format and use of custom section name
+                expressions is described in detail here.</link>
+              </para>
+            </listitem>
+            <listitem>
+              <para id="para.sectionNamePreview">
+                Section Name Preview:
+                Displays the text in the Data Start Row of the Section Name Column.
+                Used to confirm the Section Name Column number (or expression)
+                you entered results in the expected section name.
+                "[can't create preview]" will be displayed if the Data Start Row or
+                Section Name Column are invalid or blank.
+              </para>
+            </listitem>
+            <listitem>
+              <para>
+                Value to Ignore: a single value to be ignored when data is imported. Typically this
+                would be a placeholder indicating invalid data like "9999" or "BOGUS".
+              </para>
+            </listitem>
+
+          </itemizedlist>
+        </para>
+        <para>
+          File Content:
+          <para>
+            The contents of the Selected File are displayed here, separated into columns based on the selected
+            Field Delimiter character. Rows and Columns are numbered. Enter the appropriate row and column numbers
+            into the Data Import Parameters controls to import your data correctly and completely.
+          </para>
+        </para>
+
+        <para>When you've finished entering parameters, click the Next button to move to the next page, Fields Selection.</para>
+        <figure>
+          <title>Convert Tabular Data, Fields Selection page</title>
+          <graphic fileref="images/convertTabular-fields.png" />
+        </figure>
+
+        <para>
+          The upper portion of this page contains a list of the columns in your tabular data.
+          The column names are based on the Fields Row specified in the Import Parameters page.
+          To return to the Import Parameters page to make a correction, click either the Import
+          Parameters tab atop the dialog, or the Back button at bottom-center.
+        </para>          
+
+        <para>
+          Each column name
+          has a checkbox to its left. Check the box corresponding to each data column to be converted. 
+          The Section Name Column(s) and Depth Column you specified in the Import Parameters page do
+          not need to be checked; they're included automatically. You only need to check columns containing
+          data to be plotted. To simultaneously check a range of columns, you can Shift-click (hold the Shift
+          key while clicking an item in the list).
+        </para>
+        <para>
+          Once all data columns to be imported have been checked, click the Finish button.
+        </para>
+        <para>
+          You'll be prompted to choose a name and location to save the generated XML file. It's generally best to
+          save this file alongside your imported core section images and other project-related files. Once the file
+          is saved, it will automatically be loaded into the current session. You can now plot this data on your
+          core section images with <link linkend="sec.graphing">the Graph dialog</link>.
+        </para>
+      </sect2>
+      
+      <!-- 5/3/2020 directing to video tutorials instead -->
+      <!-- <sect2>
         <title>A step-by-step walkthrough example</title>
         <para>
           Next is a step by step walkthrough example. The example source
@@ -1519,10 +1553,10 @@ m	mg	ion
         </para>
 
         <para>
-          Select the "Custom Data Import" from the "File" menu.
+          Select the "Convert Tabular Data" from the "File" menu.
 
           <figure>
-            <title>Select "Custom Data Import"</title>
+            <title>Select "Convert Tabular Data"</title>
             <graphic fileref="images/dataimport-1.png" />
           </figure>
         </para>
@@ -1688,137 +1722,123 @@ m         ,          ,cm        ,cm        ,          ,m/s       ,gm/cc     ,SI 
         online (size: 6.7MB)</ulink>.
       </para>
 
-      </sect2>
+      </sect2> -->
 
     </sect1>
 
     <sect1>
-      <title>Download from IODP-USIO logging database</title>
+      <title>Open XML Data Files</title>
       <para>
-        The Integrated Ocean Drilling Program, United States
-        Implementing Organization provides the logging database
-        accessing service described in the <ulink
-        url="http://brg.ldeo.columbia.edu/services/">webpage</ulink>.
+        If you have existing Corelyzer-formatted XML data files, they can be added to the current
+        session.
       </para>
 
       <para>
-        To load logging data from the IODP-USIO logging database, select
-        the "IODP" meun item from the "File" menu and then select
-        "Show IODP lists...". Then clicking on the "Logging DB" tab in
-        the popup window as shown in the following figure.
-
-        <figure>
-          <title>Logging DB tab in IODP tables window</title>
-          <graphic fileref="images/iodp-loggingdb.png" />
-        </figure>
+        To begin, select the File > Load Data > Open XML Data Files... menu item,
+        then select one or more XML files to load.
       </para>
 
       <para>
-        Then depending on where do you run the program, you can choose
-        to access the on-ship version or the Internet version of the
-        service. On-ship version will use the service provider URL
-        "<ulink
-        url="http://load.ship.iodp.tamu.edu/services/">http://loa.ship.iodp.tamu.edu/services/</ulink>"
-        and the Internet
-        version will use the service provider URL
-        "<ulink
-        url="http://brg.ldeo.columbia.edu/">http://brg.ldeo.columbia.edu/</ulink>". Once
-        the service provider is
-        selected, the available site and tool options will be
-        downloaded and populated in the selectable combobox
-        options. Or you can also type in interested site and tool and
-        then click on the "Search" button to search for available
-        data. The search result will be shown in the table rows
-        below. You can use mouse to highlight multiple rows and click
-        on the "Load selected data files" button to download, convert
-        and load the data files. Then follow the "Plot dataset graph"
-        steps to show data plots of these loaded data files.
+        After a data file(s) is selected, Corelyzer will
+        update the Data Files list in the session window. Corelyzer-formatted XML data
+        files can contain multiple fields. You can click on a filename in the Data Files
+        list to view the fields/datatypes included in that file.
       </para>
-
-      <para>
-        A screen capture video of these actions can be found in this
-        <ulink
-            url="http://www.evl.uic.edu/cavern/corewall/documents/movies/LoadFromLoggingDB.mov">link
-        online (size: 6MB in 1920x1200 resolution)</ulink>.
-      </para>
-
     </sect1>
 
-    <sect1 id="sec.graphing">
-      <title>Plot dataset graph</title>
-      <para>
-        If you have dataset files loaded and tracks created, your main
-        iCores control window should resemble that pictured below. To plot data,
-		right-click on the desired data file and choose "Graph...". This opens the Graph dialog.
 
+    <sect1 id="sec.graphing">
+      <title>Plot Data</title>
+      <para>
+        Once core section image tracks and data files are loaded, the
+        session window should resemble that pictured below. To plot data
+        above the core images, right-click on the desired data file and choose
+        "Graph...". This will open the Graph dialog.
         <figure>
-          <title>Main window with dataset loaded</title>
+          <title>Main window with dataset loaded; right-click Data File to open Graph dialog</title>
           <graphic fileref="images/dataplot-1.png" />
         </figure>
 		
-		Alternately, you can right-click a section image in the visualization canvas and choose
-		"Graph..." from the menu as seen below:
+        Alternately, you can right-click a section image in the visualization canvas and choose
+        "Graph..." from the menu as seen below:
 		
-		<figure>
+		    <figure>
           <title>Opening graph dialog by right-clicking section image</title>
           <graphic fileref="images/dataplot-1.1.png" />
         </figure>
 		
-		<figure>
+		    <figure>
           <title>Graph dialog</title>
           <graphic fileref="images/dataplot-2.png" />
         </figure>
 
         Select one or more sections and the available data
         fields will be shown in the "Properties fields" list. Checking a
-		field's checkbox in the "Show" column will plot that data in the main
-		visualization area. To change the color of plotted data, click the field's
-		color cell and select from the resulting palette. Corelyzer attempts to use
-		the same color across all sections for fields of the same name. The "Data
-		Range" column indicates the min/max range of data across all selected sections.
-	</para>
+        field's checkbox in the "Show" column will plot that data in the main
+        visualization area. To change the color of plotted data, click the field's
+        color cell and select from the resulting palette. Corelyzer attempts to use
+        the same color across all sections for fields of the same name. The "Data
+        Range" column indicates the min/max range of data across all selected sections.
+    	</para>
 	
-	<para>
-		Other controls:
-	</para>
-	<para>
-        <itemizedlist>
-          <listitem><para>Graph type: Change apperance of graph (points, lines, etc.).</para></listitem>
-          <listitem><para>Collapse graphs: 	When checked, all selected data fields will be
-			plotted on a single coordinate plane for each section (see example below).</para></listitem>
-          <listitem><para>Scale min/max: Change the minimum and maximum range of the coordinate plane.</para></listitem>
-          <listitem><para>Excluded values: When populated, don't graph datapoints that fall within
-				the excluded range. One or both fields can be filled. When multiple sections are
-				selected, the broadest exclusion range will be displayed (that is, the minimum of
-				minimums and maximum of maximums).</para></listitem>
-		  <listitem><para>Leave gaps at excluded values: When checked, the Line and Line &amp; Points graph
-			types will not draw a line connecting points with excluded values between them.</para></listitem>
-        </itemizedlist>
+      <para>
+        Other controls:
+      </para>
+      <para>
+            <itemizedlist>
+              <listitem><para>Graph type: Change apperance of graph (points, lines, etc.).</para></listitem>
+              <listitem><para>Collapse graphs: 	When checked, all selected data fields will be
+          plotted on a single coordinate plane for each section (see example below).</para></listitem>
+              <listitem><para>Scale min/max: Change the minimum and maximum range of the coordinate plane.</para></listitem>
+              <listitem><para>Excluded values: When populated, don't graph datapoints that fall within
+            the excluded range. One or both fields can be filled. When multiple sections are
+            selected, the broadest exclusion range will be displayed (that is, the minimum of
+            minimums and maximum of maximums).</para></listitem>
+          <listitem><para>Leave gaps at excluded values: When checked, the Line and Line &amp; Points graph
+          types will not draw a line connecting points with excluded values between them.</para></listitem>
+            </itemizedlist>
+      </para>
 
-		<figure>
-          <title>Graph plot with "collapsed" graphs</title>
-          <graphic fileref="images/dataplot-3.png" />
+      <figure>
+        <title>Graph plot with Collapse graphs enabled</title>
+        <graphic fileref="images/dataplot-3.png" />
+      </figure>
+
+      <para>
+        Keyboard Commands:
+      </para>
+      <para>
+        In some cases, you may want to expand the vertical size of
+            graph plots, e.g. those with a large depth range. To increase
+        or decrease the graph (vertical) scale, you
+            can first click on the visualization canvas area, and then
+            press '[' or ']' to decrease or increase the graph's size
+            on-screen.
+        
+            <!-- A screen capture video of these actions can be found in this
+            <ulink url="http://www.corewall.org/documents/movies/6.4-GraphParameters.mov">link
+            online (size: 2.0MB)</ulink> -->
+      </para>
+
+      <sect2>
+        <title>Unmatched image section name and data section name</title>
+        <para>
+          In order to plot data on a core section image, the section name in the data must match
+          the section image's name <emphasis>exactly</emphasis>. Otherwise, no data will be plotted.
+        </para>
+        <para>
+          To help identify this problem, the Graph dialog informs you when sections
+          in the data have no matching image section in the session. This can be corrected
+          by <link linkend="sec.convertTabularData"> re-converting your tabular data</link>,
+          ensuring that the data's section names match the corresponding section image names.
+        </para>
+        <figure>
+          <title>Unmatched data sections warning, unmatched sections in red</title>
+          <graphic fileref="images/dataplot-unmatchedSections.png" />
         </figure>
-	</para>
-
-	<para>
-		Keyboard Commands:
-	</para>
-	<para>
-		In some cases, you may want to expand the vertical size of
-        graph plots, e.g. those with a large depth range. To increase
-		or decrease the graph (vertical) scale, you
-        can first click on the visualization canvas area, and then
-        press '[' or ']' to decrease or increase the graph's size
-        on-screen.
-		
-        A screen capture video of these actions can be found in this
-        <ulink url="http://www.corewall.org/documents/movies/6.4-GraphParameters.mov">link
-        online (size: 2.0MB)</ulink>
-	</para>
+      </sect2>
     </sect1>
   </chapter>
-
 
   <chapter>
     <title>Interactions</title>
@@ -1826,43 +1846,32 @@ m         ,          ,cm        ,cm        ,          ,m/s       ,gm/cc     ,SI 
     <sect1>
       <title>Interaction Scheme</title>
       <para>
-        The basic interaction scheme is a mouse-based interaction. The
-        application is best run using a two-button mouse with a scroll
-        wheel. In the most recent version of Corelyzer, the mouse clicks
-        and events are context sensitive. This means, depending on what
-        your mouse pointing to, the response of the application to mouse
-        events can vary.
+        Corelyzer is primarily controlled via mouse, ideally
+        a two-button mouse with a scroll wheel. Mouse clicks
+        and events are context sensitive. That is, depending on what
+        you're clicking (e.g. an image), corresponding menus and/or options
+        will appear.
       </para>
 
       <sect2>
         <title>Panning</title>
         <para>
-          To automatically begin panning using the Click-and-drag style,
-          first left-click on the visualization window, making sure not to
-          click on any objects (e.g. core section images, graphs,
-          annotation markers, etc.)
-        </para>
-
-        <para>
-          If you successfully clicked and are in the panning-mode, then
-          the mouse pointer should change. In Windows, it will likely
-          change to a four-direction pointer. On Mac OS X, it will
-          change from a black mouse to a white mouse cursor. To pan,
-          keep holding down the left mouse button and drag the mouse to
-          move the view of the scene.
+          To pan the visualization canvas, left-click and drag, making sure not to
+          click on any objects like core section images, graphs, or
+          annotation markers.
         </para>
       </sect2>
 
       <sect2>
         <title>Zooming</title>
         <para>
-          If you have a mouse wheel, zooming is as easy as scrolling the
-          wheel back to zoom out and forward to zoom in. Assuming a
-          particular area is of interest and you want to zoom in on it,
-          simply point at that area of interest and use the mouse wheel to
-          zoom in. The area will stay in the same place as the scene
-          changes in scale. Similarly, you can zoom out to see more of the
-          context that surrounds a particular area.
+          If your mouse has a scroll wheel, scroll forward
+          to zoom out, and backwards to zoom in. Zooming will center
+          on the mouse cursor's current location.
+        </para>
+        <para>
+          If your mouse does not have a scroll wheel, you can zoom by
+          left-clicking and dragging up and down while holding the Control key.
         </para>
 
         <para>
@@ -1885,33 +1894,22 @@ m         ,          ,cm        ,cm        ,          ,m/s       ,gm/cc     ,SI 
       </sect2>
 
       <sect2>
-        <title>Sliding a section</title>
+        <title>Moving a section</title>
         <para>
-          To slide a section image, first left-click on the section image,
-          the image will be highlighted by a yellow bounding box. If you
-          successfully do this, the mouse pointer will change to a hand
-          pointer. The core section image will also be brought to the
-          front of the other images. This is noticeable if any of the core
-          section images overlap. At this point you can slide the section
-          image left or right by moving your mouse left or right with Alt
-          key pressed at the same time.
+          To move a section image stratigraphically, first left-click on the section image.
+          The image will be highlighted by a yellow bounding box. The 
+          image will also be drawn on top of any overlapping images.
+          While holding the Alt key, left-click and drag left or right to move
+          the section image left or right.
         </para>
       </sect2>
 
       <sect2>
-        <title>Sliding a track</title>
+        <title>Moving a track</title>
         <para>
-          A track can be slid vertically. To do this, first select a core
-          section image, and then hold down the Shift key. The mouse
-          pointer will remain looking like a hand cursor. Move the mouse
-          up or down and the track will be moved in the direction of the
-          mouse motion.
-        </para>
-
-        <para>
-          NOTE: Corelyzer loads all images and tracks at the origin. It is
-          recommended to slide a track away so that new images on a
-          different track do not overlap an existing track.
+          A track can be moved vertically. To do so, left-click a section
+          image in the track to be moved. While holding the Shift key, left-click
+          and drag up or down. All core sections in the track will move to follow.
         </para>
       </sect2>
     </sect1>
@@ -1919,23 +1917,22 @@ m         ,          ,cm        ,cm        ,          ,m/s       ,gm/cc     ,SI 
     <sect1>
       <title>Manipulating Tracks and Sections</title>
       <para>
-		Right-clicking on a section image opens a menu with several options to modify that
-		section's (or its parent track's) appearance, properties and positioning relative
-		to other sections within its track.
-		
-         <figure>
+        Right-clicking on a section image opens a menu with several options to modify the
+        appearance of the section (or its parent track), properties, and positioning relative
+        to other sections within its track.
+		    <figure>
            <title>Section context menu</title>
            <graphic fileref="images/sectionMenu.png" />
          </figure>
 	  </para>
 
 		<sect2><title>Lock Section</title>
-		    If checked, section cannot be moved up or down stratigraphically. Select
+		  If checked, section cannot be moved up or down stratigraphically. Select
 			this option to lock/unlock the section.
 		</sect2>
 		
 		<sect2><title>Lock Section Graphs</title>
-		    If checked, graphs of section data cannot be moved up or down stratigraphically (this
+		  If checked, graphs of section data cannot be moved up or down stratigraphically (this
 			is the default). Select this option to lock/unlock the section's graphs.
 		</sect2>
 
@@ -1948,7 +1945,7 @@ m         ,          ,cm        ,cm        ,          ,m/s       ,gm/cc     ,SI 
 		</sect2>
 
 		<sect2><title>Properties...</title>
-			Opens the Properties dialog, where you can modify traits (e.g. DPI, rotation, visible interval) 
+			Opens the Properties dialog, where you can modify traits (resolution, visible interval, rotation, etc.)
 			of the selected section.
 		</sect2>
 
@@ -1957,34 +1954,32 @@ m         ,          ,cm        ,cm        ,          ,m/s       ,gm/cc     ,SI 
 		</sect2>
 
 		<sect2><title>Stagger Sections</title>
-			Moves every other section in the track up by the width of the track. If a
-			track is staggered, a checkmark will appear by the "Stagger Sections..." menu option; select
-			again to un-stagger.
-		
-			 <figure>
+			Moves every other section in the track up by the width of the track. This is useful for displaying
+      the ends of sections if adjacent sections overlap. When a track is staggered, a checkmark
+      will appear by the "Stagger Sections..." menu option; select again to un-stagger.
+		  <figure>
 			   <title>Staggering sections</title>
 			   <graphic fileref="images/stagger.png" />
 			 </figure>
 		</sect2>
 		
 		<sect2><title>Trim Sections...</title>
-				Opens the Trim dialog, which allows you to "trim" from the top or bottom of either the
-				selected section image, or the selected section and all deeper sections
-				in the track. Trimming modifies sections' Visible Intervals, as seen in the Properties dialog.
-				This is most useful for removing extraneous imagery such as color cards or core catchers.
+      Opens the Trim dialog, which allows you to "trim" from the top or bottom of either the
+      selected section image, or the selected section and all deeper sections
+      in the track. Trimming modifies sections' Visible Intervals, as seen in the Properties dialog.
+      This is most useful for hiding extraneous imagery such as color cards or core catchers.
 		</sect2>
 	
 		<sect2><title>Stack Sections</title>
-			Positions all sections deeper than the selected section end-to-end, with no gaps between.
-			
+			Positions all sections currently below the selected section end-to-end, with no gaps between.
+			Note that this operation is not section order aware. Sections will be stacked as they are
+      encountered, starting from the topmost section and moving downward.
 			<figure>
 				<title>Stacking sections</title>
 				<graphic fileref="images/stack.png" />
 			</figure>
 		</sect2>
-
     </sect1>
-
   </chapter>
 
   <chapter>
@@ -1992,10 +1987,8 @@ m         ,          ,cm        ,cm        ,          ,m/s       ,gm/cc     ,SI 
     <para>
       Annotations are currently shown using a marker along the top of
       a core. The marker is a simple interactive visual to indicate
-      that an annotation exists. Different markers can mean different
-      types of annotations. Annotations types will be added as
-      development continues.
-
+      that an annotation exists. Different markers indicate different
+      types of annotations.
       <figure>
         <title>Annotations for core images</title>
         <graphic fileref="images/annotations.png" />
@@ -2087,12 +2080,12 @@ m         ,          ,cm        ,cm        ,          ,m/s       ,gm/cc     ,SI 
 
       </para>
 
-      <para>
+      <!-- <para>
         A screen capture video of these actions can be found in this
         <ulink
             url="http://www.evl.uic.edu/cavern/corewall/documents/movies/8.1-CreateModAnnotation.mov">link
         online (size: 14.0MB)</ulink>.
-      </para>
+      </para> -->
 
     </sect1>
 
@@ -2122,60 +2115,101 @@ m         ,          ,cm        ,cm        ,          ,m/s       ,gm/cc     ,SI 
         </figure>
       </para>
 
-      <para>
+      <!-- <para>
         A screen capture video of these actions can be found in this
         <ulink
             url="http://www.evl.uic.edu/cavern/corewall/documents/movies/8.3-Measure.move">link
         online (size: 5.7MB)</ulink>.
-      </para>
+      </para> -->
 
     </sect1>
 
   </chapter>
 
   <chapter>
-    <title>Save and Load Sessions</title>
-    <para>
-      You can save your current working session by selecting “Save
-      Session As ...” under “File” menu. This function will save all
-      the information that you loaded into the scene into a XML-based
-      “CML” file. CML file schema description can be found in <ulink
-      url="http://instaar.colorado.edu/%7Ejenkinsc/dbseabed/corewall/CmlXml_Syntax_1.pdf">here</ulink>.
-    </para>
+    <title>Save, Load, and Share Sessions</title>
+    <sect1>
+      <title>Save and Load Sessions on the Local Machine</title>
+      <para>
+        <emphasis>It is critical to understand that a saved session file
+        does not include images and dataset files.</emphasis>
+        Rather, it saves the <emphasis>locations</emphasis> of those files on the local machine
+        so they can be loaded along with the session. This means a session file
+        will only function on the local machine where it was created!
+      </para>
 
-    <para>
-      This file doesn’t save all the images and dataset
-      files with it, it keeps track of where all the related files
-      are located. You can later load everything back by selecting
-      “Open a Session File” under the same “File” menu.
-    </para>
+      <para>
+        You can save your current session by selecting the File > Save
+        Session or File > Save Session as... menu item. This saves the session as a XML-based
+        CML (for "Core Modeling Language") file. The complete CML file schema description can be found
+        <ulink url="attachments/CmlXml_Syntax.pdf">here</ulink>.
+      </para>
 
-    <para>
-      The “cml” file is small, and if the resource you loaded into the
-      scene are all downloaded from the Internet within Corelyzer,
-      these resources’ URL will be kept and by passing just the “cml”
-      file around, other people can load back the same session that
-      you were working on.
-    </para>
+      <para>
+        A saved session can be loaded with the File > Open Session... menu item.
+      </para>
 
-    <para>
-      But if the resources you loaded in your working session are all
-      files in your local hard disk, and you want to pass the working
-      session to your colleague? Please use the “Export…” and
-      “Import…” functions under “Core Archive” menu in the "File"
-      menu. 
+      <para>
+        To copy a complete Corelyzer session to another machine or share with a colleague,
+        use the <link linkend="sec.coreArchive">Core Archive</link> function, which creates
+        a single file containing all resources (images, data files, etc.) suitable for
+        transfer to other machines.
+      </para>
+    </sect1>
 
-      The “Export…” function
-      will pack all the resources along with a session “cml” file into
-      a big compressed “Core ARchive”, a “.car” file. It will contain
-      all the images, datasets, annotations and their attachments
-      within. The other people can just use “Import…” to open it up
-      and restore everything you were working on his/her screen.
-    </para>
-
+    <sect1 id="sec.coreArchive">
+      <title>Transfer Sessions with Core Archives</title>
+      <sect2>
+        <title>Export a Core Archive</title>
+          <para>
+            The Core Archive Export function packs
+            all the resources along with a session CML file into
+            a compressed "Core ARchive", a ".car" file. It will contain
+            all the images, datasets, annotations and their attachments.
+          </para>
+          <para>
+            To transfer a complete Corelyzer project to another machine,
+            use the File > Core Archive > Export... menu item.
+          </para>
+          <para>
+            Enter a name for the project.
+            <figure>
+              <title>Name the project for export</title>
+              <graphic fileref="images/coreArchive-export1.png" />
+            </figure>
+            Choose a name and location for the exported .car file.
+            <figure>
+              <title>Choose name and destination</title>
+              <graphic fileref="images/coreArchive-export2.png" />
+            </figure>
+            The progress bar of the session window will fill as the archive is exported,
+            followed by a success message.
+            <figure>
+              <title>Success!</title>
+              <graphic fileref="images/coreArchive-export3.png" />
+            </figure>
+            The exported .car file can be transfered to other machines and shared with colleagues.
+          </para>
+      </sect2>
+      <sect2>
+      <title>Import a Core Archive</title>
+        <para>
+          To import a core archive on the destination machine, use the
+          File > Core Archive > Import... menu item.
+        </para>
+        <para>
+          Select the .car file when prompted.
+          <figure>
+            <title>Select the .car file to import</title>
+            <graphic fileref="images/coreArchive-import1.png" />
+          </figure>
+          Corelyzer will extract its contents and load them into the current session.
+        </para>
+      </sect2>
+    </sect1>
   </chapter>
 
-  <chapter>
+  <!-- <chapter>
     <title>Corelyzer server and plugin clients</title>
     <para>
       Corelyzer server and plugin support was developed by Arun Rao,
@@ -2771,9 +2805,9 @@ Depth [m]	Porosity [% vol]	WBD [g/ccm]	Sus [units]
       </itemizedlist>
     </sect1>
 
-  </chapter>
+  </chapter> -->
 
-  <chapter>
+  <!-- <chapter>
     <title>Fine tune with Correlator</title>
 
     <sect1>
@@ -2958,9 +2992,9 @@ Depth [m]	Porosity [% vol]	WBD [g/ccm]	Sus [units]
         </para>
       </sect2>
       </sect1>
-  </chapter>
+  </chapter> -->
 
-  <chapter>
+  <!-- <chapter>
     <title>Frequently Asked Questions (FAQ)</title>
     
     <sect1>
@@ -2987,7 +3021,7 @@ Depth [m]	Porosity [% vol]	WBD [g/ccm]	Sus [units]
       </para>
     </sect1>
 
-  </chapter>
+  </chapter> -->
 
   <appendix>
     <title>Appendix</title>
@@ -3040,6 +3074,108 @@ Depth [m]	Porosity [% vol]	WBD [g/ccm]	Sus [units]
         If you realize that more than one image contains the wrong
         DPI, you can create a batch process in Photoshop to help you
         deal with all the images.
+      </para>
+    </sect1>
+
+    <sect1 id="sec.customSectionName">
+      <title>Convert Tabular Data: Using a Customized Section Name</title>
+      <para>
+        Corelyzer's mechanism for customizing section names is powerful, but not terribly user-friendly.
+        If you're comfortable with Excel, it may be a simpler tool with which to add a column
+        with full section names to your data file. The updated file can then be easily imported via the Convert
+        Tabular Data dialog. With that caveat in mind: if you'd prefer to learn Corelyzer's mechanism, read on!
+      </para>
+      <para>
+        To customize section names, a comma-separated expression is entered in the Section Name Column field.
+        This expression will be used to generate a section name for each row of data.
+      </para>
+      <para>
+        Elements of the expression are separated by commas. Each element is interpreted as follows:
+        <itemizedlist>
+          <listitem>Numbers: interpreted as the contents of that column number for each row</listitem>
+          <listitem>All other text: interpreted as-is</listitem>
+        </itemizedlist>
+      </para>
+      <para>
+        For example, consider the following tabular data.
+        <ulink url="attachments/customSectionNameExample.csv">This data file is included</ulink>
+        in the documentation.
+        Open it with File > Load Data > Convert Tabular Data to XML... if you'd like to follow along
+        in Corelyzer.
+      </para>
+      <figure>
+        <title>Example data for comma-separated Section Name Column input</title>
+        <graphic fileref="images/customSectionName-0.png" />
+      </figure>
+      <para>
+        Components of the full section name are spread across four columns:
+        <itemizedlist>
+          <listitem>Site (column 1)</listitem>
+          <listitem>Hole (column 2)</listitem>
+          <listitem>Core (column 3)</listitem>
+          <listitem>Section (column 4)</listitem>
+        </itemizedlist>
+        Assume the entered Data Start Row is 2.
+      </para>
+      <para>  
+        To combine the Site, Hole, Core, and Section components into a single section name, enter the number of each column -
+        <blockquote><function>1,2,3,4</function></blockquote>
+        - in the Section Name Column edit field.
+        You'll see "U1357A11" appear in the Section Name Preview:
+        <graphic fileref="images/customSectionName-1.png" />
+        
+        The Site, Hole, Core, and Hole
+        values in row 2 (the Data Start Row) are combined to create the previewed section name.
+      </para>
+      <para>
+        The expression is applied to the
+        contents of each row, so the combined section name for row 3 will be "U1357A12", and so on.
+        You can confirm this by temporarily entering 3 in the Data Start Row field:
+        <graphic fileref="images/customSectionName-1a.png" />
+        Remember that the Section Name Preview always displays the interpreted
+        expression in the Section Name Column for the entered Data Start Row.
+      </para>
+      <para>
+        To clarify the components of this section name, it would help to separate them
+        with a hyphen (-) or underscore (_).
+        To add a hyphen between each element, enter
+        <blockquote><function>1,-,2,-,3,-,4</function></blockquote>
+        This will result in "U1357-A-1-1" for row 2:
+        <graphic fileref="images/customSectionName-2.png" />
+        Temporarily changing the Data Start Row to "12" previews "U1357-B-2-3" for row 12:
+        <graphic fileref="images/customSectionName-3.png" />
+
+        Using an underscore instead and entering
+        <blockquote><function>1,_,2,_,3,_,4</function></blockquote>
+        results in "U1357_A_1_1" for row 2, "U1357_A_1_2" for row 3, ..., and "U1357_B_2_3" for row 12.
+      </para>
+      <para>
+        You can also add arbitrary text as needed. For instance, to prefix every section name with "PREFIX-",
+        and suffix with "-SUFFIX", you'd enter
+        <blockquote><function>PREFIX-,1,-,2,-,3,-,4,-SUFFIX</function></blockquote>
+        resulting in "PREFIX-U1357-A-1-1-SUFFIX" for row 2, "PREFIX-U1357-A-1-2-SUFFIX" for row 3, and so on.
+      </para>
+      <para>
+        Text can be inserted anywhere, not just at the beginning and end. For instance,
+        <blockquote><function>1,-,2,-MOO-,3,-,4</function></blockquote>
+        results in "U1357-A-MOO-1-1".
+      </para>
+    </sect1>
+
+    <sect1>
+      <title>How do I compare two cores?</title>
+      <para>
+        To compare 2 cores images or data side-by-side, you can
+        arrange cores to be compared in different "tracks". To do
+        that, first create and highlight a new track. Then load first
+        batch of images to be compared using "Load images" item in the
+        "File" menu. The second batch of core images can be loaded
+        into another newly created track using similar steps. To
+        arrange them side-by-side, use keyboard+mouse gesture
+        "Shift-Drag" one track away from another in the vertical
+        direction. If you need to move individual section along the
+        depth direction, you can use "Alt-Drag" gesture to move
+        sections to different depths.
       </para>
     </sect1>
 
