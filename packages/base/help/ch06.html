@@ -1,21 +1,137 @@
-<html><head><meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>Chapter 6. Load and Plot Numerical Log Data</title><meta name="generator" content="DocBook XSL Stylesheets V1.77.1"><link rel="home" href="index.html" title="Corelyzer User's Manual"><link rel="up" href="index.html" title="Corelyzer User's Manual"><link rel="prev" href="ch05s05.html" title="5.5. Load FMS images from IODP-USIO logging database"><link rel="next" href="ch06s02.html" title="6.2. Use Quick Data Import"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Chapter 6. Load and Plot Numerical Log Data</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="ch05s05.html">Prev</a> </td><th width="60%" align="center"> </th><td width="20%" align="right"> <a accesskey="n" href="ch06s02.html">Next</a></td></tr></table><hr></div><div class="chapter"><div class="titlepage"><div><div><h1 class="title"><a name="id36159688"></a>Chapter 6. Load and Plot Numerical Log Data</h1></div></div></div><div class="toc"><p><b>Table of Contents</b></p><dl><dt><span class="sect1"><a href="ch06.html#id36159693">6.1. Native Corelyzer XML Format Dataset Files</a></span></dt><dt><span class="sect1"><a href="ch06s02.html">6.2. Use Quick Data Import</a></span></dt><dt><span class="sect1"><a href="ch06s03.html">6.3. Use Custom Data Import</a></span></dt><dd><dl><dt><span class="sect2"><a href="ch06s03.html#id36159867">6.3.1. A step-by-step walkthrough example</a></span></dt></dl></dd><dt><span class="sect1"><a href="ch06s04.html">6.4. Download from IODP-USIO logging database</a></span></dt><dt><span class="sect1"><a href="ch06s05.html">6.5. Plot dataset graph</a></span></dt></dl></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="id36159693"></a>6.1. Native Corelyzer XML Format Dataset Files</h2></div></div></div><p>
-        Corelyzer loads data using the Corelyzer
-        data XML schema (see appendix). A Corelyzer XML format datset
-        file can contain multiple fields in a single file. Data
-        files can be loaded at anytime during the execution of the
-        program. To do so you will need to choose the menu item under
-        "File -&gt; Open Dataset Files" and a file selection dialog will
-        appear. Corelyzer data files are in XML and properly have a .xml
-        extension appended to them.
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>Chapter 6. Load and Plot Numerical Log Data</title><meta name="generator" content="DocBook XSL Stylesheets V1.79.1"><link rel="home" href="index.html" title="Corelyzer User's Manual"><link rel="up" href="index.html" title="Corelyzer User's Manual"><link rel="prev" href="ch05s02.html" title="5.2. Load an Image Listing"><link rel="next" href="ch06s02.html" title="6.2. Open XML Data Files"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Chapter 6. Load and Plot Numerical Log Data</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="ch05s02.html">Prev</a> </td><th width="60%" align="center"> </th><td width="20%" align="right"> <a accesskey="n" href="ch06s02.html">Next</a></td></tr></table><hr></div><div class="chapter"><div class="titlepage"><div><div><h1 class="title"><a name="idm266757046800"></a>Chapter 6. Load and Plot Numerical Log Data</h1></div></div></div><div class="toc"><p><b>Table of Contents</b></p><dl class="toc"><dt><span class="sect1"><a href="ch06.html#sec.convertTabularData">6.1. Convert Tabular Data to XML</a></span></dt><dd><dl><dt><span class="sect2"><a href="ch06.html#idm266757041488">6.1.1. Opening the Convert Tabular Data Dialog</a></span></dt><dt><span class="sect2"><a href="ch06.html#idm266757040176">6.1.2. Using the Convert Tabular Data Dialog</a></span></dt></dl></dd><dt><span class="sect1"><a href="ch06s02.html">6.2. Open XML Data Files</a></span></dt><dt><span class="sect1"><a href="ch06s03.html">6.3. Plot Data</a></span></dt><dd><dl><dt><span class="sect2"><a href="ch06s03.html#idm266756996000">6.3.1. Unmatched image section name and data section name</a></span></dt></dl></dd></dl></div>
+
+    Log and sensor measurement data can be plotted alongside core imagery. When
+    provided with some basic parameters, Corelyzer can import data from comma-,
+    semicolon-, tab-, and/or space-separated value files. XML data that's already in the Corelyzer
+    format can be quickly loaded without additional input.
+
+    A Corelyzer-specific XML file will be generated when importing non-XML formats.
+
+    <div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="sec.convertTabularData"></a>6.1. Convert Tabular Data to XML</h2></div></div></div><p>
+        The Convert Tabular Data dialog allows you to flexibly import tabular data
+        such as a CSV (.csv, comma or
+        semicolon-separated values), TSV (.tsv, tab-separated values), text file (usually
+        .txt with space-separated values), or Geotek generated data (after pre-processing
+        and data cleaning) and convert it to Corelyzer's XML format.
       </p><p>
-        Once a data file is selected, the Corelyzer application will
-        process the data and then update the Dataset and Fields list
-        boxes (click on the "Local" label in "My Core Repository" to
-        show the lists). If you load up multiple data files, you can
-        click on a dataset to view what fields were retrieved from the
-        data file.
+        Your tabular data should contain one or more numeric data columns, a column with depths,
+        and one or more columns identifying the core section from which the data was collected.
+        Conversion will be easiest if the core section identity is in a single column. However, it
+        is possible to combine components of a core section identity from multiple columns if needed.
       </p><p>
-        A screen capture video of these actions can be found in this
-        <a class="ulink" href="http://www.evl.uic.edu/cavern/corewall/documents/movies/6.1-LoadNativeData.mov" target="_top">link
-        online (size: 868KB)</a>.
-      </p></div></div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="ch05s05.html">Prev</a> </td><td width="20%" align="center"> </td><td width="40%" align="right"> <a accesskey="n" href="ch06s02.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">5.5. Load FMS images from IODP-USIO logging database </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> 6.2. Use Quick Data Import</td></tr></table></div></body></html>
+        CSV is the format most commonly imported with Convert Tabular Data.
+        If your data is in Excel (.xls or .xlsx) format, it can
+        be converted to CSV with Excel's File &gt; Save As... option and selecting the 
+        "CSV" (Comma-separated Values, or Comma-delimited values) file format.
+      </p><p>
+        After selecting a file to convert, you'll provide the Convert Tabular Data dialog with the
+        parameters of your data to ensure it is converted to the Corelyzer XML format correctly and completely.
+      </p><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a name="idm266757041488"></a>6.1.1. Opening the Convert Tabular Data Dialog</h3></div></div></div><p>
+            Select the File &gt; Load Data &gt; Convert Tabular Data to XML... menu item.
+            Then select the data file to be imported.
+        </p></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a name="idm266757040176"></a>6.1.2. Using the Convert Tabular Data Dialog</h3></div></div></div><p>
+          The first page of the dialog, Import Parameters, is divided into three main panels.
+          The functions of each panel are described below.
+        </p><div class="figure"><a name="idm266757038928"></a><p class="title"><b>Figure 6.1. Convert Tabular Data, Import Parameters page</b></p><div class="figure-contents"><div><img src="images/convertTabular-params.png" alt="Convert Tabular Data, Import Parameters page"></div></div></div><br class="figure-break"><p>
+          File Import Parameters:
+          </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>
+                Selected File: selected input file name. Use the "Select..." button
+                to select a different input file.
+              </p></li><li class="listitem"><p>
+                Field Delimiter:
+                The character used to separate the components of each line in the input
+                file. Available separators are comma (,) or semicolon (;) for CSV
+                files, tab for TSV files, or space for raw text files. The initially
+                selected character is based on the input file name's extension:
+                comma for .csv, tab for .tsv, and space for .txt. For other extensions,
+                comma is the default.
+              </p><p>
+                When the selected character
+                is changed, the table of data in the File Content area will be updated
+                to reflect how each line is separated into components.
+              </p></li></ul></div><p>
+        </p><p>
+          Data Import Parameters:
+          </p><p>
+            Using the row and column numbers in the File Content area, enter appropriate
+            values into these controls to import your data correctly and completely.
+          </p><p>
+          </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>
+                Data Start Row:
+                The row with the first line of data values to be imported.
+              </p></li><li class="listitem"><p>
+                Data End Row:
+                The row with the last line of data values to be imported.
+                Initially set to the last line of the input file.
+                All rows from Data Start Row to Data End Row will be imported.
+              </p></li><li class="listitem"><p>
+                Fields Row:
+                The row with labels/fields for each data column.
+              </p></li><li class="listitem"><p>
+                Units Row:
+                If the input file has a separate row for units, check the
+                Units Row checkbox and enter the units row number.
+                If there's no units row, uncheck the checkbox.
+              </p></li><li class="listitem"><p>
+                Depth Column:
+                The column with depth values for each measurement.
+              </p><p>
+                If a units row is defined, the values in the depth column will use the
+                provided unit for the depth column. The following units
+                are recgonized by Corelyzer: mm, cm, m, in, ft, yd.
+                If no units row is defined, or the depth column unit is
+                blank or not recognized, meters will be used.
+              </p></li><li class="listitem"><p>
+                Depth Mode:
+                </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: circle; "><li class="listitem">
+                    Section Depth: the depths in the Depth Column are relative to each section.
+                  </li><li class="listitem">
+                    Accumulated Depth: the depths in the Depth Column are total depth.
+                  </li></ul></div><p>
+              </p></li><li class="listitem"><p>
+                Section Name Column:
+                The column containing full section names. <span class="emphasis"><em>These names must match
+                the corresponding section images' names exactly for data to be plotted correctly.</em></span>
+              </p><p>
+                If your data does not have a single column with full section names, you can combine
+                section name components by entering a comma-separated expression in the Section Name Column
+                field. <a class="link" href="apas03.html" title="A.3. Convert Tabular Data: Using a Customized Section Name">The format and use of custom section name
+                expressions is described in detail here.</a>
+              </p></li><li class="listitem"><p><a name="para.sectionNamePreview"></a>
+                Section Name Preview:
+                Displays the text in the Data Start Row of the Section Name Column.
+                Used to confirm the Section Name Column number (or expression)
+                you entered results in the expected section name.
+                "[can't create preview]" will be displayed if the Data Start Row or
+                Section Name Column are invalid or blank.
+              </p></li><li class="listitem"><p>
+                Value to Ignore: a single value to be ignored when data is imported. Typically this
+                would be a placeholder indicating invalid data like "9999" or "BOGUS".
+              </p></li></ul></div><p>
+        </p><p>
+          File Content:
+          </p><p>
+            The contents of the Selected File are displayed here, separated into columns based on the selected
+            Field Delimiter character. Rows and Columns are numbered. Enter the appropriate row and column numbers
+            into the Data Import Parameters controls to import your data correctly and completely.
+          </p><p>
+        </p><p>When you've finished entering parameters, click the Next button to move to the next page, Fields Selection.</p><div class="figure"><a name="idm266757017968"></a><p class="title"><b>Figure 6.2. Convert Tabular Data, Fields Selection page</b></p><div class="figure-contents"><div><img src="images/convertTabular-fields.png" alt="Convert Tabular Data, Fields Selection page"></div></div></div><br class="figure-break"><p>
+          The upper portion of this page contains a list of the columns in your tabular data.
+          The column names are based on the Fields Row specified in the Import Parameters page.
+          To return to the Import Parameters page to make a correction, click either the Import
+          Parameters tab atop the dialog, or the Back button at bottom-center.
+        </p><p>
+          Each column name
+          has a checkbox to its left. Check the box corresponding to each data column to be converted. 
+          The Section Name Column(s) and Depth Column you specified in the Import Parameters page do
+          not need to be checked; they're included automatically. You only need to check columns containing
+          data to be plotted. To simultaneously check a range of columns, you can Shift-click (hold the Shift
+          key while clicking an item in the list).
+        </p><p>
+          Once all data columns to be imported have been checked, click the Finish button.
+        </p><p>
+          You'll be prompted to choose a name and location to save the generated XML file. It's generally best to
+          save this file alongside your imported core section images and other project-related files. Once the file
+          is saved, it will automatically be loaded into the current session. You can now plot this data on your
+          core section images with <a class="link" href="ch06s03.html" title="6.3. Plot Data">the Graph dialog</a>.
+        </p></div></div></div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="ch05s02.html">Prev</a> </td><td width="20%" align="center"> </td><td width="40%" align="right"> <a accesskey="n" href="ch06s02.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">5.2. Load an Image Listing </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> 6.2. Open XML Data Files</td></tr></table></div></body></html>

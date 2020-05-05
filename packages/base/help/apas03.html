@@ -1,18 +1,60 @@
-<html><head><meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>A.3. Corelyzer Data XML Schema</title><meta name="generator" content="DocBook XSL Stylesheets V1.77.1"><link rel="home" href="index.html" title="Corelyzer User's Manual"><link rel="up" href="apa.html" title="Appendix A. Appendix"><link rel="prev" href="apas02.html" title="A.2. Making Sure the DPI of an Image is Correct"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">A.3. Corelyzer Data XML Schema</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="apas02.html">Prev</a> </td><th width="60%" align="center">Appendix A. Appendix</th><td width="20%" align="right"> </td></tr></table><hr></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="id36161842"></a>A.3. Corelyzer Data XML Schema</h2></div></div></div><p>
-        The Corelyzer Data XML Schema is a fairly simple XML
-        schema. It is based off of a version of the Geotek data XML
-        format. Examples are available at Sample Data.
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>A.3. Convert Tabular Data: Using a Customized Section Name</title><meta name="generator" content="DocBook XSL Stylesheets V1.79.1"><link rel="home" href="index.html" title="Corelyzer User's Manual"><link rel="up" href="apa.html" title="Appendix A. Appendix"><link rel="prev" href="apas02.html" title="A.2. Making Sure the DPI of an Image is Correct"><link rel="next" href="apas04.html" title="A.4. How do I compare two cores?"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">A.3. Convert Tabular Data: Using a Customized Section Name</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="apas02.html">Prev</a> </td><th width="60%" align="center">Appendix A. Appendix</th><td width="20%" align="right"> <a accesskey="n" href="apas04.html">Next</a></td></tr></table><hr></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="sec.customSectionName"></a>A.3. Convert Tabular Data: Using a Customized Section Name</h2></div></div></div><p>
+        Corelyzer's mechanism for customizing section names is powerful, but not terribly user-friendly.
+        If you're comfortable with Excel, it may be a simpler tool with which to add a column
+        with full section names to your data file. The updated file can then be easily imported via the Convert
+        Tabular Data dialog. With that caveat in mind: if you'd prefer to learn Corelyzer's mechanism, read on!
       </p><p>
-        The root of the Corelyzer XML Schema is &gt;corewall_data&lt;. Inside
-        this node are blocks of section tags. The XML schema is simply
-        a set of tables, one for each core section. Inside section
-        tags are tags to identify which section the table belongs to,
-        units of depth, listing of fields and the data retrieved from
-        sensors at particular depths.
+        To customize section names, a comma-separated expression is entered in the Section Name Column field.
+        This expression will be used to generate a section name for each row of data.
+      </p><p>
+        Elements of the expression are separated by commas. Each element is interpreted as follows:
+        </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem">Numbers: interpreted as the contents of that column number for each row</li><li class="listitem">All other text: interpreted as-is</li></ul></div><p>
+      </p><p>
+        For example, consider the following tabular data.
+        <a class="ulink" href="attachments/customSectionNameExample.csv" target="_top">This data file is included</a>
+        in the documentation.
+        Open it with File &gt; Load Data &gt; Convert Tabular Data to XML... if you'd like to follow along
+        in Corelyzer.
+      </p><div class="figure"><a name="idm266756912192"></a><p class="title"><b>Figure A.1. Example data for comma-separated Section Name Column input</b></p><div class="figure-contents"><div><img src="images/customSectionName-0.png" alt="Example data for comma-separated Section Name Column input"></div></div></div><br class="figure-break"><p>
+        Components of the full section name are spread across four columns:
+        </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem">Site (column 1)</li><li class="listitem">Hole (column 2)</li><li class="listitem">Core (column 3)</li><li class="listitem">Section (column 4)</li></ul></div><p>
+        Assume the entered Data Start Row is 2.
+      </p><p>  
+        To combine the Site, Hole, Core, and Section components into a single section name, enter the number of each column -
+        </p><div class="blockquote"><blockquote class="blockquote"><code class="function">1,2,3,4</code></blockquote></div><p>
+        - in the Section Name Column edit field.
+        You'll see "U1357A11" appear in the Section Name Preview:
+        </p><div><img src="images/customSectionName-1.png"></div><p>
+        
+        The Site, Hole, Core, and Hole
+        values in row 2 (the Data Start Row) are combined to create the previewed section name.
+      </p><p>
+        The expression is applied to the
+        contents of each row, so the combined section name for row 3 will be "U1357A12", and so on.
+        You can confirm this by temporarily entering 3 in the Data Start Row field:
+        </p><div><img src="images/customSectionName-1a.png"></div><p>
+        Remember that the Section Name Preview always displays the interpreted
+        expression in the Section Name Column for the entered Data Start Row.
+      </p><p>
+        To clarify the components of this section name, it would help to separate them
+        with a hyphen (-) or underscore (_).
+        To add a hyphen between each element, enter
+        </p><div class="blockquote"><blockquote class="blockquote"><code class="function">1,-,2,-,3,-,4</code></blockquote></div><p>
+        This will result in "U1357-A-1-1" for row 2:
+        </p><div><img src="images/customSectionName-2.png"></div><p>
+        Temporarily changing the Data Start Row to "12" previews "U1357-B-2-3" for row 12:
+        </p><div><img src="images/customSectionName-3.png"></div><p>
 
-        Here is a complete example of the XML schema, with sample data
-        processed from JANUS:
-
-        </p><div class="figure"><a name="id36161855"></a><p class="title"><b>Figure A.1. Example native Corelyzer data XML file</b></p><div class="figure-contents"><div><img src="images/exampleXMLData.png" alt="Example native Corelyzer data XML file"></div></div></div><p><br class="figure-break">
-
-      </p></div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="apas02.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="apa.html">Up</a></td><td width="40%" align="right"> </td></tr><tr><td width="40%" align="left" valign="top">A.2. Making Sure the DPI of an Image is Correct </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> </td></tr></table></div></body></html>
+        Using an underscore instead and entering
+        </p><div class="blockquote"><blockquote class="blockquote"><code class="function">1,_,2,_,3,_,4</code></blockquote></div><p>
+        results in "U1357_A_1_1" for row 2, "U1357_A_1_2" for row 3, ..., and "U1357_B_2_3" for row 12.
+      </p><p>
+        You can also add arbitrary text as needed. For instance, to prefix every section name with "PREFIX-",
+        and suffix with "-SUFFIX", you'd enter
+        </p><div class="blockquote"><blockquote class="blockquote"><code class="function">PREFIX-,1,-,2,-,3,-,4,-SUFFIX</code></blockquote></div><p>
+        resulting in "PREFIX-U1357-A-1-1-SUFFIX" for row 2, "PREFIX-U1357-A-1-2-SUFFIX" for row 3, and so on.
+      </p><p>
+        Text can be inserted anywhere, not just at the beginning and end. For instance,
+        </p><div class="blockquote"><blockquote class="blockquote"><code class="function">1,-,2,-MOO-,3,-,4</code></blockquote></div><p>
+        results in "U1357-A-MOO-1-1".
+      </p></div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="apas02.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="apa.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="apas04.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">A.2. Making Sure the DPI of an Image is Correct </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> A.4. How do I compare two cores?</td></tr></table></div></body></html>

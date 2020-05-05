@@ -1,120 +1,88 @@
 <?xml version="1.0" encoding="iso-8859-1" standalone="no"?>
 <!DOCTYPE toc PUBLIC "-//Sun Microsystems Inc.//DTD JavaHelp TOC Version 1.0//EN" "http://java.sun.com/products/javahelp/toc_1_0.dtd">
 <toc version="1.0">
-  <tocitem target="id36122733" text="Corelyzer User's Manual">
-    <tocitem target="id36157919" text="About CoreWall"/>
-    <tocitem target="id36158045" text="Pre-installation Requirements">
-      <tocitem target="id36158050" text="Hardware"/>
-      <tocitem target="id36158073" text="Example Hardware Setups">
-        <tocitem target="id36158088" text="ANDRILL - Antarctica Geological Drilling"/>
-        <tocitem target="id36158114" text="Electronic Visualization Laboratory, University of Illinois at Chicago"/>
-        <tocitem target="id36158140" text="National Lacustrine Core Facility, University of Minnesota"/>
-        <tocitem target="id36158167" text="Lamont-Doherty Earth Observatory, the Earth Institute at Columbia University"/>
-      </tocitem>
-      <tocitem target="id36158198" text="Software"/>
+  <tocitem target="idm266757164304" text="Corelyzer User's Manual">
+    <tocitem target="idm266757159488" text="Pre-installation Requirements">
+      <tocitem target="idm266757158784" text="Hardware"/>
+      <tocitem target="idm266757155152" text="Software"/>
     </tocitem>
-    <tocitem target="id36158215" text="Download and Install Corelyzer">
-      <tocitem target="id36158220" text="Download Corelyzer"/>
-      <tocitem target="id36158235" text="Install Corelyzer">
-        <tocitem target="id36158240" text="Microsoft Windows Users"/>
-        <tocitem target="id36158252" text="Apple Mac OS X Users"/>
+    <tocitem target="idm266757152832" text="Download and Install Corelyzer">
+      <tocitem target="idm266757152192" text="Download Corelyzer"/>
+      <tocitem target="idm266757149760" text="Install Corelyzer">
+        <tocitem target="idm266757149056" text="Microsoft Windows Users"/>
+        <tocitem target="idm266757147632" text="Apple Mac OS X/macOS Users"/>
       </tocitem>
     </tocitem>
-    <tocitem target="id36158420" text="Start Corelyzer">
-      <tocitem target="id36158425" text="Setting up the desktop environment">
-        <tocitem target="id36158439" text="Microsoft Windows Users"/>
-        <tocitem target="id36158524" text="Apple Mac OS X Users"/>
+    <tocitem target="idm266757144288" text="Running Corelyzer">
+      <tocitem target="idm266757143616" text="Setting up the desktop environment">
+        <tocitem target="idm266757142112" text="Microsoft Windows Users"/>
+        <tocitem target="idm266757130864" text="Apple Mac OS X/macOS Users"/>
       </tocitem>
-      <tocitem target="id36158580" text="Corelyzer Preferences">
-        <tocitem target="id36158602" text="Directories Panel"/>
-        <tocitem target="id36158626" text="Display Preferences"/>
-        <tocitem target="id36158697" text="User Interface Preferences"/>
-        <tocitem target="id36158807" text="Session Sharing and DIS Preferences"/>
-      </tocitem>
-    </tocitem>
-    <tocitem target="id36158821" text="Corelyzer Layout">
-      <tocitem target="id36158863" text="Tool Palette"/>
-      <tocitem target="id36158969" text="Session/iCores window">
-        <tocitem target="id36158978" text="Menus"/>
-        <tocitem target="id36158989" text="Local (status)"/>
-        <tocitem target="id36159012" text="Subscriptions"/>
-      </tocitem>
-      <tocitem target="id36159042" text="Visualization canvas"/>
-    </tocitem>
-    <tocitem target="id36159075" text="Load Images">
-      <tocitem target="id36159112" text="Load images from local files"/>
-      <tocitem target="id36159240" text="Load Images from online services"/>
-      <tocitem target="id36159350" text="Load Images from CoreCast syndication feeds">
-        <tocitem target="id36159360" text="Subscribe to CoreCast feeds"/>
-        <tocitem target="id36159439" text="Load core images from CoreCast feeds"/>
-      </tocitem>
-      <tocitem target="id36159507" text="Load images using IODP-formatted section list"/>
-      <tocitem target="id36159605" text="Load FMS images from IODP-USIO logging database"/>
-    </tocitem>
-    <tocitem target="id36159688" text="Load and Plot Numerical Log Data">
-      <tocitem target="id36159693" text="Native Corelyzer XML Format Dataset Files"/>
-      <tocitem target="id36159723" text="Use Quick Data Import"/>
-      <tocitem target="id36159765" text="Use Custom Data Import">
-        <tocitem target="id36159867" text="A step-by-step walkthrough example"/>
-      </tocitem>
-      <tocitem target="id36160093" text="Download from IODP-USIO logging database"/>
-      <tocitem target="sec.graphing" text="Plot dataset graph"/>
-    </tocitem>
-    <tocitem target="id36160286" text="Interactions">
-      <tocitem target="id36160291" text="Interaction Scheme">
-        <tocitem target="id36160303" text="Panning"/>
-        <tocitem target="id36160321" text="Zooming"/>
-        <tocitem target="id36160355" text="Sliding a section"/>
-        <tocitem target="id36160370" text="Sliding a track"/>
-      </tocitem>
-      <tocitem target="id36160388" text="Manipulating Tracks and Sections">
-        <tocitem target="id36160411" text="Lock Section"/>
-        <tocitem target="id36160417" text="Lock Section Graphs"/>
-        <tocitem target="id36160424" text="Graph..."/>
-        <tocitem target="id36160434" text="Split..."/>
-        <tocitem target="id36160440" text="Properties..."/>
-        <tocitem target="id36160446" text="Delete..."/>
-        <tocitem target="id36160452" text="Stagger Sections"/>
-        <tocitem target="id36160471" text="Trim Sections..."/>
-        <tocitem target="id36160479" text="Stack Sections"/>
+      <tocitem target="idm266757124032" text="Corelyzer Preferences">
+        <tocitem target="idm266757122096" text="User Interface Panel"/>
+        <tocitem target="idm266757109360" text="Displays Panel"/>
+        <tocitem target="idm266757100768" text="Directories Panel"/>
+        <tocitem target="idm266757097744" text="Session Sharing and DIS Panels"/>
       </tocitem>
     </tocitem>
-    <tocitem target="id36160500" text="Annotation">
-      <tocitem target="id36160524" text="Creating new annotations"/>
-      <tocitem target="id36160594" text="Reviewing and editing existing annotations"/>
-      <tocitem target="id36160664" text="Measuring Mode"/>
+    <tocitem target="idm266757096080" text="Corelyzer Layout">
+      <tocitem target="idm266757091040" text="Tool Palette"/>
+      <tocitem target="idm266757077920" text="Session/iCores window">
+        <tocitem target="idm266757076592" text="Local"/>
+      </tocitem>
+      <tocitem target="idm266757072752" text="Visualization Canvas"/>
     </tocitem>
-    <tocitem target="id36160728" text="Save and Load Sessions"/>
-    <tocitem target="id36160778" text="Corelyzer server and plugin clients">
-      <tocitem target="id36160786" text="Server setup"/>
-      <tocitem target="id36160867" text="Running the server"/>
-      <tocitem target="id36160893" text="Running the administration client"/>
-      <tocitem target="id36160915" text="Administrator commands"/>
-      <tocitem target="id36161135" text="Admin commands reference table"/>
-      <tocitem target="id36161279" text="Client plugin in Corelyzer"/>
-      <tocitem target="id36161340" text="Example dataset file"/>
-      <tocitem target="id36161362" text="Handy scripts"/>
-      <tocitem target="id36161458" text="Some notes"/>
+    <tocitem target="idm266757069312" text="Load Images">
+      <tocitem target="idm266757064752" text="Load local image files"/>
+      <tocitem target="idm266757048464" text="Load an Image Listing"/>
     </tocitem>
-    <tocitem target="id36161494" text="Fine tune with Correlator">
-      <tocitem target="id36161500" text="Before start - Download Corrlator and Corelyzer"/>
-      <tocitem target="id36161521" text="Interaction flow">
-        <tocitem target="id36161532" text="Start Corelyzer"/>
-        <tocitem target="id36161544" text="Start Correlator"/>
-        <tocitem target="id36161555" text="Load log data tables and image list table"/>
-        <tocitem target="id36161609" text="Load log data into Correlator plotting area"/>
-        <tocitem target="id36161652" text="Connect to Corelyzer from Correlator"/>
-        <tocitem target="id36161699" text="Composite depth shifting with core images"/>
+    <tocitem target="idm266757046800" text="Load and Plot Numerical Log Data">
+      <tocitem target="sec.convertTabularData" text="Convert Tabular Data to XML">
+        <tocitem target="idm266757041488" text="Opening the Convert Tabular Data Dialog"/>
+        <tocitem target="idm266757040176" text="Using the Convert Tabular Data Dialog"/>
+      </tocitem>
+      <tocitem target="idm266757012736" text="Open XML Data Files"/>
+      <tocitem target="sec.graphing" text="Plot Data">
+        <tocitem target="idm266756996000" text="Unmatched image section name and data section name"/>
       </tocitem>
     </tocitem>
-    <tocitem target="id36161758" text="Frequently Asked Questions (FAQ)">
-      <tocitem target="id36161763" text="How do I compare two cores?"/>
-      <tocitem target="id36161779" text="More question..."/>
+    <tocitem target="idm266756991200" text="Interactions">
+      <tocitem target="idm266756990544" text="Interaction Scheme">
+        <tocitem target="idm266756989184" text="Panning"/>
+        <tocitem target="idm266756987824" text="Zooming"/>
+        <tocitem target="idm266756983632" text="Moving a section"/>
+        <tocitem target="idm266756982080" text="Moving a track"/>
+      </tocitem>
+      <tocitem target="idm266756980528" text="Manipulating Tracks and Sections">
+        <tocitem target="idm266756978144" text="Lock Section"/>
+        <tocitem target="idm266756977360" text="Lock Section Graphs"/>
+        <tocitem target="idm266756976512" text="Graph..."/>
+        <tocitem target="idm266756975168" text="Split..."/>
+        <tocitem target="idm266756974400" text="Properties..."/>
+        <tocitem target="idm266756973600" text="Delete..."/>
+        <tocitem target="idm266756972880" text="Stagger Sections"/>
+        <tocitem target="idm266756970528" text="Trim Sections..."/>
+        <tocitem target="idm266756969472" text="Stack Sections"/>
+      </tocitem>
     </tocitem>
-    <tocitem target="id36161790" text="Appendix">
-      <tocitem target="id36161795" text="Why is the Image DPI Important?"/>
-      <tocitem target="id36161812" text="Making Sure the DPI of an Image is Correct"/>
-      <tocitem target="id36161842" text="Corelyzer Data XML Schema"/>
+    <tocitem target="idm266756966976" text="Annotation">
+      <tocitem target="idm266756964368" text="Creating new annotations"/>
+      <tocitem target="idm266756956256" text="Reviewing and editing existing annotations"/>
+      <tocitem target="idm266756948832" text="Measuring Mode"/>
+    </tocitem>
+    <tocitem target="idm266756942224" text="Save, Load, and Share Sessions">
+      <tocitem target="idm266756941552" text="Save and Load Sessions on the Local Machine"/>
+      <tocitem target="sec.coreArchive" text="Transfer Sessions with Core Archives">
+        <tocitem target="idm266756935184" text="Export a Core Archive"/>
+        <tocitem target="idm266756928432" text="Import a Core Archive"/>
+      </tocitem>
+    </tocitem>
+    <tocitem target="idm266756923968" text="Appendix">
+      <tocitem target="idm266756923312" text="Why is the Image DPI Important?"/>
+      <tocitem target="idm266756921120" text="Making Sure the DPI of an Image is Correct"/>
+      <tocitem target="sec.customSectionName" text="Convert Tabular Data: Using a Customized Section Name"/>
+      <tocitem target="idm266756899680" text="How do I compare two cores?"/>
+      <tocitem target="idm266756897776" text="Corelyzer Data XML Schema"/>
     </tocitem>
   </tocitem>
 </toc>
