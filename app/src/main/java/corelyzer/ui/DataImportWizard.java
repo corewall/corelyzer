@@ -597,7 +597,7 @@ public class DataImportWizard extends JDialog implements ActionListener, ChangeL
 	}
 
 	private void setupUI() {
-		this.setTitle("Plain Text Data Import");
+		this.setTitle("Convert Tabular Data");
 		this.setSize(600, 600);
 		this.setLocation(400, 50);
 
