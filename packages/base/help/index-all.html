@@ -1,0 +1,1010 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>Corelyzer User's Manual</title><meta name="generator" content="DocBook XSL Stylesheets V1.79.1"><meta name="description" content="Corelyzer is a scalable, extensible visualization tool developed to enhance the study of geological cores. Corelyzer can display large sets of core imagery, with corresponding multi-sensor logs, annotations and plugin-supported visuals alongside. This document describes how to download, configure, and use the software. Corelyzer was originally developed by E. Ito, S. Higgins, C. Jenkins, J. Leigh, and A. Johnson. CSDCO/LacCore developments have yielded major improvements to Corelyzer in recent years through continual feedback from facility visitors and the community at large. These efforts have enabled full utilization of the software for every project team that visits the facility and by an increasing range of institutions around the globe."></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="book"><div class="titlepage"><div><div><h1 class="title"><a name="idm484408195968"></a>Corelyzer User's Manual</h1></div><div><p class="releaseinfo">Last Updated May 5, 2020</p></div><div><div class="abstract"><p class="title"><b>Abstract</b></p><p>
+        <span class="application">Corelyzer</span> 
+        is a scalable, extensible visualization tool developed to enhance the 
+        study of geological cores. Corelyzer can 
+        display large sets of core imagery, with corresponding multi-sensor logs, annotations 
+        and plugin-supported visuals alongside. This
+        document describes how to download, configure, and use the software.
+      </p><p>
+        Corelyzer was originally developed by E. Ito, S. Higgins, C. Jenkins, J. Leigh,
+        and A. Johnson. CSDCO/LacCore developments have yielded major improvements to
+        Corelyzer in recent years through continual feedback from facility visitors
+        and the community at large. These efforts have enabled full utilization of the
+        software for every project team that visits the facility and by an increasing
+        range of institutions around the globe.
+      </p></div></div></div><hr></div><div class="toc"><p><b>Table of Contents</b></p><dl class="toc"><dt><span class="chapter"><a href="#idm484408191024">1. Pre-installation Requirements</a></span></dt><dd><dl><dt><span class="sect1"><a href="#idm484408190320">Hardware</a></span></dt><dt><span class="sect1"><a href="#idm484408186720">Software</a></span></dt></dl></dd><dt><span class="chapter"><a href="#idm484408184288">2. Download and Install Corelyzer</a></span></dt><dd><dl><dt><span class="sect1"><a href="#idm484408183648">Download Corelyzer</a></span></dt><dt><span class="sect1"><a href="#idm484408181408">Install Corelyzer</a></span></dt><dd><dl><dt><span class="sect2"><a href="#idm484408180768">Microsoft Windows Users</a></span></dt><dt><span class="sect2"><a href="#idm484408179376">Apple Mac OS X/macOS Users</a></span></dt></dl></dd></dl></dd><dt><span class="chapter"><a href="#idm484408176432">3. Running Corelyzer</a></span></dt><dd><dl><dt><span class="sect1"><a href="#idm484408175792">Setting up the desktop environment</a></span></dt><dd><dl><dt><span class="sect2"><a href="#idm484408174336">Microsoft Windows Users</a></span></dt><dt><span class="sect2"><a href="#idm484408163520">Apple Mac OS X/macOS Users</a></span></dt></dl></dd><dt><span class="sect1"><a href="#idm484408156816">Corelyzer Preferences</a></span></dt><dd><dl><dt><span class="sect2"><a href="#idm484408154912">User Interface Panel</a></span></dt><dt><span class="sect2"><a href="#idm484408142368">Displays Panel</a></span></dt><dt><span class="sect2"><a href="#idm484408133840">Directories Panel</a></span></dt><dt><span class="sect2"><a href="#idm484408130880">Session Sharing and DIS Panels</a></span></dt></dl></dd></dl></dd><dt><span class="chapter"><a href="#idm484408129248">4. Corelyzer Layout</a></span></dt><dd><dl><dt><span class="sect1"><a href="#idm484408124384">Tool Palette</a></span></dt><dt><span class="sect1"><a href="#idm484408111344">Session/iCores window</a></span></dt><dd><dl><dt><span class="sect2"><a href="#idm484408110064">Local</a></span></dt></dl></dd><dt><span class="sect1"><a href="#idm484408106336">Visualization Canvas</a></span></dt></dl></dd><dt><span class="chapter"><a href="#idm484408102928">5. Load Images</a></span></dt><dd><dl><dt><span class="sect1"><a href="#idm484408102288">Preparing to Load Core Section Images</a></span></dt><dt><span class="sect1"><a href="#idm484408097568">Selecting an Image Loading Method</a></span></dt><dt><span class="sect1"><a href="#sec.loadLocalImageFiles">Load local image files</a></span></dt><dt><span class="sect1"><a href="#sec.loadImageListing">Load images with an Image Listing file</a></span></dt><dd><dl><dt><span class="sect2"><a href="#idm484408076672">Preparing Image Listing files</a></span></dt><dt><span class="sect2"><a href="#idm484408067696">Using the Image Listing dialog</a></span></dt></dl></dd></dl></dd><dt><span class="chapter"><a href="#idm484408052560">6. Load and Plot Numerical Log Data</a></span></dt><dd><dl><dt><span class="sect1"><a href="#sec.convertTabularData">Convert Tabular Data to XML</a></span></dt><dd><dl><dt><span class="sect2"><a href="#idm484408046704">Opening the Convert Tabular Data Dialog</a></span></dt><dt><span class="sect2"><a href="#idm484408045392">Using the Convert Tabular Data Dialog</a></span></dt></dl></dd><dt><span class="sect1"><a href="#idm484408018000">Open XML Data Files</a></span></dt><dt><span class="sect1"><a href="#sec.graphing">Plot Data</a></span></dt><dd><dl><dt><span class="sect2"><a href="#idm484407984720">Unmatched image section name and data section name</a></span></dt></dl></dd></dl></dd><dt><span class="chapter"><a href="#idm484407979968">7. Interactions</a></span></dt><dd><dl><dt><span class="sect1"><a href="#idm484407979328">Interaction Scheme</a></span></dt><dd><dl><dt><span class="sect2"><a href="#idm484407977968">Panning</a></span></dt><dt><span class="sect2"><a href="#idm484407976624">Zooming</a></span></dt><dt><span class="sect2"><a href="#idm484407972448">Moving a section</a></span></dt><dt><span class="sect2"><a href="#idm484407970528">Moving a track</a></span></dt></dl></dd><dt><span class="sect1"><a href="#idm484407968992">Manipulating Tracks and Sections</a></span></dt><dd><dl><dt><span class="sect2"><a href="#idm484407966608">Lock Section</a></span></dt><dt><span class="sect2"><a href="#idm484407965840">Lock Section Graphs</a></span></dt><dt><span class="sect2"><a href="#idm484407964992">Graph...</a></span></dt><dt><span class="sect2"><a href="#idm484407963712">Split...</a></span></dt><dt><span class="sect2"><a href="#idm484407962960">Properties...</a></span></dt><dt><span class="sect2"><a href="#idm484407962176">Delete...</a></span></dt><dt><span class="sect2"><a href="#idm484407961472">Stagger Sections</a></span></dt><dt><span class="sect2"><a href="#idm484407959184">Trim Sections...</a></span></dt><dt><span class="sect2"><a href="#idm484407958128">Stack Sections</a></span></dt></dl></dd></dl></dd><dt><span class="chapter"><a href="#idm484407955648">8. Annotation</a></span></dt><dd><dl><dt><span class="sect1"><a href="#idm484407953056">Creating new annotations</a></span></dt><dt><span class="sect1"><a href="#idm484407944944">Reviewing and editing existing annotations</a></span></dt><dt><span class="sect1"><a href="#idm484407937536">Measuring Mode</a></span></dt></dl></dd><dt><span class="chapter"><a href="#idm484407930944">9. Save, Load, and Share Sessions</a></span></dt><dd><dl><dt><span class="sect1"><a href="#idm484407930272">Save and Load Sessions on the Local Machine</a></span></dt><dt><span class="sect1"><a href="#sec.coreArchive">Transfer Sessions with Core Archives</a></span></dt><dd><dl><dt><span class="sect2"><a href="#idm484407923984">Export a Core Archive</a></span></dt><dt><span class="sect2"><a href="#idm484407917248">Import a Core Archive</a></span></dt></dl></dd></dl></dd><dt><span class="appendix"><a href="#idm484407912832">A. Appendix</a></span></dt><dd><dl><dt><span class="sect1"><a href="#idm484407912192">Why is the Image DPI Important?</a></span></dt><dt><span class="sect1"><a href="#idm484407909952">Making Sure the DPI of an Image is Correct</a></span></dt><dt><span class="sect1"><a href="#sec.customSectionName">Convert Tabular Data: Using a Customized Section Name</a></span></dt><dt><span class="sect1"><a href="#idm484407888640">How do I compare two cores?</a></span></dt><dt><span class="sect1"><a href="#idm484407886736">Corelyzer Data XML Schema</a></span></dt></dl></dd></dl></div><div class="list-of-figures"><p><b>List of Figures</b></p><dl><dt>2.1. <a href="#idm484408178096">Corelyzer in Mac OS X/macOS</a></dt><dt>3.1. <a href="#idm484408173200">Display in Control Panel</a></dt><dt>3.2. <a href="#idm484408170848">Display</a></dt><dt>3.3. <a href="#idm484408166272">Example desktop configuration</a></dt><dt>3.4. <a href="#idm484408165024">Arrange desktops with drag-and-drop</a></dt><dt>3.5. <a href="#idm484408162272">Displays setup in System Preferences</a></dt><dt>3.6. <a href="#idm484408159136">Arrange tab in Displays setting</a></dt><dt>3.7. <a href="#idm484408143744">User interface panel</a></dt><dt>3.8. <a href="#idm484408135216">Displays panel</a></dt><dt>3.9. <a href="#idm484408132432">Directories panel</a></dt><dt>4.1. <a href="#idm484408128000">Initial Corelyzer appearance</a></dt><dt>4.2. <a href="#idm484408123744">Tool Palette Functions</a></dt><dt>4.3. <a href="#idm484408108320">Session/iCores window</a></dt><dt>4.4. <a href="#idm484408104432">Visualization canvas with loaded core data</a></dt><dt>5.1. <a href="#idm484408092096">Select image files to load</a></dt><dt>5.2. <a href="#idm484408089888">Arrange loaded image files</a></dt><dt>5.3. <a href="#idm484408084112">Set image properties</a></dt><dt>5.4. <a href="#idm484408079280">Visualization canvas with loaded core section image</a></dt><dt>5.5. <a href="#idm484408066592">Image Listing dialog</a></dt><dt>6.1. <a href="#idm484408044144">Convert Tabular Data, Import Parameters page</a></dt><dt>6.2. <a href="#idm484408023248">Convert Tabular Data, Fields Selection page</a></dt><dt>6.3. <a href="#idm484408014064">Main window with dataset loaded; right-click Data File to open Graph dialog</a></dt><dt>6.4. <a href="#idm484408012576">Opening graph dialog by right-clicking section image</a></dt><dt>6.5. <a href="#idm484408011264">Graph dialog</a></dt><dt>6.6. <a href="#idm484407987872">Graph plot with Collapse graphs enabled</a></dt><dt>6.7. <a href="#idm484407981712">Unmatched data sections warning, unmatched sections in red</a></dt><dt>7.1. <a href="#idm484407974016">Jump to depth dialog</a></dt><dt>7.2. <a href="#idm484407968048">Section context menu</a></dt><dt>7.3. <a href="#idm484407960624">Staggering sections</a></dt><dt>7.4. <a href="#idm484407957344">Stacking sections</a></dt><dt>8.1. <a href="#idm484407954496">Annotations for core images</a></dt><dt>8.2. <a href="#idm484407951440">Select create annotation mode</a></dt><dt>8.3. <a href="#idm484407946512">Select annotation type</a></dt><dt>8.4. <a href="#idm484407942976">Review and edit a freeform annotation</a></dt><dt>8.5. <a href="#idm484407940960">Modify annotation marker mode</a></dt><dt>8.6. <a href="#idm484407939648">Modify region of interest and marker position</a></dt><dt>8.7. <a href="#idm484407935792">Enable measure mode</a></dt><dt>8.8. <a href="#idm484407934480">Show measuring history</a></dt><dt>8.9. <a href="#idm484407933168">Measure on images</a></dt><dt>9.1. <a href="#idm484407921776">Name the project for export</a></dt><dt>9.2. <a href="#idm484407920368">Choose name and destination</a></dt><dt>9.3. <a href="#idm484407918896">Success!</a></dt><dt>9.4. <a href="#idm484407915728">Select the .car file to import</a></dt><dt>A.1. <a href="#idm484407901072">Example data for comma-separated Section Name Column input</a></dt><dt>A.2. <a href="#idm484407885120">Example native Corelyzer data XML file</a></dt></dl></div><div class="chapter"><div class="titlepage"><div><div><h1 class="title"><a name="idm484408191024"></a>Chapter 1. Pre-installation Requirements</h1></div></div></div><div class="toc"><p><b>Table of Contents</b></p><dl class="toc"><dt><span class="sect1"><a href="#idm484408190320">Hardware</a></span></dt><dt><span class="sect1"><a href="#idm484408186720">Software</a></span></dt></dl></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="idm484408190320"></a>Hardware</h2></div></div></div><p>
+        Graphics: Corelyzer takes advantage of hardware-accelerated
+        graphics. While primarily a 2D visualization program,
+        Corelyzer uses OpenGL to accelerate rendering and take
+        advantage of modern day graphics boards. Thus
+        the performance of the application depends on both
+        the speed of your CPU and the power of your Graphics
+        Processing Unit (GPU). Modern graphics cards can run
+        Corelyzer without issue.
+      </p><p>
+        Storage: Corelyzer's performance is also closely tied to the speed of storage
+        devices. Solid state drives (SSDs) greatly improve performance over hard-disk
+        drives (HDDs), especially in large projects where the volume of imagery requires
+        frequent reads of cached data.
+      </p><p>
+        Memory: At least 2GB of RAM is recommended if
+        you intend to work with projects comprising 100+ meters of high-resolution
+        core images.
+      </p><p>
+        Displays: Corelyzer does not currently support heterogeneous display settings.
+		    This means that if you have one
+        monitor at 1280x1024 resolution, and another at
+        1600x1200 resolution, you'll have to choose one or the other when
+        defining your Corelyzer display settings.
+      </p></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="idm484408186720"></a>Software</h2></div></div></div><p>
+        Corelyzer makes use of the Java Runtime Environment (JRE) version 8,
+        which is bundled with the application.
+      </p></div></div><div class="chapter"><div class="titlepage"><div><div><h1 class="title"><a name="idm484408184288"></a>Chapter 2. Download and Install Corelyzer</h1></div></div></div><div class="toc"><p><b>Table of Contents</b></p><dl class="toc"><dt><span class="sect1"><a href="#idm484408183648">Download Corelyzer</a></span></dt><dt><span class="sect1"><a href="#idm484408181408">Install Corelyzer</a></span></dt><dd><dl><dt><span class="sect2"><a href="#idm484408180768">Microsoft Windows Users</a></span></dt><dt><span class="sect2"><a href="#idm484408179376">Apple Mac OS X/macOS Users</a></span></dt></dl></dd></dl></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="idm484408183648"></a>Download Corelyzer</h2></div></div></div><p>
+        You can download copies of the application for the following
+        platforms at the main download page:  
+        <a class="ulink" href="https://github.com/corewall/corelyzer/releases" target="_top">
+          https://github.com/corewall/corelyzer/releases
+          </a>.
+      </p></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="idm484408181408"></a>Install Corelyzer</h2></div></div></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a name="idm484408180768"></a>Microsoft Windows Users</h3></div></div></div><p>
+          Extract the downloaded .zip archive by right-clicking the
+          file and selecting "Extract All...". Extract Corelyzer to the desired
+          directory and double-click the Corelyzer icon to launch.
+        </p></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a name="idm484408179376"></a>Apple Mac OS X/macOS Users</h3></div></div></div><p>
+          Unzip the downloaded file by double-clicking and you'll see the application icon.
+        </p><p>
+          You can drag the application to your
+          preferred disk location, like the Applications directory
+          or your Desktop. Double click the icon to launch
+          Corelyzer.
+
+          </p><div class="figure"><a name="idm484408178096"></a><p class="title"><b>Figure 2.1. Corelyzer in Mac OS X/macOS</b></p><div class="figure-contents"><div><img src="images/mac_install.png" alt="Corelyzer in Mac OS X/macOS"></div></div></div><p><br class="figure-break">
+        </p></div></div></div><div class="chapter"><div class="titlepage"><div><div><h1 class="title"><a name="idm484408176432"></a>Chapter 3. Running Corelyzer</h1></div></div></div><div class="toc"><p><b>Table of Contents</b></p><dl class="toc"><dt><span class="sect1"><a href="#idm484408175792">Setting up the desktop environment</a></span></dt><dd><dl><dt><span class="sect2"><a href="#idm484408174336">Microsoft Windows Users</a></span></dt><dt><span class="sect2"><a href="#idm484408163520">Apple Mac OS X/macOS Users</a></span></dt></dl></dd><dt><span class="sect1"><a href="#idm484408156816">Corelyzer Preferences</a></span></dt><dd><dl><dt><span class="sect2"><a href="#idm484408154912">User Interface Panel</a></span></dt><dt><span class="sect2"><a href="#idm484408142368">Displays Panel</a></span></dt><dt><span class="sect2"><a href="#idm484408133840">Directories Panel</a></span></dt><dt><span class="sect2"><a href="#idm484408130880">Session Sharing and DIS Panels</a></span></dt></dl></dd></dl></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="idm484408175792"></a>Setting up the desktop environment</h2></div></div></div><p>
+        Before starting Corelyzer, you should first make sure your display
+        settings are correct. On both the Mac and Windows, the default
+        monitor should be the &#8220;upper left most monitor&#8221;.
+      </p><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a name="idm484408174336"></a>Microsoft Windows Users</h3></div></div></div><p>
+          To setup the monitors on Windows, you must first go to your
+          "Display". You can do this by going to the Start
+          menu, selecting "Control Panel" and double-clicking on
+          "Display".
+
+          </p><div class="figure"><a name="idm484408173200"></a><p class="title"><b>Figure 3.1. Display in Control Panel</b></p><div class="figure-contents"><div><img src="images/windows_controlpanel.png" alt="Display in Control Panel"></div></div></div><p><br class="figure-break">
+        </p><p>
+          Once opened, go to the Settings tab. Here you will
+          see boxes with numbers representing the monitors connected
+		  to your machine. If you have a
+          monitor that is not displaying your desktop then it will
+          show up as a slightly grayed-out box, indicating this monitor
+		  is disabled. If the box
+          indicates the monitor is disabled and you click on the box,
+          you will be able to modify the options for that monitor. To
+          enable the monitor, make sure that the check box next to
+          Extend my desktop... is checked. Do this for all the
+          monitors you would like to use, presumably all of them. Then
+          click on the Apply button. Your desktop should be visible on
+          all the selected monitors. 
+          
+          </p><div class="figure"><a name="idm484408170848"></a><p class="title"><b>Figure 3.2. Display</b></p><div class="figure-contents"><div><img src="images/windows_displayproperties.png" alt="Display"></div></div></div><p><br class="figure-break">
+        </p><p>
+          Note: Some monitors need to be turned off and on again to
+          be recognized by Windows. Once the
+          desktop is visible on your monitors, you will need to set
+          the display resolution for all of the monitors. Corelyzer
+          requires that all monitors use the same resolution. Example resolutions
+          are 1280x1024 and 1600x1200. There is a slider on your
+          display settings dialog to modify the resolution. Once set
+          for all monitors, click on the Apply button again. If you
+          are prompted to restart your machine in order for the
+          changes to take effect, then do so. Otherwise, the
+          resolution of your monitors will change and you will be
+          prompted to keep the settings or change them back. 
+        </p><p>
+          Note: If your monitors do not support a particular
+          resolution, they'll typically display a message to that effect,
+          or display nothing (black). After you have enabled your
+          monitors and configured their display settings,
+          make sure that the layout of the monitors matches the layout
+          of the boxes in your display settings. Click the Identify
+          button, and note the number Windows assigns to each monitor.
+          If your monitors are
+          ordered differently than the boxes that are shown on your
+          display settings, then you will need to re-arrange your
+          monitors. This is done by clicking and dragging the
+          boxes in your settings window. Again, you should make sure
+          that the upper left most box matches your upper left
+          most monitor, and that monitor is enabled as your Primary
+          Monitor.
+        </p><p>
+          Note that the desktop numbering in Microsoft Windows
+          depends on the order in which you've connected monitors to
+          your graphics card(s). It may not appear in ascending
+          order from left to right. Ensure that your monitors' physical
+          arrangement matches the onscreen identify result and the
+          display properties display, as shown in the following two
+          screenshots.
+
+          </p><div class="figure"><a name="idm484408166272"></a><p class="title"><b>Figure 3.3. Example desktop configuration</b></p><div class="figure-contents"><div><img src="images/windows_desktops.png" alt="Example desktop configuration"></div></div></div><p><br class="figure-break">
+
+          </p><div class="figure"><a name="idm484408165024"></a><p class="title"><b>Figure 3.4. Arrange desktops with drag-and-drop</b></p><div class="figure-contents"><div><img src="images/windows_desktopdrag.png" alt="Arrange desktops with drag-and-drop"></div></div></div><p><br class="figure-break">
+
+        </p></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a name="idm484408163520"></a>Apple Mac OS X/macOS Users</h3></div></div></div><p>
+          To setup your monitors on your Mac, open the Displays
+          item in System Preferences. To do this, click the Apple menu in the
+		  upper-left of the screen and select "System Preferences". Then
+          choose "Displays", and you will see a dialog window on each
+          monitor that is connected to your machine.
+
+          </p><div class="figure"><a name="idm484408162272"></a><p class="title"><b>Figure 3.5. Displays setup in System Preferences</b></p><div class="figure-contents"><div><img src="images/mac_displays.png" alt="Displays setup in System Preferences"></div></div></div><p><br class="figure-break">
+        </p><p>
+          Make sure the display resolution on each monitor is the
+          same. After fixing the resolution, go to your main window
+          and select the "Arrangement" tab. You will then see a layout
+          of boxes that indicate how your monitors are laid
+          out. Unfortunately there is no way to identify which monitor
+          is represented by which box, as you can on Windows. You will
+          need to arrange the boxes to match your monitor arrangement.
+        </p><p>
+          Make sure the upper left
+          most monitor in your arrangement is be the main
+          monitor. On Mac, the main monitor is visible in the
+          Arrangement tab as the box with a white rectangle
+          along its top. To designate a different monitor
+          to be the main monitor, drag the white rectangle to
+          the box that should be the main monitor. This white
+          rectangle is actually the menu bar you see on top of your
+          monitor. Once the rectangle has been moved, the menu bar
+          will move as well.
+
+          </p><div class="figure"><a name="idm484408159136"></a><p class="title"><b>Figure 3.6. Arrange tab in Displays setting</b></p><div class="figure-contents"><div><img src="images/mac_display_arrangement.png" alt="Arrange tab in Displays setting"></div></div></div><p><br class="figure-break">
+
+        </p><p>
+          If you are making a presentation, then you may want to mirror
+          your display. Otherwise, it's best not to mirror your
+          display, so Corelyzer has more screen real estate in which to
+          draw core images and data.
+        </p></div></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="idm484408156816"></a>Corelyzer Preferences</h2></div></div></div><p>
+        To launch Corelyzer, double-click on the Corelyzer icon.
+        If you're launching Corelyzer for the first time, the
+		Corelyzer Preferences dialog will appear, in which you
+		can specify your scratch disk location,
+        display settings, and user interface features.
+        
+      </p><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a name="idm484408154912"></a>User Interface Panel</h3></div></div></div><p>
+          </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>
+                Automatically check for updates on startup: Corelyzer will
+                automatically check for the latest version of the software at launch.
+              </p></li><li class="listitem"><p>
+                Lock depth of core section images after loading: cores loaded while
+				this option is enabled cannot be moved up or down stratigraphically unless they
+        are manually unlocked.
+              </p></li><li class="listitem"><p>
+                Double-clicking section name zooms to that section: double-clicking the
+				section name in the session/iCores window shows the entire section at the
+				highest zoom level that can accommodate its length.
+              </p></li><li class="listitem"><p>
+                Show crosshair at origin: show the visualization canvas's origin axes.
+              </p></li><li class="listitem"><p>
+                Show labels for sections with data but no image: show section label for dummy
+				sections (those with plotted data but no image).
+              </p></li><li class="listitem"><p>
+                Canvas always draws below external application windows: windows of non-Corelyzer
+				applications will always draw below the visualization canvas. We recommend disabling
+				this option.
+              </p></li><li class="listitem"><p>
+                Scroll wheel/gesture zooms in Vertical Depth Mode: in Vertical Depth Mode,
+				scroll wheel or gesture will zoom/unzoom when this option is enabled. If disabled,
+				they will pan along the depth axis.
+              </p></li><li class="listitem"><p>
+                Horizontal or Vertical Depth Mode: defines the depth
+                orientation. In Horizontal Depth Mode, depth increases from left to right.
+				In Vertical Depth Mode, depth increases from top to bottom.
+              </p></li><li class="listitem"><p>
+                Canvas background color: defines the background color
+                of the visualization canvas. 
+              </p></li><li class="listitem"><p>
+                Canvas grid: enable/disable and defines the background
+                measurement grid parameters. In "Grid Type", 5 types of
+                grid are supported: Basic Cross, Horizontal Lines,
+                Vertical Lines, Points and Cross Points.
+              </p></li></ul></div><p>
+        </p><div class="figure"><a name="idm484408143744"></a><p class="title"><b>Figure 3.7. User interface panel</b></p><div class="figure-contents"><div><img src="images/corelyzer_ui.png" alt="User interface panel"></div></div></div><br class="figure-break"></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a name="idm484408142368"></a>Displays Panel</h3></div></div></div><p>
+          Here you can set the display configuration that Corelyzer will
+          use. Typically, it should match the display
+          configuration you set up with your operating system (see above
+          sections). After establishing inital settings, Corelyzer
+          will load the saved configurations on future launches without
+          showing the Preferences window.
+        </p><p>
+          </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>
+                Rows, Columns: define how many monitors you have,
+                and how they are arranged.
+              </p></li><li class="listitem"><p>
+                Screen Width, Screen Height: define the size of
+                a single monitor in pixels. The first time Corelyzer
+                is launched, these settings will default to the full dimensions
+                of the primary display.
+              </p></li><li class="listitem"><p>
+                Screen DPI X, Screen DPI Y: DPI stands for "dots per
+                inch". These define the mapping from pixels to
+                physical measurement. In most cases, the default values
+                should work correctly.
+              </p></li><li class="listitem"><p>
+                Column Offset, Row Offset: Defines the offsets, in pixels,
+                of the visualization area from the origin (the upper-left corner
+                of the primary display).
+              </p></li><li class="listitem"><p>
+                Border Thickness: The visualization takes into account
+                the monitor border in tiled displays setup. In most
+                cases, the default values should work correctly.
+              </p></li></ul></div><p>
+        </p><div class="figure"><a name="idm484408135216"></a><p class="title"><b>Figure 3.8. Displays panel</b></p><div class="figure-contents"><div><img src="images/corelyzer_display.png" alt="Displays panel"></div></div></div><br class="figure-break"></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a name="idm484408133840"></a>Directories Panel</h3></div></div></div><p>
+		  Image Cache: The first time you load a core section image, Corelyzer processes
+		  that image into a series of "blocks": sub-images at low, medium, and high resolutions.
+		  This processing is done in order to improve performance. Because this initial processing
+		  takes a fair amount of time, the "blocks" are stored locally in this directory for future
+		  use.
+		  
+          Downloads: Corelyzer stores local copies of images downloaded
+		  from remote servers in this directory.
+          </p><div class="figure"><a name="idm484408132432"></a><p class="title"><b>Figure 3.9. Directories panel</b></p><div class="figure-contents"><div><img src="images/corelyzer_directories.png" alt="Directories panel"></div></div></div><p><br class="figure-break">
+        </p></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a name="idm484408130880"></a>Session Sharing and DIS Panels</h3></div></div></div><p>
+          These panels, for advanced use cases, allow you to set up session
+          sharing and default annotation dictionary definition. For most users,
+          the settings here can be ignored.
+        </p></div></div></div><div class="chapter"><div class="titlepage"><div><div><h1 class="title"><a name="idm484408129248"></a>Chapter 4. Corelyzer Layout</h1></div></div></div><div class="toc"><p><b>Table of Contents</b></p><dl class="toc"><dt><span class="sect1"><a href="#idm484408124384">Tool Palette</a></span></dt><dt><span class="sect1"><a href="#idm484408111344">Session/iCores window</a></span></dt><dd><dl><dt><span class="sect2"><a href="#idm484408110064">Local</a></span></dt></dl></dd><dt><span class="sect1"><a href="#idm484408106336">Visualization Canvas</a></span></dt></dl></div><p>
+        Once the OK button is clicked in the initial preferences
+        configuration, a window (or multiple windows)
+        will be created, according to your configuration, for the
+        visualization display.
+      </p><div class="figure"><a name="idm484408128000"></a><p class="title"><b>Figure 4.1. Initial Corelyzer appearance</b></p><div class="figure-contents"><div><img src="images/corelyzer_init.png" alt="Initial Corelyzer appearance"></div></div></div><br class="figure-break"><p>
+        Corelyzer has three primary windows: 
+        </p><div class="orderedlist"><ol class="orderedlist" type="1"><li class="listitem"><p>Tool Palette</p></li><li class="listitem"><p>Session Window (aka "iCores")</p></li><li class="listitem"><p>Visualization Canvas</p></li></ol></div><p>
+      </p><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="idm484408124384"></a>Tool Palette</h2></div></div></div><div class="figure"><a name="idm484408123744"></a><p class="title"><b>Figure 4.2. Tool Palette Functions</b></p><div class="figure-contents"><div><img src="images/tool_palette.png" alt="Tool Palette Functions"></div></div></div><br class="figure-break"><p>
+          The Tool Palette contains frequently-used functions and modes. In
+          a multi-display setup, the Tool Palette will appear in the same
+          display as the mouse cursor.
+        </p><p>
+          The Tool Palette buttons, from left to right:
+        </p><p>
+          Interaction mode:
+
+          </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>
+                Normal mode: Dragging the mouse will pan the Visualization Canvas.
+                The mouse scroll wheel or a trackpad scroll gesture will zoom
+                the Visualization Canvas in and out.
+              </p></li><li class="listitem"><p>
+                Create annotation mode: Select a rectanglar area in which to
+                create an annotation on loaded core images.
+              </p></li><li class="listitem"><p>
+                Modify annotation marker mode: Select and highlight a
+                created annotation to modify the annotation area and the
+                annotation flag icon's position.
+              </p></li><li class="listitem"><p>
+                Measure mode: Specify the start and end of a segment of interest.
+                The physical measurement will be calculated based on the Screen DPI X/Y
+                resolution values specified in the Displays panel of Preferences.
+              </p></li></ul></div><p>
+
+          Cursor type:
+          </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>
+                Regular navigation cursor: The standard arrow cursor will
+                be displayed in the visualization canvas.
+              </p></li><li class="listitem"><p>
+                CrossHair cursor: In additional to standard arrow cursor, a
+                crosshair indicating the current depth will be displayed
+				        in the visualization canvas.
+              </p></li></ul></div><p>
+
+          Common system actions:
+          </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>
+                Show/Hide main window: Show or hide the session/iCores window.
+              </p></li><li class="listitem"><p>
+                Minimize Corelyzer: Minimize all Corelyzer windows.
+              </p></li><li class="listitem"><p>
+                Quit Corelyzer: Close the Corelyzer application.
+              </p></li></ul></div><p>
+        </p></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="idm484408111344"></a>Session/iCores window</h2></div></div></div><p>
+          The main session/iCores window is used to manage sessions, tracks, 
+		  section images, and datasets.
+        </p><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a name="idm484408110064"></a>Local</h3></div></div></div><p>
+            Clicking on the "Local" item in the "My Core Repository"
+            panel will show the currently-loaded sessions, tracks, 
+			core sections, datafiles and the fields available in each
+			dataset. Corelyzer can have multiple sessions, each containing
+			multiple tracks, sections, and datafiles.
+          </p><div class="figure"><a name="idm484408108320"></a><p class="title"><b>Figure 4.3. Session/iCores window</b></p><div class="figure-contents"><div><img src="images/icores_window.png" alt="Session/iCores window"></div></div></div><br class="figure-break"></div></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="idm484408106336"></a>Visualization Canvas</h2></div></div></div><p>
+          Core images, plotted data, etc. are displayed on the visualization canvas.
+        </p><div class="figure"><a name="idm484408104432"></a><p class="title"><b>Figure 4.4. Visualization canvas with loaded core data</b></p><div class="figure-contents"><div><img src="images/viz_canvas.png" alt="Visualization canvas with loaded core data"></div></div></div><br class="figure-break"></div></div><div class="chapter"><div class="titlepage"><div><div><h1 class="title"><a name="idm484408102928"></a>Chapter 5. Load Images</h1></div></div></div><div class="toc"><p><b>Table of Contents</b></p><dl class="toc"><dt><span class="sect1"><a href="#idm484408102288">Preparing to Load Core Section Images</a></span></dt><dt><span class="sect1"><a href="#idm484408097568">Selecting an Image Loading Method</a></span></dt><dt><span class="sect1"><a href="#sec.loadLocalImageFiles">Load local image files</a></span></dt><dt><span class="sect1"><a href="#sec.loadImageListing">Load images with an Image Listing file</a></span></dt><dd><dl><dt><span class="sect2"><a href="#idm484408076672">Preparing Image Listing files</a></span></dt><dt><span class="sect2"><a href="#idm484408067696">Using the Image Listing dialog</a></span></dt></dl></dd></dl></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="idm484408102288"></a>Preparing to Load Core Section Images</h2></div></div></div><p>
+        Before you proceed, make sure you know the following properties of the images to be loaded:
+
+          </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>Orientation: Are the images horizontally or vertically oriented?
+        For horizontally-oriented images, depth is assumed to increase from left to right.
+        For vertically-oriented images, top to bottom.</p></li><li class="listitem"><p>Resolution: What's the resolution of the images in dots-per-inch (DPI)?
+        </p></li></ul></div><p>
+      
+        Corelyzer requires these properties to process and render section images at the correct scale.
+      </p><p>
+      How do you determine the DPI of your image? This depends on the equipment used to capture the image.
+      Most line-scan cameras that are manufactured
+      for the creation of high-resolution images of core sections indicate DPI on their packaging,
+      but sometimes they don't save in the expected DPI. One method of ensuring a correct DPI is described in
+      <a class="ulink" href="apas02.html" target="_top">Making Sure the DPI of an Image is Correct</a>. When loading images
+      you can also specify the length of a core section image, from which Corelyzer
+      can calculate the appropriate DPI value.
+    </p></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="idm484408097568"></a>Selecting an Image Loading Method</h2></div></div></div><p>
+      Once you know your images' properties, you can proceed to load them. Corelyzer offers two methods.
+    </p><p>
+      The first method, <a class="link" href="#sec.loadLocalImageFiles" title="Load local image files">Load local image files</a>,
+      is recommended for most users. You'll select a batch of image files to load. Corelyzer
+      will attempt to organize them into tracks based on their filenames. You can modify this
+      order as needed, along with other image properties like resolution (DPI) and orientation.
+      This approach works well when your images' filenames use
+      the LacCore, IODP, or ICDP section naming convention or similar.
+      Loaded cores in each track will be placed end to end.
+    </p><p>If your cores do not use a standard naming convention, it may be easier to use
+      the second method, <a class="link" href="#sec.loadImageListing" title="Load images with an Image Listing file">Load images with an Image Listing file</a>.
+      For each track, you'll need to create a CSV file with the image file and properties
+      for each section in that track. This method also allows you to position each core at a specific
+      depth.
+    </p></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="sec.loadLocalImageFiles"></a>Load local image files</h2></div></div></div><p>
+			First, select the menu item File &gt; Load Images &gt; Open
+			Image Files.... Select one or more files to load in the resulting dialog:
+			</p><div class="figure"><a name="idm484408092096"></a><p class="title"><b>Figure 5.1. Select image files to load</b></p><div class="figure-contents"><div><img src="images/loadImages-1.png" alt="Select image files to load"></div></div></div><p><br class="figure-break">
+		</p><p>
+			By default, Corelyzer displays core imagery by placing section
+			images in horizontal tracks. Each track corresponds to a single hole.
+			After images to load are selected, Corelyzer will attempt to organize these images
+			into new and/or existing tracks based on image filenames and existing track names
+			(if present). The following dialog displays the suggested
+			organization and allows the user to modify it as needed.
+			
+			</p><div class="figure"><a name="idm484408089888"></a><p class="title"><b>Figure 5.2. Arrange loaded image files</b></p><div class="figure-contents"><div><img src="images/loadImages-2.png" alt="Arrange loaded image files"></div></div></div><p><br class="figure-break">
+			
+			In Figure 5.2, note that the nine loaded sections have been organized into three tracks.
+			Tracks are indicated by "Track" prefixing their name and a beige background.
+			Note that all sections and tracks have a green dot to their left indicating that
+			they've just been loaded (sections) or created (tracks). Most operations in this
+			dialog apply only to these new tracks and sections. To adjust the structure and
+			arrangement of tracks and sections, use the buttons described below:
+			
+			</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>Move Up/Down: Move selected sections up/down within a track or between tracks.</p></li><li class="listitem"><p>Move To Track...: Move selected sections to a specific track.</p></li><li class="listitem"><p>Delete: Remove selected section or track from the list. Tracks containing
+				sections cannot be deleted until emptied.</p></li><li class="listitem"><p>Rename Track: Rename selected track.</p></li><li class="listitem"><p>New Track: Create a new track.</p></li></ul></div><p>
+			
+			Once the arrangement of sections and tracks is correct, input your images' DPI values
+			in the DPI X/Y fields.  Because DPI X and DPI Y are almost always the same, the value
+			entered	in the X field will be immediately copied into the Y field if it's blank. Orientation
+			defaults to Horizontal; change it to Vertical if necessary. Now that image properties and 
+			section order have been established, Corelyzer can place sections in appropriate tracks and
+			position them end-to-end. To proceed, click the "Next &gt;" button.
+			
+			The	resulting dialog allows the user to review and modify image properties, if necessary:
+			
+			</p><div class="figure"><a name="idm484408084112"></a><p class="title"><b>Figure 5.3. Set image properties</b></p><div class="figure-contents"><div><img src="images/loadImages-3.png" alt="Set image properties"></div></div></div><p><br class="figure-break">
+			
+			As you can see in the (rightmost) Depth column, the first section of the 10A track starts
+      at depth zero. The following four sections are also part of the 10A track, so each is placed
+      at the end of the previous section. The next section is from a new track, 10B, thus it's
+      placed at depth zero. The final three sections are part of track 11A.  Starting from depth zero,
+		  each is placed at the bottommost depth of the preceding section.
+
+			</p><p>
+			The section image properties can be modified individually by selecting the cell you wish to change and
+			hitting the Return/Enter key, or by double-cliking the desired cell.  To modify
+			values for multiple sections, you can use the Batch Input controls below the section
+			property table. Check the "Batch input..." checkbox to enable the controls, and enter
+			the desired settings. If you want to apply these settings to all sections in the table,
+			click the Apply to All Rows button. If you want to apply these settings only to certain
+			sections, select those sections in the section property table, then click the Apply to 
+			Selected Rows button. In both cases, only populated fields will modify the corresponding
+			table cells.
+			</p><p>
+			
+			</p><p>
+			If you modify DPI values on the depth axis (DPI X for horizontal images, DPI Y
+			for vertical), section lengths and depths will be updated automatically so sections
+			in each track are positioned end-to-end when loaded.
+			</p><p>
+
+			</p><p>
+			When you are satisfied with the image properties, click the Finish button.
+			Corelyzer will begin loading images with the specified parameters.
+			</p><p>
+		
+			</p><p>
+			Once completed, the visualization window will display core images
+			and the Section listbox in the main session/iCores window will update with the image
+			filenames loaded in each track. Notice in the image below that the ruler in the core image
+			closely matches the depth measurements at the bottom of
+			the visualization window. This visual check is an excellent way to confirm the
+			proper DPI values were used.
+			
+			</p><div class="figure"><a name="idm484408079280"></a><p class="title"><b>Figure 5.4. Visualization canvas with loaded core section image</b></p><div class="figure-contents"><div><img src="images/loadImages-4.png" alt="Visualization canvas with loaded core section image"></div></div></div><p><br class="figure-break">
+			</p><p>
+
+		</p></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="sec.loadImageListing"></a>Load images with an Image Listing file</h2></div></div></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a name="idm484408076672"></a>Preparing Image Listing files</h3></div></div></div><p>
+        Image Listing files must be in CSV (comma-separated values) format.
+        They can be created manually in Excel (Save As... and choose the CSV format)
+        or a text editor (Save with a ".csv" extension, not ".txt").
+        They can also be <a class="link" href="#sec.createImageListing" title="Creating Image Listing files">created</a> in the Image Listing dialog.
+      </p><p>
+        An Image Listing file contains one or more rows. Each row has exactly six values,
+        separated by commas. These values are:
+        </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem">Filename: an image file name, optionally with a complete path</li><li class="listitem">Orientation: "Horizontal" or "Vertical" (excluding quotes)</li><li class="listitem">Length: the physical length of the imaged core section, in meters</li><li class="listitem">DPI X: the horizontal resolution of the image</li><li class="listitem">DPI Y: the vertical resolution of the image (usually the same as DPI X)</li><li class="listitem">Depth: the depth at which to place this core section image, in meters</li></ul></div><p>
+      </p><p>
+        If the filename includes a full path e.g.
+        </p><div class="blockquote"><blockquote class="blockquote"><code class="function">C:\Users\jane\Documents\core1.jpg (Windows)</code></blockquote></div><p>
+        </p><div class="blockquote"><blockquote class="blockquote"><code class="function">/Users/jane/Documents/core1.jpg (Mac)</code></blockquote></div><p>
+        it will be loaded from that location. If it cannot
+        be found there, Corelyzer will try to load the file from the same location as the
+        Image Listing file.
+      </p><p>
+        If the filename does not include a path e.g. <code class="function">core1.jpg</code>, it must be in the same directory as
+        the Image Listing file to be loaded.
+      </p><p>
+        You'll need one Image Listing file for each hole/track you want to create in Corelyzer.
+        Images will be loaded in the order they appear in the listing.
+      </p></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a name="idm484408067696"></a>Using the Image Listing dialog</h3></div></div></div><p>First, select the File &gt; Load Images &gt; Open Image Listing... menu item.</p><div class="figure"><a name="idm484408066592"></a><p class="title"><b>Figure 5.5. Image Listing dialog</b></p><div class="figure-contents"><div><img src="images/imageListing-1.png" alt="Image Listing dialog"></div></div></div><br class="figure-break"><div class="sect3"><div class="titlepage"><div><div><h4 class="title"><a name="idm484408065344"></a>Dialog Controls</h4></div></div></div><p>
+          The Image Files and Properties area consists of a table listing 
+          image properties, buttons to modify that table, and batch controls
+          to modify mutiple image properties at once.
+          </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem">
+              Image listing table: lists images in the current listing. Properties can be modified
+              by selecting the cell you wish to change and pressing the Return/Enter key,
+              or double-clicking.
+            </li><li class="listitem">
+              Select Images... button: select image files to add to the current listing
+            </li><li class="listitem">
+              Open Image Listing... button: select an Image Listing file. Its
+              contents will be added to the current listing.
+            </li><li class="listitem">
+              Save Image Listing... button: saves the current listing to a file for future use.
+            </li><li class="listitem">
+              Reset button: clears the current listing.
+            </li><li class="listitem">
+              Batch input panel:  To modify values for multiple items in the current listing,
+              you can use the Batch Input controls below the image listing table.
+              Check the "Batch input..." checkbox to enable the controls, and enter the desired
+              settings. If you want to apply these settings to all sections in the table, click
+              the Apply to All Rows button. If you want to apply these settings only to certain
+              sections, select those sections in the section property table, then click the Apply
+              to Selected Rows button. In both cases, only populated fields will modify the
+              corresponding table cells. 
+            </li></ul></div><p>
+        </p><p>
+          In the Destination Track area, select the track into which images
+          should be loaded. New tracks can be created with the Create Track button.
+        </p></div><div class="sect3"><div class="titlepage"><div><div><h4 class="title"><a name="idm484408060032"></a>Loading Existing Image Listing files</h4></div></div></div><p>
+          If you've created an Image Listing file, open it using the Open Image Listing... button.
+          The contents of that file will be added to the image listing table.
+        </p><p>
+          Modify any properties, if needed.
+        </p><p>
+          Select the destination track for the images, creating a new track if necessary. Then click
+          the OK button. Your cores will begin to load into the selected destination track, in the
+          order they appear in the listing.
+        </p></div><div class="sect3"><div class="titlepage"><div><div><h4 class="title"><a name="sec.createImageListing"></a>Creating Image Listing files</h4></div></div></div><p>
+          To create an Image Listing file, first add one or more image files with the Select
+          Image Files button. (Remember that each Image Listing file should include cores for
+          a single hole/track.) The selected images will be added to the table with default properties:
+          Horizontal orientation, 1.5m length, 0 DPI X and Y, and depths starting from 0m,
+          incrementing by 1.5m for each image.
+        </p><p>
+          If a DPI of zero is specified, Corelyzer will use the Length value and the image's width or
+          height in pixels (for Horzontal or Vertical orientation, respectively) to determine resolution.
+          If a non-zero DPI is specified, Corelyzer will use that resolution and disregard the Length.
+        </p><p>
+          Modify the properties as needed to reflect the images.
+        </p><p>
+          Click Save Image listing... and select a name and location to save the Image Listing file.
+          Image Listings created in this manner will always use full paths for filenames.
+        </p><p>
+          At this point, you can choose a destination track and load the images in the current listing
+          if desired. Otherwise, you can Reset the list and create additional Image Listing files.
+        </p></div></div></div></div><div class="chapter"><div class="titlepage"><div><div><h1 class="title"><a name="idm484408052560"></a>Chapter 6. Load and Plot Numerical Log Data</h1></div></div></div><div class="toc"><p><b>Table of Contents</b></p><dl class="toc"><dt><span class="sect1"><a href="#sec.convertTabularData">Convert Tabular Data to XML</a></span></dt><dd><dl><dt><span class="sect2"><a href="#idm484408046704">Opening the Convert Tabular Data Dialog</a></span></dt><dt><span class="sect2"><a href="#idm484408045392">Using the Convert Tabular Data Dialog</a></span></dt></dl></dd><dt><span class="sect1"><a href="#idm484408018000">Open XML Data Files</a></span></dt><dt><span class="sect1"><a href="#sec.graphing">Plot Data</a></span></dt><dd><dl><dt><span class="sect2"><a href="#idm484407984720">Unmatched image section name and data section name</a></span></dt></dl></dd></dl></div>
+
+    Log and sensor measurement data can be plotted alongside core imagery. When
+    provided with some basic parameters, Corelyzer can import data from comma-,
+    semicolon-, tab-, and/or space-separated value files. XML data that's already in the Corelyzer
+    format can be quickly loaded without additional input.
+
+    A Corelyzer-specific XML file will be generated when importing non-XML formats.
+
+    <div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="sec.convertTabularData"></a>Convert Tabular Data to XML</h2></div></div></div><p>
+        The Convert Tabular Data dialog allows you to flexibly import tabular data
+        such as a CSV (.csv, comma or
+        semicolon-separated values), TSV (.tsv, tab-separated values), text file (usually
+        .txt with space-separated values), or Geotek generated data (after pre-processing
+        and data cleaning) and convert it to Corelyzer's XML format.
+      </p><p>
+        Your tabular data should contain one or more numeric data columns, a column with depths,
+        and one or more columns identifying the core section from which the data was collected.
+        Conversion will be easiest if the core section names are in a single column. However, it
+        is possible to combine components of a core section name from multiple columns if needed.
+      </p><p>
+        <span class="emphasis"><em>
+          It is critical to understand that your data's core section names must exactly
+          match the corresponding core section image names in order to plot data.
+        </em></span>
+      </p><p>
+        CSV is the format most commonly imported with Convert Tabular Data.
+        If your data is in Excel (.xls or .xlsx) format, it can
+        be converted to CSV with Excel's File &gt; Save As... option and selecting the 
+        "CSV" (Comma-separated Values, or Comma-delimited values) file format.
+      </p><p>
+        After selecting a file to convert, you'll provide the Convert Tabular Data dialog with the
+        parameters of your data to ensure it is converted to the Corelyzer XML format correctly and completely.
+      </p><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a name="idm484408046704"></a>Opening the Convert Tabular Data Dialog</h3></div></div></div><p>
+            Select the File &gt; Load Data &gt; Convert Tabular Data to XML... menu item.
+            Then select the data file to be imported.
+        </p></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a name="idm484408045392"></a>Using the Convert Tabular Data Dialog</h3></div></div></div><p>
+          The first page of the dialog, Import Parameters, is divided into three main panels.
+          The functions of each panel are described below.
+        </p><div class="figure"><a name="idm484408044144"></a><p class="title"><b>Figure 6.1. Convert Tabular Data, Import Parameters page</b></p><div class="figure-contents"><div><img src="images/convertTabular-params.png" alt="Convert Tabular Data, Import Parameters page"></div></div></div><br class="figure-break"><p>
+          File Import Parameters:
+          </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>
+                Selected File: selected input file name. Use the "Select..." button
+                to select a different input file.
+              </p></li><li class="listitem"><p>
+                Field Delimiter:
+                The character used to separate the components of each line in the input
+                file. Available separators are comma (,) or semicolon (;) for CSV
+                files, tab for TSV files, or space for raw text files. The initially
+                selected character is based on the input file name's extension:
+                comma for .csv, tab for .tsv, and space for .txt. For other extensions,
+                comma is the default.
+              </p><p>
+                When the selected character
+                is changed, the table of data in the File Content area will be updated
+                to reflect how each line is separated into components.
+              </p></li></ul></div><p>
+        </p><p>
+          Data Import Parameters:
+          </p><p>
+            Using the row and column numbers in the File Content area, enter appropriate
+            values into these controls to import your data correctly and completely.
+          </p><p>
+          </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>
+                Data Start Row:
+                The row with the first line of data values to be imported.
+              </p></li><li class="listitem"><p>
+                Data End Row:
+                The row with the last line of data values to be imported.
+                Initially set to the last line of the input file.
+                All rows from Data Start Row to Data End Row will be imported.
+              </p></li><li class="listitem"><p>
+                Fields Row:
+                The row with labels/fields for each data column.
+              </p></li><li class="listitem"><p>
+                Units Row:
+                If the input file has a separate row for units, check the
+                Units Row checkbox and enter the units row number.
+                If there's no units row, uncheck the checkbox.
+              </p></li><li class="listitem"><p>
+                Depth Column:
+                The column with depth values for each measurement.
+              </p><p>
+                If a units row is defined, the values in the depth column will use the
+                provided unit for the depth column. The following units
+                are recgonized by Corelyzer: mm, cm, m, in, ft, yd.
+                If no units row is defined, or the depth column unit is
+                blank or not recognized, meters will be used.
+              </p></li><li class="listitem"><p>
+                Depth Mode:
+                </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: circle; "><li class="listitem">
+                    Section Depth: the depths in the Depth Column are relative to each section.
+                  </li><li class="listitem">
+                    Accumulated Depth: the depths in the Depth Column are total depth.
+                  </li></ul></div><p>
+              </p></li><li class="listitem"><p>
+                Section Name Column:
+                The column containing full section names. <span class="emphasis"><em>These names must match
+                the corresponding section images' names exactly for data to be plotted.</em></span>
+              </p><p>
+                If your data does not have a single column with full section names, you can combine
+                section name components by entering a comma-separated expression in the Section Name Column
+                field. <a class="link" href="#sec.customSectionName" title="Convert Tabular Data: Using a Customized Section Name">The format and use of custom section name
+                expressions is described in detail here.</a>
+              </p></li><li class="listitem"><p><a name="para.sectionNamePreview"></a>
+                Section Name Preview:
+                Displays the text in the Data Start Row of the Section Name Column.
+                Used to confirm the Section Name Column number (or expression)
+                you entered results in the expected section name.
+                "[can't create preview]" will be displayed if the Data Start Row or
+                Section Name Column are invalid or blank.
+              </p></li><li class="listitem"><p>
+                Value to Ignore: a single value to be ignored when data is imported. Typically this
+                would be a placeholder indicating invalid data like "9999" or "BOGUS".
+              </p></li></ul></div><p>
+        </p><p>
+          File Content:
+          </p><p>
+            The contents of the Selected File are displayed here, separated into columns based on the selected
+            Field Delimiter character. Rows and Columns are numbered. Enter the appropriate row and column numbers
+            into the Data Import Parameters controls to import your data correctly and completely.
+          </p><p>
+        </p><p>When you've finished entering parameters, click the Next button to move to the next page, Fields Selection.</p><div class="figure"><a name="idm484408023248"></a><p class="title"><b>Figure 6.2. Convert Tabular Data, Fields Selection page</b></p><div class="figure-contents"><div><img src="images/convertTabular-fields.png" alt="Convert Tabular Data, Fields Selection page"></div></div></div><br class="figure-break"><p>
+          The upper portion of this page contains a list of the columns in your tabular data.
+          The column names are based on the Fields Row specified in the Import Parameters page.
+          To return to the Import Parameters page to make a correction, click either the Import
+          Parameters tab atop the dialog, or the Back button at bottom-center.
+        </p><p>
+          Each column name
+          has a checkbox to its left. Check the box corresponding to each data column to be converted. 
+          The Section Name Column(s) and Depth Column you specified in the Import Parameters page do
+          not need to be checked; they're included automatically. You only need to check columns containing
+          data to be plotted. To simultaneously check a range of columns, you can Shift-click (hold the Shift
+          key while clicking an item in the list).
+        </p><p>
+          Once all data columns to be imported have been checked, click the Finish button.
+        </p><p>
+          You'll be prompted to choose a name and location to save the generated XML file. It's generally best to
+          save this file alongside your imported core section images and other project-related files. Once the file
+          is saved, it will automatically be loaded into the current session. You can now plot this data on your
+          core section images with <a class="link" href="#sec.graphing" title="Plot Data">the Graph dialog</a>.
+        </p></div></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="idm484408018000"></a>Open XML Data Files</h2></div></div></div><p>
+        If you have existing Corelyzer-formatted XML data files, they can be added to the current
+        session.
+      </p><p>
+        To begin, select the File &gt; Load Data &gt; Open XML Data Files... menu item,
+        then select one or more XML files to load.
+      </p><p>
+        After a data file(s) is selected, Corelyzer will
+        update the Data Files list in the session window. Corelyzer-formatted XML data
+        files can contain multiple fields. You can click on a filename in the Data Files
+        list to view the fields/datatypes included in that file.
+      </p></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="sec.graphing"></a>Plot Data</h2></div></div></div><p>
+        Once core section image tracks and data files are loaded, the
+        session window should resemble that pictured below. To plot data
+        above the core images, right-click on the desired data file and choose
+        "Graph...". This will open the Graph dialog.
+        </p><div class="figure"><a name="idm484408014064"></a><p class="title"><b>Figure 6.3. Main window with dataset loaded; right-click Data File to open Graph dialog</b></p><div class="figure-contents"><div><img src="images/dataplot-1.png" alt="Main window with dataset loaded; right-click Data File to open Graph dialog"></div></div></div><p><br class="figure-break">
+		
+        Alternately, you can right-click a section image in the visualization canvas and choose
+        "Graph..." from the menu as seen below:
+		
+		    </p><div class="figure"><a name="idm484408012576"></a><p class="title"><b>Figure 6.4. Opening graph dialog by right-clicking section image</b></p><div class="figure-contents"><div><img src="images/dataplot-1.1.png" alt="Opening graph dialog by right-clicking section image"></div></div></div><p><br class="figure-break">
+		
+		    </p><div class="figure"><a name="idm484408011264"></a><p class="title"><b>Figure 6.5. Graph dialog</b></p><div class="figure-contents"><div><img src="images/dataplot-2.png" alt="Graph dialog"></div></div></div><p><br class="figure-break">
+
+        Select one or more sections and the available data
+        fields will be shown in the "Properties fields" list. Checking a
+        field's checkbox in the "Show" column will plot that data in the main
+        visualization area. To change the color of plotted data, click the field's
+        color cell and select from the resulting palette. Corelyzer attempts to use
+        the same color across all sections for fields of the same name. The "Data
+        Range" column indicates the min/max range of data across all selected sections.
+    	</p><p>
+        Other controls:
+      </p><p>
+            </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>Graph type: Change apperance of graph (points, lines, etc.).</p></li><li class="listitem"><p>Collapse graphs: 	When checked, all selected data fields will be
+          plotted on a single coordinate plane for each section (see example below).</p></li><li class="listitem"><p>Scale min/max: Change the minimum and maximum range of the coordinate plane.</p></li><li class="listitem"><p>Excluded values: When populated, don't graph datapoints that fall within
+            the excluded range. One or both fields can be filled. When multiple sections are
+            selected, the broadest exclusion range will be displayed (that is, the minimum of
+            minimums and maximum of maximums).</p></li><li class="listitem"><p>Leave gaps at excluded values: When checked, the Line and Line &amp; Points graph
+          types will not draw a line connecting points with excluded values between them.</p></li></ul></div><p>
+      </p><div class="figure"><a name="idm484407987872"></a><p class="title"><b>Figure 6.6. Graph plot with Collapse graphs enabled</b></p><div class="figure-contents"><div><img src="images/dataplot-3.png" alt="Graph plot with Collapse graphs enabled"></div></div></div><br class="figure-break"><p>
+        Keyboard Commands:
+      </p><p>
+        In some cases, you may want to expand the vertical size of
+            graph plots, e.g. those with a large depth range. To increase
+        or decrease the graph (vertical) scale, you
+            can first click on the visualization canvas area, and then
+            press '[' or ']' to decrease or increase the graph's size
+            on-screen.
+        
+            
+      </p><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a name="idm484407984720"></a>Unmatched image section name and data section name</h3></div></div></div><p>
+          In order to plot data on a core section image, the section name in the data must match
+          the section image's name <span class="emphasis"><em>exactly</em></span>. Otherwise, no data will be plotted.
+        </p><p>
+          To help identify this problem, the Graph dialog informs you when sections
+          in the data have no matching image section in the session. This can be corrected
+          by <a class="link" href="#sec.convertTabularData" title="Convert Tabular Data to XML"> re-converting your tabular data</a>,
+          ensuring that the data's section names match the corresponding section image names.
+        </p><div class="figure"><a name="idm484407981712"></a><p class="title"><b>Figure 6.7. Unmatched data sections warning, unmatched sections in red</b></p><div class="figure-contents"><div><img src="images/dataplot-unmatchedSections.png" alt="Unmatched data sections warning, unmatched sections in red"></div></div></div><br class="figure-break"></div></div></div><div class="chapter"><div class="titlepage"><div><div><h1 class="title"><a name="idm484407979968"></a>Chapter 7. Interactions</h1></div></div></div><div class="toc"><p><b>Table of Contents</b></p><dl class="toc"><dt><span class="sect1"><a href="#idm484407979328">Interaction Scheme</a></span></dt><dd><dl><dt><span class="sect2"><a href="#idm484407977968">Panning</a></span></dt><dt><span class="sect2"><a href="#idm484407976624">Zooming</a></span></dt><dt><span class="sect2"><a href="#idm484407972448">Moving a section</a></span></dt><dt><span class="sect2"><a href="#idm484407970528">Moving a track</a></span></dt></dl></dd><dt><span class="sect1"><a href="#idm484407968992">Manipulating Tracks and Sections</a></span></dt><dd><dl><dt><span class="sect2"><a href="#idm484407966608">Lock Section</a></span></dt><dt><span class="sect2"><a href="#idm484407965840">Lock Section Graphs</a></span></dt><dt><span class="sect2"><a href="#idm484407964992">Graph...</a></span></dt><dt><span class="sect2"><a href="#idm484407963712">Split...</a></span></dt><dt><span class="sect2"><a href="#idm484407962960">Properties...</a></span></dt><dt><span class="sect2"><a href="#idm484407962176">Delete...</a></span></dt><dt><span class="sect2"><a href="#idm484407961472">Stagger Sections</a></span></dt><dt><span class="sect2"><a href="#idm484407959184">Trim Sections...</a></span></dt><dt><span class="sect2"><a href="#idm484407958128">Stack Sections</a></span></dt></dl></dd></dl></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="idm484407979328"></a>Interaction Scheme</h2></div></div></div><p>
+        Corelyzer is primarily controlled via mouse, ideally
+        a two-button mouse with a scroll wheel. Mouse clicks
+        and events are context sensitive. That is, depending on what
+        you're clicking (e.g. an image), corresponding menus and/or options
+        will appear.
+      </p><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a name="idm484407977968"></a>Panning</h3></div></div></div><p>
+          To pan the visualization canvas, left-click and drag, making sure not to
+          click on any objects like core section images, graphs, or
+          annotation markers.
+        </p></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a name="idm484407976624"></a>Zooming</h3></div></div></div><p>
+          If your mouse has a scroll wheel, scroll forward
+          to zoom out, and backwards to zoom in. Zooming will center
+          on the mouse cursor's current location.
+        </p><p>
+          If your mouse does not have a scroll wheel, you can zoom by
+          left-clicking and dragging up and down while holding the Control key.
+        </p><p>
+          You can also use keyboard for navigation in Corelyzer. You
+          can use the four-direction arrow key to pan around the main
+          visualization area. To zoom in and out around the mouse
+          cursor position, you can press the "+" and "-" keys. If you
+          want to jump to a certain depth directly, first click on the
+          main visualization area and then press the "j" key to bring
+          up the "Jump to..." dialog. Input the depth in meter and the
+          main visualization area will jump to designated depth
+          directly.
+
+          </p><div class="figure"><a name="idm484407974016"></a><p class="title"><b>Figure 7.1. Jump to depth dialog</b></p><div class="figure-contents"><div><img src="images/jumpto.png" alt="Jump to depth dialog"></div></div></div><p><br class="figure-break">
+
+        </p></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a name="idm484407972448"></a>Moving a section</h3></div></div></div><p>
+          To move a section image stratigraphically, first left-click on the section image.
+          The image will be highlighted by a yellow bounding box. The 
+          image will also be drawn on top of any overlapping images.
+          While holding the Alt key, left-click and drag left or right to move
+          the section image left or right.
+        </p></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a name="idm484407970528"></a>Moving a track</h3></div></div></div><p>
+          A track can be moved vertically. To do so, left-click a section
+          image in the track to be moved. While holding the Shift key, left-click
+          and drag up or down. All core sections in the track will move to follow.
+        </p></div></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="idm484407968992"></a>Manipulating Tracks and Sections</h2></div></div></div><p>
+        Right-clicking on a section image opens a menu with several options to modify the
+        appearance of the section (or its parent track), properties, and positioning relative
+        to other sections within its track.
+		    </p><div class="figure"><a name="idm484407968048"></a><p class="title"><b>Figure 7.2. Section context menu</b></p><div class="figure-contents"><div><img src="images/sectionMenu.png" alt="Section context menu"></div></div></div><p><br class="figure-break">
+	  </p><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a name="idm484407966608"></a>Lock Section</h3></div></div></div>
+		  If checked, section cannot be moved up or down stratigraphically. Select
+			this option to lock/unlock the section.
+		</div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a name="idm484407965840"></a>Lock Section Graphs</h3></div></div></div>
+		  If checked, graphs of section data cannot be moved up or down stratigraphically (this
+			is the default). Select this option to lock/unlock the section's graphs.
+		</div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a name="idm484407964992"></a>Graph...</h3></div></div></div>
+			Opens the Graph dialog - <a class="link" href="#sec.graphing" title="Plot Data">details here</a>.
+		</div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a name="idm484407963712"></a>Split...</h3></div></div></div>
+			Opens the Split dialog, where you can divide the selected section into separate sections.
+		</div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a name="idm484407962960"></a>Properties...</h3></div></div></div>
+			Opens the Properties dialog, where you can modify traits (resolution, visible interval, rotation, etc.)
+			of the selected section.
+		</div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a name="idm484407962176"></a>Delete...</h3></div></div></div>
+			Removes this section from the current session.
+		</div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a name="idm484407961472"></a>Stagger Sections</h3></div></div></div>
+			Moves every other section in the track up by the width of the track. This is useful for displaying
+      the ends of sections if adjacent sections overlap. When a track is staggered, a checkmark
+      will appear by the "Stagger Sections..." menu option; select again to un-stagger.
+		  <div class="figure"><a name="idm484407960624"></a><p class="title"><b>Figure 7.3. Staggering sections</b></p><div class="figure-contents"><div><img src="images/stagger.png" alt="Staggering sections"></div></div></div><br class="figure-break"></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a name="idm484407959184"></a>Trim Sections...</h3></div></div></div>
+      Opens the Trim dialog, which allows you to "trim" from the top or bottom of either the
+      selected section image, or the selected section and all deeper sections
+      in the track. Trimming modifies sections' Visible Intervals, as seen in the Properties dialog.
+      This is most useful for hiding extraneous imagery such as color cards or core catchers.
+		</div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a name="idm484407958128"></a>Stack Sections</h3></div></div></div>
+			Positions all sections currently below the selected section end-to-end, with no gaps between.
+			Note that this operation is not section order aware. Sections will be stacked as they are
+      encountered, starting from the topmost section and moving downward.
+			<div class="figure"><a name="idm484407957344"></a><p class="title"><b>Figure 7.4. Stacking sections</b></p><div class="figure-contents"><div><img src="images/stack.png" alt="Stacking sections"></div></div></div><br class="figure-break"></div></div></div><div class="chapter"><div class="titlepage"><div><div><h1 class="title"><a name="idm484407955648"></a>Chapter 8. Annotation</h1></div></div></div><div class="toc"><p><b>Table of Contents</b></p><dl class="toc"><dt><span class="sect1"><a href="#idm484407953056">Creating new annotations</a></span></dt><dt><span class="sect1"><a href="#idm484407944944">Reviewing and editing existing annotations</a></span></dt><dt><span class="sect1"><a href="#idm484407937536">Measuring Mode</a></span></dt></dl></div><p>
+      Annotations are currently shown using a marker along the top of
+      a core. The marker is a simple interactive visual to indicate
+      that an annotation exists. Different markers indicate different
+      types of annotations.
+      </p><div class="figure"><a name="idm484407954496"></a><p class="title"><b>Figure 8.1. Annotations for core images</b></p><div class="figure-contents"><div><img src="images/annotations.png" alt="Annotations for core images"></div></div></div><p><br class="figure-break">
+    </p><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="idm484407953056"></a>Creating new annotations</h2></div></div></div><p>
+        Currently, text and image annotations are
+        supported. Annotations come in the form of HTML and property
+        list XML files.
+      </p><p>
+        First an image must be loaded. A user can then select "Create
+        annotation mode" to start creating annotations.
+        </p><div class="figure"><a name="idm484407951440"></a><p class="title"><b>Figure 8.2. Select create annotation mode</b></p><div class="figure-contents"><div><img src="images/annotations-1.png" alt="Select create annotation mode"></div></div></div><p><br class="figure-break">
+      </p><p>
+        Once you are in creating annotation mode, you can create a
+        region of interest rectangle by pressing-and-dragging to show
+        interested region. A dialog asking for which kind of
+        annotation you are creating will show up once you release the
+        the mouse button. Currently Corelyzer supports the following
+        types of annotations.
+
+        </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>Freefrom: a threaded discussion freeform annotation.</p></li><li class="listitem"><p>Clast: a structured annotation which keeps
+          track of clastology information.</p></li><li class="listitem"><p>Sample Request: a front-end annotation for
+          sample requests.</p></li><li class="listitem"><p>Property Values: a generic property-value
+          pairs annotation. Default properties is defined in the
+          dictionary file specified in the preferences panel.</p></li></ul></div><p>
+
+        </p><div class="figure"><a name="idm484407946512"></a><p class="title"><b>Figure 8.3. Select annotation type</b></p><div class="figure-contents"><div><img src="images/annotations-2.png" alt="Select annotation type"></div></div></div><p><br class="figure-break">
+
+      </p></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="idm484407944944"></a>Reviewing and editing existing annotations</h2></div></div></div><p>
+        After an annotation is created, it can be edited in the
+        future. To edit an annotation, or review it, a user simply
+        clicks on an annotation marker. The same dialog used when
+        creating an annotation will display.
+      </p><p>
+        Currently, the comments will be
+        attached into a discussion thread-like display in a freeform
+        annotation. By clicking the tool buttons at the top of the
+        editing area of annotation window, the user can do simple HTML
+        formatting and insert images and attachment files with URLs or
+        by selecting files from local hard disk.
+
+        </p><div class="figure"><a name="idm484407942976"></a><p class="title"><b>Figure 8.4. Review and edit a freeform annotation</b></p><div class="figure-contents"><div><img src="images/annotations-3.png" alt="Review and edit a freeform annotation"></div></div></div><p><br class="figure-break">
+      </p><p>
+        Any time after the marker is created, the user can change to
+        marker manipulation mode by clicking icon at the toolbox in the
+        upper left screen. Next, select the marker icon and then by
+        click-and-drag the green box to change the region of interest.
+
+        </p><div class="figure"><a name="idm484407940960"></a><p class="title"><b>Figure 8.5. Modify annotation marker mode</b></p><div class="figure-contents"><div><img src="images/annotations-4.png" alt="Modify annotation marker mode"></div></div></div><p><br class="figure-break">
+
+        </p><div class="figure"><a name="idm484407939648"></a><p class="title"><b>Figure 8.6. Modify region of interest and marker position</b></p><div class="figure-contents"><div><img src="images/annotations-5.png" alt="Modify region of interest and marker position"></div></div></div><p><br class="figure-break">
+
+      </p></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="idm484407937536"></a>Measuring Mode</h2></div></div></div><p>
+        Switch to measuring mode by click the measurement icon in the
+        toolbox at the upper left corner. To measure, click two points
+        on the visualization screen, the physical length measurement
+        will be calculated and saved to measuring history. The last
+        value will also be copied to system&#8217;s clipboard so you can
+        easily paste to other applications or the annotation.
+
+        </p><div class="figure"><a name="idm484407935792"></a><p class="title"><b>Figure 8.7. Enable measure mode</b></p><div class="figure-contents"><div><img src="images/measure-1.png" alt="Enable measure mode"></div></div></div><p><br class="figure-break">
+
+        </p><div class="figure"><a name="idm484407934480"></a><p class="title"><b>Figure 8.8. Show measuring history</b></p><div class="figure-contents"><div><img src="images/measure-2.png" alt="Show measuring history"></div></div></div><p><br class="figure-break">
+
+        </p><div class="figure"><a name="idm484407933168"></a><p class="title"><b>Figure 8.9. Measure on images</b></p><div class="figure-contents"><div><img src="images/measure-3.png" alt="Measure on images"></div></div></div><p><br class="figure-break">
+      </p></div></div><div class="chapter"><div class="titlepage"><div><div><h1 class="title"><a name="idm484407930944"></a>Chapter 9. Save, Load, and Share Sessions</h1></div></div></div><div class="toc"><p><b>Table of Contents</b></p><dl class="toc"><dt><span class="sect1"><a href="#idm484407930272">Save and Load Sessions on the Local Machine</a></span></dt><dt><span class="sect1"><a href="#sec.coreArchive">Transfer Sessions with Core Archives</a></span></dt><dd><dl><dt><span class="sect2"><a href="#idm484407923984">Export a Core Archive</a></span></dt><dt><span class="sect2"><a href="#idm484407917248">Import a Core Archive</a></span></dt></dl></dd></dl></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="idm484407930272"></a>Save and Load Sessions on the Local Machine</h2></div></div></div><p>
+        <span class="emphasis"><em>It is critical to understand that a saved session file
+        does not include images and dataset files.</em></span>
+        Rather, it saves the <span class="emphasis"><em>locations</em></span> of those files on the local machine
+        so they can be loaded along with the session. This means a session file
+        will only function on the local machine where it was created!
+      </p><p>
+        You can save your current session by selecting the File &gt; Save
+        Session or File &gt; Save Session as... menu item. This saves the session as a XML-based
+        CML (for "Core Modeling Language") file. The complete CML file schema description can be found
+        <a class="ulink" href="attachments/CmlXml_Syntax.pdf" target="_top">here</a>.
+      </p><p>
+        A saved session can be loaded with the File &gt; Open Session... menu item.
+      </p><p>
+        To copy a complete Corelyzer session to another machine or share with a colleague,
+        use the <a class="link" href="#sec.coreArchive" title="Transfer Sessions with Core Archives">Core Archive</a> function, which creates
+        a single file containing all resources (images, data files, etc.) suitable for
+        transfer to other machines.
+      </p></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="sec.coreArchive"></a>Transfer Sessions with Core Archives</h2></div></div></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a name="idm484407923984"></a>Export a Core Archive</h3></div></div></div><p>
+            The Core Archive Export function packs
+            all the resources along with a session CML file into
+            a compressed "Core ARchive", a ".car" file. It will contain
+            all the images, datasets, annotations and their attachments.
+          </p><p>
+            To transfer a complete Corelyzer project to another machine,
+            use the File &gt; Core Archive &gt; Export... menu item.
+          </p><p>
+            Enter a name for the project.
+            </p><div class="figure"><a name="idm484407921776"></a><p class="title"><b>Figure 9.1. Name the project for export</b></p><div class="figure-contents"><div><img src="images/coreArchive-export1.png" alt="Name the project for export"></div></div></div><p><br class="figure-break">
+            Choose a name and location for the exported .car file.
+            </p><div class="figure"><a name="idm484407920368"></a><p class="title"><b>Figure 9.2. Choose name and destination</b></p><div class="figure-contents"><div><img src="images/coreArchive-export2.png" alt="Choose name and destination"></div></div></div><p><br class="figure-break">
+            The progress bar of the session window will fill as the archive is exported,
+            followed by a success message.
+            </p><div class="figure"><a name="idm484407918896"></a><p class="title"><b>Figure 9.3. Success!</b></p><div class="figure-contents"><div><img src="images/coreArchive-export3.png" alt="Success!"></div></div></div><p><br class="figure-break">
+            The exported .car file can be transfered to other machines and shared with colleagues.
+          </p></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a name="idm484407917248"></a>Import a Core Archive</h3></div></div></div><p>
+          To import a core archive on the destination machine, use the
+          File &gt; Core Archive &gt; Import... menu item.
+        </p><p>
+          Select the .car file when prompted.
+          </p><div class="figure"><a name="idm484407915728"></a><p class="title"><b>Figure 9.4. Select the .car file to import</b></p><div class="figure-contents"><div><img src="images/coreArchive-import1.png" alt="Select the .car file to import"></div></div></div><p><br class="figure-break">
+          Corelyzer will extract its contents and load them into the current session.
+        </p></div></div></div><div class="appendix"><div class="titlepage"><div><div><h1 class="title"><a name="idm484407912832"></a>Appendix A. Appendix</h1></div></div></div><div class="toc"><p><b>Table of Contents</b></p><dl class="toc"><dt><span class="sect1"><a href="#idm484407912192">Why is the Image DPI Important?</a></span></dt><dt><span class="sect1"><a href="#idm484407909952">Making Sure the DPI of an Image is Correct</a></span></dt><dt><span class="sect1"><a href="#sec.customSectionName">Convert Tabular Data: Using a Customized Section Name</a></span></dt><dt><span class="sect1"><a href="#idm484407888640">How do I compare two cores?</a></span></dt><dt><span class="sect1"><a href="#idm484407886736">Corelyzer Data XML Schema</a></span></dt></dl></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="idm484407912192"></a>Why is the Image DPI Important?</h2></div></div></div><p>
+        Corelyzer is a system that intends to bridge core imagery from multiple 
+        sources and scale as time moves on and resolution improves. To do this, 
+        the system scales all the images so that these varying resolution imagery 
+        can map to a space that will indicate what the dimensions of these images 
+        actually represent. In other words, so that an image of a 1.5-meter 
+        section appears to be 1.5 meters in length despite how high of a 
+        resolution image you take. Does this mean that getting higher resolution 
+        imagery is a bad idea? No, because you can always zoom in to see the 
+        finest detail available on the image. The higher the resolution the 
+        image is (i.e. the higher the DPI), then the more details that can be 
+        seen.
+      </p></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="idm484407909952"></a>Making Sure the DPI of an Image is Correct</h2></div></div></div><p>
+        Here we will discuss about how to make sure a core image has
+        the correct DPI. At this point, let's assume that your
+        digital-line-scanner scans the core at 100 dots per
+        centimeter. This is equal to 254 DPI.
+      </p><p>
+        The first thing to do is open the image in a program like
+        Adobe Photoshop, or The Gimp. At this point, we will assume
+        that you are working with Photoshop.
+      </p><p>
+        In Photoshop, you will want to view the image's properties by
+        going to Image -&gt; Image Size. A dialog will appear showing the
+        image width, height, etc. If the resolution does not match the
+        expected DPI then we will need to change it. Before doing that
+        make sure that the Resample Image checkbox is
+        unchecked. Otherwise, when you change the DPI of the image,
+        the image will get resized. After you uncheck the Resample
+        Image option, edit the Resolution text field and enter the
+        correct DPI. At the time of this writing, most core section
+        images have a DPI of 254.
+      </p><p>
+        If you realize that more than one image contains the wrong
+        DPI, you can create a batch process in Photoshop to help you
+        deal with all the images.
+      </p></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="sec.customSectionName"></a>Convert Tabular Data: Using a Customized Section Name</h2></div></div></div><p>
+        Corelyzer's mechanism for customizing section names is powerful, but not terribly user-friendly.
+        If you're comfortable with Excel, it may be a simpler tool with which to add a column
+        with full section names to your data file. The updated file can then be easily imported via the Convert
+        Tabular Data dialog. With that caveat in mind: if you'd prefer to learn Corelyzer's mechanism, read on!
+      </p><p>
+        To customize section names, a comma-separated expression is entered in the Section Name Column field.
+        This expression will be used to generate a section name for each row of data.
+      </p><p>
+        Elements of the expression are separated by commas. Each element is interpreted as follows:
+        </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem">Numbers: interpreted as the contents of that column number for each row</li><li class="listitem">All other text: interpreted as-is</li></ul></div><p>
+      </p><p>
+        For example, consider the following tabular data.
+        <a class="ulink" href="attachments/customSectionNameExample.csv" target="_top">This data file is included</a>
+        in the documentation.
+        Open it with File &gt; Load Data &gt; Convert Tabular Data to XML... if you'd like to follow along
+        in Corelyzer.
+      </p><div class="figure"><a name="idm484407901072"></a><p class="title"><b>Figure A.1. Example data for comma-separated Section Name Column input</b></p><div class="figure-contents"><div><img src="images/customSectionName-0.png" alt="Example data for comma-separated Section Name Column input"></div></div></div><br class="figure-break"><p>
+        Components of the full section name are spread across four columns:
+        </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem">Site (column 1)</li><li class="listitem">Hole (column 2)</li><li class="listitem">Core (column 3)</li><li class="listitem">Section (column 4)</li></ul></div><p>
+        Assume the entered Data Start Row is 2.
+      </p><p>  
+        To combine the Site, Hole, Core, and Section components into a single section name, enter the number of each column -
+        </p><div class="blockquote"><blockquote class="blockquote"><code class="function">1,2,3,4</code></blockquote></div><p>
+        - in the Section Name Column edit field.
+        You'll see "U1357A11" appear in the Section Name Preview:
+        </p><div><img src="images/customSectionName-1.png"></div><p>
+        
+        The Site, Hole, Core, and Hole
+        values in row 2 (the Data Start Row) are combined to create the previewed section name.
+      </p><p>
+        The expression is applied to the
+        contents of each row, so the combined section name for row 3 will be "U1357A12", and so on.
+        You can confirm this by temporarily entering 3 in the Data Start Row field:
+        </p><div><img src="images/customSectionName-1a.png"></div><p>
+        Remember that the Section Name Preview always displays the interpreted
+        expression in the Section Name Column for the entered Data Start Row.
+      </p><p>
+        To clarify the components of this section name, it would help to separate them
+        with a hyphen (-) or underscore (_).
+        To add a hyphen between each element, enter
+        </p><div class="blockquote"><blockquote class="blockquote"><code class="function">1,-,2,-,3,-,4</code></blockquote></div><p>
+        This will result in "U1357-A-1-1" for row 2:
+        </p><div><img src="images/customSectionName-2.png"></div><p>
+        Temporarily changing the Data Start Row to "12" previews "U1357-B-2-3" for row 12:
+        </p><div><img src="images/customSectionName-3.png"></div><p>
+
+        Using an underscore instead and entering
+        </p><div class="blockquote"><blockquote class="blockquote"><code class="function">1,_,2,_,3,_,4</code></blockquote></div><p>
+        results in "U1357_A_1_1" for row 2, "U1357_A_1_2" for row 3, ..., and "U1357_B_2_3" for row 12.
+      </p><p>
+        You can also add arbitrary text as needed. For instance, to prefix every section name with "PREFIX-",
+        and suffix with "-SUFFIX", you'd enter
+        </p><div class="blockquote"><blockquote class="blockquote"><code class="function">PREFIX-,1,-,2,-,3,-,4,-SUFFIX</code></blockquote></div><p>
+        resulting in "PREFIX-U1357-A-1-1-SUFFIX" for row 2, "PREFIX-U1357-A-1-2-SUFFIX" for row 3, and so on.
+      </p><p>
+        Text can be inserted anywhere, not just at the beginning and end. For instance,
+        </p><div class="blockquote"><blockquote class="blockquote"><code class="function">1,-,2,-MOO-,3,-,4</code></blockquote></div><p>
+        results in "U1357-A-MOO-1-1".
+      </p></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="idm484407888640"></a>How do I compare two cores?</h2></div></div></div><p>
+        To compare 2 cores images or data side-by-side, you can
+        arrange cores to be compared in different "tracks". To do
+        that, first create and highlight a new track. Then load first
+        batch of images to be compared using "Load images" item in the
+        "File" menu. The second batch of core images can be loaded
+        into another newly created track using similar steps. To
+        arrange them side-by-side, use keyboard+mouse gesture
+        "Shift-Drag" one track away from another in the vertical
+        direction. If you need to move individual section along the
+        depth direction, you can use "Alt-Drag" gesture to move
+        sections to different depths.
+      </p></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="idm484407886736"></a>Corelyzer Data XML Schema</h2></div></div></div><p>
+        The Corelyzer Data XML Schema is a fairly simple XML
+        schema. It is based off of a version of the Geotek data XML
+        format. Examples are available at Sample Data.
+      </p><p>
+        The root of the Corelyzer XML Schema is &gt;corewall_data&lt;. Inside
+        this node are blocks of section tags. The XML schema is simply
+        a set of tables, one for each core section. Inside section
+        tags are tags to identify which section the table belongs to,
+        units of depth, listing of fields and the data retrieved from
+        sensors at particular depths.
+
+        Here is a complete example of the XML schema, with sample data
+        processed from JANUS:
+
+        </p><div class="figure"><a name="idm484407885120"></a><p class="title"><b>Figure A.2. Example native Corelyzer data XML file</b></p><div class="figure-contents"><div><img src="images/exampleXMLData.png" alt="Example native Corelyzer data XML file"></div></div></div><p><br class="figure-break">
+
+      </p></div></div></div></body></html>

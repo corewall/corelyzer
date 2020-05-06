@@ -1,88 +1,97 @@
 <?xml version="1.0" encoding="iso-8859-1" standalone="no"?>
 <!DOCTYPE toc PUBLIC "-//Sun Microsystems Inc.//DTD JavaHelp TOC Version 1.0//EN" "http://java.sun.com/products/javahelp/toc_1_0.dtd">
 <toc version="1.0">
-  <tocitem target="idm266757164304" text="Corelyzer User's Manual">
-    <tocitem target="idm266757159488" text="Pre-installation Requirements">
-      <tocitem target="idm266757158784" text="Hardware"/>
-      <tocitem target="idm266757155152" text="Software"/>
+  <tocitem target="idm307886995568" text="Corelyzer User's Manual">
+    <tocitem target="idm307886988384" text="Pre-installation Requirements">
+      <tocitem target="idm307886987680" text="Hardware"/>
+      <tocitem target="idm307886984080" text="Software"/>
     </tocitem>
-    <tocitem target="idm266757152832" text="Download and Install Corelyzer">
-      <tocitem target="idm266757152192" text="Download Corelyzer"/>
-      <tocitem target="idm266757149760" text="Install Corelyzer">
-        <tocitem target="idm266757149056" text="Microsoft Windows Users"/>
-        <tocitem target="idm266757147632" text="Apple Mac OS X/macOS Users"/>
+    <tocitem target="idm307886981648" text="Download and Install Corelyzer">
+      <tocitem target="idm307886981008" text="Download Corelyzer"/>
+      <tocitem target="idm307886978768" text="Install Corelyzer">
+        <tocitem target="idm307886978128" text="Microsoft Windows Users"/>
+        <tocitem target="idm307886976736" text="Apple Mac OS X/macOS Users"/>
       </tocitem>
     </tocitem>
-    <tocitem target="idm266757144288" text="Running Corelyzer">
-      <tocitem target="idm266757143616" text="Setting up the desktop environment">
-        <tocitem target="idm266757142112" text="Microsoft Windows Users"/>
-        <tocitem target="idm266757130864" text="Apple Mac OS X/macOS Users"/>
+    <tocitem target="idm307886973696" text="Running Corelyzer">
+      <tocitem target="idm307886973056" text="Setting up the desktop environment">
+        <tocitem target="idm307886971600" text="Microsoft Windows Users"/>
+        <tocitem target="idm307886960592" text="Apple Mac OS X/macOS Users"/>
       </tocitem>
-      <tocitem target="idm266757124032" text="Corelyzer Preferences">
-        <tocitem target="idm266757122096" text="User Interface Panel"/>
-        <tocitem target="idm266757109360" text="Displays Panel"/>
-        <tocitem target="idm266757100768" text="Directories Panel"/>
-        <tocitem target="idm266757097744" text="Session Sharing and DIS Panels"/>
+      <tocitem target="idm307886953888" text="Corelyzer Preferences">
+        <tocitem target="idm307886951984" text="User Interface Panel"/>
+        <tocitem target="idm307886939440" text="Displays Panel"/>
+        <tocitem target="idm307886930912" text="Directories Panel"/>
+        <tocitem target="idm307886927952" text="Session Sharing and DIS Panels"/>
       </tocitem>
     </tocitem>
-    <tocitem target="idm266757096080" text="Corelyzer Layout">
-      <tocitem target="idm266757091040" text="Tool Palette"/>
-      <tocitem target="idm266757077920" text="Session/iCores window">
-        <tocitem target="idm266757076592" text="Local"/>
+    <tocitem target="idm307886926320" text="Corelyzer Layout">
+      <tocitem target="idm307886921456" text="Tool Palette"/>
+      <tocitem target="idm307886908416" text="Session/iCores window">
+        <tocitem target="idm307886907136" text="Local"/>
       </tocitem>
-      <tocitem target="idm266757072752" text="Visualization Canvas"/>
+      <tocitem target="idm307886903408" text="Visualization Canvas"/>
     </tocitem>
-    <tocitem target="idm266757069312" text="Load Images">
-      <tocitem target="idm266757064752" text="Load local image files"/>
-      <tocitem target="idm266757048464" text="Load an Image Listing"/>
+    <tocitem target="idm307886900000" text="Load Images">
+      <tocitem target="idm307886899360" text="Preparing to Load Core Section Images"/>
+      <tocitem target="idm307886894640" text="Selecting an Image Loading Method"/>
+      <tocitem target="sec.loadLocalImageFiles" text="Load local image files"/>
+      <tocitem target="sec.loadImageListing" text="Load images with an Image Listing file">
+        <tocitem target="idm307886874096" text="Preparing Image Listing files"/>
+        <tocitem target="idm307886865120" text="Using the Image Listing dialog">
+          <tocitem target="idm307886862768" text="Dialog Controls"/>
+          <tocitem target="idm307886857456" text="Loading Existing Image Listing files"/>
+          <tocitem target="sec.createImageListing" text="Creating Image Listing files"/>
+        </tocitem>
+      </tocitem>
     </tocitem>
-    <tocitem target="idm266757046800" text="Load and Plot Numerical Log Data">
+    <tocitem target="idm307886849984" text="Load and Plot Numerical Log Data">
       <tocitem target="sec.convertTabularData" text="Convert Tabular Data to XML">
-        <tocitem target="idm266757041488" text="Opening the Convert Tabular Data Dialog"/>
-        <tocitem target="idm266757040176" text="Using the Convert Tabular Data Dialog"/>
+        <tocitem target="idm307886844128" text="Opening the Convert Tabular Data Dialog"/>
+        <tocitem target="idm307886842816" text="Using the Convert Tabular Data Dialog"/>
       </tocitem>
-      <tocitem target="idm266757012736" text="Open XML Data Files"/>
+      <tocitem target="idm307886815424" text="Open XML Data Files"/>
       <tocitem target="sec.graphing" text="Plot Data">
-        <tocitem target="idm266756996000" text="Unmatched image section name and data section name"/>
+        <tocitem target="idm307886798784" text="Unmatched image section name and data section name"/>
       </tocitem>
     </tocitem>
-    <tocitem target="idm266756991200" text="Interactions">
-      <tocitem target="idm266756990544" text="Interaction Scheme">
-        <tocitem target="idm266756989184" text="Panning"/>
-        <tocitem target="idm266756987824" text="Zooming"/>
-        <tocitem target="idm266756983632" text="Moving a section"/>
-        <tocitem target="idm266756982080" text="Moving a track"/>
+    <tocitem target="idm307886794032" text="Interactions">
+      <tocitem target="idm307886793392" text="Interaction Scheme">
+        <tocitem target="idm307886792064" text="Panning"/>
+        <tocitem target="idm307886790720" text="Zooming"/>
+        <tocitem target="idm307886786608" text="Moving a section"/>
+        <tocitem target="idm307886784720" text="Moving a track"/>
       </tocitem>
-      <tocitem target="idm266756980528" text="Manipulating Tracks and Sections">
-        <tocitem target="idm266756978144" text="Lock Section"/>
-        <tocitem target="idm266756977360" text="Lock Section Graphs"/>
-        <tocitem target="idm266756976512" text="Graph..."/>
-        <tocitem target="idm266756975168" text="Split..."/>
-        <tocitem target="idm266756974400" text="Properties..."/>
-        <tocitem target="idm266756973600" text="Delete..."/>
-        <tocitem target="idm266756972880" text="Stagger Sections"/>
-        <tocitem target="idm266756970528" text="Trim Sections..."/>
-        <tocitem target="idm266756969472" text="Stack Sections"/>
+      <tocitem target="idm307886783184" text="Manipulating Tracks and Sections">
+        <tocitem target="idm307886780864" text="Lock Section"/>
+        <tocitem target="idm307886780096" text="Lock Section Graphs"/>
+        <tocitem target="idm307886779280" text="Graph..."/>
+        <tocitem target="idm307886778032" text="Split..."/>
+        <tocitem target="idm307886777280" text="Properties..."/>
+        <tocitem target="idm307886776496" text="Delete..."/>
+        <tocitem target="idm307886775792" text="Stagger Sections"/>
+        <tocitem target="idm307886773600" text="Trim Sections..."/>
+        <tocitem target="idm307886772576" text="Stack Sections"/>
       </tocitem>
     </tocitem>
-    <tocitem target="idm266756966976" text="Annotation">
-      <tocitem target="idm266756964368" text="Creating new annotations"/>
-      <tocitem target="idm266756956256" text="Reviewing and editing existing annotations"/>
-      <tocitem target="idm266756948832" text="Measuring Mode"/>
+    <tocitem target="idm307886770160" text="Annotation">
+      <tocitem target="idm307886767632" text="Creating new annotations"/>
+      <tocitem target="idm307886759680" text="Reviewing and editing existing annotations"/>
+      <tocitem target="idm307886752400" text="Measuring Mode"/>
     </tocitem>
-    <tocitem target="idm266756942224" text="Save, Load, and Share Sessions">
-      <tocitem target="idm266756941552" text="Save and Load Sessions on the Local Machine"/>
+    <tocitem target="idm307886746000" text="Save, Load, and Share Sessions">
+      <tocitem target="idm307886745360" text="Save and Load Sessions on the Local Machine"/>
       <tocitem target="sec.coreArchive" text="Transfer Sessions with Core Archives">
-        <tocitem target="idm266756935184" text="Export a Core Archive"/>
-        <tocitem target="idm266756928432" text="Import a Core Archive"/>
+        <tocitem target="idm307886739136" text="Export a Core Archive"/>
+        <tocitem target="idm307886732592" text="Import a Core Archive"/>
       </tocitem>
     </tocitem>
-    <tocitem target="idm266756923968" text="Appendix">
-      <tocitem target="idm266756923312" text="Why is the Image DPI Important?"/>
-      <tocitem target="idm266756921120" text="Making Sure the DPI of an Image is Correct"/>
+    <tocitem target="idm307886728272" text="Appendix">
+      <tocitem target="idm307886727632" text="Why is the Image DPI Important?"/>
+      <tocitem target="idm307886725392" text="Making Sure the DPI of an Image is Correct"/>
       <tocitem target="sec.customSectionName" text="Convert Tabular Data: Using a Customized Section Name"/>
-      <tocitem target="idm266756899680" text="How do I compare two cores?"/>
-      <tocitem target="idm266756897776" text="Corelyzer Data XML Schema"/>
+      <tocitem target="idm307886704400" text="How do I compare two cores?"/>
+      <tocitem target="idm307886702528" text="Corelyzer Data XML Schema"/>
     </tocitem>
   </tocitem>
 </toc>
