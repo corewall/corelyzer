@@ -872,34 +872,60 @@
 
   <chapter>
     <title>Load Images</title>
-    <para>
-		  Before you proceed, make sure you know the following properties of the images to be loaded:
-
-        <itemizedlist>
-          <listitem><para>Orientation: Are the images horizontally or vertically oriented?
-		  For horizontally-oriented images, depth is assumed to increase from left to right.
-		  For vertically-oriented images, top to bottom.</para></listitem>
-          <listitem><para>Resolution: What's the resolution of the images in dots-per-inch (DPI)?
-		  </para></listitem>
-        </itemizedlist>
-		
-		Corelyzer requires these properties to process and render section images at the correct scale.
-    </para>
-	
-	<para>
-		How do you determine the DPI of your image? This depends on the equipment used to capture the image.
-    Most line-scan cameras that are manufactured
-		for the creation of high-resolution images of core sections indicate DPI on their packaging,
-		but sometimes they don't save in the expected DPI. One method of ensuring a correct DPI is described in
-		<ulink url="apas02.html">Making Sure the DPI of an Image is Correct</ulink>. When loading images
-		you can also specify the length of a core section image, from which Corelyzer
-		can calculate the appropriate DPI value.
-	</para>
-
     <sect1>
+      <title>Preparing to Load Core Section Images</title>
+      <para>
+        Before you proceed, make sure you know the following properties of the images to be loaded:
+
+          <itemizedlist>
+            <listitem><para>Orientation: Are the images horizontally or vertically oriented?
+        For horizontally-oriented images, depth is assumed to increase from left to right.
+        For vertically-oriented images, top to bottom.</para></listitem>
+            <listitem><para>Resolution: What's the resolution of the images in dots-per-inch (DPI)?
+        </para></listitem>
+          </itemizedlist>
+      
+        Corelyzer requires these properties to process and render section images at the correct scale.
+      </para>
+    
+    <para>
+      How do you determine the DPI of your image? This depends on the equipment used to capture the image.
+      Most line-scan cameras that are manufactured
+      for the creation of high-resolution images of core sections indicate DPI on their packaging,
+      but sometimes they don't save in the expected DPI. One method of ensuring a correct DPI is described in
+      <ulink url="apas02.html">Making Sure the DPI of an Image is Correct</ulink>. When loading images
+      you can also specify the length of a core section image, from which Corelyzer
+      can calculate the appropriate DPI value.
+    </para>
+  </sect1>
+
+  <sect1>
+    <title>Selecting an Image Loading Method</title>
+    <para>
+      Once you know your images' properties, you can proceed to load them. Corelyzer offers two methods.
+    </para>
+
+    <para>
+      The first method, <link linkend="sec.loadLocalImageFiles">Load local image files</link>,
+      is recommended for most users. You'll select a batch of image files to load. Corelyzer
+      will attempt to organize them into tracks based on their filenames. You can modify this
+      order as needed, along with other image properties like resolution (DPI) and orientation.
+      This approach works well when your images' filenames use
+      the LacCore, IODP, or ICDP section naming convention or similar.
+      Loaded cores in each track will be placed end to end.
+    </para>
+    <para>If your cores do not use a standard naming convention, it may be easier to use
+      the second method, <link linkend="sec.loadImageListing">Load images with an Image Listing file</link>.
+      For each track, you'll need to create a CSV file with the image file and properties
+      for each section in that track. This method also allows you to position each core at a specific
+      depth.
+    </para>
+  </sect1>
+
+    <sect1 id="sec.loadLocalImageFiles">
       <title>Load local image files</title>
 		<para>
-			To start the image loading process, select the menu item File > Load Images > Open
+			First, select the menu item File > Load Images > Open
 			Image Files.... Select one or more files to load in the resulting dialog:
 			<figure>
 			  <title>Select image files to load</title>
@@ -996,9 +1022,134 @@
 		</para>
 	</sect1>
 
-  <sect1>
-    <title>Load an Image Listing</title>
-    TODO
+  <sect1 id="sec.loadImageListing">
+    <title>Load images with an Image Listing file</title>
+    <sect2>
+      <title>Preparing Image Listing files</title>
+      <para>
+        Image Listing files must be in CSV (comma-separated values) format.
+        They can be created manually in Excel (Save As... and choose the CSV format)
+        or a text editor (Save with a ".csv" extension, not ".txt").
+        They can also be <link linkend="sec.createImageListing">created</link> in the Image Listing dialog.
+      </para>
+      <para>
+        An Image Listing file contains one or more rows. Each row has exactly six values,
+        separated by commas. These values are:
+        <itemizedlist>
+          <listitem>Filename: an image file name, optionally with a complete path</listitem>
+          <listitem>Orientation: "Horizontal" or "Vertical" (excluding quotes)</listitem>
+          <listitem>Length: the physical length of the imaged core section, in meters</listitem>
+          <listitem>DPI X: the horizontal resolution of the image</listitem>
+          <listitem>DPI Y: the vertical resolution of the image (usually the same as DPI X)</listitem>
+          <listitem>Depth: the depth at which to place this core section image, in meters</listitem>
+        </itemizedlist>
+      </para>
+      <para>
+        If the filename includes a full path e.g.
+        <blockquote><function>C:\Users\jane\Documents\core1.jpg (Windows)</function></blockquote>
+        <blockquote><function>/Users/jane/Documents/core1.jpg (Mac)</function></blockquote>
+        it will be loaded from that location. If it cannot
+        be found there, Corelyzer will try to load the file from the same location as the
+        Image Listing file.
+      </para>
+      <para>
+        If the filename does not include a path e.g. <function>core1.jpg</function>, it must be in the same directory as
+        the Image Listing file to be loaded.
+      </para>
+      <para>
+        You'll need one Image Listing file for each hole/track you want to create in Corelyzer.
+        Images will be loaded in the order they appear in the listing.
+      </para>
+    </sect2>
+
+    <sect2>
+      <title>Using the Image Listing dialog</title>
+      <para>First, select the File > Load Images > Open Image Listing... menu item.</para>
+      <figure>
+        <title>Image Listing dialog</title>
+        <graphic fileref="images/imageListing-1.png" />
+      </figure>
+      <sect3><title>Dialog Controls</title>
+        <para>
+          The Image Files and Properties area consists of a table listing 
+          image properties, buttons to modify that table, and batch controls
+          to modify mutiple image properties at once.
+          <itemizedlist>
+            <listitem>
+              Image listing table: lists images in the current listing. Properties can be modified
+              by selecting the cell you wish to change and pressing the Return/Enter key,
+              or double-clicking.
+            </listitem>
+            <listitem>
+              Select Images... button: select image files to add to the current listing
+            </listitem>
+            <listitem>
+              Open Image Listing... button: select an Image Listing file. Its
+              contents will be added to the current listing.
+            </listitem>
+            <listitem>
+              Save Image Listing... button: saves the current listing to a file for future use.
+            </listitem>
+            <listitem>
+              Reset button: clears the current listing.
+            </listitem>
+            <listitem>
+              Batch input panel:  To modify values for multiple items in the current listing,
+              you can use the Batch Input controls below the image listing table.
+              Check the "Batch input..." checkbox to enable the controls, and enter the desired
+              settings. If you want to apply these settings to all sections in the table, click
+              the Apply to All Rows button. If you want to apply these settings only to certain
+              sections, select those sections in the section property table, then click the Apply
+              to Selected Rows button. In both cases, only populated fields will modify the
+              corresponding table cells. 
+            </listitem>
+          </itemizedlist>
+        </para>
+        <para>
+          In the Destination Track area, select the track into which images
+          should be loaded. New tracks can be created with the Create Track button.
+        </para>
+      </sect3>
+      <sect3><title>Loading Existing Image Listing files</title>
+        <para>
+          If you've created an Image Listing file, open it using the Open Image Listing... button.
+          The contents of that file will be added to the image listing table.
+        </para>
+        <para>
+          Modify any properties, if needed.
+        </para>
+        <para>
+          Select the destination track for the images, creating a new track if necessary. Then click
+          the OK button. Your cores will begin to load into the selected destination track, in the
+          order they appear in the listing.
+        </para>
+      </sect3>
+      <sect3 id="sec.createImageListing"><title>Creating Image Listing files</title>
+        <para>
+          To create an Image Listing file, first add one or more image files with the Select
+          Image Files button. (Remember that each Image Listing file should include cores for
+          a single hole/track.) The selected images will be added to the table with default properties:
+          Horizontal orientation, 1.5m length, 0 DPI X and Y, and depths starting from 0m,
+          incrementing by 1.5m for each image.
+        </para>
+        <para>
+          If a DPI of zero is specified, Corelyzer will use the Length value and the image's width or
+          height in pixels (for Horzontal or Vertical orientation, respectively) to determine resolution.
+          If a non-zero DPI is specified, Corelyzer will use that resolution and disregard the Length.
+        </para>
+        <para>
+          Modify the properties as needed to reflect the images.
+        </para>
+        <para>
+          Click Save Image listing... and select a name and location to save the Image Listing file.
+          Image Listings created in this manner will always use full paths for filenames.
+        </para>
+        <para>
+          At this point, you can choose a destination track and load the images in the current listing
+          if desired. Otherwise, you can Reset the list and create additional Image Listing files.
+        </para>
+      </sect3>
+    </sect2>
   </sect1>
 
     <!-- <sect1>
