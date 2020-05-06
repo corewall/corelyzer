@@ -92,7 +92,7 @@ public class CRLoadImageListingDialog extends JDialog {
 	public CRLoadImageListingDialog(final Frame owner) {
 		super(owner);
 		$$$setupUI$$$();
-		setTitle("Load Images");
+		setTitle("Image Listing");
 
 		setContentPane(contentPane);
 		setModal(true);
@@ -189,8 +189,8 @@ public class CRLoadImageListingDialog extends JDialog {
 				GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
 		helpButton = new JButton();
 		helpButton.setText("Help");
-		panel1.add(helpButton, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL,
-				GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+		// panel1.add(helpButton, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL,
+		// 		GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
 		final JPanel panel3 = new JPanel();
 		panel3.setLayout(new GridLayoutManager(4, 1, new Insets(0, 0, 0, 0), -1, -1));
 		contentPane
@@ -215,7 +215,7 @@ public class CRLoadImageListingDialog extends JDialog {
 				| GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null,
 				new Dimension(122, 33), null, 0, false));
 		filesButton = new JButton();
-		filesButton.setText("Select Image Files");
+		filesButton.setText("Select Images...");
 		panel6.add(filesButton, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL,
 				GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(120, 29), null, 0, false));
 		final JPanel panel7 = new JPanel();
@@ -225,7 +225,7 @@ public class CRLoadImageListingDialog extends JDialog {
 				new Dimension(122, 33), null, 0, false));
 		openButton = new JButton();
 		openButton.setEnabled(true);
-		openButton.setText("Open an Image Listing File");
+		openButton.setText("Open Image Listing...");
 		panel7.add(openButton, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL,
 				GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
 		final JPanel panel8 = new JPanel();
@@ -235,7 +235,7 @@ public class CRLoadImageListingDialog extends JDialog {
 				new Dimension(122, 33), null, 0, false));
 		saveButton = new JButton();
 		saveButton.setEnabled(false); // only enabled when list has at least one row
-		saveButton.setText("Save the Image Listing");
+		saveButton.setText("Save Image Listing...");
 		panel8.add(saveButton, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL,
 				GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
 		final JPanel panel9 = new JPanel();
@@ -262,7 +262,7 @@ public class CRLoadImageListingDialog extends JDialog {
 				GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK
 				| GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
 		
-		JPanel destTrackPanel = new JPanel(new MigLayout("fillx", "[80%][20%]", "[]"));
+		JPanel destTrackPanel = new JPanel(new MigLayout("fillx, insets 5", "[80%][20%]", "[]"));
 		destTrackPanel.setBorder(BorderFactory.createTitledBorder("Destination Track"));
 		destTrackPanel.add(new JLabel("Load images into track: "));
 		destTrackList = new JComboBox<TrackSceneNode>();
@@ -274,10 +274,7 @@ public class CRLoadImageListingDialog extends JDialog {
 		destTrackPanel.add(newTrackButton, "growx");
 		newTrackButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent event) {
-				if (CorelyzerApp.getApp().getController().createTrack()) {
-					updateTrackList();
-					destTrackList.setSelectedIndex(destTrackList.getItemCount() - 1);
-				}
+				createNewTrack();
 			}
 		});
 		
@@ -298,6 +295,22 @@ public class CRLoadImageListingDialog extends JDialog {
 				comboModel.addElement(tsn);
 			}
 			destTrackList.setModel(comboModel);
+		}
+	}
+
+	private void createNewTrack() {
+		String trackName = JOptionPane.showInputDialog(this, "Please input a track name");
+		if (trackName != null) {
+			Session curSession = CorelyzerApp.getApp().getSelectedSession();
+			final boolean trackExists = (curSession != null && curSession.getTrackSceneNodeWithName(trackName) != null);
+			if (!trackExists || curSession == null)  { // creation of a track with no session creates Default session
+				if (CorelyzerApp.getApp().getController().createTrack(trackName) >= 0) {
+					updateTrackList();
+					destTrackList.setSelectedIndex(destTrackList.getItemCount() - 1);
+				}
+			} else {
+				JOptionPane.showMessageDialog(this, "The track '" + trackName + "' already exists.");
+			}
 		}
 	}
 
@@ -446,8 +459,9 @@ public class CRLoadImageListingDialog extends JDialog {
 	private void onOK() {
 		// create default session and track if necessary
 		Session curSession = CoreGraph.getInstance().getCurrentSession();
-		if ( curSession == null || ( curSession != null && curSession.getNumberOfTracks() == 0 )) {
-			CorelyzerApp.getApp().createTrack("New Track");
+		if (curSession.getNumberOfTracks() == 0) {
+			JOptionPane.showMessageDialog(this, "A destination track must be selected.");
+			return;
 		}
 		
 		Runnable loading = new Runnable() {
@@ -554,10 +568,11 @@ public class CRLoadImageListingDialog extends JDialog {
 	private void selectAndLoadCSVFileToList(final String delimiter) {
 		// show up general info message
 		JOptionPane.showMessageDialog(this, "Image Listing Files must be in Comma Separated Values (.csv) format.\n\n"
-				+ "- Format each line as follows:\n" + "filename (including extension), orientation, length (cm), dpix, dpiy, depth (m)\n\n"
+				+ "- Each line must consist of six values:\n"
+				+ "Filename (including extension), Orientation, Length (cm), DPI X, DPI Y, Depth (m)\n\n"
+				+ "- Each filename must be either a complete path, or located in the same directory as the image listing file.\n"
 				+ "- Orientation must be 'Horizontal' or 'Vertical' (excluding quotes).\n"
-				+ "- Headers and comment lines, if included, must start with # to avoid errors.\n"
-				+ "- Image listing file must be in same directory as the image files it refers to.");
+				+ "- Headers and comment lines, if included, must start with # to avoid errors.");
 
 		JFileChooser chooser = new JFileChooser();
 		chooser.setFileFilter(new FileNameExtensionFilter("Comma Separated Values (.csv)", "csv"));
