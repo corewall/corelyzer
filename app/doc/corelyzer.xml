@@ -1484,8 +1484,15 @@
       <para>
         Your tabular data should contain one or more numeric data columns, a column with depths,
         and one or more columns identifying the core section from which the data was collected.
-        Conversion will be easiest if the core section identity is in a single column. However, it
-        is possible to combine components of a core section identity from multiple columns if needed.
+        Conversion will be easiest if the core section names are in a single column. However, it
+        is possible to combine components of a core section name from multiple columns if needed.
+      </para>
+
+      <para>
+        <emphasis>
+          It is critical to understand that your data's core section names must exactly
+          match the corresponding core section image names in order to plot data.
+        </emphasis>
       </para>
 
       <para>
@@ -1620,7 +1627,7 @@
               <para>
                 Section Name Column:
                 The column containing full section names. <emphasis>These names must match
-                the corresponding section images' names exactly for data to be plotted correctly.</emphasis>
+                the corresponding section images' names exactly for data to be plotted.</emphasis>
               </para>
               <para>
                 If your data does not have a single column with full section names, you can combine
