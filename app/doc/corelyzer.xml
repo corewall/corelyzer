@@ -160,7 +160,7 @@
         Graphics: Corelyzer takes advantage of hardware-accelerated
         graphics. While primarily a 2D visualization program,
         Corelyzer uses OpenGL to accelerate rendering and take
-        advantage of modern day graphics boards. Thus
+        advantage of modern graphics boards. Thus
         the performance of the application depends on both
         the speed of your CPU and the power of your Graphics
         Processing Unit (GPU). Modern graphics cards can run
@@ -392,7 +392,7 @@
           for all monitors, click on the Apply button again. If you
           are prompted to restart your machine in order for the
           changes to take effect, then do so. Otherwise, the
-          resolution of your monitors will change and you will be
+          resolution of your monitors will change, and you will be
           prompted to keep the settings or change them back. 
         </para>
 
@@ -403,7 +403,7 @@
           monitors and configured their display settings,
           make sure that the layout of the monitors matches the layout
           of the boxes in your display settings. Click the Identify
-          button, and note the number Windows assigns to each monitor.
+          button and note the number Windows assigns to each monitor.
           If your monitors are
           ordered differently than the boxes that are shown on your
           display settings, then you will need to re-arrange your
@@ -598,7 +598,7 @@
           Here you can set the display configuration that Corelyzer will
           use. Typically, it should match the display
           configuration you set up with your operating system (see above
-          sections). After establishing inital settings, Corelyzer
+          sections). After establishing initial settings, Corelyzer
           will load the saved configurations on future launches without
           showing the Preferences window.
         </para>
@@ -742,7 +742,7 @@
 
             <listitem>
               <para>
-                Create annotation mode: Select a rectanglar area in which to
+                Create annotation mode: Select a rectangular area in which to
                 create an annotation on loaded core images.
               </para>
             </listitem>
@@ -984,9 +984,9 @@
 
 			<para>
 			The section image properties can be modified individually by selecting the cell you wish to change and
-			hitting the Return/Enter key, or by double-cliking the desired cell.  To modify
+			hitting the Return/Enter key or by double-clicking the desired cell.  To modify
 			values for multiple sections, you can use the Batch Input controls below the section
-			property table. Check the "Batch input..." checkbox to enable the controls, and enter
+			property table. Check the "Batch input..." checkbox to enable the controls and enter
 			the desired settings. If you want to apply these settings to all sections in the table,
 			click the Apply to All Rows button. If you want to apply these settings only to certain
 			sections, select those sections in the section property table, then click the Apply to 
@@ -1073,7 +1073,7 @@
         <para>
           The Image Files and Properties area consists of a table listing 
           image properties, buttons to modify that table, and batch controls
-          to modify mutiple image properties at once.
+          to modify multiple image properties at once.
           <itemizedlist>
             <listitem>
               Image listing table: lists images in the current listing. Properties can be modified
@@ -1096,7 +1096,7 @@
             <listitem>
               Batch input panel:  To modify values for multiple items in the current listing,
               you can use the Batch Input controls below the image listing table.
-              Check the "Batch input..." checkbox to enable the controls, and enter the desired
+              Check the "Batch input..." checkbox to enable the controls and enter the desired
               settings. If you want to apply these settings to all sections in the table, click
               the Apply to All Rows button. If you want to apply these settings only to certain
               sections, select those sections in the section property table, then click the Apply
@@ -1134,7 +1134,7 @@
         </para>
         <para>
           If a DPI of zero is specified, Corelyzer will use the Length value and the image's width or
-          height in pixels (for Horzontal or Vertical orientation, respectively) to determine resolution.
+          height in pixels (for Horizontal or Vertical orientation, respectively) to determine resolution.
           If a non-zero DPI is specified, Corelyzer will use that resolution and disregard the Length.
         </para>
         <para>
@@ -1603,7 +1603,7 @@
               <para>
                 If a units row is defined, the values in the depth column will use the
                 provided unit for the depth column. The following units
-                are recgonized by Corelyzer: mm, cm, m, in, ft, yd.
+                are recognized by Corelyzer: mm, cm, m, in, ft, yd.
                 If no units row is defined, or the depth column unit is
                 blank or not recognized, meters will be used.
               </para>
@@ -1944,7 +1944,7 @@ m         ,          ,cm        ,cm        ,          ,m/s       ,gm/cc     ,SI 
       </para>
       <para>
             <itemizedlist>
-              <listitem><para>Graph type: Change apperance of graph (points, lines, etc.).</para></listitem>
+              <listitem><para>Graph type: Change appearance of graph (points, lines, etc.).</para></listitem>
               <listitem><para>Collapse graphs: 	When checked, all selected data fields will be
           plotted on a single coordinate plane for each section (see example below).</para></listitem>
               <listitem><para>Scale min/max: Change the minimum and maximum range of the coordinate plane.</para></listitem>
@@ -2173,13 +2173,13 @@ m         ,          ,cm        ,cm        ,          ,m/s       ,gm/cc     ,SI 
       <para>
         Once you are in creating annotation mode, you can create a
         region of interest rectangle by pressing-and-dragging to show
-        interested region. A dialog asking for which kind of
-        annotation you are creating will show up once you release the
-        the mouse button. Currently Corelyzer supports the following
-        types of annotations.
+        interested region. A dialog asking which kind of
+        annotation to create will appear after you release the
+        mouse button. Currently Corelyzer supports the following
+        types of annotations:
 
         <itemizedlist>
-          <listitem><para>Freefrom: a threaded discussion freeform annotation.</para></listitem>
+          <listitem><para>Freeform: a threaded discussion freeform annotation.</para></listitem>
           <listitem><para>Clast: a structured annotation which keeps
           track of clastology information.</para></listitem>
           <listitem><para>Sample Request: a front-end annotation for
@@ -2298,7 +2298,7 @@ m         ,          ,cm        ,cm        ,          ,m/s       ,gm/cc     ,SI 
 
       <para>
         You can save your current session by selecting the File > Save
-        Session or File > Save Session as... menu item. This saves the session as a XML-based
+        Session or File > Save Session as... menu item. This saves the session as an XML-based
         CML (for "Core Modeling Language") file. The complete CML file schema description can be found
         <ulink url="attachments/CmlXml_Syntax.pdf">here</ulink>.
       </para>
@@ -2346,7 +2346,7 @@ m         ,          ,cm        ,cm        ,          ,m/s       ,gm/cc     ,SI 
               <title>Success!</title>
               <graphic fileref="images/coreArchive-export3.png" />
             </figure>
-            The exported .car file can be transfered to other machines and shared with colleagues.
+            The exported .car file can be transferred to other machines and shared with colleagues.
           </para>
       </sect2>
       <sect2>
@@ -3186,17 +3186,15 @@ Depth [m]	Porosity [% vol]	WBD [g/ccm]	Sus [units]
     <sect1>
       <title>Why is the Image DPI Important?</title>
       <para>
-        Corelyzer is a system that intends to bridge core imagery from multiple 
-        sources and scale as time moves on and resolution improves. To do this, 
-        the system scales all the images so that these varying resolution imagery 
-        can map to a space that will indicate what the dimensions of these images 
-        actually represent. In other words, so that an image of a 1.5-meter 
-        section appears to be 1.5 meters in length despite how high of a 
-        resolution image you take. Does this mean that getting higher resolution 
+        Corelyzer is a system designed to handle core imagery from multiple 
+        sources in a variety of resolutions. Corelyzer
+        scales images such that images with different resolutions
+        map to a space depicting their true physical dimensions.
+        In other words, an image of a 1.5m section draws as 1.5m in length
+        regardless of the source image's resolution. Does this mean that using higher resolution 
         imagery is a bad idea? No, because you can always zoom in to see the 
-        finest detail available on the image. The higher the resolution the 
-        image is (i.e. the higher the DPI), then the more details that can be 
-        seen.
+        finest detail available on the image. The higher the image resolution,
+        the farther one can zoom into that image before it appears "pixellated".
       </para>
     </sect1>
 
