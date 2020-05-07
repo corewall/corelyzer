@@ -1427,7 +1427,7 @@ public class CorelyzerApp extends WindowAdapter implements MouseListener, Startu
 
 		// Images
 		JMenu loadImageMenu = new JMenu("Load Images");
-		loadImageMenuItem = new JMenuItem("Open Local Image Files...", KeyEvent.VK_M);
+		loadImageMenuItem = new JMenuItem("Open Image Files...", KeyEvent.VK_M);
 		loadImageMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_M, MENU_MASK));
 		loadImageMenuItem.addActionListener(new ActionListener() {
 			public void actionPerformed(final ActionEvent event) {
@@ -1447,25 +1447,34 @@ public class CorelyzerApp extends WindowAdapter implements MouseListener, Startu
 		loadImageMenu.add(autoLoadImageMenuItem);
 		
 		// online image services
-		JMenuItem chronosMenuItem = new JMenuItem("Online Image Services...");
-		loadImageMenu.add(chronosMenuItem);
-		chronosMenuItem.addActionListener(new ActionListener() {
-			public void actionPerformed(final ActionEvent event) {
-				IODPListsDialog d = new IODPListsDialog(getMainFrame());
-				d.pack();
-				d.setSize(800, 600);
-				d.setLocationRelativeTo(getMainFrame());
-				d.setVisibleTab(1);
-				d.setVisible(true);
-			}
-		});
+		// JMenuItem chronosMenuItem = new JMenuItem("Online Image Services...");
+		// loadImageMenu.add(chronosMenuItem);
+		// chronosMenuItem.addActionListener(new ActionListener() {
+		// 	public void actionPerformed(final ActionEvent event) {
+		// 		IODPListsDialog d = new IODPListsDialog(getMainFrame());
+		// 		d.pack();
+		// 		d.setSize(800, 600);
+		// 		d.setLocationRelativeTo(getMainFrame());
+		// 		d.setVisibleTab(1);
+		// 		d.setVisible(true);
+		// 	}
+		// });
 
 		fileMenu.add(loadImageMenu);
 
-		// Numbercal data (plots)
+		// Numerical data (plots)
 		JMenu loadDataMenu = new JMenu("Load Data");
-
-		loadDataMenuItem = new JMenuItem("Open Local Dataset Files", KeyEvent.VK_D);
+		fileMenu.add(loadDataMenu);
+		
+		JMenuItem importDataMenuItem = new JMenuItem("Convert Tabular Data to XML...");
+		importDataMenuItem.addActionListener(new ActionListener() {
+			public void actionPerformed(final ActionEvent event) {
+				controller.importData();
+			}
+		});
+		loadDataMenu.add(importDataMenuItem);
+		
+		loadDataMenuItem = new JMenuItem("Open XML Data Files...", KeyEvent.VK_D);
 		loadDataMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_D, MENU_MASK));
 		loadDataMenuItem.addActionListener(new ActionListener() {
 			public void actionPerformed(final ActionEvent event) {
@@ -1473,41 +1482,34 @@ public class CorelyzerApp extends WindowAdapter implements MouseListener, Startu
 			}
 		});
 		loadDataMenu.add(loadDataMenuItem);
-		fileMenu.add(loadDataMenu);
 
-		JMenuItem quickDataImportMenuItem = new JMenuItem("Quick Data Import...");
-		quickDataImportMenuItem.addActionListener(new ActionListener() {
-			public void actionPerformed(final ActionEvent event) {
-				controller.quickDataImport();
-			}
-		});
-		loadDataMenu.add(quickDataImportMenuItem);
+		// 5/6/2020 Removing Quick Data Import - workflow useful to no one.
+		// JMenuItem quickDataImportMenuItem = new JMenuItem("Quick Data Import...");
+		// quickDataImportMenuItem.addActionListener(new ActionListener() {
+		// 	public void actionPerformed(final ActionEvent event) {
+		// 		controller.quickDataImport();
+		// 	}
+		// });
+		// loadDataMenu.add(quickDataImportMenuItem);
 
-		JMenuItem importDataMenuItem = new JMenuItem("Custom Data Import...");
-		importDataMenuItem.addActionListener(new ActionListener() {
-			public void actionPerformed(final ActionEvent event) {
-				controller.importData();
-			}
-		});
-		loadDataMenu.add(importDataMenuItem);
 
 		// LoggingDB
-		JMenuItem loggingDBMenuItem = new JMenuItem("LDEO logging DB...");
-		loggingDBMenuItem.addActionListener(new ActionListener() {
-			public void actionPerformed(final ActionEvent event) {
-				IODPListsDialog d = new IODPListsDialog(getMainFrame());
-				d.pack();
-				d.setSize(800, 600);
-				d.setLocationRelativeTo(getMainFrame());
-				d.setVisibleTab(2);
-				d.setVisible(true);
-			}
-		});
-		loadDataMenu.add(loggingDBMenuItem);
+		// JMenuItem loggingDBMenuItem = new JMenuItem("LDEO logging DB...");
+		// loggingDBMenuItem.addActionListener(new ActionListener() {
+		// 	public void actionPerformed(final ActionEvent event) {
+		// 		IODPListsDialog d = new IODPListsDialog(getMainFrame());
+		// 		d.pack();
+		// 		d.setSize(800, 600);
+		// 		d.setLocationRelativeTo(getMainFrame());
+		// 		d.setVisibleTab(2);
+		// 		d.setVisible(true);
+		// 	}
+		// });
+		// loadDataMenu.add(loggingDBMenuItem);
 
 		fileMenu.addSeparator();
 
-		loadStateFileMenuItem = new JMenuItem("Open a Session File", KeyEvent.VK_O);
+		loadStateFileMenuItem = new JMenuItem("Open Session...", KeyEvent.VK_O);
 		loadStateFileMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, MENU_MASK));
 		loadStateFileMenuItem.addActionListener(new ActionListener() {
 			public void actionPerformed(final ActionEvent event) {
@@ -1856,59 +1858,59 @@ public class CorelyzerApp extends WindowAdapter implements MouseListener, Startu
 		menuBar.add(listsMenu);
 
 		// Create Tools Menu
-		JMenu toolsMenu = new JMenu("Tools");
-		JMenuItem wholeCoreViewerMenuItem = new JMenuItem("Get 3D Whole Core Imagery Viewer...");
-		wholeCoreViewerMenuItem.addActionListener(new ActionListener() {
-			public void actionPerformed(final ActionEvent event) {
-				try {
-					String app;
-					String url = "http://www.evl.uic.edu/cavern/corewall/SciVizCore/";
+		// JMenu toolsMenu = new JMenu("Tools");
+		// JMenuItem wholeCoreViewerMenuItem = new JMenuItem("Get 3D Whole Core Imagery Viewer...");
+		// wholeCoreViewerMenuItem.addActionListener(new ActionListener() {
+		// 	public void actionPerformed(final ActionEvent event) {
+		// 		try {
+		// 			String app;
+		// 			String url = "http://www.evl.uic.edu/cavern/corewall/SciVizCore/";
 
-					if (System.getProperty("os.name").toLowerCase().contains("windows")) {
-						app = "cmd.exe /c explorer " + url;
-						Runtime.getRuntime().exec(app);
-					} else {
-						app = "open";
-						String[] cmd = { app, url };
-						Runtime.getRuntime().exec(cmd);
-					}
-				} catch (IOException ex) {
-					System.err.println("IOException in opening SciVizCore link");
-				}
-			}
-		});
+		// 			if (System.getProperty("os.name").toLowerCase().contains("windows")) {
+		// 				app = "cmd.exe /c explorer " + url;
+		// 				Runtime.getRuntime().exec(app);
+		// 			} else {
+		// 				app = "open";
+		// 				String[] cmd = { app, url };
+		// 				Runtime.getRuntime().exec(cmd);
+		// 			}
+		// 		} catch (IOException ex) {
+		// 			System.err.println("IOException in opening SciVizCore link");
+		// 		}
+		// 	}
+		// });
 
-		toolsMenu.add(wholeCoreViewerMenuItem);
+		// toolsMenu.add(wholeCoreViewerMenuItem);
 
-		// DEBUG
-		String debug = System.getProperty("DEBUG");
-		if ((debug != null) && System.getProperty("DEBUG").equals("true")) {
-			JMenuItem gcItem = new JMenuItem("GC");
-			gcItem.addActionListener(new ActionListener() {
-				public void actionPerformed(final ActionEvent event) {
-					long mem0 = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
-					System.out.println("- B4 mem:\t" + mem0 / 1000000.0f);
+		// // DEBUG
+		// String debug = System.getProperty("DEBUG");
+		// if ((debug != null) && System.getProperty("DEBUG").equals("true")) {
+		// 	JMenuItem gcItem = new JMenuItem("GC");
+		// 	gcItem.addActionListener(new ActionListener() {
+		// 		public void actionPerformed(final ActionEvent event) {
+		// 			long mem0 = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
+		// 			System.out.println("- B4 mem:\t" + mem0 / 1000000.0f);
 
-					int trials = 10000;
-					for (int i = 0; i < trials; i++) {
-						updateGLWindows();
-					}
+		// 			int trials = 10000;
+		// 			for (int i = 0; i < trials; i++) {
+		// 				updateGLWindows();
+		// 			}
 
-					long mem1 = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
-					System.out.println("- " + trials + " mem:\t" + mem1 / 1000000.0f);
+		// 			long mem1 = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
+		// 			System.out.println("- " + trials + " mem:\t" + mem1 / 1000000.0f);
 
-					System.gc();
-					System.gc();
-					System.gc();
+		// 			System.gc();
+		// 			System.gc();
+		// 			System.gc();
 
-					long mem2 = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
-					System.out.println("- AferGC mem:\t" + mem2 / 1000000.0f);
-				}
-			});
-			toolsMenu.add(gcItem);
-		}
+		// 			long mem2 = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
+		// 			System.out.println("- AferGC mem:\t" + mem2 / 1000000.0f);
+		// 		}
+		// 	});
+		// 	toolsMenu.add(gcItem);
+		// }
 
-		menuBar.add(toolsMenu);
+		// menuBar.add(toolsMenu);
 
 		// Create Help Menu
 		// Create JavaHelp hooks
