@@ -666,7 +666,7 @@ public class CRGraphDialog extends JFrame {
 					final int gid = SceneGraph.addLineGraphToSection( gp.trackId, gp.sectionId, gp.datasetId, gp.dataTableId, row );
 					if ( gid == -1 ) {
 						System.out.println("- Creating graph, but gid is: " + gid);
-						return;
+						continue;
 					}
 					//System.out.println( "setting properties for gid = " + gid );
 					this.setGraphProperties( gid, row );
