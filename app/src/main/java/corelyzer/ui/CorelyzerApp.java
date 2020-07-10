@@ -372,7 +372,7 @@ public class CorelyzerApp extends WindowAdapter implements MouseListener, Startu
 		
 		if (myApp.preferences.isInited) {
 			myApp.startup();
-			// myApp.pingLaunchTracker();
+			myApp.pingLaunchTracker();
 		}
 
 		// apply preferences
