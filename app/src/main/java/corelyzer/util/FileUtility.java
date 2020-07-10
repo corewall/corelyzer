@@ -452,42 +452,6 @@ public class FileUtility {
 		}
 	}
 	
-	// "Full Track ID" means expedition + [optional LacCore lake/year ID] + site/hole.
-	// Currently only looking for IODP and LacCore-style section image naming.
-	// - IODP expeditions are always numeric, LacCore are always alphabetic.
-	// - IODP names have three delimiters (usually hyphens but we also look for underscores),
-	// LacCore have four. (If Archive (A)/Working (W) half is indicated in the name, four
-	// and five delimiters, respectively.)
-	public static String parseFullTrackID(final String filename)
-	{
-		final String strippedFilename = stripExtension(filename);
-		StringTokenizer tokenizer = new StringTokenizer(strippedFilename, "-_");
-
-		final int tokenCount = tokenizer.countTokens();
-		if ( tokenCount < 3 ) {
-			System.out.println("too few tokens in " + filename + " to determine section image file naming convention");
-			return null;
-		}
-		
-		if ( tokenCount > 6 ) { // on the off-chance there's a whole mess of delimiters
-			System.out.println("so many delimiters in " + filename + "! unable to determine section image file naming convention");
-			return null;
-		}
-				
-		// for now, rely only on expedition name to determine type
-		final String expeditionToken = tokenizer.nextToken();
-		final boolean isIODP = Character.isDigit( expeditionToken.charAt(0) );
-		
-		String lakeYearToken = null;
-		if ( !isIODP ) // skip LacCore lake/year token
-			lakeYearToken = tokenizer.nextToken();
-		
-		// next token indicates site and track/hole, e.g. U1363C = site U1363, track/hole C
-		String siteTrackToken = tokenizer.nextToken();
-		String fullTrackID = expeditionToken + "-" + ( isIODP ? "" : lakeYearToken + "-" ) + siteTrackToken;
-		
-		return fullTrackID;
-	}
 
 	// 4/26/2012 brg: Extracted for general image loading use: returns null if user cancels
 	// out of dialog, client is responsible for checking this. (Better to have Vector<File> as an
