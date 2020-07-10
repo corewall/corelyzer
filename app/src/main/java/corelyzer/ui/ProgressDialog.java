@@ -35,6 +35,10 @@ import javax.swing.JProgressBar;
 import javax.swing.SpringLayout;
 import javax.swing.WindowConstants;
 
+
+// brg 2/13/2020 appears half-baked and totally unused. No way to
+// set keep_running member to false. Guessing this was supplanted by
+// built-in iCores plugin progress bar...candidate for dumpage?
 /**
  * Reusable progress dialog to show current work progress. Used in loading core
  * section images, dataset files, and state files.

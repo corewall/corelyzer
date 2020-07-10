@@ -767,10 +767,9 @@ public class CorelyzerAppController implements ActionListener {
 		dialog.setVisible(true);
 	}
 
-	/*
-	 * A reusable call to validate empty or duplicate input string with a given
-	 * list model
-	 */
+	
+	// A reusable call to validate empty or duplicate input string with a given
+	// list model. brg 5/6/2020: if called from a dialog, this will pop behind.
 	private String getAValidInputString(final String initInputString, final String initTitle, final String initMessage, final String emptyTitle,
 			final String emptyMessage, final String dupTitle, final String dupMessage, final String listType) {
 		String aName = initInputString;
