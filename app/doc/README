@@ -1,5 +1,5 @@
 --- How to Generate Corelyzer Help Files ---
-Brian Grivna, August 27, 2012
+LacCore/CSDCO, May 6, 2020
 
 The help files included with Corelyzer are generated using:
 
@@ -12,10 +12,12 @@ If you're running a recent version of Mac OS X, you're in luck,
 it's likely already installed.
 
 http://javahelp.java.net/
-- The JavaHelp system, required to generate the search database.
+https://github.com/sorghumking/javahelp
+- The JavaHelp system, required to generate the search database. sorghumking/javahelp is
+my fork of https://github.com/javaee/javahelp that fixes throwing of URI exceptions.
 
 app/doc/corelyzer.xml
-- The "source" file that contains all help text and defines help structure.
+- The DocBook file that contains all help text and defines help structure.
 
 
 To generate help files:
@@ -44,8 +46,7 @@ app/doc should now contain a directory called JavaHelpSearch.
 3. Create a single-page HTML document containing all documentation with
 the following command (in app/doc):
 
-xsltproc -o index-all.html /usr/share/docbook-xsl-1.77.1/html/docbook.xsl \
-corelyzer.xml
+xsltproc -o index-all.html [DocBook root]/html/docbook.xsl corelyzer.xml
 
 (We don't want this page indexed for JavaHelp, thus we create after step #2.)
 
