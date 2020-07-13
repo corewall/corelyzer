@@ -24,7 +24,7 @@
 	<key>CFBundleExecutable</key>
 	<string>Corelyzer</string>
 	<key>CFBundleGetInfoString</key>
-	<string>:version, CoreWall Project (http://corewall.org)</string>
+	<string>:version, CSDCO (http://csdco.umn.edu)</string>
 	<key>CFBundleIconFile</key>
 	<string>corelyzer.icns</string>
 	<key>CFBundleInfoDictionaryVersion</key>
@@ -39,6 +39,15 @@
 	<string>????</string>
 	<key>CFBundleVersion</key>
 	<string>:version</string>
+	<key>NSHighResolutionCapable</key>
+    <true/>
+    <key>NSSupportsAutomaticGraphicsSwitching</key>
+    <true/>
+	<key>LSEnvironment</key>
+	<dict>
+		<key>JAVA_HOME</key>
+		<string>Contents/Frameworks/amazon-corretto-8.jdk/Contents/Home</string>
+	</dict>
 	<key>Java</key>
 	<dict>
 		<key>ClassPath</key>
@@ -46,7 +55,7 @@
 :classpath
 		</array>
 		<key>JVMVersion</key>
-		<string>1.5+</string>
+		<string>1.8*</string>
 		<key>MainClass</key>
 		<string>corelyzer.ui.splashscreen.SplashScreenMain</string>
 		<key>Properties</key>
@@ -85,7 +94,7 @@
 			<string>$JAVAROOT/</string>
 		</dict>
 		<key>VMOptions</key>
-		<string>-Xms512m -Xmx512m</string>
+		<string>-Xms512m -Xmx1024m</string>
 		<key>WorkingDirectory</key>
 		<string>$APP_PACKAGE/Contents/</string>
         </dict>
