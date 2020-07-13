@@ -40,16 +40,28 @@ dependencies {
 	compile ':jai_codec:1.1.3'
 	compile ':jai_imageio:1.1'
 	compile ':clibwrapper_jiio:1.1'
-	compile 'ch.qos.logback:logback-core:0.5'
-	compile 'ch.qos.logback:logback-classic:0.5'
-	compile group: 'org.jogamp.gluegen', name: 'gluegen-rt-main', version: '2.3.2'
-	compile group: 'org.jogamp.jogl', name: 'jogl-all-main', version: '2.3.2'
+	compile 'ch.qos.logback:logback-core:1.0.6'
+	compile 'ch.qos.logback:logback-classic:1.0.6'
+
+	// brg 6/24/2020
+	// JOGL version 2.4 release candidates are required to resolve launch-time crash in macOS/OSX:
+	// "Terminating app due to uncaught exception 'NSInternalInconsistencyException', reason:
+	// 'NSWindow drag regions should only be invalidated on the Main Thread!'"
+	// Currently using JARs downloaded from v2.4.0-rc-20200307/ dir here, and placed in app/deps/:
+	// https://jogamp.org/deployment/archive/rc/
+	compile group: 'org.jogamp.gluegen', name: 'gluegen-rt'
+	compile group: 'org.jogamp.gluegen', name: 'gluegen-rt-natives-windows-amd64'
+	compile group: 'org.jogamp.gluegen', name: 'gluegen-rt-natives-macosx-universal'
+	compile group: 'org.jogamp.jogl', name: 'jogl-all'
+	compile group: 'org.jogamp.jogl', name: 'jogl-all-natives-windows-amd64'
+	compile group: 'org.jogamp.jogl', name: 'jogl-all-natives-macosx-universal'
+
 	compile group: 'com.apple', name: 'dnssd', version: '108.6'
 	compile('net.java.dev.stax-utils:stax-utils:20070216') {
 		exclude group:'com.bea.xml'
 	}
 	compile 'org.json:json:20140107'
-	compile 'com.brsanthu:google-analytics-java:1.1.2'
+	compile('com.brsanthu:google-analytics-java:1.1.2')
 	compile 'com.opencsv:opencsv:5.0'
 }
 
