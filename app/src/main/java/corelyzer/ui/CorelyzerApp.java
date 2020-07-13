@@ -255,6 +255,14 @@ public class CorelyzerApp extends WindowAdapter implements MouseListener, Startu
 			prefs.isInited = true;
 		}
 
+        final String jreArch = System.getProperty("os.arch").contains("64") ? "64-bit" : "32-bit";
+		final String javaVersion = System.getProperty("java.version");
+		final String javaVendor = System.getProperty("java.vendor");
+		final String javaHome = System.getProperty("java.home");		
+		System.out.println("Java Arch: " + jreArch);
+		System.out.println("Java Version: " + javaVersion);
+		System.out.println("Java Home: " + javaHome);
+		System.out.println("Java Vendor: " + javaVendor);
 		System.out.println(prefs.dumpDirectoryConfig());
 		
 		return prefs;
@@ -475,12 +483,13 @@ public class CorelyzerApp extends WindowAdapter implements MouseListener, Startu
 				}
 
 				// track launch
-				GoogleAnalytics ga = new GoogleAnalytics("UA-88247383-1");
+				GoogleAnalytics ga = new GoogleAnalytics("UA-93914547-1");
 				ga.post(new PageViewHit("http://www.laccore.org", "launch: UUID=" + uuid));
+				System.out.println("UUID = " + uuid);
 				// GoogleAnalyticsResponse response = ga.post(new PageViewHit("http://www.laccore.org", "launch: UUID=" + uuid));
-//				for (NameValuePair kvp : response.getPostedParms()) {
-//					System.out.println("key: " + kvp.getName() + ", value: "+ kvp.getValue());
-//				}
+				// for (NameValuePair kvp : response.getPostedParms()) {
+				// 	System.out.println("key: " + kvp.getName() + ", value: "+ kvp.getValue());
+				// }
 			}
 		});
 	}
