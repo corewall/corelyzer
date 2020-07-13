@@ -1,5 +1,5 @@
 allprojects {
-	version = '2.0.4'
+	version = '2.1.0'
 	group = 'org.corewall'
 }
 
@@ -72,7 +72,13 @@ task packageMac(dependsOn: 'package-check')  {
 			// copy plugins
 			copy {
 				into 'dist/mac/Corelyzer.app/Contents/plugins'
-				from file('plugins').listFiles().findAll { it.name.endsWith('.jar') }
+				from file('plugin_jars').listFiles().findAll { it.name.endsWith('.jar') }
+			}
+
+			// copy Java runtime into bundle
+			copy {
+				into 'dist/mac/Corelyzer.app/Contents/Frameworks'
+				from file('java_runtime')
 			}
 
 			// update our Info.plist
