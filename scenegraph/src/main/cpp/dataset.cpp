@@ -30,6 +30,10 @@
 #include "dataset.h"
 #include "graph.h"
 
+#ifdef linux
+#include "string.h"
+#endif
+
 //======================================================================
 std::vector< Dataset* > datasetvec;
 

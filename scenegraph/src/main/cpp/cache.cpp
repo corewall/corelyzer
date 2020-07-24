@@ -36,11 +36,9 @@
 #include <pthread.h>
 
 //====================================================================
-#ifndef __APPLE__
-
+#if defined(WIN32) || defined(_WIN32)
 extern PFNGLCOMPRESSEDTEXIMAGE2DARBPROC    glCompressedTexImage2D;
 extern PFNGLCOMPRESSEDTEXSUBIMAGE2DARBPROC glCompressedTexSubImage2D;
-
 #endif
 
 //====================================================================
@@ -327,7 +325,7 @@ void* tex_cache_miss_impl(void *threadarg)
     static char blkdir[1024];
 #endif
 
-    GETCWD( cwd, 1024 );
+    char const * dummy = GETCWD( cwd, 1024 );
 
     basedir = tb->blockfile;
     point   = basedir.rfind('/');
@@ -354,18 +352,17 @@ void* tex_cache_miss_impl(void *threadarg)
     
     char* pixels;
 
-    if( !is_s3tc_available() )
+    if (!is_s3tc_available())
     {
-        pixels = new char[ tb->texW * tb->texH * tb->components ];
-        fread( pixels, sizeof(char), tb->texW * tb->texH * tb->components, 
-               fptr);
+        pixels = new char[tb->texW * tb->texH * tb->components];
+        size_t dummy = fread(pixels, sizeof(char), tb->texW * tb->texH * tb->components, fptr);
         fclose(fptr);
     }
     else
     {
-        fread(&size,sizeof(int),1,fptr);
+        size_t dummy = fread(&size,sizeof(int),1,fptr);
         pixels = new char[ size ];
-        fread(pixels,sizeof(char),size,fptr);
+        dummy = fread(pixels,sizeof(char),size,fptr);
         fclose(fptr);
     }
 

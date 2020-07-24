@@ -30,6 +30,10 @@
 #include "freedraw.h"
 #include "canvas.h"
 
+#ifdef linux
+#include "string.h"
+#endif
+
 //================================================================
 void update_track_dimensions(TrackSceneNode* t);
 

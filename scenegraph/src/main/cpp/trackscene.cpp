@@ -34,6 +34,10 @@
 #include "trackscenenode.h"
 #include "freedraw.h"
 
+#ifdef linux
+#include "string.h" // linux
+#endif
+
 #define TRACK_GAP   (10) // inch
 #define DEFAULT_DPI (72)
 

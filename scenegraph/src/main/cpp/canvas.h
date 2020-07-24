@@ -50,7 +50,7 @@
 #define glGetProcAddress( x ) (*glXGetProcAddressARB)((const GLubyte*) (x))
 #endif
 
-#else
+#else // # __APPLE__
 #include <OpenGL/gl.h>
 #include <OpenGL/glu.h>
 #endif
