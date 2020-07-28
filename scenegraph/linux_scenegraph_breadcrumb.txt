@@ -9,9 +9,24 @@ sudo apt-get install openjdk-11-jdk
 Manually download and install Gradle 6 and add to your PATH, using
 the Installing Manually steps here: https://gradle.org/install/
 
-in scenegraph dir, gradle build-jni-linux to build scenegraph JAR and
-libscenegraph.so in dist/.
+in scenegraph dir, use
 
+gradle build-jni-linux
+
+to build scenegraph JAR and libscenegraph.so in dist/.
+
+Once you have libscenegraph.so and scenegraph-[version].jar built in scenegraph/dist,
+cd to root corelyzer dir and run 'gradle package'. There is no packaged Linux build
+at present, but this compiles Corelyzer Java logic into dist/app-[version].jar and
+copies all required JARs to dist as well.
+
+Create a corelyzer/working_dir directory, and copy the app/base/help, app/base/resources,
+and app/base/plugins dirs into working_dir.
+
+From working_dir, launch Corelyzer with command (after modifying paths for your system):
+java -cp "../app/dist/*" -Djava.library.path=/home/lcdev/proj/corewall/corelyzer/scenegraph/dist:/usr/lib/x86_64-linux-gnu corelyzer.ui.splashscreen.SplashScreenMain
+
+Hopefully it'll work!
 
 
 July 27 2020
@@ -39,18 +54,6 @@ to libscenegraph.so path) in Code's launch.json file, holy crap, Corelyzer
 launches and works in Code!
 
 Now we need to figure out how to package a proper Linux app.
-
-
-Once you have libscenegraph.so and scenegraph-[version].jar built in scenegraph/dist,
-cd to root corelyzer dir and run 'gradle package'. There is no packaged Linux build
-at present, but this compiles Corelyzer Java logic into dist/app-[version].jar and
-copies all required JARs to dist as well.
-
-Create a corelyzer/working_dir directory, and copy the app/base/help, app/base/resources,
-and app/base/plugins dirs into working_dir.
-
-From working_dir, launch Corelyzer with command (after modifying paths for your system):
-java -cp "../app/dist/*" -Djava.library.path=/home/lcdev/proj/corewall/corelyzer/scenegraph/dist:/usr/lib/x86_64-linux-gnu corelyzer.ui.splashscreen.SplashScreenMain
 
 
 ### Resolved Issues
