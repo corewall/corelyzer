@@ -45,7 +45,7 @@ task 'generate-jni-headers'(dependsOn: 'build') {
 
 	// To build and debug, VSCode seems to depend on contents of build/classes/java
 	// being copied into scenegraph/bin, but doesn't always do so on its own, unclear why.
-	// Copy manually here.
+	// Copy manually here. 
 	mkdir('bin')
 	copy {
 		into file('bin')
@@ -148,6 +148,52 @@ def compileMac(src, arch, includes, dir) {
 	}
 }
 
+task 'build-jni-linux'(dependsOn: 'generate-jni-headers') {
+	doLast {
+		def build = new File(project.buildDir, 'cpp')
+		def dist = file('dist')
+		def src = file('src/main/cpp')
+		def includes = [
+			src.absolutePath,
+			dist.absolutePath,
+			build.absolutePath,
+			file('/usr/lib/jvm/java-11-openjdk-amd64/include'),
+			file('/usr/lib/jvm/java-11-openjdk-amd64/include/linux'),
+			file('/usr/include/freetype2')]
+
+		mkdir(build)
+
+		def arch = "x86_64"
+		ant.echo("Generating libscenegraph for Linux ${arch}...")
+		ant.exec(executable: 'gcc', dir: dist, logError: true, failonerror: true) {
+			arg(value: '-O')
+			arg(value: '-fPIC')
+			arg(value: '-shared')
+			arg(value: '-DUSE_FASTDXT')
+			includes.each { arg(value: "-I${it}") }
+			src.eachFileMatch({ it.endsWith('.c') || it.endsWith('.cpp')} ) { file ->
+				println "Compiling $file..."
+				arg(value: file)
+			}
+			arg(value: '-L')
+			arg(value: '/usr/lib/x86_64-linux-gnu')
+			arg(value: '-lpng')
+			arg(value: '-lGL')
+			arg(value: '-lGLU')
+			arg(value: '-lstdc++')
+			arg(value: '-lfreetype')
+			arg(value: '-ljpeg')
+			arg(value: '-ltiff')
+			arg(value: '-lsquish')
+			arg(value: '-o')
+			arg(value: 'libscenegraph.so')
+		}
+	}
+}
+
+// cross-compile Window with MINGW...has unresolved texture
+// generation issue at runtime, build with provided MSVC
+// project instead.
 task 'build-jni-win'(dependsOn: 'generate-jni-headers') {
 	doLast {
 		def build = new File(project.buildDir, 'cpp')
@@ -236,8 +282,4 @@ def linkWin(libs, dir, path) {
 			arg(value: '-mwindows')
 		}
 	}
-}
-
-task 'build-jni'(dependsOn: ['build-jni-mac', 'build-jni-win']) {
-	doLast {}
 }
