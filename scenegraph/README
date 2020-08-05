@@ -24,7 +24,7 @@ Install 'wget' and 'gsed' via the Terminal:
 The final step is to build the SceneGraph JNI Library.  You can do this by 
 invoking Gradle in the scenegraph/ directory via the Terminal:
 
-  $ ../gradlew clean build-jni
+  $ ../gradlew clean build-jni-mac
 
 The resulting JAR file, jnilib, and DLLs will be in scenegraph/dist.  You only
 need to re-run this step when you change the native code or when you change
@@ -37,3 +37,52 @@ The win32 version of scenegraph was formerly built via cross-compile, but
 intractable runtime issues precipitated building on Windows using Microsoft's
 Visual Studio 2008.  Required libraries and headers are included. Open win32/vs2008/libscenegraph.vcproj and Rebuild Solution. If all goes well,
 scenegraph.dll can be found in the Debug or Release subdirectory.
+
+
+=== Building on Linux ===
+
+The following steps resulted in a working build of Corelyzer 2.1.0 on
+a clean Ubuntu 18.04.4 Bionic Beaver installation.
+
+Open Terminal.
+
+Install required dev tools:
+
+sudo apt-get install git
+sudo apt-get install openjdk-8-jdk
+sudo apt-get install mesa-common-dev libglu1-mesa-dev
+sudo apt-get install libfreetype6-dev libpng-dev libjpeg-dev libtiff-dev libsquish-dev
+
+(Note that Corelyzer does run against the openjdk-11-jdk, but
+it excludes the javah utility that's currently required in build
+scripts. Once Scenegraph is built, you can safely switch to 11.)
+
+Clone Corelyzer GitHub repo, using linux_build branch:
+
+git clone https://github.com/corewall/corelyzer
+cd corelyzer
+git checkout linux_build
+
+Build Scenegraph library, using provided Gradle wrapper:
+
+cd scenegraph
+
+Update the java include path in build.gradle to reflect your configuration.
+
+Use provided Gradle wrapper gradle:
+../gradlew build-jni-linux
+
+This will generate libscenegraph.so and scenegraph-[version].jar in scenegraph/dist.
+
+Now 'cd ..' to root corelyzer dir and run
+
+./gradlew packageLinux
+
+There is no packaged Linux build at present, but this compiles Corelyzer Java
+logic into dist/app-[version].jar and copies all required JARs to dist. It then
+creates a corelyzer/working_dir directory and copies required resources there.
+
+From working_dir, launch Corelyzer with command (adjusting paths for your system):
+java -cp "../app/dist/*" -Djava.library.path=/home/lcdev/proj/corewall/corelyzer/scenegraph/dist:/usr/lib/x86_64-linux-gnu corelyzer.ui.splashscreen.SplashScreenMain
+
+Corelyzer should launch - have fun!
