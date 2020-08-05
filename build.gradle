@@ -27,6 +27,18 @@ task 'package-check'(dependsOn: [':app:build'])  {
 	}
 }
 
+
+task packageLinux(dependsOn: 'package-check') {
+	def wrk_dir = file ('working_dir')
+	if (!wrk_dir.exists()) {
+		mkdir(wrk_dir)
+	}
+	copy {
+		into wrk_dir
+		from 'packages/base'
+	}
+}
+
 /**
  * Package things up as a Mac application bundle
  */
@@ -116,7 +128,6 @@ task packageMac(dependsOn: 'package-check')  {
 		}
 	}
 }
-
 
 // Windows packaging
 def winDist = file("dist/win/Corelyzer")
