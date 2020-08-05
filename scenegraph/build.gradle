@@ -157,8 +157,8 @@ task 'build-jni-linux'(dependsOn: 'generate-jni-headers') {
 			src.absolutePath,
 			dist.absolutePath,
 			build.absolutePath,
-			file('/usr/lib/jvm/java-11-openjdk-amd64/include'),
-			file('/usr/lib/jvm/java-11-openjdk-amd64/include/linux'),
+			file('/usr/lib/jvm/java-8-openjdk-amd64/include'),
+			file('/usr/lib/jvm/java-8-openjdk-amd64/include/linux'),
 			file('/usr/include/freetype2')]
 
 		mkdir(build)
