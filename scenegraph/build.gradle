@@ -15,37 +15,42 @@ clean.doLast {
 	ant.delete(dir: file('bin'), failonerror: false)
 }
 
+// Use javac -h flag to build JNI header for SceneGraph.java.
+// Separate javah call is no longer needed, and javah has been
+// removed from JDK version 11.
+compileJava {
+	def build = new File(project.buildDir, 'cpp')
+	options.compilerArgs += ["-h", "$build"]
+}
+
 task 'clean-dist' {
 	doLast {
 		ant.delete(dir: file('dist'), failonerror: false)
 	}
 }
 
-task 'generate-jni-headers'(dependsOn: 'build') {
+task 'copy-jni-files'(dependsOn: 'build') {
 	doLast {
-		// copy our jar into dist/
+		// copy scenegraph jar into dist
 		copy {
 			into file('dist')
 			from configurations.default.allArtifacts.getFiles()
 		}
 
-		// create build/cpp
-		def build = new File(project.buildDir, 'cpp')
-		mkdir(build)
-
-		// generate the JNI header
-		ant.exec(executable: 'javah', dir: file('dist'), failonerror: true) {
-			arg(value: '-classpath')
-			arg(value: "scenegraph-${version}.jar")
-			arg(value: '-d')
-			arg(path: build)
-			arg(value: 'corelyzer.graphics.SceneGraph')
+		// copy JNI header into src
+		file('build/cpp').eachFileMatch({it.endsWith('.h')}) { f ->
+			copy {
+				into file('src/main/cpp')
+				from f
+			}
 		}
 	}
+}
 
-	// To build and debug, VSCode seems to depend on contents of build/classes/java
-	// being copied into scenegraph/bin, but doesn't always do so on its own, unclear why.
-	// Copy manually here. 
+// To build and debug, VSCode seems to depend on contents of scenegraph/build/classes/java
+// being copied into scenegraph/bin, but doesn't always do so on its own, unclear why.
+// Copy manually here. 
+task 'generate-vscode-bin'(dependsOn: 'build') {
 	mkdir('bin')
 	copy {
 		into file('bin')
@@ -53,7 +58,7 @@ task 'generate-jni-headers'(dependsOn: 'build') {
 	}
 }
 
-task 'build-jni-mac'(dependsOn: 'generate-jni-headers') {
+task 'build-jni-mac'(dependsOn: 'copy-jni-files') {
 	doLast {
 		def build = new File(project.buildDir, 'cpp')
 		def dist = file('dist')
@@ -148,7 +153,7 @@ def compileMac(src, arch, includes, dir) {
 	}
 }
 
-task 'build-jni-linux'(dependsOn: 'generate-jni-headers') {
+task 'build-jni-linux'(dependsOn: 'copy-jni-files') {
 	doLast {
 		def build = new File(project.buildDir, 'cpp')
 		def dist = file('dist')
@@ -194,7 +199,7 @@ task 'build-jni-linux'(dependsOn: 'generate-jni-headers') {
 // cross-compile Window with MINGW...has unresolved texture
 // generation issue at runtime, build with provided MSVC
 // project instead.
-task 'build-jni-win'(dependsOn: 'generate-jni-headers') {
+task 'build-jni-win'(dependsOn: 'copy-jni-files') {
 	doLast {
 		def build = new File(project.buildDir, 'cpp')
 		def dist = file('dist')

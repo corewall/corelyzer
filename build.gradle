@@ -29,7 +29,7 @@ task 'package-check'(dependsOn: [':app:build'])  {
 
 
 task packageLinux(dependsOn: 'package-check') {
-	def wrk_dir = file ('working_dir')
+	def wrk_dir = file('working_dir')
 	if (!wrk_dir.exists()) {
 		mkdir(wrk_dir)
 	}
