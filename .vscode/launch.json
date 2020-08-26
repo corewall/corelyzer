@@ -1,0 +1,42 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Debug SplashScreenMain",
+            "request": "launch",
+            "mainClass": "corelyzer.ui.splashscreen.SplashScreenMain",
+            "vmArgs": "-Djava.library.path=/Users/lcdev/proj/corewall/corelyzer/app/deps/mac",
+            "cwd": "${workspaceFolder}/working_dir"
+        },
+        {
+            "type": "java",
+            "name": "Debug URLRetrieval",
+            "request": "launch",
+            "mainClass": "corelyzer.helper.URLRetrieval",
+            "args": "file:///Users/lcdev/Desktop/foo.txt /Users/lcdev/Desktop/output", // test copy of local file
+            "vmArgs": "-Djava.library.path=/Users/lcdev/proj/corewall/corelyzer/app/deps/mac",
+            "cwd": "${workspaceFolder}/working_dir"
+        },
+        {
+            "type": "java",
+            "name": "Debug TabularToXMLConversion",
+            "request": "launch",
+            "mainClass": "corelyzer.data.TabularToXMLConversion",
+            "args": "/Users/lcdev/proj/corewall/corelyzer/app/testdata/", // path to testdata dir
+            "vmArgs": "-Djava.library.path=/Users/lcdev/proj/corewall/corelyzer/app/deps/mac",
+            "cwd": "${workspaceFolder}/working_dir"
+        },
+        {
+            "type": "java",
+            "name": "Debug (Launch) - Current File",
+            "request": "launch",
+            "mainClass": "${file}",
+            "vmArgs": "-Djava.library.path=/Users/lcdev/proj/corewall/corelyzer/app/deps/mac",
+            "cwd": "${workspaceFolder}/working_dir"
+        }
+    ]
+}
