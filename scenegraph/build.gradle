@@ -20,7 +20,7 @@ clean.doLast {
 // removed from JDK version 11.
 compileJava {
 	def build = new File(project.buildDir, 'cpp')
-	options.compilerArgs += ["-h", "$build"]
+	options.compilerArgs += ["-h", "${build}"]
 }
 
 task 'clean-dist' {
