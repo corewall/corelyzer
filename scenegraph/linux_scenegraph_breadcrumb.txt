@@ -26,7 +26,8 @@ BB 18.04.4 from the ubuntu-18.04.4-desktop-amd64.iso. Runs against openjdk
 8 and 11.
 
 But as soon as software update is run, the crash occurs. I assume the problem
-is related to the latest Mesa drivers/libraries.
+is related to the latest Mesa drivers/libraries. (September 15 2020 turns out this is wrong,
+it's the kernel!)
 
 Built JOGL from scratch using the directions here: https://jogamp.org/jogl/doc/HowToBuild.html
 
@@ -41,8 +42,9 @@ JOGL tests with
 
     ant -Dtarget.sourcelevel=1.8 -Dtarget.targetlevel=1.8 -Dtarget.rt.jar=/your/openjdk8/lib/rt.jar junit.run
 
-Tests showed the same crash in libEGL.so, which is good. Next step, contact JOGL forum?
-And figure out how to grab JOGL-compatible versions of the mesa libraries?
+Tests showed the same crash in libEGL.so, which is good. Next step, contact JOGL forum? Or is my
+limited understanding of Linux the problem? Ubuntu 20 has been out for a while and I don't see anyone
+complaining about issues on the JOGL forums...???
 
 
 ### Steps to build Corelyzer on a fresh 18.04.4 BB Install:
