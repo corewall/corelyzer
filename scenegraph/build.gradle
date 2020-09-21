@@ -37,7 +37,7 @@ task 'copy-jni-files'(dependsOn: 'build') {
 			from configurations.default.allArtifacts.getFiles()
 		}
 
-		// copy JNI header into src
+		// copy generated Scenegraph JNI header into src
 		file('build/cpp').eachFileMatch({it.endsWith('.h')}) { f ->
 			copy {
 				into file('src/main/cpp')
@@ -162,8 +162,8 @@ task 'build-jni-linux'(dependsOn: 'copy-jni-files') {
 			src.absolutePath,
 			dist.absolutePath,
 			build.absolutePath,
-			file('/usr/lib/jvm/java-8-openjdk-amd64/include'),
-			file('/usr/lib/jvm/java-8-openjdk-amd64/include/linux'),
+			file('/usr/lib/jvm/java-11-openjdk-amd64/include'),
+			file('/usr/lib/jvm/java-11-openjdk-amd64/include/linux'),
 			file('/usr/include/freetype2')]
 
 		mkdir(build)
