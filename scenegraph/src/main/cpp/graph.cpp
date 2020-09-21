@@ -614,7 +614,7 @@ void render_graph(Canvas* c, CoreSection* cs, int gid)
 					{
 						for ( int row = 0; row < dataTable->numberOfRows; row++ )
 						{
-							if ( dataTable->depth[row] < cs->intervalTop || dataTable->depth[row] > cs->intervalBottom ||
+							if ((dataTable->depth[row] * depthunitscale) < cs->intervalTop || (dataTable->depth[row] * depthunitscale) > cs->intervalBottom ||
 								 !dataTable->table[fieldToGraph][row].valid ||
 								 dataTable->table[fieldToGraph][row].exclude )
 								continue;
@@ -633,7 +633,7 @@ void render_graph(Canvas* c, CoreSection* cs, int gid)
 					int vertsInStrip = 0;
 					for ( int row = 0; row < dataTable->numberOfRows; row++ )
 					{
-						if ( dataTable->depth[row] < cs->intervalTop || dataTable->depth[row] > cs->intervalBottom ||
+						if ((dataTable->depth[row] * depthunitscale) < cs->intervalTop || (dataTable->depth[row]  * depthunitscale) > cs->intervalBottom ||
 							 !dataTable->table[fieldToGraph][row].valid )
 							continue;
 						
@@ -687,7 +687,7 @@ void render_graph(Canvas* c, CoreSection* cs, int gid)
 					{
 						for ( int row = 0; row < dataTable->numberOfRows; row++ )
 						{
-							if ( dataTable->depth[row] < cs->intervalTop || dataTable->depth[row] > cs->intervalBottom ||
+							if ((dataTable->depth[row] * depthunitscale) < cs->intervalTop || (dataTable->depth[row] * depthunitscale) > cs->intervalBottom ||
 								 !dataTable->table[fieldToGraph][row].valid ||
 								 dataTable->table[fieldToGraph][row].exclude )
 								continue;
@@ -710,7 +710,7 @@ void render_graph(Canvas* c, CoreSection* cs, int gid)
 				{
 					for ( int row = 0; row < dataTable->numberOfRows; row++ )
 					{
-						if ( dataTable->depth[row] < cs->intervalTop || dataTable->depth[row] > cs->intervalBottom ||
+						if ((dataTable->depth[row] * depthunitscale) < cs->intervalTop || (dataTable->depth[row] * depthunitscale) > cs->intervalBottom ||
 							 !dataTable->table[fieldToGraph][row].valid ||
 							 dataTable->table[fieldToGraph][row].exclude )
 							continue;
@@ -734,7 +734,7 @@ void render_graph(Canvas* c, CoreSection* cs, int gid)
 				{
 					for ( int row = 0; row < dataTable->numberOfRows; row++ )
 					{
-						if ( dataTable->depth[row] < cs->intervalTop || dataTable->depth[row] > cs->intervalBottom ||
+						if ((dataTable->depth[row] * depthunitscale) < cs->intervalTop || (dataTable->depth[row]  * depthunitscale) > cs->intervalBottom ||
 							 !dataTable->table[fieldToGraph][row].valid ||
 							 dataTable->table[fieldToGraph][row].exclude )
 							continue;
