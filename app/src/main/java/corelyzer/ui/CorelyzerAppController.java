@@ -25,6 +25,8 @@
 package corelyzer.ui;
 
 import java.awt.Component;
+import java.awt.Desktop;
+import java.awt.desktop.*;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -66,7 +68,7 @@ import corelyzer.data.lists.CRDefaultListModel;
 import corelyzer.data.lists.CRListModels;
 import corelyzer.graphics.SceneGraph;
 import corelyzer.handlers.SubscribeHandler;
-import corelyzer.helper.OSXAdapter;
+// import corelyzer.helper.OSXAdapter;
 import corelyzer.io.CRDISDepthValueDataLoader;
 import corelyzer.io.CRDepthValueDataLoader;
 import corelyzer.io.DISLoader;
@@ -85,7 +87,7 @@ import corelyzer.util.FileUtility;
 import corelyzer.util.StringUtility;
 
 
-public class CorelyzerAppController implements ActionListener {
+public class CorelyzerAppController implements ActionListener, AboutHandler, QuitHandler, PreferencesHandler, OpenFilesHandler {
 	// handy utilities
 	static boolean MAC_OS_X = System.getProperty("os.name").toLowerCase().startsWith("mac os x");
 	String sp = System.getProperty("file.separator");
@@ -608,10 +610,11 @@ public class CorelyzerAppController implements ActionListener {
 		}
 	}
 
-	public void doAssociatedFile(final String aFilename) {
-		System.out.println("[FIXME] Mac: opening file: " + aFilename);
+	// public void doAssociatedFile(final String aFilename) {
+	public void doAssociatedFile(final File aFile) {
+		// System.out.println("[FIXME] Mac: opening file: " + aFilename);
 
-		File aFile = new File(aFilename);
+		// File aFile = new File(aFilename);
 		if (!aFile.exists()) {
 			JOptionPane.showMessageDialog(view.getMainFrame(), "Unknown file format");
 			return;
@@ -619,6 +622,7 @@ public class CorelyzerAppController implements ActionListener {
 
 		String extension = StringUtility.getExtension(aFile);
 
+		String aFilename = aFile.getAbsolutePath();
 		if (extension.toLowerCase().equals("cml")) {
 			System.out.println("---> [INFO] Loading CML: " + aFile);
 			loadStateFile(aFilename);
@@ -1262,6 +1266,12 @@ public class CorelyzerAppController implements ActionListener {
 		refreshSessionHistoryMenu();
 	}
 
+	// brg 9/22/2020: Transitioned from OSXAdapter to java.awt.Desktop methods
+	// as part of move away from ancient Java 8 to 11+.
+	// All handlers work except for open file handler, which always seems to launch a new
+	// instance of Corelyzer instead of opening in the existing one. This was the
+	// case in Java 8 as well.
+
 	// --------------------------------------------------------------------------
 	// ---- Courtesy of Apple MacOSX "OSXAdapter" Example Code ----
 	// Generic registration with the Mac OS X application menu.
@@ -1277,15 +1287,37 @@ public class CorelyzerAppController implements ActionListener {
 				// all the methods we wish to
 				// use as delegates for various
 				// com.apple.eawt.ApplicationListener methods
-				OSXAdapter.setQuitHandler(this, getClass().getDeclaredMethod("quit", (Class[]) null));
-				OSXAdapter.setAboutHandler(this, getClass().getDeclaredMethod("about", (Class[]) null));
-				OSXAdapter.setPreferencesHandler(this, getClass().getDeclaredMethod("doPreferences", (Class[]) null));
+				// OSXAdapter.setQuitHandler(this, getClass().getDeclaredMethod("quit", (Class[]) null));
+				// OSXAdapter.setAboutHandler(this, getClass().getDeclaredMethod("about", (Class[]) null));
+				Desktop.getDesktop().setQuitHandler(this);
+				Desktop.getDesktop().setAboutHandler(this);
+				Desktop.getDesktop().setPreferencesHandler(this);
+				// OSXAdapter.setPreferencesHandler(this, getClass().getDeclaredMethod("doPreferences", (Class[]) null));
 
-				OSXAdapter.setFileHandler(this, getClass().getDeclaredMethod("doAssociatedFile", new Class[] { String.class }));
+				// OSXAdapter.setFileHandler(this, getClass().getDeclaredMethod("doAssociatedFile", new Class[] { String.class }));
+				Desktop.getDesktop().setOpenFileHandler(this);
 			} catch (Exception e) {
 				System.err.println("Error while loading the OSXAdapter:");
 				e.printStackTrace();
 			}
+		}
+	}
+
+	public void handleAbout(AboutEvent e) {
+		about();
+	}
+	
+	public void handleQuitRequestWith(QuitEvent e, QuitResponse response) {
+		quit(response);
+	}
+
+	public void handlePreferences(PreferencesEvent e) {
+		doPreferences();
+	}
+
+	public void openFiles(OpenFilesEvent e) {
+		for (File f : e.getFiles()) {
+			doAssociatedFile(f);
 		}
 	}
 
@@ -1465,6 +1497,41 @@ public class CorelyzerAppController implements ActionListener {
 				if (MAC_OS_X) {
 					throw new IllegalStateException("Hack way to cancel quit");
 				}
+		}
+	}	
+
+	public void quit(QuitResponse qr) {
+		int sel = 1;
+		if (view.getSessionList().getModel().getSize() > 0) {
+			Object[] options = { "Save", "Don't Save", "Cancel" };
+			sel = JOptionPane.showOptionDialog(view.getMainFrame(), "Do you want to save your " + "session before leaving " + "Corelyzer?",
+					"Exit Confirmation", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
+		}
+
+		switch (sel) {
+			case 0: // save to session file and quit
+				if (saveStateToFile()) {
+					cleanThingsUp();
+					// System.exit(0);
+					qr.performQuit();
+				}
+				break;
+
+			case 1: // don't save, just quit
+				cleanThingsUp();
+				qr.performQuit();
+				// System.exit(0);
+
+			default: // abort quit
+				view.getMainFrame().setVisible(true);
+				view.toolFrame.setVisible(true);
+				view.toolFrame.setAppFrameSelected(true);
+				qr.cancelQuit();
+
+				// Hack way to stop quitting, only applies to Cmd+Q keystroke
+				// if (MAC_OS_X) {
+				// 	throw new IllegalStateException("Hack way to cancel quit");
+				// }
 		}
 	}
 

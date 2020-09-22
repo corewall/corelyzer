@@ -56,6 +56,9 @@ Copyright 2003-2007 Apple, Inc., All Rights Reserved
  */
 
 // package apple.dts.samplecode.osxadapter;
+
+// brg 9/22/2020 - OBSOLETE! Using java.awt.desktop methods instead.
+
 package corelyzer.helper;
 
 import java.lang.reflect.InvocationHandler;
@@ -63,7 +66,14 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 
+import java.awt.desktop.AboutEvent;
+import java.awt.desktop.AboutHandler;
+
 public class OSXAdapter implements InvocationHandler {
+
+	public void handleAbout(AboutEvent e) {
+
+	}
 
 	// Pass this method an Object and a Method equipped to handle document
 	// events from the Finder
