@@ -202,7 +202,7 @@ public class CRGraphDialog extends JFrame {
 	// designer, but we now use the far friendlier MigLayout for the graph dialog.
 	private void setupUI()
 	{
-		contentPane = new JPanel(new MigLayout("", "[grow]", "[][grow][][]"));		
+		contentPane = new JPanel(new MigLayout("", "[grow]", "[][][grow][]"));
 		contentPane.add(new JLabel("Choose a dataset:"), "split 2");
 		
 		datasetList = new JComboBox<WellLogDataSet>();
