@@ -30,6 +30,10 @@
 #include <iostream>
 #endif
 
+#ifdef linux
+#include "string.h"
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -427,7 +431,7 @@ void build_tex_blocks(char* pixels, MultiLevelTextureSetEX* set, bool hasDir, in
     // make sure imgblock directory is there
 
     char cwd[1024];
-    GETCWD( cwd, 1024 );
+    char const * dummy = GETCWD( cwd, 1024 );
 
     // Check if the block dir exists
     FILE* fptr0 = fopen(set->blkdir, "r");
@@ -1361,7 +1365,7 @@ bool read_bmp_header( FILE *filePtr, BMPHeader &header, BMPInfoHeader &infoHeade
 		return false;
 	}
     
-	fread((char*) &(header.sig), sizeof(BMP_WORD), 1, filePtr);
+	size_t dummy = fread((char*) &(header.sig), sizeof(BMP_WORD), 1, filePtr);
     if( IsBigEndian() && header.sig != 0x424D )
     {
         printf("BMP file signature wrong!\n");
@@ -1375,9 +1379,9 @@ bool read_bmp_header( FILE *filePtr, BMPHeader &header, BMPInfoHeader &infoHeade
         return false;
     }
 	
-	fread(&(header.filesize),   sizeof(BMP_DWORD), 1, filePtr);
-    fread(&(header.reserved),   sizeof(BMP_DWORD), 1, filePtr);
-    fread(&(header.dataoffset), sizeof(BMP_DWORD), 1, filePtr);
+	dummy = fread(&(header.filesize),   sizeof(BMP_DWORD), 1, filePtr);
+    dummy = fread(&(header.reserved),   sizeof(BMP_DWORD), 1, filePtr);
+    dummy = fread(&(header.dataoffset), sizeof(BMP_DWORD), 1, filePtr);
 	
     if( IsBigEndian() )
     {
@@ -1387,17 +1391,17 @@ bool read_bmp_header( FILE *filePtr, BMPHeader &header, BMPInfoHeader &infoHeade
         header.dataoffset = Flip(header.dataoffset);
     }
 	
-    fread(&(infoHeader.infoheadersize),     sizeof(BMP_DWORD), 1, filePtr);
-    fread(&(infoHeader.bmpwidth),           sizeof(BMP_DWORD), 1, filePtr);
-    fread(&(infoHeader.bmpheight),          sizeof(BMP_DWORD), 1, filePtr);
-    fread(&(infoHeader.planes),             sizeof(BMP_WORD),  1, filePtr);
-    fread(&(infoHeader.bpp),                sizeof(BMP_WORD),  1, filePtr);
-    fread(&(infoHeader.compression),        sizeof(BMP_DWORD), 1, filePtr);
-    fread(&(infoHeader.compressedimgsize),  sizeof(BMP_DWORD), 1, filePtr);
-    fread(&(infoHeader.hppm),               sizeof(BMP_DWORD), 1, filePtr);
-    fread(&(infoHeader.vppm),               sizeof(BMP_DWORD), 1, filePtr);
-    fread(&(infoHeader.numcolorsused),      sizeof(BMP_DWORD), 1, filePtr);
-    fread(&(infoHeader.numimportantcolors), sizeof(BMP_DWORD), 1, filePtr);
+    dummy = fread(&(infoHeader.infoheadersize),     sizeof(BMP_DWORD), 1, filePtr);
+    dummy = fread(&(infoHeader.bmpwidth),           sizeof(BMP_DWORD), 1, filePtr);
+    dummy = fread(&(infoHeader.bmpheight),          sizeof(BMP_DWORD), 1, filePtr);
+    dummy = fread(&(infoHeader.planes),             sizeof(BMP_WORD),  1, filePtr);
+    dummy = fread(&(infoHeader.bpp),                sizeof(BMP_WORD),  1, filePtr);
+    dummy = fread(&(infoHeader.compression),        sizeof(BMP_DWORD), 1, filePtr);
+    dummy = fread(&(infoHeader.compressedimgsize),  sizeof(BMP_DWORD), 1, filePtr);
+    dummy = fread(&(infoHeader.hppm),               sizeof(BMP_DWORD), 1, filePtr);
+    dummy = fread(&(infoHeader.vppm),               sizeof(BMP_DWORD), 1, filePtr);
+    dummy = fread(&(infoHeader.numcolorsused),      sizeof(BMP_DWORD), 1, filePtr);
+    dummy = fread(&(infoHeader.numimportantcolors), sizeof(BMP_DWORD), 1, filePtr);
 	
     if( IsBigEndian() )
     {
@@ -1495,7 +1499,7 @@ MultiLevelTextureSetEX* create_texset_from_bmp(const char* filename, int nlevels
 
     char* pixels = NULL;
 
-    if(!hasDir)
+    if (!hasDir)
     {
         pixels = new char[ texset->src_w * texset->src_h * texset->components ];
         memset( pixels,255, texset->src_w * texset->src_h * texset->components);
@@ -1509,18 +1513,19 @@ MultiLevelTextureSetEX* create_texset_from_bmp(const char* filename, int nlevels
         // for( int r = 0; r < texset->src_h; r++) works for certain BMP files, but
         // I can't find them at the moment. The following code works for LacCore images
         //                                                                                 
-        for( int r = texset->src_h - 1; r > -1; --r)
+        size_t dummy = 0;
+        for (int r = texset->src_h - 1; r > -1; --r)
         {
-            for(int c = 0; c < texset->src_w; c++)
+            for( int c = 0; c < texset->src_w; c++)
             {
-                fread( pixels + r * texset->src_w * 3 + c * 3 + 2, 1, 1, fptr);
-                fread( pixels + r * texset->src_w * 3 + c * 3 + 1, 1, 1, fptr);
-                fread( pixels + r * texset->src_w * 3 + c * 3    , 1, 1, fptr);
+                dummy = fread( pixels + r * texset->src_w * 3 + c * 3 + 2, 1, 1, fptr);
+                dummy = fread( pixels + r * texset->src_w * 3 + c * 3 + 1, 1, 1, fptr);
+                dummy = fread( pixels + r * texset->src_w * 3 + c * 3    , 1, 1, fptr);
             }
 
             //bmp is padded to fit on 32 bit boundry
-            for(int i = 0; i < padcount; i++)
-                fread(&pad,1,1,fptr);
+            for (int i = 0; i < padcount; i++)
+                dummy = fread(&pad,1,1,fptr);
         }    
     }
 

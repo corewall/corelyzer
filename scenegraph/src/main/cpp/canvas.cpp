@@ -33,6 +33,10 @@
 #include "fontsys.h"
 #include "cache.h"
 
+#ifdef linux
+#include "string.h"
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -65,7 +69,7 @@ static float bgcolor[3] = {0.1f , 0.1f, 0.1f};
 static bool  hasCrossHair = true;
 static char  *crossHairLabel = NULL;
 
-#ifndef __APPLE__
+#if defined(WIN32) || defined(_WIN32)
 PFNGLCOMPRESSEDTEXIMAGE2DARBPROC    glCompressedTexImage2D = NULL;
 PFNGLCOMPRESSEDTEXSUBIMAGE2DARBPROC glCompressedTexSubImage2D = NULL;
 #endif
@@ -83,10 +87,10 @@ static float framesPerSecond = 0.0f;
 //====================================================================
 void load_gl_extensions()
 {
-#ifdef __APPLE__
+#if defined(__APPLE__) || defined(linux)
     return;
 #else
-    glCompressedTexImage2D = (PFNGLCOMPRESSEDTEXIMAGE2DARBPROC) 
+    glCompressedTexImage2D = (PFNGLCOMPRESSEDTEXIMAGE2DARBPROC) // commmented for linux...already defined in gl.h
         glGetProcAddress( "glCompressedTexImage2DARB" );
     glCompressedTexSubImage2D = (PFNGLCOMPRESSEDTEXSUBIMAGE2DARBPROC)
         glGetProcAddress( "glCompressedTexSubImage2DARB" );

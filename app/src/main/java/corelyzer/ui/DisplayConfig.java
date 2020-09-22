@@ -178,9 +178,9 @@ public class DisplayConfig extends WindowAdapter {
 		rows = new JFormattedTextField(NumberFormat.getIntegerInstance());
 		rows.setValue(new Integer(1));
 		rows.setPreferredSize(new Dimension(50, 25));
-		rows.addPropertyChangeListener(new TileConfigListener());
 		dlg.getContentPane().add(label);
 		dlg.getContentPane().add(rows);
+		rows.addPropertyChangeListener(new TileConfigListener());
 		PositionWidget(rows, layout, 15, 400);
 		PositionWidget(label, layout, 75, 400);
 

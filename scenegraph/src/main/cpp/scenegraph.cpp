@@ -23,7 +23,6 @@
  * cavern@evl.uic.edu
  *
  *****************************************************************************/
-
 // #include "shaders.h"
 #include "common.h"
 #include "corelyzer_graphics_SceneGraph.h"
@@ -37,6 +36,10 @@
 #include "graph.h"
 #include "fontsys.h"
 #include "freedraw.h"
+
+#ifdef linux
+#include "string.h"
+#endif
 
 #include <vector>
 #include <iostream>

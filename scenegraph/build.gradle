@@ -15,37 +15,42 @@ clean.doLast {
 	ant.delete(dir: file('bin'), failonerror: false)
 }
 
+// Use javac -h flag to build JNI header for SceneGraph.java.
+// Separate javah call is no longer needed, and javah has been
+// removed from JDK version 11.
+compileJava {
+	def build = new File(project.buildDir, 'cpp')
+	options.compilerArgs += ["-h", "${build}"]
+}
+
 task 'clean-dist' {
 	doLast {
 		ant.delete(dir: file('dist'), failonerror: false)
 	}
 }
 
-task 'generate-jni-headers'(dependsOn: 'build') {
+task 'copy-jni-files'(dependsOn: 'build') {
 	doLast {
-		// copy our jar into dist/
+		// copy scenegraph jar into dist
 		copy {
 			into file('dist')
 			from configurations.default.allArtifacts.getFiles()
 		}
 
-		// create build/cpp
-		def build = new File(project.buildDir, 'cpp')
-		mkdir(build)
-
-		// generate the JNI header
-		ant.exec(executable: 'javah', dir: file('dist'), failonerror: true) {
-			arg(value: '-classpath')
-			arg(value: "scenegraph-${version}.jar")
-			arg(value: '-d')
-			arg(path: build)
-			arg(value: 'corelyzer.graphics.SceneGraph')
+		// copy generated Scenegraph JNI header into src
+		file('build/cpp').eachFileMatch({it.endsWith('.h')}) { f ->
+			copy {
+				into file('src/main/cpp')
+				from f
+			}
 		}
 	}
+}
 
-	// To build and debug, VSCode seems to depend on contents of build/classes/java
-	// being copied into scenegraph/bin, but doesn't always do so on its own, unclear why.
-	// Copy manually here.
+// To build and debug, VSCode seems to depend on contents of scenegraph/build/classes/java
+// being copied into scenegraph/bin, but doesn't always do so on its own, unclear why.
+// Copy manually here. 
+task 'generate-vscode-bin'(dependsOn: 'build') {
 	mkdir('bin')
 	copy {
 		into file('bin')
@@ -53,7 +58,7 @@ task 'generate-jni-headers'(dependsOn: 'build') {
 	}
 }
 
-task 'build-jni-mac'(dependsOn: 'generate-jni-headers') {
+task 'build-jni-mac'(dependsOn: 'copy-jni-files') {
 	doLast {
 		def build = new File(project.buildDir, 'cpp')
 		def dist = file('dist')
@@ -148,7 +153,53 @@ def compileMac(src, arch, includes, dir) {
 	}
 }
 
-task 'build-jni-win'(dependsOn: 'generate-jni-headers') {
+task 'build-jni-linux'(dependsOn: 'copy-jni-files') {
+	doLast {
+		def build = new File(project.buildDir, 'cpp')
+		def dist = file('dist')
+		def src = file('src/main/cpp')
+		def includes = [
+			src.absolutePath,
+			dist.absolutePath,
+			build.absolutePath,
+			file('/usr/lib/jvm/java-11-openjdk-amd64/include'),
+			file('/usr/lib/jvm/java-11-openjdk-amd64/include/linux'),
+			file('/usr/include/freetype2')]
+
+		mkdir(build)
+
+		def arch = "x86_64"
+		ant.echo("Generating libscenegraph for Linux ${arch}...")
+		ant.exec(executable: 'gcc', dir: dist, logError: true, failonerror: true) {
+			arg(value: '-O')
+			arg(value: '-fPIC')
+			arg(value: '-shared')
+			arg(value: '-DUSE_FASTDXT')
+			includes.each { arg(value: "-I${it}") }
+			src.eachFileMatch({ it.endsWith('.c') || it.endsWith('.cpp')} ) { file ->
+				println "Compiling $file..."
+				arg(value: file)
+			}
+			arg(value: '-L')
+			arg(value: '/usr/lib/x86_64-linux-gnu')
+			arg(value: '-lpng')
+			arg(value: '-lGL')
+			arg(value: '-lGLU')
+			arg(value: '-lstdc++')
+			arg(value: '-lfreetype')
+			arg(value: '-ljpeg')
+			arg(value: '-ltiff')
+			arg(value: '-lsquish')
+			arg(value: '-o')
+			arg(value: 'libscenegraph.so')
+		}
+	}
+}
+
+// cross-compile Window with MINGW...has unresolved texture
+// generation issue at runtime, build with provided MSVC
+// project instead.
+task 'build-jni-win'(dependsOn: 'copy-jni-files') {
 	doLast {
 		def build = new File(project.buildDir, 'cpp')
 		def dist = file('dist')
@@ -236,8 +287,4 @@ def linkWin(libs, dir, path) {
 			arg(value: '-mwindows')
 		}
 	}
-}
-
-task 'build-jni'(dependsOn: ['build-jni-mac', 'build-jni-win']) {
-	doLast {}
 }

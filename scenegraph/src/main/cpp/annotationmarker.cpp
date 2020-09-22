@@ -29,6 +29,10 @@
 #include <math.h>
 #include <vector>
 
+#ifdef linux
+#include "string.h"
+#endif
+
 extern void read_png(const char* pngfilename, int* w, int* h, GLenum* format, 
                      char*& pixels);
 

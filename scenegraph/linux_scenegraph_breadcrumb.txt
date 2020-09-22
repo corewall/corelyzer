@@ -1,0 +1,161 @@
+Linux Corelyzer Build Breadcrumbs
+Using Ubuntu 18.04.4 LTS Bionic Beaver
+
+### September 15, 2020
+More confusion! Corelyzer runs without issue on a BB VM (BBeav Deux) that appears to have
+the same versions of Mesa as a VM (BBeav Three) where it crashes...WTF?
+
+Finally found the culprit! The "Complete Generic Linux kernel and headers" item under
+"Security Updates" in Software Updater breaks the build after rebooting. Seems to have
+nothing to do with Mesa updates. Problem kernel version is 5.4.0-47-generic...
+Working kernel is 5.3.0-28-generic.
+
+This holds true in a Ubuntu 20 install, which already comes with 5.4.0-47-generic
+kernel. Corelyzer crashes at launch in libEGL.so.
+
+
+### September 11, 2020
+Recently noticed that Corelyzer crashed in libEGL.so at launch on certain Ubuntu
+VMs. Initially thought this was related to using JDK 11 now that obsolete javah
+build code has been upgraded.
+
+Much confusion and five new Bionic Beaver virtual machines later, I finally
+learned that it has nothing to do with JDK.  It's due to updating Ubuntu!
+Corelyzer runs without issue when built on a fresh Parallels install of
+BB 18.04.4 from the ubuntu-18.04.4-desktop-amd64.iso. Runs against openjdk
+8 and 11.
+
+But as soon as software update is run, the crash occurs. I assume the problem
+is related to the latest Mesa drivers/libraries. (September 15 2020 turns out this is wrong,
+it's the kernel!)
+
+Built JOGL from scratch using the directions here: https://jogamp.org/jogl/doc/HowToBuild.html
+
+Rather confusing in that both JDK 8 and 11 seem to be required to build.
+In addition to building gluegen as described in the doc with
+ 
+    cd /home/dude/projects/jogamp/gluegen/make/
+    ant -Dtarget.sourcelevel=1.8 -Dtarget.targetlevel=1.8 -Dtarget.rt.jar=/your/openjdk8/lib/rt.jar
+
+I needed to issue the same ant command in /jogamp/jogl/make. After that, I was able to run
+JOGL tests with
+
+    ant -Dtarget.sourcelevel=1.8 -Dtarget.targetlevel=1.8 -Dtarget.rt.jar=/your/openjdk8/lib/rt.jar junit.run
+
+Tests showed the same crash in libEGL.so, which is good. Next step, contact JOGL forum? Or is my
+limited understanding of Linux the problem? Ubuntu 20 has been out for a while and I don't see anyone
+complaining about issues on the JOGL forums...???
+
+
+### Steps to build Corelyzer on a fresh 18.04.4 BB Install:
+
+sudo apt install git
+git clone https://github.com/corewall/corelyzer
+cd corelyzer
+git checkout linux_build
+
+sudo apt install openjdk-8-jdk // or openjdk-11-jdk
+
+Use provided Gradle wrapper to build Java components:
+./gradlew build
+
+To build Scenegraph library:
+
+cd scenegraph
+
+Update the java include path in build.gradle to reflect your configuration. Then:
+
+../gradlew build-jni-linux
+
+Build will complain about missing GL and GLU headers. To resolve:
+
+sudo apt install mesa-common-dev
+sudo apt install libglu1-mesa-dev
+
+To resolve missing PNG, TIFF, JPEG, Freetype, Squish headers:
+sudo apt install libfreetype6-dev libpng-dev libjpeg-dev libtiff-dev libsquish-dev
+
+../gradlew build-jni-linux
+
+should now complete successfully. Generated libscenegraph.so and scenegraph-[version].jar
+are found in scenegraph/dist.
+
+Now cd to root corelyzer dir and run
+
+./gradlew packageLinux
+
+There is no packaged Linux build at present, but this compiles Corelyzer Java
+logic into dist/app-[version].jar, copies all required JARs to dist, and creates
+corelyzer/working_dir with required files for launch.
+
+cd working_dir
+
+Now launch Corelyzer with (adjusting paths for your system):
+java -cp "../app/dist/*" -Djava.library.path=/home/lcdev/proj/corewall/corelyzer/scenegraph/dist:/usr/lib/x86_64-linux-gnu corelyzer.ui.splashscreen.SplashScreenMain
+
+
+
+July 28, 2020
+
+
+Prereqs:
+sudo apt install openjdk-11-jdk
+
+Manually download and install Gradle 6 and add to your PATH, using
+the Installing Manually steps here: https://gradle.org/install/
+
+in scenegraph dir, use
+
+gradle build-jni-linux
+
+to build scenegraph JAR and libscenegraph.so in dist/.
+
+Once you have libscenegraph.so and scenegraph-[version].jar built in scenegraph/dist,
+cd to root corelyzer dir and run 'gradle package'. There is no packaged Linux build
+at present, but this compiles Corelyzer Java logic into dist/app-[version].jar and
+copies all required JARs to dist as well.
+
+Create a corelyzer/working_dir directory, and copy the app/base/help, app/base/resources,
+and app/base/plugins dirs into working_dir.
+
+From working_dir, launch Corelyzer with command (after modifying paths for your system):
+java -cp "../app/dist/*" -Djava.library.path=/home/lcdev/proj/corewall/corelyzer/scenegraph/dist:/usr/lib/x86_64-linux-gnu corelyzer.ui.splashscreen.SplashScreenMain
+
+Hopefully it'll work!
+
+
+July 27 2020
+After some tweaking, all scenegraph cpp files now compile under GCC.
+Linking "succeeds", even though we're not linking
+required libraries...however, Corelyzer crashes
+due to missing PNG library, so we *need* to be linking
+required libs.
+
+Got build of libscenegraph.so working with -shared -fPIC and refs
+to required libraries. Then got complaints about undefined
+symbols during Corelyzer launch. This was remedied by installing
+the following libraries:
+
+sudo apt install libfreetype6-dev
+sudo apt install libpng-dev
+sudo apt install libjpeg-dev
+sudo apt install libtiff-dev
+
+. To appease compiler when looking for squish.h include, also had to:
+sudo apt install libsquish-dev
+
+After adding /usr/lib/x86_64-linux-gnu to the -Djava.library.path (in addition
+to libscenegraph.so path) in Code's launch.json file, holy crap, Corelyzer
+launches and works in Code!
+
+Now we need to figure out how to package a proper Linux app.
+
+
+### Resolved Issues
+Bizarre Java issue: Corelyzer crashes on getContentPane().add() of 'rows'
+in prefs dialog.
+Solved: adding TileConfigListener before adding 'rows' to the content pane
+resulted in a NullPointerException for some reason. Adding after 'rows' has
+been added solves the problem!
+Unclear if this is a Linux thing or a Java 11 thing...probably the former.
+
