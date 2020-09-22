@@ -725,9 +725,6 @@ public class CorelyzerGLCanvas implements GLEventListener, MouseListener, MouseW
 		CRGraphDialog graphDialog = new CRGraphDialog(this.canvas);
 		graphDialog.setDatasetVec(datasets);
 		graphDialog.setSelectedTrackAndSectionId(t, s);
-
-		graphDialog.pack();
-		graphDialog.setSize(480, 500);
 		graphDialog.setVisible(true);
 	}
 

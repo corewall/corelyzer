@@ -1961,8 +1961,6 @@ public class CorelyzerAppController implements ActionListener {
 		//graphDialog.setSelectedTrackListId(t);
 		graphDialog.setDatasetVec(datasets);
 		graphDialog.selectDataset(d);
-		graphDialog.pack();
-		graphDialog.setSize(480, 500);
 		graphDialog.setVisible(true);
 	}
 	
