@@ -12,10 +12,11 @@ is written in Java and can be built on any platform.
 
 ### Building Corelyzer on Linux
 
-At present, Corelyzer can be built and run on Ubuntu 18.04.4 "Bionic Beaver"
-with Linux kernel version 5.3.0-28-generic.
+Corelyzer builds and runs successfully on Ubuntu LTS 18.04.4 "Bionic Beaver" and 20.04.1 "Focal Fossa".
+It **should** work in other distributions and versions. Add an Issue if you run into trouble, and we'll try to help.
 
-Note that Corelyzer **will not run** against kernel versions 5.4+, it crashes at launch.
+**NOTE**: Corelyzer is known to crash when launched on Ubuntu virtual machines with kernel version
+5.4+. This can be resolved by disabling hardware acceleration in the VM.
 
 On Linux, no pre-built SceneGraph library is provided.
 
