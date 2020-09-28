@@ -34,12 +34,10 @@ scenegraph.dll can be found in the Debug or Release subdirectory.
 #### Linux
 
 The following steps result in a working build of Scenegraph on
-a clean Ubuntu 18.04.4 Bionic Beaver installation, with Linux
-kernel version 5.3.0-28-generic.
+a on Ubuntu LTS 18.04.4 "Bionic Beaver" and 20.04.1 "Focal Fossa".
 
-**Do not** upgrade the kernel to 5.4+, as it causes a crash at launch.
-This also means Corelyzer can't currently run on Ubuntu 20.04.1, which
-includes kernel version 5.4.0-47-generic.
+**NOTE**: Corelyzer is known to crash when launched on Ubuntu virtual machines with kernel version
+5.4+. This can be resolved by disabling hardware acceleration in the VM.
 
 Install required dev tools:
 
