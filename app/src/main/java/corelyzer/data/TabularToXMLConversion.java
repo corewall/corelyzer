@@ -902,7 +902,7 @@ public class TabularToXMLConversion {
 				System.out.println("Doesn't exist! " + f.getAbsolutePath());
 			}
             Vector<Integer> vals = new Vector<Integer>();
-            vals.add(new Integer(11));
+            vals.add(Integer.valueOf(11));
             test(f, "/Users/lcdev/Desktop/test1", ",", "", 1, 60, 0, 0, "1", 9, vals, DepthMode.ACCUM_DEPTH, true, Float.NaN);
         }
 
@@ -910,7 +910,7 @@ public class TabularToXMLConversion {
         {
             File f = new File(testdataDir, "318-U1357-GRA-AB_secnames_1sec_unitsrow.csv");
             Vector<Integer> vals = new Vector<Integer>();
-            vals.add(new Integer(11));
+            vals.add(Integer.valueOf(11));
             test(f, "/Users/lcdev/Desktop/test2", ",", "", 2, 61, 0, 1, "1", 9, vals, DepthMode.ACCUM_DEPTH, true, Float.NaN);
 		}
 		
@@ -918,7 +918,7 @@ public class TabularToXMLConversion {
         {
             File f = new File(testdataDir, "318-U1357-GRA-AB_secnames_1sec_unitsrow.csv");
             Vector<Integer> vals = new Vector<Integer>();
-            vals.add(new Integer(11));
+            vals.add(Integer.valueOf(11));
             test(f, "/Users/lcdev/Desktop/test3", ",", "", 2, 61, 0, 1, "1", 9, vals, DepthMode.SECTION_DEPTH, true, Float.NaN);
 		}
 
@@ -926,7 +926,7 @@ public class TabularToXMLConversion {
         {
             File f = new File(testdataDir, "318-U1357-GRA-AB_secnames_1sec_out_of_order.csv");
             Vector<Integer> vals = new Vector<Integer>();
-            vals.add(new Integer(11));
+            vals.add(Integer.valueOf(11));
             test(f, "/Users/lcdev/Desktop/test4", ",", "", 2, 121, 0, 1, "1", 9, vals, DepthMode.ACCUM_DEPTH, true, Float.NaN);
 		}		
 
@@ -934,7 +934,7 @@ public class TabularToXMLConversion {
         {
             File f = new File(testdataDir, "318-U1357-GRA-AB_secnames_2secs.csv");
             Vector<Integer> vals = new Vector<Integer>();
-            vals.add(new Integer(11));
+            vals.add(Integer.valueOf(11));
             test(f, "/Users/lcdev/Desktop/test5", ",", "", 2, 244, 0, 1, "1", 9, vals, DepthMode.ACCUM_DEPTH, true, Float.NaN);
 		}
 		
@@ -942,7 +942,7 @@ public class TabularToXMLConversion {
 		{
             File f = new File(testdataDir, "318-U1357-GRA-AB_secnames.csv");
             Vector<Integer> vals = new Vector<Integer>();
-            vals.add(new Integer(11));
+            vals.add(Integer.valueOf(11));
             test(f, "/Users/lcdev/Desktop/test6", ",", "", 2, 2392, 0, 1, "1", 9, vals, DepthMode.ACCUM_DEPTH, true, Float.NaN);
 		}		
 
@@ -950,7 +950,7 @@ public class TabularToXMLConversion {
 		{
             File f = new File(testdataDir, "318-U1357-GRA-AB_secnames_sorted.csv");
             Vector<Integer> vals = new Vector<Integer>();
-            vals.add(new Integer(11));
+            vals.add(Integer.valueOf(11));
             test(f, "/Users/lcdev/Desktop/test7", ",", "", 2, 2392, 0, 1, "1", 9, vals, DepthMode.ACCUM_DEPTH, true, Float.NaN);
 		}	
 
@@ -959,8 +959,8 @@ public class TabularToXMLConversion {
 		{
             File f = new File(testdataDir, "318-U1357-GRA-AB_secnames_1sec_blankfirstrow.csv");
             Vector<Integer> vals = new Vector<Integer>();
-			vals.add(new Integer(11));
-			// vals.add(new Integer(17));
+			vals.add(Integer.valueOf(11));
+			// vals.add(Integer.valueOf(17));
             test(f, "/Users/lcdev/Desktop/test8", ",", "", 1, 60, 0, 0, "1", 9, vals, DepthMode.ACCUM_DEPTH, true, Float.NaN);
 		}
 
@@ -970,8 +970,8 @@ public class TabularToXMLConversion {
 		{
             File f = new File(testdataDir, "318-U1357-GRA-AB_secnames_1sec_blankfirstrow.csv");
             Vector<Integer> vals = new Vector<Integer>();
-			vals.add(new Integer(11));
-			vals.add(new Integer(16));
+			vals.add(Integer.valueOf(11));
+			vals.add(Integer.valueOf(16));
             test(f, "/Users/lcdev/Desktop/test9", ",", "", 1, 60, 0, 0, "1", 9, vals, DepthMode.ACCUM_DEPTH, true, Float.NaN);
 		}
 
@@ -980,7 +980,7 @@ public class TabularToXMLConversion {
             File f = new File(testdataDir, "MCC_MSCL-S_Feldman.csv");
 			Vector<Integer> vals = new Vector<Integer>();
 			for (int i = 8; i <= 16; i++) {
-				vals.add(new Integer(i));
+				vals.add(Integer.valueOf(i));
 			}
             test(f, "/Users/lcdev/Desktop/test10", ",", "", 1, 5810, 0, 0, "1", 7, vals, DepthMode.ACCUM_DEPTH, true, Float.NaN);
 		}
@@ -989,8 +989,8 @@ public class TabularToXMLConversion {
 		{
             File f = new File(testdataDir, "MCC_MSCL-XYZ_Feldman.csv");
             Vector<Integer> vals = new Vector<Integer>();
-			vals.add(new Integer(8)); // Laser Profiler
-			vals.add(new Integer(9)); // MS
+			vals.add(Integer.valueOf(8)); // Laser Profiler
+			vals.add(Integer.valueOf(9)); // MS
             test(f, "/Users/lcdev/Desktop/test11", ",", "", 1, 5400, 0, 0, "1", 7, vals, DepthMode.ACCUM_DEPTH, true, Float.NaN);
 		}
     }

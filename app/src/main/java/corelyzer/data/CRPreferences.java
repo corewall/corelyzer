@@ -396,41 +396,41 @@ public class CRPreferences {
 			String line;
 
 			line = br.readLine();
-			this.screenWidth = new Integer(line);
+			this.screenWidth = Integer.valueOf(line);
 
 			line = br.readLine();
-			this.screenHeight = new Integer(line);
+			this.screenHeight = Integer.valueOf(line);
 
 			line = br.readLine();
-			this.numberOfRows = new Integer(line);
+			this.numberOfRows = Integer.valueOf(line);
 
 			line = br.readLine();
-			this.numberOfColumns = new Integer(line);
+			this.numberOfColumns = Integer.valueOf(line);
 
 			line = br.readLine();
-			this.dpix = new Float(line);
+			this.dpix = Float.valueOf(line);
 
 			line = br.readLine();
-			this.dpiy = new Float(line);
+			this.dpiy = Float.valueOf(line);
 
 			line = br.readLine();
-			this.borderUp = new Float(line);
+			this.borderUp = Float.valueOf(line);
 
 			line = br.readLine();
-			this.borderDown = new Float(line);
+			this.borderDown = Float.valueOf(line);
 
 			line = br.readLine();
-			this.borderLeft = new Float(line);
+			this.borderLeft = Float.valueOf(line);
 
 			line = br.readLine();
-			this.borderRight = new Float(line);
+			this.borderRight = Float.valueOf(line);
 
 			try {
 				line = br.readLine();
-				this.column_offset = new Integer(line);
+				this.column_offset = Integer.valueOf(line);
 
 				line = br.readLine();
-				this.row_offset = new Integer(line);
+				this.row_offset = Integer.valueOf(line);
 			} catch (NumberFormatException e) {
 				System.out.println("[CRPreferences] Ignore rest display.conf");
 			}
@@ -502,17 +502,17 @@ public class CRPreferences {
 					this.grid_show = toks[1].trim().equalsIgnoreCase("true");
 					// now let's read values for grid configuration.
 					line = br.readLine();
-					this.grid_type = new Integer(line);
+					this.grid_type = Integer.valueOf(line);
 					line = br.readLine();
-					this.grid_size = new Float(line);
+					this.grid_size = Float.valueOf(line);
 					line = br.readLine();
-					this.grid_thickness = new Integer(line);
+					this.grid_thickness = Integer.valueOf(line);
 					line = br.readLine();
-					this.grid_r = new Float(line);
+					this.grid_r = Float.valueOf(line);
 					line = br.readLine();
-					this.grid_g = new Float(line);
+					this.grid_g = Float.valueOf(line);
 					line = br.readLine();
-					this.grid_b = new Float(line);
+					this.grid_b = Float.valueOf(line);
 				} else if (toks[0].trim().toLowerCase().startsWith("sessionhst")) {
 					String path = toks[1].trim();
 					this.sessionHistory.add(path);

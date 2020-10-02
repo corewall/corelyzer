@@ -832,7 +832,7 @@ class OpenCSVTableModel extends AbstractTableModel {
 		if (col == 0) {
 			return "Row\\Column";
 		} else {
-			return new Integer(col).toString();
+			return Integer.valueOf(col).toString();
 		}
 	}
 	public int getRowCount() {
@@ -843,7 +843,7 @@ class OpenCSVTableModel extends AbstractTableModel {
 	}
 	public Object getValueAt(int row, int col) {
 		if (col == 0) {
-			return new Integer(row + 1).toString();
+			return Integer.valueOf(row + 1).toString();
 		 } else {
 			final int adjCol = col - 1;
 			if (data.get(row).length > (adjCol)) {
