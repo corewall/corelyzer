@@ -106,7 +106,6 @@ public class CorelyzerAppController implements ActionListener, AboutHandler, Qui
 	// Plugin Handler
 	CorelyzerPluginManager pluginManager;
 
-	// private BonjourManager bonjourManager;
 	private ControlServerApplication remoteControlServer;
 	
 	public CorelyzerAppController() {
@@ -909,13 +908,6 @@ public class CorelyzerAppController implements ActionListener, AboutHandler, Qui
 	private void initAnnotationTypeDirectory() {
 		AnnotationTypeDirectory annotationTypeDirectory = new AnnotationTypeDirectory();
 		annotationTypeDirectory.init();
-	}
-
-	private void initBonjour() {
-		if (MAC_OS_X) {
-			// this.bonjourManager = new BonjourManager(view.friendsMenu);
-			System.out.println("[Disabled] Initialize Bonjour...");
-		}
 	}
 
 	private void initRemoteControlServer() {
@@ -2067,7 +2059,6 @@ public class CorelyzerAppController implements ActionListener, AboutHandler, Qui
 		};
 		autoSave.start();
 
-		this.initBonjour();
 		this.initRemoteControlServer();
 		this.initAnnotationTypeDirectory();
 	}
