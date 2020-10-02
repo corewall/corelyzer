@@ -68,7 +68,6 @@ import corelyzer.data.lists.CRDefaultListModel;
 import corelyzer.data.lists.CRListModels;
 import corelyzer.graphics.SceneGraph;
 import corelyzer.handlers.SubscribeHandler;
-// import corelyzer.helper.OSXAdapter;
 import corelyzer.io.CRDISDepthValueDataLoader;
 import corelyzer.io.CRDepthValueDataLoader;
 import corelyzer.io.DISLoader;
@@ -1271,35 +1270,12 @@ public class CorelyzerAppController implements ActionListener, AboutHandler, Qui
 	// All handlers work except for open file handler, which always seems to launch a new
 	// instance of Corelyzer instead of opening in the existing one. This was the
 	// case in Java 8 as well.
-
-	// --------------------------------------------------------------------------
-	// ---- Courtesy of Apple MacOSX "OSXAdapter" Example Code ----
-	// Generic registration with the Mac OS X application menu.
-	// Checks the platform, then attempts
-	// to register with the Apple EAWT.
-	// This method calls OSXAdapter.registerMacOSXApplication() and
-	// OSXAdapter.enablePrefs().
-	// See corelyzer.helper.OSXAdapter.java for the signatures of these methods.
 	public void macOSXRegistration() {
 		if (MAC_OS_X) {
-			try {
-				// Generate and register the OSXAdapter, passing it a hash of
-				// all the methods we wish to
-				// use as delegates for various
-				// com.apple.eawt.ApplicationListener methods
-				// OSXAdapter.setQuitHandler(this, getClass().getDeclaredMethod("quit", (Class[]) null));
-				// OSXAdapter.setAboutHandler(this, getClass().getDeclaredMethod("about", (Class[]) null));
-				Desktop.getDesktop().setQuitHandler(this);
-				Desktop.getDesktop().setAboutHandler(this);
-				Desktop.getDesktop().setPreferencesHandler(this);
-				// OSXAdapter.setPreferencesHandler(this, getClass().getDeclaredMethod("doPreferences", (Class[]) null));
-
-				// OSXAdapter.setFileHandler(this, getClass().getDeclaredMethod("doAssociatedFile", new Class[] { String.class }));
-				Desktop.getDesktop().setOpenFileHandler(this);
-			} catch (Exception e) {
-				System.err.println("Error while loading the OSXAdapter:");
-				e.printStackTrace();
-			}
+			Desktop.getDesktop().setQuitHandler(this);
+			Desktop.getDesktop().setAboutHandler(this);
+			Desktop.getDesktop().setPreferencesHandler(this);
+			Desktop.getDesktop().setOpenFileHandler(this);
 		}
 	}
 
