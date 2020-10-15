@@ -40,9 +40,12 @@ public class SceneGraph {
 	public static boolean VERTICAL = false;
 
 	static {
-		// brg 7/18/2015: uncomment to launch properly in Eclipse on Windows
-		//System.loadLibrary("OpenJPEG");
-		//System.loadLibrary("pthreadVC2");
+		// brg 10/15/2020: uncomment to launch from VSCode on Windows
+		// System.loadLibrary("pthreadVC2");
+		// System.loadLibrary("zlib1");
+		// System.loadLibrary("libpng13");
+		// System.loadLibrary("tiff");
+
 		System.loadLibrary("scenegraph");
 	}
 
