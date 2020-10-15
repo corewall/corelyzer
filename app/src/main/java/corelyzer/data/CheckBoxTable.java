@@ -41,7 +41,7 @@ public class CheckBoxTable extends JTable {
 
 	/** Add another selectable entry into the table, with the associated label */
 	public void addRow(final boolean b, final String label, final Color c, final String range) {
-		model.checkVec.add(new Boolean(b));
+		model.checkVec.add(Boolean.valueOf(b));
 		model.labelVec.add(label);
 		model.colorVec.add(c);
 		model.valueRangeVec.add(range);
@@ -172,9 +172,9 @@ class CheckBoxTableModel extends AbstractTableModel {
 	public void setValueAt(final Object value, final int row, final int col) {
 		if (col == 0) {
 			if (checkVec.elementAt(row).booleanValue()) {
-				checkVec.setElementAt(new Boolean(false), row);
+				checkVec.setElementAt(Boolean.valueOf(false), row);
 			} else {
-				checkVec.setElementAt(new Boolean(true), row);
+				checkVec.setElementAt(Boolean.valueOf(true), row);
 			}
 			this.fireTableCellUpdated( row, col );
 		}

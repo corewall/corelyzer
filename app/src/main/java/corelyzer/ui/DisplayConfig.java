@@ -176,7 +176,7 @@ public class DisplayConfig extends WindowAdapter {
 		JLabel label;
 		label = new JLabel("Rows ");
 		rows = new JFormattedTextField(NumberFormat.getIntegerInstance());
-		rows.setValue(new Integer(1));
+		rows.setValue(Integer.valueOf(1));
 		rows.setPreferredSize(new Dimension(50, 25));
 		dlg.getContentPane().add(label);
 		dlg.getContentPane().add(rows);
@@ -186,7 +186,7 @@ public class DisplayConfig extends WindowAdapter {
 
 		label = new JLabel("Columns ");
 		cols = new JFormattedTextField(NumberFormat.getIntegerInstance());
-		cols.setValue(new Integer(1));
+		cols.setValue(Integer.valueOf(1));
 		cols.setPreferredSize(new Dimension(50, 25));
 		cols.addPropertyChangeListener(new TileConfigListener());
 		dlg.getContentPane().add(cols);
@@ -196,7 +196,7 @@ public class DisplayConfig extends WindowAdapter {
 
 		label = new JLabel("Screen Width");
 		width = new JFormattedTextField(NumberFormat.getIntegerInstance());
-		width.setValue(new Integer(1024));
+		width.setValue(Integer.valueOf(1024));
 		width.setPreferredSize(new Dimension(50, 25));
 		width.addPropertyChangeListener(new TileConfigListener());
 		dlg.getContentPane().add(width);
@@ -206,7 +206,7 @@ public class DisplayConfig extends WindowAdapter {
 
 		label = new JLabel("Screen Height");
 		height = new JFormattedTextField(NumberFormat.getIntegerInstance());
-		height.setValue(new Integer(768));
+		height.setValue(Integer.valueOf(768));
 		height.setPreferredSize(new Dimension(50, 25));
 		height.addPropertyChangeListener(new TileConfigListener());
 		dlg.getContentPane().add(height);
@@ -216,7 +216,7 @@ public class DisplayConfig extends WindowAdapter {
 
 		label = new JLabel("Screen DPI X");
 		dpix = new JFormattedTextField(twosig);
-		dpix.setValue(new Float(72.0));
+		dpix.setValue(Float.valueOf(72.0f));
 		dpix.setPreferredSize(new Dimension(50, 25));
 		dlg.getContentPane().add(dpix);
 		dlg.getContentPane().add(label);
@@ -225,7 +225,7 @@ public class DisplayConfig extends WindowAdapter {
 
 		label = new JLabel("Screen DPI Y");
 		dpiy = new JFormattedTextField(twosig);
-		dpiy.setValue(new Float(72.0));
+		dpiy.setValue(Float.valueOf(72.0f));
 		dpiy.setPreferredSize(new Dimension(50, 25));
 		dlg.getContentPane().add(dpiy);
 		dlg.getContentPane().add(label);
@@ -255,7 +255,7 @@ public class DisplayConfig extends WindowAdapter {
 		PositionWidget(label, layout, 15, 540);
 		label = new JLabel("Top");
 		borderUp = new JFormattedTextField(twosig);
-		borderUp.setValue(new Float(1.0));
+		borderUp.setValue(Float.valueOf(1.0f));
 		borderUp.setPreferredSize(new Dimension(40, 25));
 		dlg.getContentPane().add(borderUp);
 		dlg.getContentPane().add(label);
@@ -264,7 +264,7 @@ public class DisplayConfig extends WindowAdapter {
 
 		label = new JLabel("Bottom");
 		borderDown = new JFormattedTextField(twosig);
-		borderDown.setValue(new Float(1.0));
+		borderDown.setValue(Float.valueOf(1.0f));
 		borderDown.setPreferredSize(new Dimension(40, 25));
 		dlg.getContentPane().add(borderDown);
 		dlg.getContentPane().add(label);
@@ -273,7 +273,7 @@ public class DisplayConfig extends WindowAdapter {
 
 		label = new JLabel("Left");
 		borderLeft = new JFormattedTextField(twosig);
-		borderLeft.setValue(new Float(1.0));
+		borderLeft.setValue(Float.valueOf(1.0f));
 		borderLeft.setPreferredSize(new Dimension(40, 25));
 		dlg.getContentPane().add(borderLeft);
 		dlg.getContentPane().add(label);
@@ -282,7 +282,7 @@ public class DisplayConfig extends WindowAdapter {
 
 		label = new JLabel("Right");
 		borderRight = new JFormattedTextField(twosig);
-		borderRight.setValue(new Float(1.0));
+		borderRight.setValue(Float.valueOf(1.0f));
 		borderRight.setPreferredSize(new Dimension(40, 25));
 		dlg.getContentPane().add(borderRight);
 		dlg.getContentPane().add(label);
@@ -394,54 +394,42 @@ public class DisplayConfig extends WindowAdapter {
 
 			FileReader fr = new FileReader(prevsettings);
 			BufferedReader br = new BufferedReader(fr);
-			String line;
-			// data is
-			// width
-			// height
-			// rows
-			// cols
-			// dpi_x
-			// dpi_y
-			// top border
-			// down border
-			// left border
-			// right border
-			line = br.readLine();
-			width.setValue(new Integer(line));
+			String line = br.readLine();
+			width.setValue(Integer.valueOf(line));
 
 			line = br.readLine();
-			height.setValue(new Integer(line));
+			height.setValue(Integer.valueOf(line));
 
 			line = br.readLine();
-			rows.setValue(new Integer(line));
+			rows.setValue(Integer.valueOf(line));
 
 			line = br.readLine();
-			cols.setValue(new Integer(line));
+			cols.setValue(Integer.valueOf(line));
 
 			line = br.readLine();
-			dpix.setValue(new Float(line));
+			dpix.setValue(Float.valueOf(line));
 
 			line = br.readLine();
-			dpiy.setValue(new Float(line));
+			dpiy.setValue(Float.valueOf(line));
 
 			line = br.readLine();
-			borderUp.setValue(new Float(line));
+			borderUp.setValue(Float.valueOf(line));
 
 			line = br.readLine();
-			borderDown.setValue(new Float(line));
+			borderDown.setValue(Float.valueOf(line));
 
 			line = br.readLine();
-			borderLeft.setValue(new Float(line));
+			borderLeft.setValue(Float.valueOf(line));
 
 			line = br.readLine();
-			borderRight.setValue(new Float(line));
+			borderRight.setValue(Float.valueOf(line));
 
 			try {
 				line = br.readLine();
-				this.column_offset.setValue(new Integer(line));
+				this.column_offset.setValue(Integer.valueOf(line));
 
 				line = br.readLine();
-				this.row_offset.setValue(new Integer(line));
+				this.row_offset.setValue(Integer.valueOf(line));
 			} catch (NumberFormatException e) {
 				this.column_offset.setValue(0);
 				this.row_offset.setValue(0);

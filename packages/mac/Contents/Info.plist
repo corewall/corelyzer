@@ -46,7 +46,7 @@
 	<key>LSEnvironment</key>
 	<dict>
 		<key>JAVA_HOME</key>
-		<string>Contents/Frameworks/amazon-corretto-8.jdk/Contents/Home</string>
+		<string>Contents/Frameworks/adoptopenjdk-11.jdk/Contents/Home</string>
 	</dict>
 	<key>Java</key>
 	<dict>
@@ -55,7 +55,7 @@
 :classpath
 		</array>
 		<key>JVMVersion</key>
-		<string>1.8*</string>
+		<string>1.11*</string>
 		<key>MainClass</key>
 		<string>corelyzer.ui.splashscreen.SplashScreenMain</string>
 		<key>Properties</key>
