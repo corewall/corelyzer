@@ -136,9 +136,13 @@ public class FeedTreeNode extends DefaultMutableTreeNode implements Runnable {
 	/**
 	 * {@inheritDoc}
 	 */
-	public Enumeration<FeedTreeNode> children() {
-		return Collections.enumeration(children);
-	}
+	public Enumeration<TreeNode> children() {
+        List<TreeNode> kids = new ArrayList<TreeNode>();
+        for (TreeNode tn : children) {
+            kids.add(tn);
+        }
+		return Collections.enumeration(kids);
+    }
 
 	/**
 	 * Don't allow children?
