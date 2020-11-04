@@ -85,8 +85,8 @@ public class TrimDialog extends JDialog
 		
 		affectedSectionsBox = new JComboBox<String>();
 		final DefaultComboBoxModel<String> affectedSectionsModel = new DefaultComboBoxModel<String>();
+		affectedSectionsModel.addElement("selected and deeper sections");
 		affectedSectionsModel.addElement("selected section only");
-                affectedSectionsModel.addElement("selected and deeper sections");
 		affectedSectionsBox.setModel(affectedSectionsModel);
 		
 		closeButton = new JButton("Close");
@@ -118,7 +118,7 @@ public class TrimDialog extends JDialog
 		if (trimValue != -1.0f)
 			trimField.setText(Float.toString(trimValue));
 		else
-			trimField.setText("0");
+			trimField.setText("???");
 	}
 	
 	private void updateFromToLabel()
