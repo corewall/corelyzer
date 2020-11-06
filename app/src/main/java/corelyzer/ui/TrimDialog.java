@@ -85,8 +85,8 @@ public class TrimDialog extends JDialog
 		
 		affectedSectionsBox = new JComboBox<String>();
 		final DefaultComboBoxModel<String> affectedSectionsModel = new DefaultComboBoxModel<String>();
-		affectedSectionsModel.addElement("selected and deeper sections");
 		affectedSectionsModel.addElement("selected section only");
+                affectedSectionsModel.addElement("selected and deeper sections");
 		affectedSectionsBox.setModel(affectedSectionsModel);
 		
 		closeButton = new JButton("Close");
@@ -118,7 +118,7 @@ public class TrimDialog extends JDialog
 		if (trimValue != -1.0f)
 			trimField.setText(Float.toString(trimValue));
 		else
-			trimField.setText("???");
+			trimField.setText("0");
 	}
 	
 	private void updateFromToLabel()
@@ -174,7 +174,7 @@ public class TrimDialog extends JDialog
 		}
 		
 		final boolean fromBottom = ( beginEndBox.getSelectedIndex() == 0 ); // "bottom"
-		final boolean trimSelAndDeeper = ( affectedSectionsBox.getSelectedIndex() == 0 ); // "selected and deeper sections"
+		final boolean trimSelAndDeeper = ( affectedSectionsBox.getSelectedIndex() == 1 ); // "selected and deeper sections"
 		if ( trimTypeBox.getSelectedIndex() == 1 ) // if adding, swap trim sign
 			trim = -trim;
 		SceneGraph.trimSections(this.selectedTrack, this.selectedTrackSection, trim, fromBottom, trimSelAndDeeper);
