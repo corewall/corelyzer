@@ -1,5 +1,5 @@
 allprojects {
-	version = '2.1.0'
+	version = '2.1.1'
 	group = 'org.corewall'
 }
 
@@ -12,6 +12,8 @@ task clean  {
 	}
 }
 
+def javaRuntimeFile = null // replace with your Java 11 runtime
+
 /**
  * Packaging tasks.	 It may be good to just extend the gradle dist task instead of having a custom task.
  */
@@ -20,15 +22,23 @@ task 'package-check'(dependsOn: [':app:build'])  {
 		def required = file("scenegraph/dist/scenegraph-${version}.jar")
 		if (!required.exists()) {
 			logger.error("!! Missing required scenegraph library or version mismatch.  Expected: scenegraph/dist/scenegraph-${version}.jar")
-			logger.error("!! The library must be generated (or re-generated for this version) via 'gradle :scenegraph:build-jni'")
-			logger.error("!! See scenegraph/README for instructions on how to setup the build environment")
+			logger.error("!! The library must be generated (or re-generated for this version), see scenegraph/README.md for instructions.")
 			throw new Error("Missing required scenegraph library or version mismatch.  Expected: scenegraph/dist/scenegraph-${version}.jar")
+		}
+		def javaRuntimeDir = file("packages/java_runtime")
+		if (!javaRuntimeDir.exists()) {
+			throw new Error("Error: Missing packages/java_runtime directory")
+		}
+		if (javaRuntimeFile == null) {
+			throw new Error("Error: javaRuntimeFile var is null.\nTo resolve, update javaRuntimeFile var with your Java 11 runtime in build.gradle.")
+		}
+		if (javaRuntimeDir.listFiles().find { it.name.equals(javaRuntimeFile) } == null) {
+			throw new Error("Error: Missing Java runtime '${javaRuntimeFile}' in packages/java_runtime")
 		}
 	}
 }
 
-
-task packageLinux(dependsOn: 'package-check') {
+task 'create-working-dir' {
 	def wrk_dir = file('working_dir')
 	if (!wrk_dir.exists()) {
 		mkdir(wrk_dir)
@@ -39,22 +49,26 @@ task packageLinux(dependsOn: 'package-check') {
 	}
 }
 
-/**
- * Package things up as a Mac application bundle
- */
+// 'package' is a misnomer, this task just builds components and creates
+// working_dir for command-line launch of Corelyzer.
+task packageLinux(dependsOn: ['package-check', 'create-working-dir']) { }
+
+
+// Package things up as a macOS/OSX .app bundle
 task packageMac(dependsOn: 'package-check')  {
 	doLast {
 		def app = file('dist/mac/Corelyzer.app')
 		if (app.exists()) {
+			println "Found dist/mac/Corelyzer.app package, copying in latest app/dist, app/deps/mac, scenegraph/dist..."
 			// copy the jars and native libraries
 			copy {
 				into 'dist/mac/Corelyzer.app/Contents/Resources/Java'
 				from 'app/dist'
 				from 'app/deps/mac'
 				from file('scenegraph/dist').listFiles().findAll { it.name.endsWith('.jar') || it.name.endsWith('.jnilib') }
-				from file('plugins').listFiles().findAll { it.name.endsWith('.jar') }
 			}
 		} else {
+			println "No dist/mac/Corelyzer.app found, building from scratch..."
 			mkdir(app)
 
 			// copy the skeleton
@@ -72,6 +86,10 @@ task packageMac(dependsOn: 'package-check')  {
 				into 'dist/mac/Corelyzer.app/Contents/help'
 				from 'packages/base/help'
 			}
+			copy {
+				into 'dist/mac/Corelyzer.app/Contents/plugins'
+				from 'packages/base/plugins'
+			}
 
 			// copy the jars and native libraries
 			copy {
@@ -81,16 +99,11 @@ task packageMac(dependsOn: 'package-check')  {
 				from file('scenegraph/dist').listFiles().findAll { it.name.endsWith('.jar') || it.name.endsWith('.jnilib') }
 			}
 
-			// copy plugins
-			copy {
-				into 'dist/mac/Corelyzer.app/Contents/plugins'
-				from file('plugin_jars').listFiles().findAll { it.name.endsWith('.jar') }
-			}
-
 			// copy Java runtime into bundle
 			copy {
+				from 'packages/java_runtime'
 				into 'dist/mac/Corelyzer.app/Contents/Frameworks'
-				from file('java_runtime')
+				include "${javaRuntimeFile}/**"
 			}
 
 			// update our Info.plist
@@ -101,6 +114,7 @@ task packageMac(dependsOn: 'package-check')  {
 			def text = plist.text.toString()
 			text = text.replaceAll(':version', version) // add our version
 			text = text.replaceAll(':classpath', classpath.join('\n'))
+			text = text.replaceAll(':java_runtime', javaRuntimeFile)
 			plist.write(text)
 
 			// make our app executable

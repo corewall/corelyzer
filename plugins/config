@@ -7,13 +7,13 @@ endif
 # brg 1/23/2012: Should match [root]/build.gradle allprojects.version.
 # Changing manually until I get plugins building under Gradle, at which
 # point we can import those settings and dispense with this.
-CORELYZER_VERSION = 2.1.0
+CORELYZER_VERSION = 2.1.1
 
 export SYSTEM = $(shell uname -s)
 export PROCESSOR = $(shell uname -p)
 
 ifeq ($(SYSTEM),Darwin)
-        CP = ${CW}/scenegraph/dist/scenegraph-$(CORELYZER_VERSION).jar:${CW}/app/deps/gluegen-rt-2.3.2.jar:${CW}/app/deps/jogl-all-2.3.2.jar:${CW}/app/dist/app-$(CORELYZER_VERSION).jar:${CW}/app/deps/i4jruntime-3.2.4.jar
+        CP = ${CW}/scenegraph/dist/scenegraph-$(CORELYZER_VERSION).jar:${CW}/app/deps/gluegen-rt.jar:${CW}/app/deps/jogl-all.jar:${CW}/app/dist/app-$(CORELYZER_VERSION).jar:${CW}/app/deps/i4jruntime-3.2.4.jar
 else
         CP = ${CW}/bin/Corelyzer.jar:${CW}/bin/jars/linux/amd64/jogl.jar
 endif
@@ -24,7 +24,7 @@ endif
 
 # jni native compilation
 COMPILER_FLAGS = -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk -arch x86_64
-ENVP = MACOSX_DEPLOYMENT_TARGET=10.12
+ENVP = MACOSX_DEPLOYMENT_TARGET=10.10
 INCLUDE_DIR = -I. -I./include -I/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/Library/Frameworks/JavaVM.framework/Versions/Current/Headers
 LIBRARY_DIR = -framework JavaVM
 LIBRARIES = -lstdc++ -lpthread

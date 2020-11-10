@@ -46,7 +46,7 @@
 	<key>LSEnvironment</key>
 	<dict>
 		<key>JAVA_HOME</key>
-		<string>Contents/Frameworks/adoptopenjdk-11.jdk/Contents/Home</string>
+		<string>Contents/Frameworks/:java_runtime/Contents/Home</string>
 	</dict>
 	<key>Java</key>
 	<dict>
