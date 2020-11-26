@@ -1,12 +1,9 @@
-
 .gradle/
 
-working_dir/
-
-scenegraph/
-
 app/bin/
-
 app/build/
-
 app/dist/
+
+dist/
+
+working_dir/
