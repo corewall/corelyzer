@@ -55,7 +55,7 @@
 :classpath
 		</array>
 		<key>JVMVersion</key>
-		<string>1.11*</string>
+		<string>11*</string>
 		<key>MainClass</key>
 		<string>corelyzer.ui.splashscreen.SplashScreenMain</string>
 		<key>Properties</key>
