@@ -918,7 +918,7 @@ public class CorelyzerApp extends WindowAdapter implements MouseListener, Startu
 
 	public String getCorelyzerVersion()
 	{
-		String defaultVersion = "2.1.0";
+		String defaultVersion = "2.1.1";
 		String implVersion = this.getClass().getPackage().getImplementationVersion();
 		return (implVersion == null ? defaultVersion : implVersion);
 		// return defaultVersion;
