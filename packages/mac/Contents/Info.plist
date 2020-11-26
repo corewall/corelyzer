@@ -48,7 +48,7 @@
 		<key>JAVA_HOME</key>
 		<string>Contents/Frameworks/:java_runtime/Contents/Home</string>
 	</dict>
-	<key>Java</key>
+	<key>JavaX</key>
 	<dict>
 		<key>ClassPath</key>
 		<array>
