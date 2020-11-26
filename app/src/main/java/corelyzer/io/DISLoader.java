@@ -459,16 +459,16 @@ public class DISLoader {
 										System.out.println("[URL OK] the path is: " + relativePath);
 										System.out.println("[URL OK] the file is: " + fff);
 
-										// replace with local prefix + path
-										boolean MAC_OS_X = System.getProperty("os.name").toLowerCase().startsWith("mac os x");
-										if (MAC_OS_X) {
-
-										} else { // assume Windows only
+										// replace with local prefix + pathos.name
+										boolean WIN = System.getProperty("os.name").toLowerCase().contains("win");
+										if (WIN) { // assume Windows only
 											// "FILE://C:\DIS\Images\keke.jpg"
 											imageUrl = "file:///" + app.preferences().getProperty("dis.prefix") + sp + imageUrl.substring(10);
 
 											System.out.println("[DISLoader] !Mac's imageUrl: " + imageUrl);
-										}
+										} else {
+                                                                                    
+                                                                                }
 									} catch (MalformedURLException ex) {
 										// might be the case of
 										// "FILE://C:\DIS\Images\keke.jpg" in
