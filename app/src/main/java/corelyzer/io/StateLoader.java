@@ -1358,12 +1358,13 @@ public class StateLoader {
 		sectionOffset = SceneGraph.getSectionYPos(trackId, sectionId);
 		y = y + trackOffset + sectionOffset;
 
-		// Check for duplicates. If found, ignoer this one.
-		boolean isDuplicate = SceneGraph.isDuplicateAnnotation(trackId, sectionId, x, y, v0, v1, v2, v3, urn, local);
-
+		// Check for duplicates. If found, ignore this one.
+		// brg 3/30/2021 Looks like annotation elements are added to the core image
+		// and associated dataset elements in the CML file, so the below "ignore" message
+		// comes up frequently when loading sessions with annotations and plotted data.
+		final boolean isDuplicate = SceneGraph.isDuplicateAnnotation(trackId, sectionId, x, y, v0, v1, v2, v3, urn, local);
 		if (isDuplicate) {
 			System.out.println("-> Ignore this duplicate annotation: '" + urn + "'.");
-
 			return;
 		}
 
