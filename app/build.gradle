@@ -1,8 +1,7 @@
 apply plugin: 'java'
-apply plugin: 'eclipse'
 
-sourceCompatibility = 1.8
-targetCompatibility = 1.8
+sourceCompatibility = 1.11
+targetCompatibility = 1.11
 
 jar.doFirst {
 	manifest {
@@ -20,6 +19,7 @@ repositories {
 configurations {
 	all*.exclude group:'asm'
 	all*.exclude group:'ant'
+	all*.exclude group: 'xml-apis'
 }
 
 dependencies {
