@@ -84,7 +84,7 @@ public class SectionIDParserFactory {
             "333_1_AA_1_1"
         };
         String[] default_ids = {
-            // valid IDs
+            // IDs with at least one of - or _ can be parsed
             "1-1",
             "1A-1b-1CXZ",
             "a-b-C",
@@ -93,7 +93,9 @@ public class SectionIDParserFactory {
             "d1_e12_xx_1000_cow",
             "EXP10-SITE9-HOLE5_CORE3_SEC2",
             "A_B-C_D-E_F-G",
-            // invalid IDs
+            // as a fallback, all other IDs will be returned in their entirety
+            "foobar",
+            "Super Long Nonstandard Hole Name",
             "1A", // must be at least two components separated by - or _
             "1-B--C" // only a single - or _ can separate each pair of components
         };

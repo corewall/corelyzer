@@ -87,8 +87,9 @@ class ICDPSectionParser extends SectionIDParser {
 }
 
 // Last resort when a section name doesn't match any known naming conventions.
-// Split on either - or _.  Make no other attempt to split components e.g. on
-// alpha and numeric boundaries.
+// Split on - or _ if present.  Make no other attempt to split components e.g. on
+// alpha and numeric boundaries. If input string doesn't contain - or _, return
+// entire string.
 class DefaultSectionParser extends SectionIDParser {
     public DefaultSectionParser() {
         super();
@@ -98,10 +99,7 @@ class DefaultSectionParser extends SectionIDParser {
 
     @Override
     public boolean matches(String secid) {
-		StringTokenizer tokenizer = new StringTokenizer(secid, "-_");
-        final int tokenCount = tokenizer.countTokens();
-        // use pattern to ensure pairs of components are separated by a single - or _
-        return tokenCount > 1 && pattern.matcher(secid).matches();
+        return true;
     }
 
     // Best we can do is to guess meaning of components, assuming the section
@@ -129,6 +127,8 @@ class DefaultSectionParser extends SectionIDParser {
                     }
                 }
             }
+        } else { // can't parse anything, return entire string
+            result = secid;
         }
         return result;
     }
