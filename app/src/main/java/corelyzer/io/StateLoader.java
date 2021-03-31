@@ -56,6 +56,7 @@ import corelyzer.data.lists.CRDefaultListModel;
 import corelyzer.graphics.SceneGraph;
 import corelyzer.helper.URLRetrieval;
 import corelyzer.ui.CorelyzerApp;
+import corelyzer.ui.SwingSafeDirectoryChooser;
 import corelyzer.util.FileUtility;
 
 @SuppressWarnings({"unused"}) // stifle two goofy dead code warnings, find on "suppressed"
@@ -388,17 +389,9 @@ public class StateLoader {
 							if (result == 2) { // select...
 								// show file browser
 								File sessionFileParent = new File(stateFilename).getParentFile();
-
-								JFileChooser chooser = new JFileChooser(datadirectory);
-								chooser.setCurrentDirectory(sessionFileParent);
-								chooser.setDialogTitle("Select directory for image files");
-								chooser.resetChoosableFileFilters();
-								chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-								chooser.setMultiSelectionEnabled(false);
-								int retval = chooser.showOpenDialog(app.getMainFrame());
-
+								final int retval = SwingSafeDirectoryChooser.chooseFile(sessionFileParent, app.getMainFrame(), "Select directory for image files");
 								if (retval == JFileChooser.APPROVE_OPTION) {
-									File f = chooser.getSelectedFile();
+									File f = SwingSafeDirectoryChooser.selectedDir;										
 									datadirectory = f.getAbsolutePath();
 									local = datadirectory + sp + fptr.getName();
 									fptr = new File(local);
@@ -762,18 +755,10 @@ public class StateLoader {
 
 					if (result == 2) { // TODO more about returns
 						// show file browser
-						File sessionFileParent = new File(stateFilename).getParentFile();
-						JFileChooser chooser = new JFileChooser(datadirectory);
-						chooser.setCurrentDirectory(sessionFileParent);
-
-						chooser.setDialogTitle("Select directory for data files");
-						chooser.resetChoosableFileFilters();
-						chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-						chooser.setMultiSelectionEnabled(false);
-						int retval = chooser.showOpenDialog(app.getMainFrame());
-
+						final File sessionFileParent = new File(stateFilename).getParentFile();
+						final int retval = SwingSafeDirectoryChooser.chooseFile(sessionFileParent, app.getMainFrame(), "Select directory for data files");
 						if (retval == JFileChooser.APPROVE_OPTION) {
-							File f = chooser.getSelectedFile();
+							File f = SwingSafeDirectoryChooser.selectedDir;			
 							datadirectory = f.getAbsolutePath();
 							filename = datadirectory + sp + fptr.getName();
 							fptr = new File(filename);
