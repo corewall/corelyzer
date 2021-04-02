@@ -402,43 +402,22 @@ void render_marker(Canvas *c, AnnotationMarker *m) {
     }
 
     // Draw marker icon
-    // glBegin(GL_QUADS);
-    // {
-    //     float scale_x = c->dpi_x / DEFAULT_MARKER_DPI_X;
-    //     float scale_y = c->dpi_y / DEFAULT_MARKER_DPI_Y;
-    //     glScalef( scale_x, scale_y, 1.0f );
-    //     {
-    //         glColor3f(0.0f, 1.0f, 0.0f);
-    //         glTexCoord2f( m->ultex[0], m->lrtex[1] );
-    //             glVertex3f( 0,    0,    0);
-    //         glTexCoord2f( m->ultex[0], m->ultex[1] );
-    //             glVertex3f( 0,    m->h * getMarkerScale(), 0);
-    //         glTexCoord2f( m->lrtex[0], m->ultex[1] );
-    //             glVertex3f( m->w * getMarkerScale(),
-    //                         m->h * getMarkerScale(), 0);
-    //         glTexCoord2f( m->lrtex[0], m->lrtex[1] );
-    //             glVertex3f( m->w* getMarkerScale(), 0,    0);
-    //     }
-    //     glScalef( 1.0f / scale_x, 1.0f / scale_y, 1.0f );
-    // }
-    // glEnd();
-
-    // glClearColor(1,1,0,0);
-    // glClear(GL_COLOR_BUFFER_BIT);
-    glBindTexture(GL_TEXTURE_2D, 0);  // must unbind texture or normal color won't draw!
-    glBegin(GL_TRIANGLES);
+    glBegin(GL_QUADS);
     {
         float scale_x = c->dpi_x / DEFAULT_MARKER_DPI_X;
         float scale_y = c->dpi_y / DEFAULT_MARKER_DPI_Y;
         glScalef(scale_x, scale_y, 1.0f);
         {
-            glColor3f(0.0f, 1.0f, 0.0f);
-            glVertex2f(0, 0);
-            glVertex2f(m->w * getMarkerScale() / 2.0f, m->h * getMarkerScale());
-            glVertex2f(m->w * getMarkerScale(), 0);
+            glTexCoord2f(m->ultex[0], m->lrtex[1]);
+            glVertex3f(0, 0, 0);
+            glTexCoord2f(m->ultex[0], m->ultex[1]);
+            glVertex3f(0, m->h * getMarkerScale(), 0);
+            glTexCoord2f(m->lrtex[0], m->ultex[1]);
+            glVertex3f(m->w * getMarkerScale(), m->h * getMarkerScale(), 0);
+            glTexCoord2f(m->lrtex[0], m->lrtex[1]);
+            glVertex3f(m->w * getMarkerScale(), 0, 0);
         }
         glScalef(1.0f / scale_x, 1.0f / scale_y, 1.0f);
-        printf("m->h = %f, m->w = %f, scale = %f\n", m->h, m->w, getMarkerScale());
     }
     glEnd();
 
