@@ -24,27 +24,28 @@
  *
  *****************************************************************************/
 // #include "shaders.h"
-#include "common.h"
-#include "corelyzer_graphics_SceneGraph.h"
 #include "annotationmarker.h"
 #include "canvas.h"
-#include "trackscene.h"
-#include "textureresource_ex.h"
+#include "common.h"
+#include "corelyzer_graphics_SceneGraph.h"
 #include "coresection.h"
-#include "model.h"
 #include "dataset.h"
-#include "graph.h"
 #include "fontsys.h"
 #include "freedraw.h"
+#include "graph.h"
+#include "model.h"
+#include "textureresource_ex.h"
+#include "trackscene.h"
 
 #ifdef linux
 #include "string.h"
 #endif
 
-#include <vector>
-#include <iostream>
 #include <math.h>
+
 #include <exception>
+#include <iostream>
+#include <vector>
 
 using namespace std;
 
@@ -111,8 +112,7 @@ static float allScale = 1.0f;
 //************************** JNI FUNCTIONS ********************************//
 
 #ifdef __cplusplus
-extern "C"
-{
+extern "C" {
 #endif
 
 // james addition
@@ -121,12 +121,9 @@ extern "C"
 * Method:    setMode
 * Signature: (I)V
 */
-JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setMode(JNIEnv *jenv, jclass jcls, jint mode)
-{
-
+JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setMode(JNIEnv *jenv, jclass jcls, jint mode) {
     // for each canvas, reset measure point number
-    for (int id = 0; id < num_canvases(); ++id)
-    {
+    for (int id = 0; id < num_canvases(); ++id) {
         if (!is_canvas(id))
             continue;
         set_canvas_mode(id, mode);
@@ -138,13 +135,10 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setMode(JNIEnv *jenv, 
 * Method:    addMeasurePoint
 * Signature: (FF)V
 */
-JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_addMeasurePoint(JNIEnv *jenv, jclass jcls, jfloat x, jfloat y)
-{
-
+JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_addMeasurePoint(JNIEnv *jenv, jclass jcls, jfloat x, jfloat y) {
     // for each canvas, add measure point
     int npoint = 0;
-    for (int id = 0; id < num_canvases(); ++id)
-    {
+    for (int id = 0; id < num_canvases(); ++id) {
         if (!is_canvas(id))
             continue;
         npoint = add_canvas_measurepoint(id, x, y);
@@ -158,12 +152,9 @@ JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_addMeasurePoint(JNIEnv
 * Method:    setMeasurePoint
 * Signature: (FFFF)I
 */
-JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setMeasurePoint(JNIEnv *jenv, jclass jcls, jfloat x1, jfloat y1, jfloat x2, jfloat y2)
-{
-
+JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setMeasurePoint(JNIEnv *jenv, jclass jcls, jfloat x1, jfloat y1, jfloat x2, jfloat y2) {
     // for each canvas, set measure point
-    for (int id = 0; id < num_canvases(); ++id)
-    {
+    for (int id = 0; id < num_canvases(); ++id) {
         if (!is_canvas(id))
             continue;
         set_canvas_measurepoint(id, x1, y1, x2, y2);
@@ -175,11 +166,9 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setMeasurePoint(JNIEnv
 * Method:    addClastPoint1
 * Signature: (FF)I
 */
-JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_addClastPoint1(JNIEnv *aEnv, jclass aClass, jfloat x_pos, jfloat y_pos)
-{
+JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_addClastPoint1(JNIEnv *aEnv, jclass aClass, jfloat x_pos, jfloat y_pos) {
     // for each canvas, add 1st clast point
-    for (int id = 0; id < num_canvases(); ++id)
-    {
+    for (int id = 0; id < num_canvases(); ++id) {
         if (!is_canvas(id))
             continue;
         set_clast_1st_point(id, x_pos, y_pos);
@@ -191,11 +180,9 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_addClastPoint1(JNIEnv 
 * Method:    addClastPoint2
 * Signature: (FF)V
 */
-JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_addClastPoint2(JNIEnv *aEnv, jclass aClass, jfloat x_pos, jfloat y_pos)
-{
+JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_addClastPoint2(JNIEnv *aEnv, jclass aClass, jfloat x_pos, jfloat y_pos) {
     // for each canvas, add 2nd clast point
-    for (int id = 0; id < num_canvases(); ++id)
-    {
+    for (int id = 0; id < num_canvases(); ++id) {
         if (!is_canvas(id))
             continue;
         set_clast_2nd_point(id, x_pos, y_pos);
@@ -207,19 +194,15 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_addClastPoint2(JNIEnv 
 * Method:    startUp
 * Signature: ()V
 */
-JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_startUp(JNIEnv *jenv, jclass jcls)
-{
-
+JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_startUp(JNIEnv *jenv, jclass jcls) {
     printf("\n--- SceneGraph startUp called ---\n");
     if (default_track_scene < 0)
         default_track_scene = create_track_scene();
 
-    if (default_track_scene >= 0)
-    {
+    if (default_track_scene >= 0) {
         printf("Default Track Scene Made & Bound: %d \n", default_track_scene);
         bind_scene(default_track_scene);
-    }
-    else
+    } else
         printf("Unable to make Default Track Scene\n");
 
     // set the default block directory to imgblocks
@@ -242,8 +225,7 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_startUp(JNIEnv *jenv, 
 * Method:    closeDown
 * Signature: ()V
 */
-JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_closeDown(JNIEnv *jenv, jclass jcls)
-{
+JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_closeDown(JNIEnv *jenv, jclass jcls) {
     if (default_block_dir)
         free(default_block_dir);
 
@@ -269,8 +251,7 @@ if (markers_initialized)
 * Method:    setTexBlockDirectory
 * Signature: (Ljava/lang/String;)V
 */
-JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setTexBlockDirectory(JNIEnv *jenv, jclass cls, jstring abspath)
-{
+JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setTexBlockDirectory(JNIEnv *jenv, jclass cls, jstring abspath) {
     int i;
     i = jenv->GetStringLength(abspath);
     if (i <= 1)
@@ -288,8 +269,7 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setTexBlockDirectory(J
 * Method:    getImageName
 * Signature: (V)C
 */
-JNIEXPORT jstring JNICALL Java_corelyzer_graphics_SceneGraph_getTexBlockDirectory(JNIEnv *jenv, jclass jcls)
-{
+JNIEXPORT jstring JNICALL Java_corelyzer_graphics_SceneGraph_getTexBlockDirectory(JNIEnv *jenv, jclass jcls) {
     return jenv->NewStringUTF(default_block_dir);
 }
 
@@ -298,9 +278,7 @@ JNIEXPORT jstring JNICALL Java_corelyzer_graphics_SceneGraph_getTexBlockDirector
 * Method:    panScene
 * Signature: (FF)V
 */
-JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_panScene(JNIEnv *jenv, jclass jcls, jfloat dx, jfloat dy)
-{
-
+JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_panScene(JNIEnv *jenv, jclass jcls, jfloat dx, jfloat dy) {
 #ifdef DEBUG
     printf("\n--- SceneGraph panScene called ---\n");
     printf("Incoming delta %f, %f\n", dx, dy);
@@ -313,8 +291,7 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_panScene(JNIEnv *jenv,
 * Method:    scaleScene
 * Signature: (F)V
 */
-JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_scaleScene(JNIEnv *jenv, jclass jcls, jfloat ds)
-{
+JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_scaleScene(JNIEnv *jenv, jclass jcls, jfloat ds) {
     scale_scene(ds);
 }
 
@@ -323,9 +300,7 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_scaleScene(JNIEnv *jen
 * Method:    positionScene
 * Signature: (FF)V
 */
-JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_positionScene(JNIEnv *jenv, jclass jcls, jfloat x, jfloat y)
-{
-
+JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_positionScene(JNIEnv *jenv, jclass jcls, jfloat x, jfloat y) {
     float dx, dy;
 
     dx = get_scene_center_x();
@@ -337,8 +312,7 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_positionScene(JNIEnv *
     translate_scene_center(dx, dy);
 
     // position mouse to stay where they are in screen space
-    for (int id = 0; id < num_canvases(); ++id)
-    {
+    for (int id = 0; id < num_canvases(); ++id) {
         if (!is_canvas(id))
             continue;
 
@@ -354,11 +328,8 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_positionScene(JNIEnv *
 * Method:    positionMouse
 * Signature: (FF)V
 */
-JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_positionMouse(JNIEnv *jenv, jclass jcls, jfloat x, jfloat y)
-{
-
-    for (int id = 0; id < num_canvases(); ++id)
-    {
+JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_positionMouse(JNIEnv *jenv, jclass jcls, jfloat x, jfloat y) {
+    for (int id = 0; id < num_canvases(); ++id) {
         if (!is_canvas(id))
             continue;
         set_canvas_mouse(id, x, y);
@@ -370,8 +341,7 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_positionMouse(JNIEnv *
 * Method:    setSceneScale
 * Signature: (F)V
 */
-JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setSceneScale(JNIEnv *jenv, jclass jcls, jfloat s)
-{
+JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setSceneScale(JNIEnv *jenv, jclass jcls, jfloat s) {
 }
 
 /*
@@ -379,9 +349,7 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setSceneScale(JNIEnv *
 * Method:    getSceneCenterX
 * Signature: ()F
 */
-JNIEXPORT jfloat JNICALL Java_corelyzer_graphics_SceneGraph_getSceneCenterX(JNIEnv *jenv, jclass jcls)
-{
-
+JNIEXPORT jfloat JNICALL Java_corelyzer_graphics_SceneGraph_getSceneCenterX(JNIEnv *jenv, jclass jcls) {
     return get_scene_center_x();
 }
 
@@ -390,9 +358,7 @@ JNIEXPORT jfloat JNICALL Java_corelyzer_graphics_SceneGraph_getSceneCenterX(JNIE
 * Method:    getSceneCenterY
 * Signature: ()F
 */
-JNIEXPORT jfloat JNICALL Java_corelyzer_graphics_SceneGraph_getSceneCenterY(JNIEnv *jenv, jclass jcls)
-{
-
+JNIEXPORT jfloat JNICALL Java_corelyzer_graphics_SceneGraph_getSceneCenterY(JNIEnv *jenv, jclass jcls) {
     return get_scene_center_y();
 }
 
@@ -402,9 +368,7 @@ JNIEXPORT jfloat JNICALL Java_corelyzer_graphics_SceneGraph_getSceneCenterY(JNIE
 * Signature: (IIII)I
 */
 JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_genCanvas(JNIEnv *jenv, jclass jcls, jfloat x, jfloat y, jint width, jint height,
-                                                                    jfloat dpix, jfloat dpiy)
-{
-
+                                                                    jfloat dpix, jfloat dpiy) {
     int id = create_canvas(x, y, (float)width, (float)height, dpix, dpiy);
     if (id >= 0)
         update_center_point();
@@ -416,9 +380,7 @@ JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_genCanvas(JNIEnv *jenv
 * Method:    numCanvases
 * Signature: ()I
 */
-JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_numCanvases(JNIEnv *jenv, jclass jcls)
-{
-
+JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_numCanvases(JNIEnv *jenv, jclass jcls) {
     return num_canvases();
 }
 
@@ -427,9 +389,7 @@ JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_numCanvases(JNIEnv *je
 * Method:    destroyCanvases
 * Signature: ()V
 */
-JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_destroyCanvases(JNIEnv *jenv, jclass jcls)
-{
-
+JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_destroyCanvases(JNIEnv *jenv, jclass jcls) {
     int i;
     for (i = 0; i < num_canvases(); ++i)
         free_canvas(i);
@@ -442,8 +402,7 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_destroyCanvases(JNIEnv
 * Method:    debugKey
 * Signature: (I)V
 */
-JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_debugKey(JNIEnv *jenv, jclass jcls, jint keyId)
-{
+JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_debugKey(JNIEnv *jenv, jclass jcls, jint keyId) {
     // 8/16/2012 brg: Leaving around as mechanism to pass keystrokes to
     // scenegraph for debugging purposes.
 }
@@ -453,12 +412,10 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_debugKey(JNIEnv *jenv,
 * Method:    render
 * Signature: (I)V
 */
-JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_render(JNIEnv *jenv, jclass jcls, jint canvas_id)
-{
+JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_render(JNIEnv *jenv, jclass jcls, jint canvas_id) {
     set_current_jnienv(jenv);
 
-    if (!markers_initialized)
-    {
+    if (!markers_initialized) {
         printf("Initializing markers\n");
         init_section_annotation_markers();
         markers_initialized = true;
@@ -472,8 +429,7 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_render(JNIEnv *jenv, j
 * Method:    setRenderMode
 * Signature: (I)V
 */
-JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setRenderMode(JNIEnv *jenv, jclass jclass, jint renderMode)
-{
+JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setRenderMode(JNIEnv *jenv, jclass jclass, jint renderMode) {
     set_render_mode(renderMode);
 }
 
@@ -482,8 +438,7 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setRenderMode(JNIEnv *
 * Method:    getRenderMode
 * Signature: ()I
 */
-JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_getRenderMode(JNIEnv *, jclass)
-{
+JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_getRenderMode(JNIEnv *, jclass) {
     return get_render_mode();
 }
 
@@ -492,8 +447,7 @@ JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_getRenderMode(JNIEnv *
 * Method:    setCanvasBottomRow
 * Signature: (IZ)V
 */
-JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setCanvasBottomRow(JNIEnv *jenv, jclass jcls, jint canvas, jboolean flag)
-{
+JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setCanvasBottomRow(JNIEnv *jenv, jclass jcls, jint canvas, jboolean flag) {
     if (flag)
         set_canvas_bottom_row(canvas, true);
     else
@@ -505,8 +459,7 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setCanvasBottomRow(JNI
 * Method:    setCanvasRowcAndColumn
 * Signature: (II)V
 */
-JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setCanvasRowcAndColumn(JNIEnv *jenv, jclass jcls, jint nrows, jint ncols)
-{
+JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setCanvasRowcAndColumn(JNIEnv *jenv, jclass jcls, jint nrows, jint ncols) {
     set_canvas_rows_and_columns(nrows, ncols);
 }
 
@@ -515,8 +468,7 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setCanvasRowcAndColumn
 * Method:    setCanvasFirstColumn
 * Signature: (IZ)V
 */
-JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setCanvasFirstColumn(JNIEnv *jenv, jclass jcls, jint canvas, jboolean flag)
-{
+JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setCanvasFirstColumn(JNIEnv *jenv, jclass jcls, jint canvas, jboolean flag) {
     if (flag)
         set_canvas_first_column(canvas, true);
     else
@@ -528,9 +480,7 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setCanvasFirstColumn(J
 * Method:    markCanvasDrawCrossCoreScale
 * Signature: (I)V
 */
-JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_enableCanvasCrossCoreScale(JNIEnv *env, jclass jcls, jint canvas, jboolean flag)
-{
-
+JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_enableCanvasCrossCoreScale(JNIEnv *env, jclass jcls, jint canvas, jboolean flag) {
     if (flag)
         set_canvas_draw_cross_core_scale(canvas, true);
     else
@@ -542,11 +492,8 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_enableCanvasCrossCoreS
 * Method:    enableCanvasGrid
 * Signature: (IZ)V
 */
-JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_enableCanvasGrid(JNIEnv *env, jclass jcls, jboolean flag)
-{
-
-    for (int i = 0; i < num_canvases(); ++i)
-    {
+JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_enableCanvasGrid(JNIEnv *env, jclass jcls, jboolean flag) {
+    for (int i = 0; i < num_canvases(); ++i) {
         if (flag)
             set_canvas_draw_grid(i, true);
         else
@@ -559,9 +506,7 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_enableCanvasGrid(JNIEn
 * Method:    setCanvasGridColor
 * Signature: (IFFF)V
 */
-JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setCanvasGridColor(JNIEnv *env, jclass jcls, jfloat r, jfloat g, jfloat b)
-{
-
+JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setCanvasGridColor(JNIEnv *env, jclass jcls, jfloat r, jfloat g, jfloat b) {
     for (int i = 0; i < num_canvases(); ++i)
         set_canvas_grid_color(i, r, g, b);
 }
@@ -571,9 +516,7 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setCanvasGridColor(JNI
 * Method:    setCanvasGridSize
 * Signature: (IF)V
 */
-JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setCanvasGridSize(JNIEnv *env, jclass jcls, jfloat size)
-{
-
+JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setCanvasGridSize(JNIEnv *env, jclass jcls, jfloat size) {
     for (int i = 0; i < num_canvases(); ++i)
         set_canvas_grid_size(i, size);
 }
@@ -583,9 +526,7 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setCanvasGridSize(JNIE
 * Method:    setCanvasGridThickness
 * Signature: (I)V
 */
-JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setCanvasGridThickness(JNIEnv *env, jclass jcls, jint thick)
-{
-
+JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setCanvasGridThickness(JNIEnv *env, jclass jcls, jint thick) {
     for (int i = 0; i < num_canvases(); ++i)
         set_canvas_grid_thickness(i, thick);
 }
@@ -595,9 +536,7 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setCanvasGridThickness
 * Method:    setCanvasGridType
 * Signature: (II)V
 */
-JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setCanvasGridType(JNIEnv *env, jclass jcls, jint type)
-{
-
+JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setCanvasGridType(JNIEnv *env, jclass jcls, jint type) {
     for (int i = 0; i < num_canvases(); ++i)
         set_canvas_grid_type(i, type);
 }
@@ -607,13 +546,10 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setCanvasGridType(JNIE
 * Method:    orientSceneVertical
 * Signature: (Z)V
 */
-JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_orientSceneVertical(JNIEnv *jenv, jclass jcls, jboolean flag)
-{
-
+JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_orientSceneVertical(JNIEnv *jenv, jclass jcls, jboolean flag) {
     int i;
 
-    for (i = 0; i < num_canvases(); i++)
-    {
+    for (i = 0; i < num_canvases(); i++) {
         /* tell each one to align the scene vertically */
         if (flag)
             orient_canvas_vertically(i);
@@ -627,9 +563,7 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_orientSceneVertical(JN
 * Method:    getCanvasPositionX
 * Signature: (I)F
 */
-JNIEXPORT jfloat JNICALL Java_corelyzer_graphics_SceneGraph_getCanvasPositionX(JNIEnv *jenv, jclass jcls, jint canvas)
-{
-
+JNIEXPORT jfloat JNICALL Java_corelyzer_graphics_SceneGraph_getCanvasPositionX(JNIEnv *jenv, jclass jcls, jint canvas) {
     float x, y, z;
     int camera;
     if (!is_canvas(canvas))
@@ -647,9 +581,7 @@ JNIEXPORT jfloat JNICALL Java_corelyzer_graphics_SceneGraph_getCanvasPositionX(J
 * Method:    getCanvasPositionY
 * Signature: (I)F
 */
-JNIEXPORT jfloat JNICALL Java_corelyzer_graphics_SceneGraph_getCanvasPositionY(JNIEnv *jenv, jclass jcls, jint canvas)
-{
-
+JNIEXPORT jfloat JNICALL Java_corelyzer_graphics_SceneGraph_getCanvasPositionY(JNIEnv *jenv, jclass jcls, jint canvas) {
     float x, y, z;
     int camera;
     if (!is_canvas(canvas))
@@ -667,9 +599,7 @@ JNIEXPORT jfloat JNICALL Java_corelyzer_graphics_SceneGraph_getCanvasPositionY(J
 * Method:    getCanvasWidth
 * Signature: (I)F
 */
-JNIEXPORT jfloat JNICALL Java_corelyzer_graphics_SceneGraph_getCanvasWidth(JNIEnv *jenv, jclass jcls, jint canvas)
-{
-
+JNIEXPORT jfloat JNICALL Java_corelyzer_graphics_SceneGraph_getCanvasWidth(JNIEnv *jenv, jclass jcls, jint canvas) {
     float w, h;
     if (!is_canvas(canvas))
         return 0.0;
@@ -684,9 +614,7 @@ JNIEXPORT jfloat JNICALL Java_corelyzer_graphics_SceneGraph_getCanvasWidth(JNIEn
 * Method:    getCanvasHeight
 * Signature: (I)F
 */
-JNIEXPORT jfloat JNICALL Java_corelyzer_graphics_SceneGraph_getCanvasHeight(JNIEnv *jenv, jclass jcls, jint canvas)
-{
-
+JNIEXPORT jfloat JNICALL Java_corelyzer_graphics_SceneGraph_getCanvasHeight(JNIEnv *jenv, jclass jcls, jint canvas) {
     float w, h;
     if (!is_canvas(canvas))
         return 0.0;
@@ -701,9 +629,7 @@ JNIEXPORT jfloat JNICALL Java_corelyzer_graphics_SceneGraph_getCanvasHeight(JNIE
 * Method:    getCanvasDPIX
 * Signature: (I)F
 */
-JNIEXPORT jfloat JNICALL Java_corelyzer_graphics_SceneGraph_getCanvasDPIX(JNIEnv *jenv, jclass jcls, jint canvas)
-{
-
+JNIEXPORT jfloat JNICALL Java_corelyzer_graphics_SceneGraph_getCanvasDPIX(JNIEnv *jenv, jclass jcls, jint canvas) {
     float dpix, dpiy;
 
     if (!is_canvas(canvas))
@@ -719,9 +645,7 @@ JNIEXPORT jfloat JNICALL Java_corelyzer_graphics_SceneGraph_getCanvasDPIX(JNIEnv
 * Method:    getCanvasDPIY
 * Signature: (I)F
 */
-JNIEXPORT jfloat JNICALL Java_corelyzer_graphics_SceneGraph_getCanvasDPIY(JNIEnv *jenv, jclass jcls, jint canvas)
-{
-
+JNIEXPORT jfloat JNICALL Java_corelyzer_graphics_SceneGraph_getCanvasDPIY(JNIEnv *jenv, jclass jcls, jint canvas) {
     float dpix, dpiy;
 
     if (!is_canvas(canvas))
@@ -737,8 +661,7 @@ JNIEXPORT jfloat JNICALL Java_corelyzer_graphics_SceneGraph_getCanvasDPIY(JNIEnv
 * Method:    addTrack
 * Signature: (Ljava/lang/String;Ljava/lang/String;)I
 */
-JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_addTrack(JNIEnv *jenv, jclass jcls, jstring jSessionName, jstring jTrackName)
-{
+JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_addTrack(JNIEnv *jenv, jclass jcls, jstring jSessionName, jstring jTrackName) {
     char *sessionName;
     char *trackName;
     int length = -1;
@@ -765,9 +688,7 @@ JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_addTrack(JNIEnv *jenv,
 * Method:    deleteTrack
 * Signature: (I)V
 */
-JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_deleteTrack(JNIEnv *jenv, jclass jcls, jint track)
-{
-
+JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_deleteTrack(JNIEnv *jenv, jclass jcls, jint track) {
     // printf("\n--- Delete Track called ---\n");
     free_track(default_track_scene, track);
 
@@ -781,8 +702,7 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_deleteTrack(JNIEnv *je
 * Method:    highlightTrack
 * Signature: (I)V
 */
-JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setTrackHighlight(JNIEnv *jenv, jclass jcls, jint track, jboolean isOn)
-{
+JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setTrackHighlight(JNIEnv *jenv, jclass jcls, jint track, jboolean isOn) {
     // highlight the track we want
     TrackSceneNode *tsn = get_scene_track(default_track_scene, track);
     if (!tsn)
@@ -796,8 +716,7 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setTrackHighlight(JNIE
 * Method:    setTrackHighlightColor
 * Signature: (IFFF)V
 */
-JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setTrackHighlightColor(JNIEnv *jenv, jclass jclass, jint trackId, jfloat r, jfloat g, jfloat b)
-{
+JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setTrackHighlightColor(JNIEnv *jenv, jclass jclass, jint trackId, jfloat r, jfloat g, jfloat b) {
     TrackSceneNode *t = get_scene_track(default_track_scene, trackId);
     if (!t)
         return;
@@ -810,8 +729,7 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setTrackHighlightColor
 * Method:    setTrackShow
 * Signature: (IZ)V
 */
-JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setTrackShow(JNIEnv *jenv, jclass jcls, jint trackId, jboolean isShow)
-{
+JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setTrackShow(JNIEnv *jenv, jclass jcls, jint trackId, jboolean isShow) {
     TrackSceneNode *tsn;
 
     tsn = get_scene_track(default_track_scene, trackId);
@@ -826,8 +744,7 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setTrackShow(JNIEnv *j
 * Method:    getTrackShow
 * Signature: (I)Z
 */
-JNIEXPORT jboolean JNICALL Java_corelyzer_graphics_SceneGraph_getTrackShow(JNIEnv *jenv, jclass jcls, jint track)
-{
+JNIEXPORT jboolean JNICALL Java_corelyzer_graphics_SceneGraph_getTrackShow(JNIEnv *jenv, jclass jcls, jint track) {
     TrackSceneNode *tsn;
 
     tsn = get_scene_track(default_track_scene, track);
@@ -842,15 +759,12 @@ JNIEXPORT jboolean JNICALL Java_corelyzer_graphics_SceneGraph_getTrackShow(JNIEn
 * Method:    moveTrack
 * Signature: (IFF)V
 */
-JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_moveTrack(JNIEnv *jenv, jclass jcls, jint track, jfloat dx, jfloat dy)
-{
-
+JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_moveTrack(JNIEnv *jenv, jclass jcls, jint track, jfloat dx, jfloat dy) {
     TrackSceneNode *tsn = get_scene_track(default_track_scene, track);
     if (!tsn)
         return;
 
-    if (tsn->movable)
-    {
+    if (tsn->movable) {
         tsn->px += dx;
     }
 
@@ -862,8 +776,7 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_moveTrack(JNIEnv *jenv
 * Method:    moveTrackAbsX
 * Signature: (IF)V
 */
-JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_moveTrackAbsX(JNIEnv *jenv, jclass jcls, jint track, jfloat absX)
-{
+JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_moveTrackAbsX(JNIEnv *jenv, jclass jcls, jint track, jfloat absX) {
     TrackSceneNode *tsn = get_scene_track(default_track_scene, track);
     if (!tsn)
         return;
@@ -876,8 +789,7 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_moveTrackAbsX(JNIEnv *
 * Method:    moveTrackAbsY
 * Signature: (IF)V
 */
-JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_moveTrackAbsY(JNIEnv *jenv, jclass jcls, jint track, jfloat absY)
-{
+JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_moveTrackAbsY(JNIEnv *jenv, jclass jcls, jint track, jfloat absY) {
     TrackSceneNode *tsn = get_scene_track(default_track_scene, track);
     if (!tsn)
         return;
@@ -890,8 +802,7 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_moveTrackAbsY(JNIEnv *
 * Method:    renameTrack
 * Signature: (ILjava/lang/String;)V
 */
-JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_renameTrack(JNIEnv *jenv, jclass jclass, jint trackId, jstring newName)
-{
+JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_renameTrack(JNIEnv *jenv, jclass jclass, jint trackId, jstring newName) {
     TrackSceneNode *t = get_scene_track(default_track_scene, trackId);
     if (!t)
         return;
@@ -917,8 +828,7 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_renameTrack(JNIEnv *je
 * Method:    getImageName
 * Signature: (I)C
 */
-JNIEXPORT jstring JNICALL Java_corelyzer_graphics_SceneGraph_getTrackName(JNIEnv *jenv, jclass jcls, jint trackId)
-{
+JNIEXPORT jstring JNICALL Java_corelyzer_graphics_SceneGraph_getTrackName(JNIEnv *jenv, jclass jcls, jint trackId) {
     TrackSceneNode *tsn = get_scene_track(default_track_scene, trackId);
     if (!tsn)
         return jenv->NewStringUTF(NULL);
@@ -931,8 +841,7 @@ JNIEXPORT jstring JNICALL Java_corelyzer_graphics_SceneGraph_getTrackName(JNIEnv
 * Method:    getTrackXPos
 * Signature: (I)F
 */
-JNIEXPORT jfloat JNICALL Java_corelyzer_graphics_SceneGraph_getTrackXPos(JNIEnv *jenv, jclass jcls, jint trackId)
-{
+JNIEXPORT jfloat JNICALL Java_corelyzer_graphics_SceneGraph_getTrackXPos(JNIEnv *jenv, jclass jcls, jint trackId) {
     if (!is_track(default_track_scene, trackId))
         return 0.0;
 
@@ -944,8 +853,7 @@ JNIEXPORT jfloat JNICALL Java_corelyzer_graphics_SceneGraph_getTrackXPos(JNIEnv 
 * Method:    getTrackYPos
 * Signature: (I)F
 */
-JNIEXPORT jfloat JNICALL Java_corelyzer_graphics_SceneGraph_getTrackYPos(JNIEnv *jenv, jclass jcls, jint trackId)
-{
+JNIEXPORT jfloat JNICALL Java_corelyzer_graphics_SceneGraph_getTrackYPos(JNIEnv *jenv, jclass jcls, jint trackId) {
     if (!is_track(default_track_scene, trackId))
         return 0.0;
 
@@ -957,14 +865,12 @@ JNIEXPORT jfloat JNICALL Java_corelyzer_graphics_SceneGraph_getTrackYPos(JNIEnv 
 * Method:    setTrackXPos
 * Signature: (IF)V
 */
-JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setTrackXPos(JNIEnv *jenv, jclass jcls, jint trackId, jfloat xpos)
-{
+JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setTrackXPos(JNIEnv *jenv, jclass jcls, jint trackId, jfloat xpos) {
     if (!is_track(default_track_scene, trackId))
         return;
 
     TrackSceneNode *t = get_scene_track(default_track_scene, trackId);
-    if (t)
-    {
+    if (t) {
         t->px = xpos;
     }
 }
@@ -974,14 +880,12 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setTrackXPos(JNIEnv *j
 * Method:    setTrackYPos
 * Signature: (IF)V
 */
-JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setTrackYPos(JNIEnv *jenv, jclass jcls, jint trackId, jfloat ypos)
-{
+JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setTrackYPos(JNIEnv *jenv, jclass jcls, jint trackId, jfloat ypos) {
     if (!is_track(default_track_scene, trackId))
         return;
 
     TrackSceneNode *t = get_scene_track(default_track_scene, trackId);
-    if (t)
-    {
+    if (t) {
         t->py = ypos;
     }
 }
@@ -991,8 +895,7 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setTrackYPos(JNIEnv *j
 * Method:    getNumSections
 * Signature: (I)I
 */
-JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_getNumSections(JNIEnv *jenv, jclass jcls, jint trackId)
-{
+JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_getNumSections(JNIEnv *jenv, jclass jcls, jint trackId) {
     if (!is_track(default_track_scene, trackId))
         return 0;
 
@@ -1005,8 +908,7 @@ JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_getNumSections(JNIEnv 
 * Method:    bringTrackToFront
 * Signature: (I)V
 */
-JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_bringTrackToFront(JNIEnv *jenv, jclass jcls, jint trackId)
-{
+JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_bringTrackToFront(JNIEnv *jenv, jclass jcls, jint trackId) {
     if (!is_track(default_track_scene, trackId))
         return;
 
@@ -1019,8 +921,7 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_bringTrackToFront(JNIE
 * Method:    getTrackIDByName
 * Signature: (Ljava/lang/String;)I
 */
-JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_getTrackIDByName(JNIEnv *jenv, jclass jcls, jstring jSessionName, jstring jTrackName)
-{
+JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_getTrackIDByName(JNIEnv *jenv, jclass jcls, jstring jSessionName, jstring jTrackName) {
     char *sessionName;
     char *trackName;
 
@@ -1032,18 +933,15 @@ JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_getTrackIDByName(JNIEn
     trackName = (char *)malloc(length * sizeof(char) + 1);
     jenv->GetStringUTFRegion(jTrackName, 0, length, trackName);
 
-    for (int i = 0; i < num_tracks(default_track_scene); i++)
-    {
+    for (int i = 0; i < num_tracks(default_track_scene); i++) {
         TrackSceneNode *tsn = get_scene_track(default_track_scene, i);
 
-        if (!tsn)
-        {
+        if (!tsn) {
             continue;
         }
 
         // Also compare "session name" to make tracks, session aware?
-        if (!strcmp(sessionName, tsn->sessionName) && !strcmp(trackName, tsn->name))
-        {
+        if (!strcmp(sessionName, tsn->sessionName) && !strcmp(trackName, tsn->name)) {
             free(sessionName);
             free(trackName);
 
@@ -1062,8 +960,7 @@ JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_getTrackIDByName(JNIEn
 * Method:    getSectionIDByName
 * Signature: (ILjava/lang/String;)I
 */
-JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_getSectionIDByName(JNIEnv *jenv, jclass jcls, jint trackId, jstring name)
-{
+JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_getSectionIDByName(JNIEnv *jenv, jclass jcls, jint trackId, jstring name) {
     TrackSceneNode *t = get_scene_track(default_track_scene, trackId);
     if (!t)
         return -1;
@@ -1075,8 +972,7 @@ JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_getSectionIDByName(JNI
     nbuf = (char *)malloc(i * sizeof(char) + 1);
     jenv->GetStringUTFRegion(name, 0, i, nbuf);
 
-    for (i = 0; i < t->modelvec.size(); i++)
-    {
+    for (i = 0; i < t->modelvec.size(); i++) {
         CoreSection *cs = t->modelvec[i];
 
         if (!cs)
@@ -1085,8 +981,7 @@ JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_getSectionIDByName(JNI
         if (get_section_name(cs) == NULL)
             continue;
 
-        if (!strcmp(nbuf, cs->name))
-        {
+        if (!strcmp(nbuf, cs->name)) {
             free(nbuf);
             return i;
         }
@@ -1101,8 +996,7 @@ JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_getSectionIDByName(JNI
 * Method:    getSectionIDFromURL
 * Signature: (ILjava/lang/String;)I
 */
-JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_getSectionIDFromURL(JNIEnv *jenv, jclass jcls, jint trackId, jstring urlString)
-{
+JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_getSectionIDFromURL(JNIEnv *jenv, jclass jcls, jint trackId, jstring urlString) {
     TrackSceneNode *t = get_scene_track(default_track_scene, trackId);
     if (!t)
         return -1;
@@ -1111,21 +1005,17 @@ JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_getSectionIDFromURL(JN
     char *nbuf = (char *)malloc(i * sizeof(char) + 1);
     jenv->GetStringUTFRegion(urlString, 0, i, nbuf);
 
-    for (i = 0; i < t->modelvec.size(); i++)
-    {
+    for (i = 0; i < t->modelvec.size(); i++) {
         CoreSection *cs = t->modelvec[i];
 
         if (!cs)
             continue;
 
         // Has image
-        if (is_texset(cs->src))
-        {
+        if (is_texset(cs->src)) {
             char *imageURL = get_texset_url(cs->src);
-            if (imageURL)
-            {
-                if (!strcmp(nbuf, imageURL))
-                {
+            if (imageURL) {
+                if (!strcmp(nbuf, imageURL)) {
                     free(nbuf);
                     return i;
                 }
@@ -1142,21 +1032,18 @@ JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_getSectionIDFromURL(JN
 * Method:    loadImage
 * Signature: (Ljava/lang/String;)I
 */
-JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_loadImage(JNIEnv *jenv, jclass jcls, jstring name)
-{
+JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_loadImage(JNIEnv *jenv, jclass jcls, jstring name) {
     unsigned int i = jenv->GetStringLength(name);
     char *nbuf = (char *)malloc(i * sizeof(char) + 1);
     jenv->GetStringUTFRegion(name, 0, i, nbuf);
 
     // Search the tVec for common filename
-    for (unsigned int j = 0; j < tVec.size(); j++)
-    {
+    for (unsigned int j = 0; j < tVec.size(); j++) {
         TextureSet *ts = tVec[j];
         if (ts == NULL)
             continue;
 
-        if (strcmp(ts->imageFilename, nbuf) == 0)
-        {
+        if (strcmp(ts->imageFilename, nbuf) == 0) {
 #ifdef DEBUG
             printf("---> [INFO] Hit  %d. file: %s\n", j, nbuf);
 #endif
@@ -1169,9 +1056,7 @@ JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_loadImage(JNIEnv *jenv
 
             free(nbuf);
             return k;
-        }
-        else
-        {
+        } else {
 #ifdef DEBUG
             printf("---> [INFO] Miss %d, file: %s\n", j, nbuf);
 #endif
@@ -1189,8 +1074,7 @@ JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_loadImage(JNIEnv *jenv
 * Method:    genTextureBlocks
 * Signature: (C)I
 */
-JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_genTextureBlocks(JNIEnv *jenv, jclass jcls, jstring name)
-{
+JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_genTextureBlocks(JNIEnv *jenv, jclass jcls, jstring name) {
     // 4/17/2012 brg: File verification error codes, corresponding to codes in
     // CorelyzerAppController.java. Names are more readable than arbitrary integers!
     // Ideally we'd report a more meaningful error (from the appropriate library) in
@@ -1210,15 +1094,13 @@ JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_genTextureBlocks(JNIEn
 
     // Verify file exists
     FILE *f = fopen(fileName, "r");
-    if (!f)
-    {
+    if (!f) {
         free(fileName);
         return FILE_DOES_NOT_EXIST;
     }
 
     // 4/9/2012 brg: Verify file contains data (empty files cause a crash)
-    if (fgetc(f) == EOF)
-    {
+    if (fgetc(f) == EOF) {
         free(fileName);
         fclose(f);
         return FILE_IS_EMPTY;
@@ -1226,24 +1108,16 @@ JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_genTextureBlocks(JNIEn
     fclose(f);
 
     TextureSet *ts = new TextureSet();
-    try
-    {
+    try {
         if (strstr(fileName, ".JPEG") || strstr(fileName, ".jpeg") ||
-            strstr(fileName, ".JPG") || strstr(fileName, ".jpg"))
-        {
+            strstr(fileName, ".JPG") || strstr(fileName, ".jpg")) {
             ts->texset = create_texset_from_jpeg(fileName, LEVELS);
-        }
-        else if (strstr(fileName, ".PNG") || strstr(fileName, ".png"))
-        {
+        } else if (strstr(fileName, ".PNG") || strstr(fileName, ".png")) {
             ts->texset = create_texset_from_png(fileName, LEVELS);
-        }
-        else if (strstr(fileName, ".BMP") || strstr(fileName, ".bmp"))
-        {
+        } else if (strstr(fileName, ".BMP") || strstr(fileName, ".bmp")) {
             ts->texset = create_texset_from_bmp(fileName, LEVELS);
-        }
-        else if (strstr(fileName, ".TIFF") || strstr(fileName, ".tiff") ||
-                    strstr(fileName, ".TIF") || strstr(fileName, ".tif"))
-        {
+        } else if (strstr(fileName, ".TIFF") || strstr(fileName, ".tiff") ||
+                   strstr(fileName, ".TIF") || strstr(fileName, ".tif")) {
             ts->texset = create_texset_from_tiff(fileName, LEVELS);
         }
         // 4/24/2018 brg: removing JPEG2000 support
@@ -1252,21 +1126,17 @@ JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_genTextureBlocks(JNIEn
         //	printf("---> [TODO] Loading JPEG2000: %s\n", fileName);
         //	ts->texset = create_texset_from_jp2k(fileName, LEVELS);
         //}
-        else
-        {
+        else {
             printf("Could not load image %s, unsupported format\n", fileName);
             free(fileName);
             return FILE_READ_ERROR;
         }
-    }
-    catch (exception &e)
-    {
+    } catch (exception &e) {
         printf("Exception caught in genTextureBlocks: %s\n", e.what());
         return EXCEPTION_THROWN;
     }
 
-    if (ts->texset == NULL)
-    {
+    if (ts->texset == NULL) {
         free(fileName);
         return FILE_READ_ERROR;
     }
@@ -1276,10 +1146,8 @@ JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_genTextureBlocks(JNIEn
     free(fileName);
 
     // find a place to insert
-    for (unsigned int i = 0; i < tVec.size(); i++)
-    {
-        if (tVec[i] == NULL)
-        {
+    for (unsigned int i = 0; i < tVec.size(); i++) {
+        if (tVec[i] == NULL) {
             tVec[i] = ts;
             return 1;
         }
@@ -1294,8 +1162,7 @@ JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_genTextureBlocks(JNIEn
 * Method:    genTextureBlocksToDirectory
 * Signature: (Ljava/lang/String;Ljava/lang/String;)Z
 */
-JNIEXPORT jboolean JNICALL Java_corelyzer_graphics_SceneGraph_genTextureBlocksToDirectory(JNIEnv *jenv, jclass jcls, jstring inputFileNameString, jstring outputDirectoryString)
-{
+JNIEXPORT jboolean JNICALL Java_corelyzer_graphics_SceneGraph_genTextureBlocksToDirectory(JNIEnv *jenv, jclass jcls, jstring inputFileNameString, jstring outputDirectoryString) {
     int input_length, output_length;
     char *inputFileName;
     char *outputDirectory;
@@ -1311,8 +1178,7 @@ JNIEXPORT jboolean JNICALL Java_corelyzer_graphics_SceneGraph_genTextureBlocksTo
     jenv->GetStringUTFRegion(outputDirectoryString, 0, output_length, outputDirectory);
 
     // assign block dir
-    if (default_block_dir)
-    {
+    if (default_block_dir) {
         free(default_block_dir);
     }
 
@@ -1322,8 +1188,7 @@ JNIEXPORT jboolean JNICALL Java_corelyzer_graphics_SceneGraph_genTextureBlocksTo
 
     // 2. non-exist path
     FILE *f = fopen(inputFileName, "r");
-    if (!f)
-    {
+    if (!f) {
         free(inputFileName);
         return false;
     }
@@ -1335,43 +1200,32 @@ JNIEXPORT jboolean JNICALL Java_corelyzer_graphics_SceneGraph_genTextureBlocksTo
     MultiLevelTextureSetEX *texset;
 
     if (strstr(inputFileName, ".JPEG") || strstr(inputFileName, ".jpeg") ||
-        strstr(inputFileName, ".JPG") || strstr(inputFileName, ".jpg"))
-    {
+        strstr(inputFileName, ".JPG") || strstr(inputFileName, ".jpg")) {
         texset = create_texset_from_jpeg(inputFileName, LEVELS);
 
-        if (texset == NULL)
-        {
+        if (texset == NULL) {
             free(inputFileName);
             return false;
         }
-    }
-    else if (strstr(inputFileName, ".PNG") || strstr(inputFileName, ".png"))
-    {
+    } else if (strstr(inputFileName, ".PNG") || strstr(inputFileName, ".png")) {
         texset = create_texset_from_png(inputFileName, LEVELS);
 
-        if (texset == NULL)
-        {
+        if (texset == NULL) {
             free(inputFileName);
             return false;
         }
-    }
-    else if (strstr(inputFileName, ".BMP") || strstr(inputFileName, ".bmp"))
-    {
+    } else if (strstr(inputFileName, ".BMP") || strstr(inputFileName, ".bmp")) {
         texset = create_texset_from_bmp(inputFileName, LEVELS);
 
-        if (texset == NULL)
-        {
+        if (texset == NULL) {
             free(inputFileName);
             return false;
         }
-    }
-    else if (strstr(inputFileName, ".TIFF") || strstr(inputFileName, ".tiff") ||
-                strstr(inputFileName, ".TIF") || strstr(inputFileName, ".tif"))
-    {
+    } else if (strstr(inputFileName, ".TIFF") || strstr(inputFileName, ".tiff") ||
+               strstr(inputFileName, ".TIF") || strstr(inputFileName, ".tif")) {
         texset = create_texset_from_tiff(inputFileName, LEVELS);
 
-        if (texset == NULL)
-        {
+        if (texset == NULL) {
             free(inputFileName);
             return false;
         }
@@ -1388,8 +1242,7 @@ JNIEXPORT jboolean JNICALL Java_corelyzer_graphics_SceneGraph_genTextureBlocksTo
     //          return false;
     //      }
     //  }
-    else
-    {
+    else {
         printf("Could not load image %s, unsupported format\n", inputFileName);
         free(inputFileName);
 
@@ -1398,8 +1251,7 @@ JNIEXPORT jboolean JNICALL Java_corelyzer_graphics_SceneGraph_genTextureBlocksTo
     free(inputFileName);
 
     // release
-    if (texset != NULL)
-    {
+    if (texset != NULL) {
         delete_texset(texset);
 
         // free(texset);
@@ -1414,8 +1266,7 @@ JNIEXPORT jboolean JNICALL Java_corelyzer_graphics_SceneGraph_genTextureBlocksTo
 * Method:    duplicateSection
 * Signature: (II)I
 */
-JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_duplicateSection(JNIEnv *jenv, jclass jcls, jint trackId, jint sectionId)
-{
+JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_duplicateSection(JNIEnv *jenv, jclass jcls, jint trackId, jint sectionId) {
     return duplicateSection(trackId, sectionId, trackId);
 }
 
@@ -1424,8 +1275,7 @@ JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_duplicateSection(JNIEn
 * Method:    duplicateSectionToAnotherTrack
 * Signature: (III)I
 */
-JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_duplicateSectionToAnotherTrack(JNIEnv *jenv, jclass jcls, jint trackId, jint sectionId, jint newTrackId)
-{
+JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_duplicateSectionToAnotherTrack(JNIEnv *jenv, jclass jcls, jint trackId, jint sectionId, jint newTrackId) {
     return duplicateSection(trackId, sectionId, newTrackId);
 }
 
@@ -1434,9 +1284,7 @@ JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_duplicateSectionToAnot
 * Method:    setImageURL
 * Signature: (IC)V
 */
-JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setImageURL(JNIEnv *jenv, jclass jcls, jint imageId, jstring url)
-{
-
+JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setImageURL(JNIEnv *jenv, jclass jcls, jint imageId, jstring url) {
     int i;
     char *nbuf;
 
@@ -1459,8 +1307,7 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setImageURL(JNIEnv *je
 * Method:    getImageName
 * Signature: (I)C
 */
-JNIEXPORT jstring JNICALL Java_corelyzer_graphics_SceneGraph_getImageName(JNIEnv *jenv, jclass jcls, jint imageId)
-{
+JNIEXPORT jstring JNICALL Java_corelyzer_graphics_SceneGraph_getImageName(JNIEnv *jenv, jclass jcls, jint imageId) {
     return jenv->NewStringUTF(get_texset_name(imageId));
 }
 
@@ -1469,8 +1316,7 @@ JNIEXPORT jstring JNICALL Java_corelyzer_graphics_SceneGraph_getImageName(JNIEnv
 * Method:    getImageURL
 * Signature: (I)C
 */
-JNIEXPORT jstring JNICALL Java_corelyzer_graphics_SceneGraph_getImageURL(JNIEnv *jenv, jclass jcls, jint imageId)
-{
+JNIEXPORT jstring JNICALL Java_corelyzer_graphics_SceneGraph_getImageURL(JNIEnv *jenv, jclass jcls, jint imageId) {
     return jenv->NewStringUTF(get_texset_url(imageId));
 }
 
@@ -1479,9 +1325,7 @@ JNIEXPORT jstring JNICALL Java_corelyzer_graphics_SceneGraph_getImageURL(JNIEnv 
 * Method:    getImageDPIX
 * Signature: (I)F
 */
-JNIEXPORT jfloat JNICALL Java_corelyzer_graphics_SceneGraph_getImageDPIX(JNIEnv *jenv, jclass jcls, jint imageId)
-{
-
+JNIEXPORT jfloat JNICALL Java_corelyzer_graphics_SceneGraph_getImageDPIX(JNIEnv *jenv, jclass jcls, jint imageId) {
     if (!is_texset(imageId))
         return 0.0f;
     return get_texset_src_dpi_x(imageId);
@@ -1492,9 +1336,7 @@ JNIEXPORT jfloat JNICALL Java_corelyzer_graphics_SceneGraph_getImageDPIX(JNIEnv 
 * Method:    getImageDPIY
 * Signature: (I)F
 */
-JNIEXPORT jfloat JNICALL Java_corelyzer_graphics_SceneGraph_getImageDPIY(JNIEnv *jenv, jclass jcls, jint imageId)
-{
-
+JNIEXPORT jfloat JNICALL Java_corelyzer_graphics_SceneGraph_getImageDPIY(JNIEnv *jenv, jclass jcls, jint imageId) {
     if (!is_texset(imageId))
         return 0.0f;
     return get_texset_src_dpi_y(imageId);
@@ -1505,9 +1347,7 @@ JNIEXPORT jfloat JNICALL Java_corelyzer_graphics_SceneGraph_getImageDPIY(JNIEnv 
 * Method:    getImageWidth
 * Signature: (I)I
 */
-JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_getImageWidth(JNIEnv *jenv, jclass jcls, jint imageId)
-{
-
+JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_getImageWidth(JNIEnv *jenv, jclass jcls, jint imageId) {
     if (!is_texset(imageId))
         return 0;
     return get_texset_src_width(imageId);
@@ -1518,8 +1358,7 @@ JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_getImageWidth(JNIEnv *
 * Method:    getImageDepthPix
 * Signature: (Ljava/lang/String;Z)I
 */
-JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_getImageDepthPix(JNIEnv *jenv, jclass jcls, jstring imageFilename, jboolean isVertical)
-{
+JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_getImageDepthPix(JNIEnv *jenv, jclass jcls, jstring imageFilename, jboolean isVertical) {
     const int fileNameLen = jenv->GetStringLength(imageFilename);
     char *fileName = (char *)malloc(fileNameLen * sizeof(char) + 1);
     jenv->GetStringUTFRegion(imageFilename, 0, fileNameLen, fileName);
@@ -1532,9 +1371,7 @@ JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_getImageDepthPix(JNIEn
 * Method:    getImageHeight
 * Signature: (I)I
 */
-JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_getImageHeight(JNIEnv *jenv, jclass jcls, jint imageId)
-{
-
+JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_getImageHeight(JNIEnv *jenv, jclass jcls, jint imageId) {
     if (!is_texset(imageId))
         return 0;
     return get_texset_src_height(imageId);
@@ -1545,23 +1382,20 @@ JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_getImageHeight(JNIEnv 
 * Method:    addSectionToTrack
 * Signature: (I)I
 */
-JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_addSectionToTrack // fixme
-    (JNIEnv *jenv, jclass jcls, jint track, jint sec)
-{
+JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_addSectionToTrack  // fixme
+    (JNIEnv *jenv, jclass jcls, jint track, jint sec) {
     CoreSection *section;
 
     // fixme printf("\n--- Add Section To Track called ---\n");
 
-    if (!is_track(default_track_scene, track))
-    {
+    if (!is_track(default_track_scene, track)) {
         printf("ERROR: %d is not a track\n", (int)track);
         return -1;
     }
 
     create_section_model(track, sec, section);
 
-    if (!section)
-    {
+    if (!section) {
         printf("ERROR: Could not create a section model\n");
         return -1;
     }
@@ -1578,9 +1412,7 @@ JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_addSectionToTrack // f
 * Method:    setSectionName
 * Signature: (IILjava/lang/String;)I
 */
-JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setSectionName(JNIEnv *jenv, jclass jcls, jint track, jint sec, jstring name)
-{
-
+JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setSectionName(JNIEnv *jenv, jclass jcls, jint track, jint sec, jstring name) {
     TrackSceneNode *t;
     CoreSection *cs;
     t = get_scene_track(default_track_scene, track);
@@ -1604,8 +1436,7 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setSectionName(JNIEnv 
 * Method:    getSectionName
 * Signature: (II)Ljava/lang/String;
 */
-JNIEXPORT jstring JNICALL Java_corelyzer_graphics_SceneGraph_getSectionName(JNIEnv *jenv, jclass jcls, jint trackId, jint sectionId)
-{
+JNIEXPORT jstring JNICALL Java_corelyzer_graphics_SceneGraph_getSectionName(JNIEnv *jenv, jclass jcls, jint trackId, jint sectionId) {
     TrackSceneNode *t;
     CoreSection *cs;
     t = get_scene_track(default_track_scene, trackId);
@@ -1622,23 +1453,19 @@ JNIEXPORT jstring JNICALL Java_corelyzer_graphics_SceneGraph_getSectionName(JNIE
 * Method:    addSectionImageToTrack
 * Signature: (II)V
 */
-JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_addSectionImageToTrack(JNIEnv *jenv, jclass jcls, jint track, jint sec, jint image)
-{
-
+JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_addSectionImageToTrack(JNIEnv *jenv, jclass jcls, jint track, jint sec, jint image) {
     CoreSection *section;
 
     // fixme printf("\n--- Add Section Image To Track called ---\n");
 
-    if (!is_track(default_track_scene, track))
-    {
+    if (!is_track(default_track_scene, track)) {
         printf("ERROR: %d is not a track\n", (int)track);
         return -1;
     }
 
     // fixme printf("\n-- after is_track? --\n");
 
-    if (!is_texset(image))
-    {
+    if (!is_texset(image)) {
         printf("ERROR: %d is not an image\n", (int)image);
         return -1;
     }
@@ -1649,8 +1476,7 @@ JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_addSectionImageToTrack
 
     // fixme printf("\n-- after add_section_image --\n");
 
-    if (!section)
-    {
+    if (!section) {
         printf("ERROR: Could not make a section model from image %d\n", (int)image);
         return -1;
     }
@@ -1669,9 +1495,7 @@ JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_addSectionImageToTrack
 * Method:    removeSectionImageFromTrack
 * Signature: (II)V
 */
-JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_removeSectionImageFromTrack(JNIEnv *jenv, jclass jcls, jint track, jint section)
-{
-
+JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_removeSectionImageFromTrack(JNIEnv *jenv, jclass jcls, jint track, jint section) {
     printf("\n--- Delete Section called ---\n");
     free_track_section_model(default_track_scene, track, section);
 }
@@ -1681,9 +1505,8 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_removeSectionImageFrom
 * Method:    highlightSection
 * Signature: (II)I
 */
-JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_highlightSection(JNIEnv *jenv, jclass jcls, jint track, jint section, jboolean isOn)
-{
-    return -1; // brg 7/18/2015: supplanted by highlightSections
+JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_highlightSection(JNIEnv *jenv, jclass jcls, jint track, jint section, jboolean isOn) {
+    return -1;  // brg 7/18/2015: supplanted by highlightSections
 
     //TrackSceneNode *t;
     //   CoreSection *cs;
@@ -1733,71 +1556,52 @@ JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_highlightSection(JNIEn
 * Method:    highlightSections
 * Signature: (II)I
 */
-JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_highlightSections(JNIEnv *jenv, jclass jcls, jint track, jintArray sectionArray)
-{
+JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_highlightSections(JNIEnv *jenv, jclass jcls, jint track, jintArray sectionArray) {
     // first, clear all selected sections
     const int trackCount = num_tracks(default_track_scene);
-    for (int tidx = 0; tidx < trackCount; tidx++)
-    {
+    for (int tidx = 0; tidx < trackCount; tidx++) {
         TrackSceneNode *track = get_scene_track(default_track_scene, tidx);
-        if (track)
-        {
+        if (track) {
             const int secCount = track->modelvec.size();
-            for (int sidx = 0; sidx < secCount; sidx++)
-            {
+            for (int sidx = 0; sidx < secCount; sidx++) {
                 CoreSection *sec = get_track_section(track, sidx);
-                if (sec)
-                {
+                if (sec) {
                     sec->highlight = false;
-                }
-                else
-                {
+                } else {
                     printf("sec %d not found, can't unhighlight!\n", sidx);
                 }
             }
-        }
-        else
-        {
+        } else {
             printf("track %d not found!\n", tidx);
         }
     }
 
     // now highlight selected sections
     TrackSceneNode *trackToHighlight = get_scene_track(default_track_scene, track);
-    if (trackToHighlight)
-    {
+    if (trackToHighlight) {
         jint *selSecs = jenv->GetIntArrayElements(sectionArray, 0);
         const jsize selSecCount = jenv->GetArrayLength(sectionArray);
         const int secCount = trackToHighlight->modelvec.size();
         CoreSection *lastSec = NULL;
-        for (int i = 0; i < selSecCount; i++)
-        {
+        for (int i = 0; i < selSecCount; i++) {
             const int sectionID = selSecs[i];
             CoreSection *sec = get_track_section(trackToHighlight, sectionID);
-            if (sec)
-            {
+            if (sec) {
                 sec->highlight = true;
-            }
-            else
-            {
+            } else {
                 printf("sec %d not found, can't highlight!\n", i);
             }
-            if (sec && !lastSec)
-            {
+            if (sec && !lastSec) {
                 lastSec = sec;
             }
         }
 
-        if (selSecCount > 0)
-        {
+        if (selSecCount > 0) {
             int bufferSize = 128;
             char *label = (char *)malloc(sizeof(char) * bufferSize);
-            if (selSecCount == 1 && lastSec)
-            {
+            if (selSecCount == 1 && lastSec) {
                 sprintf(label, "section %s", get_section_name(lastSec));
-            }
-            else
-            {
+            } else {
                 sprintf(label, "track %s: %d sections selected", trackToHighlight->name, (int)selSecCount);
             }
             set_crosshair_label(label);
@@ -1805,9 +1609,7 @@ JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_highlightSections(JNIE
         }
 
         jenv->ReleaseIntArrayElements(sectionArray, selSecs, 0);
-    }
-    else
-    {
+    } else {
         printf("trackToHighlight %d not found.\n", (int)track);
     }
 
@@ -1819,15 +1621,13 @@ JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_highlightSections(JNIE
 * Method:    setSectionHighlightColor
 * Signature: (IIFFF)I
 */
-JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setSectionHighlightColor(JNIEnv *jenv, jclass jcls, jint trackId, jint sectionId, jfloat r, jfloat g, jfloat b)
-{
+JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setSectionHighlightColor(JNIEnv *jenv, jclass jcls, jint trackId, jint sectionId, jfloat r, jfloat g, jfloat b) {
     TrackSceneNode *t;
     CoreSection *cs;
     t = get_scene_track(default_track_scene, trackId);
     cs = get_track_section(t, sectionId);
 
-    if (!cs)
-    {
+    if (!cs) {
         return;
     }
 
@@ -1835,8 +1635,7 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setSectionHighlightCol
 }
 
 // offset a single section
-static void move_section(CoreSection *cs, const jfloat dx, const jfloat dy)
-{
+static void move_section(CoreSection *cs, const jfloat dx, const jfloat dy) {
     if (!cs)
         return;
     if (!cs->movable)
@@ -1844,7 +1643,7 @@ static void move_section(CoreSection *cs, const jfloat dx, const jfloat dy)
 
 #ifdef DEBUG
     printf("Updating section position from %f, %f to %f, %f\n",
-            cs->px, cs->py, cs->px + dx, cs->py + dy);
+           cs->px, cs->py, cs->px + dx, cs->py + dy);
 #endif
 
     cs->px += dx;
@@ -1860,7 +1659,7 @@ static void move_section(CoreSection *cs, const jfloat dx, const jfloat dy)
     // update section depth var
     float cdpix, cdpiy;
     get_canvas_dpi(0, &cdpix, &cdpiy);
-    cs->depth = cs->px * CM_PER_INCH / cdpix; // cm
+    cs->depth = cs->px * CM_PER_INCH / cdpix;  // cm
 }
 
 /*
@@ -1868,8 +1667,7 @@ static void move_section(CoreSection *cs, const jfloat dx, const jfloat dy)
 * Method:    moveSection
 * Signature: (IIFF)V
 */
-JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_moveSection(JNIEnv *jenv, jclass jcls, jint track, jint section, jfloat dx, jfloat dy)
-{
+JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_moveSection(JNIEnv *jenv, jclass jcls, jint track, jint section, jfloat dx, jfloat dy) {
     TrackSceneNode *t = get_scene_track(default_track_scene, track);
     if (!t)
         return;
@@ -1879,14 +1677,12 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_moveSection(JNIEnv *je
 }
 
 // move multiple sections at once
-JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_moveSections(JNIEnv *jenv, jclass jcls, jint track, jintArray secArray, jfloat dx, jfloat dy)
-{
+JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_moveSections(JNIEnv *jenv, jclass jcls, jint track, jintArray secArray, jfloat dx, jfloat dy) {
     TrackSceneNode *t = get_scene_track(default_track_scene, track);
 
     jint *moveSecs = jenv->GetIntArrayElements(secArray, 0);
     const jsize moveSecCount = jenv->GetArrayLength(secArray);
-    for (int i = 0; i < moveSecCount; i++)
-    {
+    for (int i = 0; i < moveSecCount; i++) {
         CoreSection *cs = get_track_section(t, moveSecs[i]);
         if (cs)
             move_section(cs, dx, dy);
@@ -1900,8 +1696,7 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_moveSections(JNIEnv *j
 * Method:    moveSectionGraph
 * Signature: (IIFF)V
 */
-JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_moveSectionGraph(JNIEnv *jenv, jclass jcls, jint track, jint section, jfloat dx, jfloat dy)
-{
+JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_moveSectionGraph(JNIEnv *jenv, jclass jcls, jint track, jint section, jfloat dx, jfloat dy) {
     TrackSceneNode *t = get_scene_track(default_track_scene, track);
     CoreSection *cs = get_track_section(t, section);
 
@@ -1912,13 +1707,12 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_moveSectionGraph(JNIEn
 
 #ifdef DEBUG
     printf("Updating section position from %f, %f to %f, %f\n",
-            cs->px, cs->py, cs->px + dx, cs->py + dy);
+           cs->px, cs->py, cs->px + dx, cs->py + dy);
 #endif
 
     // if this section has only graph, then do same logic as moveSection func
     // else, then adjust graph offset only
-    if (cs->src == -1)
-    {
+    if (cs->src == -1) {
         cs->px += dx;
         cs->py += dy;
         if (cs->px < 0)
@@ -1927,9 +1721,8 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_moveSectionGraph(JNIEn
         // update section depth var
         float cdpix, cdpiy;
         get_canvas_dpi(0, &cdpix, &cdpiy);
-        cs->depth = cs->px * CM_PER_INCH / cdpix; // cm
-    }
-    else
+        cs->depth = cs->px * CM_PER_INCH / cdpix;  // cm
+    } else
         cs->graph_offset += dx;
 }
 
@@ -1938,8 +1731,7 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_moveSectionGraph(JNIEn
 * Method:    setGraphScale
 * Signature: (F)V
 */
-JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setGraphScale(JNIEnv *jenv, jclass jcls, jfloat scale)
-{
+JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setGraphScale(JNIEnv *jenv, jclass jcls, jfloat scale) {
     setGraphScale(scale);
 }
 
@@ -1948,8 +1740,7 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setGraphScale(JNIEnv *
 * Method:    setMarkerScale
 * Signature: (F)V
 */
-JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setMarkerScale(JNIEnv *jenv, jclass jcls, jfloat scale)
-{
+JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setMarkerScale(JNIEnv *jenv, jclass jcls, jfloat scale) {
     setMarkerScale(scale);
 }
 
@@ -1958,9 +1749,7 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setMarkerScale(JNIEnv 
 * Method:    positionSection
 * Signature: (IIFF)V
 */
-JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_positionSection(JNIEnv *jenv, jclass jcls, jint track, jint section, jfloat x, jfloat y)
-{
-
+JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_positionSection(JNIEnv *jenv, jclass jcls, jint track, jint section, jfloat x, jfloat y) {
     // x and y is pixel unit
 
     TrackSceneNode *t;
@@ -1988,7 +1777,7 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_positionSection(JNIEnv
     // update section depth var
     float cdpix, cdpiy;
     get_canvas_dpi(0, &cdpix, &cdpiy);
-    cs->depth = cs->px * CM_PER_INCH / cdpix; // cm
+    cs->depth = cs->px * CM_PER_INCH / cdpix;  // cm
 }
 
 /*
@@ -1996,9 +1785,7 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_positionSection(JNIEnv
 * Method:    getSectionDepth
 * Signature: (II)F
 */
-JNIEXPORT jfloat JNICALL Java_corelyzer_graphics_SceneGraph_getSectionDepth(JNIEnv *jenv, jclass jcls, jint track, jint section)
-{
-
+JNIEXPORT jfloat JNICALL Java_corelyzer_graphics_SceneGraph_getSectionDepth(JNIEnv *jenv, jclass jcls, jint track, jint section) {
     TrackSceneNode *t;
     CoreSection *cs;
 
@@ -2018,8 +1805,7 @@ JNIEXPORT jfloat JNICALL Java_corelyzer_graphics_SceneGraph_getSectionDepth(JNIE
 * Method:    getSectionParentTrackId
 * Signature: (II)I
 */
-JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_getSectionParentTrackId(JNIEnv *jenv, jclass jcls, jint trackId, jint sectionId)
-{
+JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_getSectionParentTrackId(JNIEnv *jenv, jclass jcls, jint trackId, jint sectionId) {
     TrackSceneNode *t;
     CoreSection *cs;
 
@@ -2039,8 +1825,7 @@ JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_getSectionParentTrackI
 * Method:    getSectionParentSectionId
 * Signature: (II)I
 */
-JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_getSectionParentSectionId(JNIEnv *jenv, jclass jcls, jint trackId, jint sectionId)
-{
+JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_getSectionParentSectionId(JNIEnv *jenv, jclass jcls, jint trackId, jint sectionId) {
     TrackSceneNode *t;
     CoreSection *cs;
 
@@ -2060,8 +1845,7 @@ JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_getSectionParentSectio
 * Method:    setSectionParentIds
 * Signature: (IIII)V
 */
-JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setSectionParentIds(JNIEnv *jenv, jclass jcls, jint trackId, jint sectionId, jint srcTrackId, jint srcSectionId)
-{
+JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setSectionParentIds(JNIEnv *jenv, jclass jcls, jint trackId, jint sectionId, jint srcTrackId, jint srcSectionId) {
     TrackSceneNode *t;
     CoreSection *cs;
 
@@ -2082,8 +1866,7 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setSectionParentIds(JN
 * Method:    getSectionLength
 * Signature: (II)F
 */
-JNIEXPORT jfloat JNICALL Java_corelyzer_graphics_SceneGraph_getSectionLength(JNIEnv *jenv, jclass jcls, jint track, jint section)
-{
+JNIEXPORT jfloat JNICALL Java_corelyzer_graphics_SceneGraph_getSectionLength(JNIEnv *jenv, jclass jcls, jint track, jint section) {
     TrackSceneNode *t;
     CoreSection *cs;
 
@@ -2102,9 +1885,7 @@ JNIEXPORT jfloat JNICALL Java_corelyzer_graphics_SceneGraph_getSectionLength(JNI
 * Method:    getSectionHeight
 * Signature: (II)F
 */
-JNIEXPORT jfloat JNICALL Java_corelyzer_graphics_SceneGraph_getSectionHeight(JNIEnv *jenv, jclass jcls, jint track, jint section)
-{
-
+JNIEXPORT jfloat JNICALL Java_corelyzer_graphics_SceneGraph_getSectionHeight(JNIEnv *jenv, jclass jcls, jint track, jint section) {
     TrackSceneNode *t;
     CoreSection *cs;
 
@@ -2124,9 +1905,7 @@ JNIEXPORT jfloat JNICALL Java_corelyzer_graphics_SceneGraph_getSectionHeight(JNI
 * Method:    getSectionWidth
 * Signature: (II)F
 */
-JNIEXPORT jfloat JNICALL Java_corelyzer_graphics_SceneGraph_getSectionWidth(JNIEnv *jenv, jclass jcls, jint track, jint section)
-{
-
+JNIEXPORT jfloat JNICALL Java_corelyzer_graphics_SceneGraph_getSectionWidth(JNIEnv *jenv, jclass jcls, jint track, jint section) {
     TrackSceneNode *t;
     CoreSection *cs;
 
@@ -2146,8 +1925,7 @@ JNIEXPORT jfloat JNICALL Java_corelyzer_graphics_SceneGraph_getSectionWidth(JNIE
 * Method:    getSectionIntervalTop
 * Signature: (II)F
 */
-JNIEXPORT jfloat JNICALL Java_corelyzer_graphics_SceneGraph_getSectionIntervalTop(JNIEnv *jenv, jclass jcls, jint track, jint section)
-{
+JNIEXPORT jfloat JNICALL Java_corelyzer_graphics_SceneGraph_getSectionIntervalTop(JNIEnv *jenv, jclass jcls, jint track, jint section) {
     TrackSceneNode *t;
     CoreSection *cs;
 
@@ -2167,8 +1945,7 @@ JNIEXPORT jfloat JNICALL Java_corelyzer_graphics_SceneGraph_getSectionIntervalTo
 * Method:    getSectionIntervalBottom
 * Signature: (II)F
 */
-JNIEXPORT jfloat JNICALL Java_corelyzer_graphics_SceneGraph_getSectionIntervalBottom(JNIEnv *jenv, jclass jcls, jint track, jint section)
-{
+JNIEXPORT jfloat JNICALL Java_corelyzer_graphics_SceneGraph_getSectionIntervalBottom(JNIEnv *jenv, jclass jcls, jint track, jint section) {
     TrackSceneNode *t;
     CoreSection *cs;
 
@@ -2188,8 +1965,7 @@ JNIEXPORT jfloat JNICALL Java_corelyzer_graphics_SceneGraph_getSectionIntervalBo
 * Method:    setSectionIntervalTop
 * Signature: (IIF)V
 */
-JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setSectionIntervalTop(JNIEnv *jenv, jclass jcls, jint track, jint section, jfloat top)
-{
+JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setSectionIntervalTop(JNIEnv *jenv, jclass jcls, jint track, jint section, jfloat top) {
     TrackSceneNode *t;
     CoreSection *cs;
 
@@ -2209,8 +1985,7 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setSectionIntervalTop(
 * Method:    setSectionIntervalBottom
 * Signature: (IIF)V
 */
-JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setSectionIntervalBottom(JNIEnv *jenv, jclass jcls, jint track, jint section, jfloat bottom)
-{
+JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setSectionIntervalBottom(JNIEnv *jenv, jclass jcls, jint track, jint section, jfloat bottom) {
     TrackSceneNode *t;
     CoreSection *cs;
 
@@ -2232,9 +2007,7 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setSectionIntervalBott
 * Method:    getSectionGraphOffset
 * Signature: (II)F
 */
-JNIEXPORT jfloat JNICALL Java_corelyzer_graphics_SceneGraph_getSectionGraphOffset(JNIEnv *jenv, jclass jcls, jint track, jint section)
-{
-
+JNIEXPORT jfloat JNICALL Java_corelyzer_graphics_SceneGraph_getSectionGraphOffset(JNIEnv *jenv, jclass jcls, jint track, jint section) {
     TrackSceneNode *t;
     CoreSection *cs;
 
@@ -2257,8 +2030,7 @@ JNIEXPORT jfloat JNICALL Java_corelyzer_graphics_SceneGraph_getSectionGraphOffse
 * Method:    setSectionGraphOffset
 * Signature: (IIF)V
 */
-JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setSectionGraphOffset(JNIEnv *jenv, jclass jcls, jint track, jint section, jfloat offset)
-{
+JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setSectionGraphOffset(JNIEnv *jenv, jclass jcls, jint track, jint section, jfloat offset) {
     // offset is cm scale
     TrackSceneNode *t;
     CoreSection *cs;
@@ -2285,9 +2057,7 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setSectionGraphOffset(
 * Method:    getSectionSourceImage
 * Signature: (II)I
 */
-JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_getSectionSourceImage(JNIEnv *jenv, jclass jcls, jint track, jint section)
-{
-
+JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_getSectionSourceImage(JNIEnv *jenv, jclass jcls, jint track, jint section) {
     TrackSceneNode *t;
     CoreSection *cs;
     t = get_scene_track(default_track_scene, track);
@@ -2303,8 +2073,7 @@ JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_getSectionSourceImage(
 * Method:    getSectionDPIX
 * Signature: (I)F
 */
-JNIEXPORT jfloat JNICALL Java_corelyzer_graphics_SceneGraph_getSectionDPIX(JNIEnv *jenv, jclass jcls, jint track, jint section)
-{
+JNIEXPORT jfloat JNICALL Java_corelyzer_graphics_SceneGraph_getSectionDPIX(JNIEnv *jenv, jclass jcls, jint track, jint section) {
     TrackSceneNode *t = get_scene_track(default_track_scene, track);
     CoreSection *cs = get_track_section(t, section);
     if (!cs)
@@ -2318,8 +2087,7 @@ JNIEXPORT jfloat JNICALL Java_corelyzer_graphics_SceneGraph_getSectionDPIX(JNIEn
 * Method:    getSectionDPIY
 * Signature: (I)F
 */
-JNIEXPORT jfloat JNICALL Java_corelyzer_graphics_SceneGraph_getSectionDPIY(JNIEnv *jenv, jclass jcls, jint track, jint section)
-{
+JNIEXPORT jfloat JNICALL Java_corelyzer_graphics_SceneGraph_getSectionDPIY(JNIEnv *jenv, jclass jcls, jint track, jint section) {
     TrackSceneNode *t = get_scene_track(default_track_scene, track);
     CoreSection *cs = get_track_section(t, section);
     if (!cs)
@@ -2329,8 +2097,7 @@ JNIEXPORT jfloat JNICALL Java_corelyzer_graphics_SceneGraph_getSectionDPIY(JNIEn
 }
 
 // private function for update CoreSection metadata // FIXME mmm...
-void updateCoreSectionMeta(CoreSection *cs)
-{
+void updateCoreSectionMeta(CoreSection *cs) {
     // in cm
     float horiDPI = (cs->orientation) ? cs->dpi_y : cs->dpi_x;
     float vertDPI = (cs->orientation) ? cs->dpi_x : cs->dpi_y;
@@ -2348,15 +2115,13 @@ void updateCoreSectionMeta(CoreSection *cs)
 * Signature: (F)V
 */
 JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setSectionDPI(JNIEnv *jenv, jclass jcls, jint track, jint section, jfloat dpix,
-                                                                        jfloat dpiy)
-{
+                                                                        jfloat dpiy) {
     TrackSceneNode *t;
     CoreSection *cs;
 
     t = get_scene_track(default_track_scene, track);
     cs = get_track_section(t, section);
-    if (!cs)
-    {
+    if (!cs) {
         printf("ERROR: Track %d\tSection %d\n", (int)track, (int)section);
         return;
     }
@@ -2372,8 +2137,7 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setSectionDPI(JNIEnv *
 * Method:    setSectionOrientation
 * Signature: (IIZ)V
 */
-JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setSectionOrientation(JNIEnv *jenv, jclass jcls, jint trackId, jint sectionId, jboolean isPortrait)
-{
+JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setSectionOrientation(JNIEnv *jenv, jclass jcls, jint trackId, jint sectionId, jboolean isPortrait) {
     TrackSceneNode *tsn;
     CoreSection *cs;
 
@@ -2396,8 +2160,7 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setSectionOrientation(
 * Method:    getSectionOrientation
 * Signature: (II)Z
 */
-JNIEXPORT jboolean JNICALL Java_corelyzer_graphics_SceneGraph_getSectionOrientation(JNIEnv *jenv, jclass jcls, jint trackId, jint sectionId)
-{
+JNIEXPORT jboolean JNICALL Java_corelyzer_graphics_SceneGraph_getSectionOrientation(JNIEnv *jenv, jclass jcls, jint trackId, jint sectionId) {
     TrackSceneNode *tsn;
     CoreSection *cs;
 
@@ -2417,8 +2180,7 @@ JNIEXPORT jboolean JNICALL Java_corelyzer_graphics_SceneGraph_getSectionOrientat
 * Method:    rotateSection
 * Signature: (IIF)V
 */
-JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_rotateSection(JNIEnv *jenv, jclass jcls, jint trackId, jint sectionId, jfloat angle)
-{
+JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_rotateSection(JNIEnv *jenv, jclass jcls, jint trackId, jint sectionId, jfloat angle) {
     TrackSceneNode *tsn;
     CoreSection *cs;
 
@@ -2439,9 +2201,7 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_rotateSection(JNIEnv *
 * Method:    getSectionRotation
 * Signature: (II)F
 */
-JNIEXPORT jfloat JNICALL Java_corelyzer_graphics_SceneGraph_getSectionRotation(JNIEnv *jenv, jclass jcls, jint trackId, jint sectionId)
-{
-
+JNIEXPORT jfloat JNICALL Java_corelyzer_graphics_SceneGraph_getSectionRotation(JNIEnv *jenv, jclass jcls, jint trackId, jint sectionId) {
     TrackSceneNode *tsn;
     CoreSection *cs;
 
@@ -2460,8 +2220,7 @@ JNIEXPORT jfloat JNICALL Java_corelyzer_graphics_SceneGraph_getSectionRotation(J
 * Method:    getImageIdForSection
 * Signature: (II)I
 */
-JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_getImageIdForSection(JNIEnv *jenv, jclass jcls, jint track, jint section)
-{
+JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_getImageIdForSection(JNIEnv *jenv, jclass jcls, jint track, jint section) {
     TrackSceneNode *t;
     CoreSection *cs;
     t = get_scene_track(default_track_scene, track);
@@ -2477,9 +2236,7 @@ JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_getImageIdForSection(J
 * Method:    getSectionXPos
 * Signature: (I)F
 */
-JNIEXPORT jfloat JNICALL Java_corelyzer_graphics_SceneGraph_getSectionXPos(JNIEnv *jenv, jclass jcls, jint track, jint section)
-{
-
+JNIEXPORT jfloat JNICALL Java_corelyzer_graphics_SceneGraph_getSectionXPos(JNIEnv *jenv, jclass jcls, jint track, jint section) {
     TrackSceneNode *t;
     CoreSection *cs;
     t = get_scene_track(default_track_scene, track);
@@ -2495,9 +2252,7 @@ JNIEXPORT jfloat JNICALL Java_corelyzer_graphics_SceneGraph_getSectionXPos(JNIEn
 * Method:    getSectionYPos
 * Signature: (I)F
 */
-JNIEXPORT jfloat JNICALL Java_corelyzer_graphics_SceneGraph_getSectionYPos(JNIEnv *jenv, jclass jcls, jint track, jint section)
-{
-
+JNIEXPORT jfloat JNICALL Java_corelyzer_graphics_SceneGraph_getSectionYPos(JNIEnv *jenv, jclass jcls, jint track, jint section) {
     TrackSceneNode *t;
     CoreSection *cs;
     t = get_scene_track(default_track_scene, track);
@@ -2513,8 +2268,7 @@ JNIEXPORT jfloat JNICALL Java_corelyzer_graphics_SceneGraph_getSectionYPos(JNIEn
 * Method:    bringSectionToFront
 * Signature: (II)V
 */
-JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_bringSectionToFront(JNIEnv *jenv, jclass jcls, jint trackId, jint sectionId)
-{
+JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_bringSectionToFront(JNIEnv *jenv, jclass jcls, jint trackId, jint sectionId) {
     TrackSceneNode *tsn;
     tsn = get_scene_track(default_track_scene, trackId);
     if (!tsn)
@@ -2531,13 +2285,12 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_bringSectionToFront(JN
 * Method:    pushSectionToEnd
 * Signature: (II)V
 */
-JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_pushSectionToEnd(JNIEnv *jenv, jclass jcls, jint trackId, jint sectionId)
-{
+JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_pushSectionToEnd(JNIEnv *jenv, jclass jcls, jint trackId, jint sectionId) {
     TrackSceneNode *tsn;
     tsn = get_scene_track(default_track_scene, trackId);
 #ifdef DEBUG
     printf("pushing section to end called for track %d, sec %d\n",
-            trackId, sectionId);
+           trackId, sectionId);
 #endif
     if (!tsn)
         return;
@@ -2552,8 +2305,7 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_pushSectionToEnd(JNIEn
 * Method:    setSectionMovable
 * Signature: (IIB)V
 */
-JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setSectionMovable(JNIEnv *jenv, jclass jcls, jint track, jint section, jboolean flag)
-{
+JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setSectionMovable(JNIEnv *jenv, jclass jcls, jint track, jint section, jboolean flag) {
     TrackSceneNode *t;
     CoreSection *cs;
     t = get_scene_track(default_track_scene, track);
@@ -2569,8 +2321,7 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setSectionMovable(JNIE
 * Method:    isSectionMovable
 * Signature: (II)Z
 */
-JNIEXPORT jboolean JNICALL Java_corelyzer_graphics_SceneGraph_isSectionMovable(JNIEnv *jenv, jclass jcls, jint track, jint section)
-{
+JNIEXPORT jboolean JNICALL Java_corelyzer_graphics_SceneGraph_isSectionMovable(JNIEnv *jenv, jclass jcls, jint track, jint section) {
     TrackSceneNode *t;
     CoreSection *cs;
     t = get_scene_track(default_track_scene, track);
@@ -2586,8 +2337,7 @@ JNIEXPORT jboolean JNICALL Java_corelyzer_graphics_SceneGraph_isSectionMovable(J
 * Method:    setSectionGraphMovable
 * Signature: (IIB)V
 */
-JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setSectionGraphMovable(JNIEnv *jenv, jclass jcls, jint track, jint section, jboolean flag)
-{
+JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setSectionGraphMovable(JNIEnv *jenv, jclass jcls, jint track, jint section, jboolean flag) {
     TrackSceneNode *t;
     CoreSection *cs;
     t = get_scene_track(default_track_scene, track);
@@ -2603,8 +2353,7 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setSectionGraphMovable
 * Method:    isSectionGraphMovable
 * Signature: (II)Z
 */
-JNIEXPORT jboolean JNICALL Java_corelyzer_graphics_SceneGraph_isSectionGraphMovable(JNIEnv *jenv, jclass jcls, jint track, jint section)
-{
+JNIEXPORT jboolean JNICALL Java_corelyzer_graphics_SceneGraph_isSectionGraphMovable(JNIEnv *jenv, jclass jcls, jint track, jint section) {
     TrackSceneNode *t;
     CoreSection *cs;
     t = get_scene_track(default_track_scene, track);
@@ -2620,8 +2369,7 @@ JNIEXPORT jboolean JNICALL Java_corelyzer_graphics_SceneGraph_isSectionGraphMova
 * Method:    markTrackMovable
 * Signature: (IZ)V
 */
-JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setTrackMovable(JNIEnv *jenv, jclass jcls, jint trackId, jboolean flag)
-{
+JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setTrackMovable(JNIEnv *jenv, jclass jcls, jint trackId, jboolean flag) {
     TrackSceneNode *t;
     t = get_scene_track(default_track_scene, trackId);
 
@@ -2634,8 +2382,7 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setTrackMovable(JNIEnv
 * Method:    isTrackMovable
 * Signature: (I)Z
 */
-JNIEXPORT jboolean JNICALL Java_corelyzer_graphics_SceneGraph_isTrackMovable(JNIEnv *jenv, jclass jcls, jint trackId)
-{
+JNIEXPORT jboolean JNICALL Java_corelyzer_graphics_SceneGraph_isTrackMovable(JNIEnv *jenv, jclass jcls, jint trackId) {
     TrackSceneNode *t = get_scene_track(default_track_scene, trackId);
     if (t)
         return t->movable;
@@ -2648,9 +2395,7 @@ JNIEXPORT jboolean JNICALL Java_corelyzer_graphics_SceneGraph_isTrackMovable(JNI
 * Method:    addDataset
 * Signature: (Ljava/lang/String;)I
 */
-JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_addDataset(JNIEnv *jenv, jclass jcls, jstring name)
-{
-
+JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_addDataset(JNIEnv *jenv, jclass jcls, jstring name) {
     char *nbuf;
     int i;
 
@@ -2678,12 +2423,10 @@ JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_addDataset(JNIEnv *jen
 * Method:    deleteDataset
 * Signature: (I)V
 */
-JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_deleteDataset(JNIEnv *jenv, jclass jcls, jint datasetId)
-{
+JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_deleteDataset(JNIEnv *jenv, jclass jcls, jint datasetId) {
     printf("\n--- free native dataset ---\n");
 
-    if (is_dataset(datasetId))
-    {
+    if (is_dataset(datasetId)) {
         free_dataset(datasetId);
     }
 }
@@ -2693,9 +2436,7 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_deleteDataset(JNIEnv *
 * Method:    setDatasetURL
 * Signature: (ILjava/lang/String;)V
 */
-JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setDatasetURL(JNIEnv *jenv, jclass jcls, jint set, jstring url)
-{
-
+JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setDatasetURL(JNIEnv *jenv, jclass jcls, jint set, jstring url) {
     char *nbuf;
     int i;
 
@@ -2715,8 +2456,7 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setDatasetURL(JNIEnv *
 * Method:    getDatasetURL
 * Signature: (I)Ljava/lang/String;
 */
-JNIEXPORT jstring JNICALL Java_corelyzer_graphics_SceneGraph_getDatasetURL(JNIEnv *jenv, jclass jcls, jint set)
-{
+JNIEXPORT jstring JNICALL Java_corelyzer_graphics_SceneGraph_getDatasetURL(JNIEnv *jenv, jclass jcls, jint set) {
     return jenv->NewStringUTF(get_dataset_url(set));
 }
 
@@ -2725,8 +2465,7 @@ JNIEXPORT jstring JNICALL Java_corelyzer_graphics_SceneGraph_getDatasetURL(JNIEn
 * Method:    getDatasetName
 * Signature: (I)Ljava/lang/String;
 */
-JNIEXPORT jstring JNICALL Java_corelyzer_graphics_SceneGraph_getDatasetName(JNIEnv *jenv, jclass jcls, jint set)
-{
+JNIEXPORT jstring JNICALL Java_corelyzer_graphics_SceneGraph_getDatasetName(JNIEnv *jenv, jclass jcls, jint set) {
     return jenv->NewStringUTF(get_dataset_name(set));
 }
 
@@ -2735,9 +2474,7 @@ JNIEXPORT jstring JNICALL Java_corelyzer_graphics_SceneGraph_getDatasetName(JNIE
 * Method:    addTable
 * Signature: (I)I
 */
-JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_addTable(JNIEnv *jenv, jclass jcls, jint jset, jstring jName)
-{
-
+JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_addTable(JNIEnv *jenv, jclass jcls, jint jset, jstring jName) {
     char *nbuf;
     int i;
 
@@ -2760,9 +2497,7 @@ JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_addTable(JNIEnv *jenv,
 * Method:    setTableHeight
 * Signature: (III)V
 */
-JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setTableHeight(JNIEnv *jenv, jclass jcls, jint jset, jint jtable, jint jheight)
-{
-
+JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setTableHeight(JNIEnv *jenv, jclass jcls, jint jset, jint jtable, jint jheight) {
     int h = set_table_height(jset, jtable, jheight);
 
 #ifdef DEBUG
@@ -2775,9 +2510,7 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setTableHeight(JNIEnv 
 * Method:    setTableFieldCount
 * Signature: (III)V
 */
-JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setTableFieldCount(JNIEnv *jenv, jclass jcls, jint jset, jint jtable, jint jcount)
-{
-
+JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setTableFieldCount(JNIEnv *jenv, jclass jcls, jint jset, jint jtable, jint jcount) {
     int c = set_table_field_count(jset, jtable, jcount);
 #ifdef DEBUG
     printf("\n--- setTableFieldCount: [%d] ---\n", c);
@@ -2789,8 +2522,7 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setTableFieldCount(JNI
 * Method:    addNewFieldToTable
 * Signature: (IILjava/lang/String;)B
 */
-JNIEXPORT jboolean JNICALL Java_corelyzer_graphics_SceneGraph_addNewFieldToTable(JNIEnv *jenv, jclass jcls, jint set, jint table, jstring label)
-{
+JNIEXPORT jboolean JNICALL Java_corelyzer_graphics_SceneGraph_addNewFieldToTable(JNIEnv *jenv, jclass jcls, jint set, jint table, jstring label) {
     int i;
     char *nbuf;
     i = jenv->GetStringLength(label);
@@ -2812,8 +2544,7 @@ JNIEXPORT jboolean JNICALL Java_corelyzer_graphics_SceneGraph_addNewFieldToTable
 * Signature: (IIII)V
 */
 JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setTableHeightAndFieldCount(JNIEnv *jenv, jclass jcls, jint jset, jint jtable,
-                                                                                        jint jheight, jint jcount)
-{
+                                                                                      jint jheight, jint jcount) {
 #ifdef DEBUG
     printf("\n--- Enter setTableHeightAndFieldCount ---\n");
 #endif
@@ -2824,7 +2555,7 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setTableHeightAndField
 
 #ifdef DEBUG
     printf("\n--- Set[%d], Table[%d] has [%d] rows and [%d] fields ---\n",
-            jset, jtable, h, c);
+           jset, jtable, h, c);
     printf("--- Table Init done ---\n");
 #endif
 }
@@ -2835,12 +2566,12 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setTableHeightAndField
 * Signature: (IIIIF)V
 */
 JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setTableCell(JNIEnv *jenv, jclass jcls, jint jset, jint jtable,
-                                                                        jint jfield, jint jrow, jboolean jvalid, jfloat jdepth, jfloat jvalue)
-{
+                                                                       jint jfield, jint jrow, jboolean jvalid, jfloat jdepth, jfloat jvalue) {
 #ifdef DEBUG
-    printf("\n--- Put value[%4.4f] depth[%4.4f] Valid[%d] in row[%d] \
+    printf(
+        "\n--- Put value[%4.4f] depth[%4.4f] Valid[%d] in row[%d] \
     field[%d] in table[%d] of dataset[%d] ---\n",
-            jvalue, jdepth, jvalid, jrow, jfield, jtable, jset);
+        jvalue, jdepth, jvalid, jrow, jfield, jtable, jset);
 #endif
 
     set_table_cell(jset, jtable, jfield, jrow, jvalue);
@@ -2858,11 +2589,10 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setTableCell(JNIEnv *j
 * Signature: (IIIFF)V
 */
 JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setFieldMinMax(JNIEnv *jenv, jclass jcls, jint jset, jint jtable, jint jfield,
-                                                                            jfloat jmin, jfloat jmax)
-{
+                                                                         jfloat jmin, jfloat jmax) {
 #ifdef DEBUG
     printf("\n--- Setting dataset:%d, table:%d, field:%d minmax value",
-            jset, jtable, jfield);
+           jset, jtable, jfield);
     printf(" to: %f, %f ---\n", jmin, jmax);
 #endif
 
@@ -2874,9 +2604,7 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setFieldMinMax(JNIEnv 
 * Method:    getTableHeight
 * Signature: (II)V
 */
-JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_getTableHeight(JNIEnv *jenv, jclass jcls, jint jset, jint jtable)
-{
-
+JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_getTableHeight(JNIEnv *jenv, jclass jcls, jint jset, jint jtable) {
     return get_table_height(jset, jtable);
 }
 
@@ -2885,8 +2613,7 @@ JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_getTableHeight(JNIEnv 
 * Method:    getTableFields
 * Signature: (II)I
 */
-JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_getTableFields(JNIEnv *jenv, jclass jcls, jint jset, jint jtable)
-{
+JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_getTableFields(JNIEnv *jenv, jclass jcls, jint jset, jint jtable) {
     return get_table_field_count(jset, jtable);
 }
 
@@ -2895,8 +2622,7 @@ JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_getTableFields(JNIEnv 
 * Method:    isTableCellValid
 * Signature: (IIII)I
 */
-JNIEXPORT jboolean JNICALL Java_corelyzer_graphics_SceneGraph_isTableCellValid(JNIEnv *jenv, jclass jcls, jint jset, jint jtable, jint jfield, jint jrow)
-{
+JNIEXPORT jboolean JNICALL Java_corelyzer_graphics_SceneGraph_isTableCellValid(JNIEnv *jenv, jclass jcls, jint jset, jint jtable, jint jfield, jint jrow) {
     return is_table_cell_valid(jset, jtable, jfield, jrow);
 }
 
@@ -2905,8 +2631,7 @@ JNIEXPORT jboolean JNICALL Java_corelyzer_graphics_SceneGraph_isTableCellValid(J
 * Method:    getTableCell
 * Signature: (IIII)F
 */
-JNIEXPORT jfloat JNICALL Java_corelyzer_graphics_SceneGraph_getTableCell(JNIEnv *jenv, jclass jcls, jint jset, jint jtable, jint jfield, jint jrow)
-{
+JNIEXPORT jfloat JNICALL Java_corelyzer_graphics_SceneGraph_getTableCell(JNIEnv *jenv, jclass jcls, jint jset, jint jtable, jint jfield, jint jrow) {
     return get_table_cell(jset, jtable, jfield, jrow);
 }
 
@@ -2915,8 +2640,7 @@ JNIEXPORT jfloat JNICALL Java_corelyzer_graphics_SceneGraph_getTableCell(JNIEnv 
 * Method:    getTableCellDepth
 * Signature: (IIII)F
 */
-JNIEXPORT jfloat JNICALL Java_corelyzer_graphics_SceneGraph_getTableCellDepth(JNIEnv *jenv, jclass jcls, jint jset, jint jtable, jint jfield, jint jrow)
-{
+JNIEXPORT jfloat JNICALL Java_corelyzer_graphics_SceneGraph_getTableCellDepth(JNIEnv *jenv, jclass jcls, jint jset, jint jtable, jint jfield, jint jrow) {
     return get_table_row_depth(jset, jtable, jrow);
 }
 
@@ -2925,8 +2649,7 @@ JNIEXPORT jfloat JNICALL Java_corelyzer_graphics_SceneGraph_getTableCellDepth(JN
 * Method:    getNumberOfTables
 * Signature: (I)I
 */
-JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_getNumberOfTables(JNIEnv *jenv, jclass jcls, jint jset)
-{
+JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_getNumberOfTables(JNIEnv *jenv, jclass jcls, jint jset) {
     return num_tables(jset);
 }
 
@@ -2935,8 +2658,7 @@ JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_getNumberOfTables(JNIE
 * Method:    getTableName
 * Signature: (II)Ljava/lang/String;
 */
-JNIEXPORT jstring JNICALL Java_corelyzer_graphics_SceneGraph_getTableName(JNIEnv *jenv, jclass jcls, jint set, jint table)
-{
+JNIEXPORT jstring JNICALL Java_corelyzer_graphics_SceneGraph_getTableName(JNIEnv *jenv, jclass jcls, jint set, jint table) {
     return jenv->NewStringUTF(get_table_name(set, table));
 }
 
@@ -2945,8 +2667,7 @@ JNIEXPORT jstring JNICALL Java_corelyzer_graphics_SceneGraph_getTableName(JNIEnv
 * Method:    getFieldName
 * Signature: (III)Ljava/lang/String;
 */
-JNIEXPORT jstring JNICALL Java_corelyzer_graphics_SceneGraph_getFieldName(JNIEnv *jenv, jclass jcls, jint set, jint table, jint field)
-{
+JNIEXPORT jstring JNICALL Java_corelyzer_graphics_SceneGraph_getFieldName(JNIEnv *jenv, jclass jcls, jint set, jint table, jint field) {
     return jenv->NewStringUTF(get_field_name(set, table, field));
 }
 
@@ -2955,8 +2676,7 @@ JNIEXPORT jstring JNICALL Java_corelyzer_graphics_SceneGraph_getFieldName(JNIEnv
 * Method:    setTableDepthUnitScale
 * Signature: (IIF)V
 */
-JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setTableDepthUnitScale(JNIEnv *jenv, jclass jcls, jint jdataset, jint jtable, jfloat jscale)
-{
+JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setTableDepthUnitScale(JNIEnv *jenv, jclass jcls, jint jdataset, jint jtable, jfloat jscale) {
     if (!is_dataset(jdataset))
         return;
 
@@ -2968,8 +2688,7 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setTableDepthUnitScale
 * Method:    getTableDepthUnitScale
 * Signature: (II)F
 */
-JNIEXPORT jfloat JNICALL Java_corelyzer_graphics_SceneGraph_getTableDepthUnitScale(JNIEnv *jenv, jclass jcls, jint jdataset, jint jtable)
-{
+JNIEXPORT jfloat JNICALL Java_corelyzer_graphics_SceneGraph_getTableDepthUnitScale(JNIEnv *jenv, jclass jcls, jint jdataset, jint jtable) {
     if (!is_dataset(jdataset))
         return -1.0;
 
@@ -2982,9 +2701,7 @@ JNIEXPORT jfloat JNICALL Java_corelyzer_graphics_SceneGraph_getTableDepthUnitSca
 * Signature: (IIIII)I
 */
 JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_addLineGraphToSection(JNIEnv *jenv, jclass jcls, jint jtrack, jint jsection, jint jdataset,
-                                                                                jint jtable, jint jfield)
-{
-
+                                                                                jint jtable, jint jfield) {
     int gid = add_line_graph_to_section(jtrack, jsection,
                                         jdataset, jtable, jfield);
 
@@ -2993,12 +2710,11 @@ JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_addLineGraphToSection(
     if (gid != -1)
         move_graph_to_top(gid);
 
-    if (gid == -1)
-    {
+    if (gid == -1) {
         // fixme
         printf("\nERROR: addLineGraph Fail!\n");
         printf("trackId: %d, sectionId: %d, datasetId: %d, tableId: %d, fieldId: %d\n",
-                (int)jtrack, (int)jsection, (int)jdataset, (int)jtable, (int)jfield);
+               (int)jtrack, (int)jsection, (int)jdataset, (int)jtable, (int)jfield);
     }
 
     return gid;
@@ -3009,12 +2725,10 @@ JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_addLineGraphToSection(
 * Method:    removeLineGraphFromSection
 * Signature: (I)I
 */
-JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_removeLineGraphFromSection(JNIEnv *jenv, jclass jcls, jint graphid)
-{
+JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_removeLineGraphFromSection(JNIEnv *jenv, jclass jcls, jint graphid) {
     int gid = remove_line_graph_from_section(graphid);
 
-    if (gid == -1)
-    {
+    if (gid == -1) {
         printf("\nERROR: removeLineGraph Fail! graphId: %d\n", (int)graphid);
     }
 
@@ -3026,8 +2740,7 @@ JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_removeLineGraphFromSec
 * Method:    setLineGraphColor
 * Signature: (IIIFFF)V
 */
-JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setLineGraphColor(JNIEnv *jenv, jclass jcls, jint graphid, jfloat jr, jfloat jg, jfloat jb)
-{
+JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setLineGraphColor(JNIEnv *jenv, jclass jcls, jint graphid, jfloat jr, jfloat jg, jfloat jb) {
     set_line_graph_color(graphid, jr, jg, jb);
 }
 
@@ -3036,8 +2749,7 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setLineGraphColor(JNIE
 * Method:    setLineGraphType
 * Signature: (II)V
 */
-JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setLineGraphType(JNIEnv *jenv, jclass jcls, jint graphid, jint type)
-{
+JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setLineGraphType(JNIEnv *jenv, jclass jcls, jint graphid, jint type) {
     set_line_graph_type(graphid, type);
 }
 
@@ -3046,8 +2758,7 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setLineGraphType(JNIEn
 * Method:    setLineGraphRange
 * Signature: (IIIFF)V
 */
-JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setLineGraphRange(JNIEnv *jenv, jclass jcls, jint graphid, jfloat jmin, jfloat jmax)
-{
+JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setLineGraphRange(JNIEnv *jenv, jclass jcls, jint graphid, jfloat jmin, jfloat jmax) {
     set_line_graph_range(graphid, jmin, jmax);
 }
 
@@ -3056,8 +2767,7 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setLineGraphRange(JNIE
 * Method:    setLineGraphExcludeRange
 * Signature: (IIIFF)V
 */
-JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setLineGraphExcludeRange(JNIEnv *jenv, jclass jcls, jint graphid, jfloat jmin, jfloat jmax)
-{
+JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setLineGraphExcludeRange(JNIEnv *jenv, jclass jcls, jint graphid, jfloat jmin, jfloat jmax) {
     set_line_graph_exclude_range(graphid, jmin, jmax);
 }
 
@@ -3066,8 +2776,7 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setLineGraphExcludeRan
 * Method:    setLineGraphExcludeStyle
 * Signature: (IIII)V
 */
-JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setLineGraphExcludeStyle(JNIEnv *jenv, jclass jcls, jint graphid, jint jstyle)
-{
+JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setLineGraphExcludeStyle(JNIEnv *jenv, jclass jcls, jint graphid, jint jstyle) {
     set_line_graph_exclude_style(graphid, jstyle);
 }
 
@@ -3076,9 +2785,7 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setLineGraphExcludeSty
 * Method:    setLineGraphLabel
 * Signature: (IIILjava/lang/String;)V
 */
-JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setLineGraphLabel(JNIEnv *jenv, jclass jcls, jint graphid, jstring jlabel)
-{
-
+JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setLineGraphLabel(JNIEnv *jenv, jclass jcls, jint graphid, jstring jlabel) {
     char *nbuf;
     int i;
 
@@ -3087,8 +2794,7 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setLineGraphLabel(JNIE
     jenv->GetStringUTFRegion(jlabel, 0, i, nbuf);
     set_line_graph_label(graphid, nbuf);
 
-    if (nbuf != NULL)
-    {
+    if (nbuf != NULL) {
         free(nbuf);
     }
 }
@@ -3098,8 +2804,7 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setLineGraphLabel(JNIE
 * Method:    isLineGraphShown
 * Signature: (III)Z
 */
-JNIEXPORT jboolean JNICALL Java_corelyzer_graphics_SceneGraph_isLineGraphShown(JNIEnv *jenv, jclass jcls, jint graphid)
-{
+JNIEXPORT jboolean JNICALL Java_corelyzer_graphics_SceneGraph_isLineGraphShown(JNIEnv *jenv, jclass jcls, jint graphid) {
     return is_line_graph_shown(graphid);
 }
 
@@ -3108,8 +2813,7 @@ JNIEXPORT jboolean JNICALL Java_corelyzer_graphics_SceneGraph_isLineGraphShown(J
 * Method:    getNumGraphsForSection
 * Signature: (II)I
 */
-JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_getNumGraphsForSection(JNIEnv *jenv, jclass jcls, jint track, jint section)
-{
+JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_getNumGraphsForSection(JNIEnv *jenv, jclass jcls, jint track, jint section) {
     TrackSceneNode *t;
     CoreSection *cs;
     t = get_scene_track(default_track_scene, track);
@@ -3125,8 +2829,7 @@ JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_getNumGraphsForSection
 * Signature: (IIIII)I
 */
 JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_getGraphID(JNIEnv *jenv, jclass jcls, jint track, jint section, jint dataset,
-                                                                        jint table, jint field)
-{
+                                                                     jint table, jint field) {
     return locate_graph(track, section, dataset, table, field);
 }
 
@@ -3136,8 +2839,7 @@ JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_getGraphID(JNIEnv *jen
 * Method:    setGraphsCollapse
 * Signature: (Z)V
 */
-JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setGraphsCollapse(JNIEnv *jenv, jclass jcls, jboolean isCollapse)
-{
+JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setGraphsCollapse(JNIEnv *jenv, jclass jcls, jboolean isCollapse) {
     setCollapse(isCollapse);
 }
 
@@ -3146,8 +2848,7 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setGraphsCollapse(JNIE
 * Method:    getGraphsCollapse
 * Signature: ()Z
 */
-JNIEXPORT jboolean JNICALL Java_corelyzer_graphics_SceneGraph_getGraphsCollapse(JNIEnv *jenv, jclass jcls)
-{
+JNIEXPORT jboolean JNICALL Java_corelyzer_graphics_SceneGraph_getGraphsCollapse(JNIEnv *jenv, jclass jcls) {
     return ifCollapse();
 }
 
@@ -3156,8 +2857,7 @@ JNIEXPORT jboolean JNICALL Java_corelyzer_graphics_SceneGraph_getGraphsCollapse(
 * Method:    getGraphIDFromSectionSlot
 * Signature: (III)I
 */
-JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_getGraphIDFromSectionSlot(JNIEnv *jenv, jclass jcls, jint track, jint section, jint slot)
-{
+JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_getGraphIDFromSectionSlot(JNIEnv *jenv, jclass jcls, jint track, jint section, jint slot) {
     TrackSceneNode *tsn;
     CoreSection *cs;
 
@@ -3175,8 +2875,7 @@ JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_getGraphIDFromSectionS
 * Method:    getDatasetReference
 * Signature: (I)I
 */
-JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_getDatasetReference(JNIEnv *jenv, jclass jcls, jint gid)
-{
+JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_getDatasetReference(JNIEnv *jenv, jclass jcls, jint gid) {
     return get_data_set_index(gid);
 }
 
@@ -3185,8 +2884,7 @@ JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_getDatasetReference(JN
 * Method:    getTableReference
 * Signature: (I)I
 */
-JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_getTableReference(JNIEnv *jenv, jclass jcls, jint gid)
-{
+JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_getTableReference(JNIEnv *jenv, jclass jcls, jint gid) {
     return get_table_index(gid);
 }
 
@@ -3195,8 +2893,7 @@ JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_getTableReference(JNIE
 * Method:    getFieldReference
 * Signature: (I)I
 */
-JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_getFieldReference(JNIEnv *jenv, jclass jcls, jint gid)
-{
+JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_getFieldReference(JNIEnv *jenv, jclass jcls, jint gid) {
     return get_field_index(gid);
 }
 
@@ -3205,8 +2902,7 @@ JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_getFieldReference(JNIE
 * Method:    getTrackReference
 * Signature: (I)I
 */
-JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_getTrackReference(JNIEnv *jenv, jclass jcls, jint gid)
-{
+JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_getTrackReference(JNIEnv *jenv, jclass jcls, jint gid) {
     return get_track_index(gid);
 }
 
@@ -3215,8 +2911,7 @@ JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_getTrackReference(JNIE
 * Method:    getSectionReference
 * Signature: (I)I
 */
-JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_getSectionReference(JNIEnv *jenv, jclass jcls, jint gid)
-{
+JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_getSectionReference(JNIEnv *jenv, jclass jcls, jint gid) {
     return get_section_index(gid);
 }
 /*
@@ -3224,8 +2919,7 @@ JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_getSectionReference(JN
 * Method:    getGraphMax
 * Signature: (I)F
 */
-JNIEXPORT jfloat JNICALL Java_corelyzer_graphics_SceneGraph_getGraphMax(JNIEnv *jenv, jclass jcls, jint gid)
-{
+JNIEXPORT jfloat JNICALL Java_corelyzer_graphics_SceneGraph_getGraphMax(JNIEnv *jenv, jclass jcls, jint gid) {
     return get_max(gid);
 }
 
@@ -3234,8 +2928,7 @@ JNIEXPORT jfloat JNICALL Java_corelyzer_graphics_SceneGraph_getGraphMax(JNIEnv *
 * Method:    getGraphMin
 * Signature: (I)F
 */
-JNIEXPORT jfloat JNICALL Java_corelyzer_graphics_SceneGraph_getGraphMin(JNIEnv *jenv, jclass jcls, jint graphid)
-{
+JNIEXPORT jfloat JNICALL Java_corelyzer_graphics_SceneGraph_getGraphMin(JNIEnv *jenv, jclass jcls, jint graphid) {
     return get_min(graphid);
 }
 
@@ -3244,8 +2937,7 @@ JNIEXPORT jfloat JNICALL Java_corelyzer_graphics_SceneGraph_getGraphMin(JNIEnv *
 * Method:    getGraphOrigMax
 * Signature: (I)F
 */
-JNIEXPORT jfloat JNICALL Java_corelyzer_graphics_SceneGraph_getGraphOrigMax(JNIEnv *jenv, jclass jcls, jint graphid)
-{
+JNIEXPORT jfloat JNICALL Java_corelyzer_graphics_SceneGraph_getGraphOrigMax(JNIEnv *jenv, jclass jcls, jint graphid) {
     return get_graph_orig_max(graphid);
 }
 
@@ -3254,8 +2946,7 @@ JNIEXPORT jfloat JNICALL Java_corelyzer_graphics_SceneGraph_getGraphOrigMax(JNIE
 * Method:    getGraphOrigMin
 * Signature: (I)F
 */
-JNIEXPORT jfloat JNICALL Java_corelyzer_graphics_SceneGraph_getGraphOrigMin(JNIEnv *jenv, jclass jcls, jint graphid)
-{
+JNIEXPORT jfloat JNICALL Java_corelyzer_graphics_SceneGraph_getGraphOrigMin(JNIEnv *jenv, jclass jcls, jint graphid) {
     return get_graph_orig_min(graphid);
 }
 
@@ -3264,8 +2955,7 @@ JNIEXPORT jfloat JNICALL Java_corelyzer_graphics_SceneGraph_getGraphOrigMin(JNIE
 * Method:    getGraphExcludeMin
 * Signature: (I)F
 */
-JNIEXPORT jfloat JNICALL Java_corelyzer_graphics_SceneGraph_getGraphExcludeMin(JNIEnv *jenv, jclass jcls, jint graphid)
-{
+JNIEXPORT jfloat JNICALL Java_corelyzer_graphics_SceneGraph_getGraphExcludeMin(JNIEnv *jenv, jclass jcls, jint graphid) {
     return get_graph_exclude_min(graphid);
 }
 
@@ -3274,8 +2964,7 @@ JNIEXPORT jfloat JNICALL Java_corelyzer_graphics_SceneGraph_getGraphExcludeMin(J
 * Method:    getGraphExcludeMax
 * Signature: (I)F
 */
-JNIEXPORT jfloat JNICALL Java_corelyzer_graphics_SceneGraph_getGraphExcludeMax(JNIEnv *jenv, jclass jcls, jint graphid)
-{
+JNIEXPORT jfloat JNICALL Java_corelyzer_graphics_SceneGraph_getGraphExcludeMax(JNIEnv *jenv, jclass jcls, jint graphid) {
     return get_graph_exclude_max(graphid);
 }
 
@@ -3284,8 +2973,7 @@ JNIEXPORT jfloat JNICALL Java_corelyzer_graphics_SceneGraph_getGraphExcludeMax(J
 * Method:    getGraphExcludeStyle
 * Signature: (I)I
 */
-JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_getGraphExcludeStyle(JNIEnv *jenv, jclass jcls, jint graphid)
-{
+JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_getGraphExcludeStyle(JNIEnv *jenv, jclass jcls, jint graphid) {
     return get_graph_exclude_style(graphid);
 }
 
@@ -3294,8 +2982,7 @@ JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_getGraphExcludeStyle(J
 * Method:    getGraphSlot
 * Signature: (I)I
 */
-JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_getGraphSlot(JNIEnv *jenv, jclass jcls, jint graphId)
-{
+JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_getGraphSlot(JNIEnv *jenv, jclass jcls, jint graphId) {
     return get_graph_slot(graphId);
 }
 
@@ -3304,8 +2991,7 @@ JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_getGraphSlot(JNIEnv *j
 * Method:    getLineGraphColorComponent
 * Signature: (IIII)F
 */
-JNIEXPORT jfloat JNICALL Java_corelyzer_graphics_SceneGraph_getLineGraphColorComponent(JNIEnv *jenv, jclass jcls, jint graphid, jint jcomponent)
-{
+JNIEXPORT jfloat JNICALL Java_corelyzer_graphics_SceneGraph_getLineGraphColorComponent(JNIEnv *jenv, jclass jcls, jint graphid, jint jcomponent) {
     return get_line_graph_color_component(graphid, jcomponent);
 }
 
@@ -3314,8 +3000,7 @@ JNIEXPORT jfloat JNICALL Java_corelyzer_graphics_SceneGraph_getLineGraphColorCom
 * Method:    getLineGraphType
 * Signature: (I)I
 */
-JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_getLineGraphType(JNIEnv *jenv, jclass jcls, jint graphid)
-{
+JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_getLineGraphType(JNIEnv *jenv, jclass jcls, jint graphid) {
     return get_line_graph_type(graphid);
 }
 
@@ -3324,8 +3009,7 @@ JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_getLineGraphType(JNIEn
 * Method:    findGraph
 * Signature: (I)II
 */
-JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_findGraphByField(JNIEnv *jenv, jclass jcls, jint datasetid, jint fieldid)
-{
+JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_findGraphByField(JNIEnv *jenv, jclass jcls, jint datasetid, jint fieldid) {
     return find_graph_by_field(datasetid, fieldid);
 }
 
@@ -3334,9 +3018,7 @@ JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_findGraphByField(JNIEn
 * Method:    pickForTrack
 * Signature: (IFF)I
 */
-JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_pickForTrack(JNIEnv *jenv, jclass jcls, jint canvas, jfloat x, jfloat y)
-{
-
+JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_pickForTrack(JNIEnv *jenv, jclass jcls, jint canvas, jfloat x, jfloat y) {
     // go through zorder of scene's tracks from front to back
     int zlen, *order;
     int i;
@@ -3358,8 +3040,7 @@ JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_pickForTrack(JNIEnv *j
     order = (int *)malloc(sizeof(int) * zlen);
     get_scene_track_zorder(default_track_scene, order);
 
-    for (i = 0; i < zlen; ++i)
-    {
+    for (i = 0; i < zlen; ++i) {
 #ifdef DEBUG
         printf("Checking if %d is a track in track scene\n", order[i]);
 #endif
@@ -3370,8 +3051,8 @@ JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_pickForTrack(JNIEnv *j
 
         // bounding box intersection test
         printf("Comparing %f, %f to bound (%f, %f) to (%f, %f)\n",
-                x, y, tsn->px, tsn->py, tsn->px + (tsn->w * cdpix),
-                tsn->py + (tsn->h * cdpiy));
+               x, y, tsn->px, tsn->py, tsn->px + (tsn->w * cdpix),
+               tsn->py + (tsn->h * cdpiy));
 
         if (x < tsn->px)
             continue;
@@ -3398,8 +3079,7 @@ JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_pickForTrack(JNIEnv *j
 * Method:    pickForSection
 * Signature: (IIFF)I
 */
-JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_pickForSection(JNIEnv *jenv, jclass jcls, jint canvas, jint track, jfloat x, jfloat y)
-{
+JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_pickForSection(JNIEnv *jenv, jclass jcls, jint canvas, jint track, jfloat x, jfloat y) {
     if (!is_canvas(canvas))
         return -1;
 
@@ -3422,8 +3102,7 @@ JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_pickForSection(JNIEnv 
     get_track_section_zorder(tsn, order);
 
     // bounding box test
-    for (int i = 0; i < zlen; ++i)
-    {
+    for (int i = 0; i < zlen; ++i) {
         if (!is_section_model(tsn, order[i]))
             continue;
 
@@ -3435,8 +3114,7 @@ JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_pickForSection(JNIEnv 
         w *= cdpix;
         h *= cdpiy;
 
-        if (cs->orientation == PORTRAIT)
-        {
+        if (cs->orientation == PORTRAIT) {
             float t = w;
             w = h;
             h = t;
@@ -3466,8 +3144,7 @@ JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_pickForSection(JNIEnv 
 * Method:    enableVerticalLineFromGraph
 * Signature: (I)V
 */
-JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_enableVerticalLineFromGraph(JNIEnv *jenv, jclass jcls, jint graph)
-{
+JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_enableVerticalLineFromGraph(JNIEnv *jenv, jclass jcls, jint graph) {
     TrackSceneNode *tsn;
     CoreSection *cs;
     int csid;
@@ -3487,8 +3164,7 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_enableVerticalLineFrom
 * Method:    disableVerticalLineFromGraph
 * Signature: (I)V
 */
-JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_disableVerticalLineFromGraph(JNIEnv *jenv, jclass jcls, jint graph)
-{
+JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_disableVerticalLineFromGraph(JNIEnv *jenv, jclass jcls, jint graph) {
     TrackSceneNode *tsn;
     CoreSection *cs;
     int csid;
@@ -3508,8 +3184,7 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_disableVerticalLineFro
 * Method:    setVerticalLineFromGraphXPosition
 * Signature: (IF)V
 */
-JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setVerticalLineFromGraphXPosition(JNIEnv *jenv, jclass jcls, jint graph, jfloat x)
-{
+JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setVerticalLineFromGraphXPosition(JNIEnv *jenv, jclass jcls, jint graph, jfloat x) {
     TrackSceneNode *tsn;
     CoreSection *cs;
     int csid;
@@ -3528,9 +3203,7 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setVerticalLineFromGra
 * Method:    performPick
 * Signature: (III)V
 */
-JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_performPick(JNIEnv *jenv, jclass jcls, jint canvas, jfloat x, jfloat y)
-{
-
+JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_performPick(JNIEnv *jenv, jclass jcls, jint canvas, jfloat x, jfloat y) {
     perform_pick(canvas, x, y);
 }
 
@@ -3540,9 +3213,7 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_performPick(JNIEnv *je
 * Signature: (IIIFF)Z
 */
 JNIEXPORT jboolean JNICALL Java_corelyzer_graphics_SceneGraph_hitMarker(JNIEnv *jenv, jclass jcls, jint canvas, jint track, jint section, jint marker,
-                                                                        jfloat x, jfloat y)
-{
-
+                                                                        jfloat x, jfloat y) {
     TrackSceneNode *t;
     CoreSection *cs;
 
@@ -3553,8 +3224,7 @@ JNIEXPORT jboolean JNICALL Java_corelyzer_graphics_SceneGraph_hitMarker(JNIEnv *
 
     float cdpix, cdpiy;
 
-    if (!get_horizontal_depth())
-    {
+    if (!get_horizontal_depth()) {
         float tVar = x;
         x = y;
         y = -tVar;
@@ -3568,8 +3238,7 @@ JNIEXPORT jboolean JNICALL Java_corelyzer_graphics_SceneGraph_hitMarker(JNIEnv *
         return hit;
     get_canvas_dpi(canvas, &cdpix, &cdpiy);
 
-    if (cs && is_section_annotation(cs, marker))
-    {
+    if (cs && is_section_annotation(cs, marker)) {
         CoreAnnotation *ca = cs->annovec[marker];
 
         // find which handle mouse hit
@@ -3578,144 +3247,126 @@ JNIEXPORT jboolean JNICALL Java_corelyzer_graphics_SceneGraph_hitMarker(JNIEnv *
         /// sy = cdpiy / DEFAULT_MARKER_DPI_Y;
         float mx, my, mw, mh;
 
-        switch (ca->m.type)
-        {
-        case CORE_POINT_MARKER:
-        {
-            // two possible handle
-            // 1. annotation icon
-            mx = ca->m.px;
-            my = ca->m.py;
-            mw = ca->m.w * getMarkerScale();
-            mh = ca->m.h * getMarkerScale();
-            if (y >= my && y <= my + mh && x >= mx + cs->px && x <= mx + mw + cs->px)
-            {
-                hit = true;
-                ca->m.hit0 = &(ca->m.px);
-                ca->m.hit1 = &(ca->m.py);
-                break;
-            }
-            // 2: point
-            mw *= 0.5f;
-            mh *= 0.5f;
-            mx = ca->m.depthX - mw / 2.0f;
-            my = ca->m.depthY - mh / 2.0f;
-            if (y >= my && y <= my + mh && x >= mx + cs->px && x <= mx + mw + cs->px)
-            {
-                hit = true;
-                ca->m.hit0 = &(ca->m.depthX);
-                ca->m.hit1 = &(ca->m.depthY);
-                break;
-            }
-        }
-        break;
-        case CORE_SPAN_MARKER:
-        {
-            // 1. annotation icon
-            mx = ca->m.px;
-            my = ca->m.py;
-            mw = ca->m.w * getMarkerScale();
-            mh = ca->m.h * getMarkerScale();
-            if (y >= my && y <= my + mh && x >= mx + cs->px && x <= mx + mw + cs->px)
-            {
-                hit = true;
-                ca->m.hit0 = &(ca->m.px);
-                ca->m.hit1 = &(ca->m.py);
-                break;
-            }
-            // left span
-            mw = ca->m.w * getMarkerScale() / 6.0f;
-            mh = ca->m.w * getMarkerScale() / 6.0f;
-            mx = ca->m.markerVt[0] - mw / 2.0f;
-            my = ca->m.markerVt[1] - mh / 2.0f;
-            if (y >= my && y <= my + mh && x >= mx + cs->px && x <= mx + mw + cs->px)
-            {
-                hit = true;
-                ca->m.hit0 = &(ca->m.markerVt[0]);
-                ca->m.hit1 = &(ca->m.markerVt[4]); // dummy point since not moving y in span
-                break;
-            }
-            // right span
-            mx = ca->m.markerVt[2] - mw / 2.0f;
-            my = ca->m.markerVt[3] - mh / 2.0f;
-            if (y >= my && y <= my + mh && x >= mx + cs->px && x <= mx + mw + cs->px)
-            {
-                hit = true;
-                ca->m.hit0 = &(ca->m.markerVt[2]);
-                ca->m.hit1 = &(ca->m.markerVt[4]); // dummy point since not moving y in span
-                break;
-            }
-        }
-        break;
-        case CORE_OUTLINE_MARKER:
-        {
-            // 1. annotation icon
-            mx = ca->m.px;
-            my = ca->m.py;
-            mw = ca->m.w * getMarkerScale();
-            mh = ca->m.h * getMarkerScale();
-            if (y >= my && y <= my + mh && x >= mx + cs->px && x <= mx + mw + cs->px)
-            {
-                hit = true;
-                ca->m.hit0 = &(ca->m.px);
-                ca->m.hit1 = &(ca->m.py);
-                break;
-            }
+        switch (ca->m.type) {
+            case CORE_POINT_MARKER: {
+                // two possible handle
+                // 1. annotation icon
+                mx = ca->m.px;
+                my = ca->m.py;
+                mw = ca->m.w * getMarkerScale();
+                mh = ca->m.h * getMarkerScale();
+                if (y >= my && y <= my + mh && x >= mx + cs->px && x <= mx + mw + cs->px) {
+                    hit = true;
+                    ca->m.hit0 = &(ca->m.px);
+                    ca->m.hit1 = &(ca->m.py);
+                    break;
+                }
+                // 2: point
+                mw *= 0.5f;
+                mh *= 0.5f;
+                mx = ca->m.depthX - mw / 2.0f;
+                my = ca->m.depthY - mh / 2.0f;
+                if (y >= my && y <= my + mh && x >= mx + cs->px && x <= mx + mw + cs->px) {
+                    hit = true;
+                    ca->m.hit0 = &(ca->m.depthX);
+                    ca->m.hit1 = &(ca->m.depthY);
+                    break;
+                }
+            } break;
+            case CORE_SPAN_MARKER: {
+                // 1. annotation icon
+                mx = ca->m.px;
+                my = ca->m.py;
+                mw = ca->m.w * getMarkerScale();
+                mh = ca->m.h * getMarkerScale();
+                if (y >= my && y <= my + mh && x >= mx + cs->px && x <= mx + mw + cs->px) {
+                    hit = true;
+                    ca->m.hit0 = &(ca->m.px);
+                    ca->m.hit1 = &(ca->m.py);
+                    break;
+                }
+                // left span
+                mw = ca->m.w * getMarkerScale() / 6.0f;
+                mh = ca->m.w * getMarkerScale() / 6.0f;
+                mx = ca->m.markerVt[0] - mw / 2.0f;
+                my = ca->m.markerVt[1] - mh / 2.0f;
+                if (y >= my && y <= my + mh && x >= mx + cs->px && x <= mx + mw + cs->px) {
+                    hit = true;
+                    ca->m.hit0 = &(ca->m.markerVt[0]);
+                    ca->m.hit1 = &(ca->m.markerVt[4]);  // dummy point since not moving y in span
+                    break;
+                }
+                // right span
+                mx = ca->m.markerVt[2] - mw / 2.0f;
+                my = ca->m.markerVt[3] - mh / 2.0f;
+                if (y >= my && y <= my + mh && x >= mx + cs->px && x <= mx + mw + cs->px) {
+                    hit = true;
+                    ca->m.hit0 = &(ca->m.markerVt[2]);
+                    ca->m.hit1 = &(ca->m.markerVt[4]);  // dummy point since not moving y in span
+                    break;
+                }
+            } break;
+            case CORE_OUTLINE_MARKER: {
+                // 1. annotation icon
+                mx = ca->m.px;
+                my = ca->m.py;
+                mw = ca->m.w * getMarkerScale();
+                mh = ca->m.h * getMarkerScale();
+                if (y >= my && y <= my + mh && x >= mx + cs->px && x <= mx + mw + cs->px) {
+                    hit = true;
+                    ca->m.hit0 = &(ca->m.px);
+                    ca->m.hit1 = &(ca->m.py);
+                    break;
+                }
 
-            // outline center
-            mw = ca->m.w * getMarkerScale() / 4.0f;
-            mh = ca->m.w * getMarkerScale() / 4.0f;
-            mx = ca->m.depthX - mw / 2.0f;
-            my = ca->m.depthY - mh / 2.0f;
-            if (y >= my && y <= my + mh && x >= mx + cs->px && x <= mx + mw + cs->px)
-            {
-                hit = true;
-                ca->m.hit0 = &(ca->m.depthX);
-                ca->m.hit1 = &(ca->m.depthY);
-                break;
-            }
-            // top handle
-            mw = ca->m.w * getMarkerScale() / 6.0f;
-            mh = ca->m.w * getMarkerScale() / 6.0f;
-            mx = (ca->m.markerVt[0] + ca->m.markerVt[2]) / 2.0f - mw / 2.0f;
-            my = ca->m.markerVt[1] - mh / 2.0f;
-            if (y >= my && y <= my + mh && x >= mx + cs->px && x <= mx + mw + cs->px)
-            {
-                hit = true;
-                ca->m.hit0 = &(ca->m.markerVt[4]); // dummy point
-                ca->m.hit1 = &(ca->m.markerVt[1]);
-                break;
-            }
-            // bottom handle
-            my = ca->m.markerVt[3] - mh / 2.0f;
-            if (y >= my && y <= my + mh && x >= mx + cs->px && x <= mx + mw + cs->px)
-            {
-                hit = true;
-                ca->m.hit0 = &(ca->m.markerVt[4]); // dummy point
-                ca->m.hit1 = &(ca->m.markerVt[3]); // change bottom y
-                break;
-            }
-            // left handle
-            mx = ca->m.markerVt[0] - mw / 2.0f;
-            my = (ca->m.markerVt[1] + ca->m.markerVt[3]) / 2.0f - mh / 2.0f;
-            if (y >= my && y <= my + mh && x >= mx + cs->px && x <= mx + mw + cs->px)
-            {
-                hit = true;
-                ca->m.hit0 = &(ca->m.markerVt[0]);
-                ca->m.hit1 = &(ca->m.markerVt[4]); // dummy point
-                break;
-            }
-            // right handle
-            mx = ca->m.markerVt[2] - mw / 2.0f;
-            if (y >= my && y <= my + mh && x >= mx + cs->px && x <= mx + mw + cs->px)
-            {
-                hit = true;
-                ca->m.hit0 = &(ca->m.markerVt[2]);
-                ca->m.hit1 = &(ca->m.markerVt[4]); // dummy point
-                break;
-            }
-        }
-        break;
+                // outline center
+                mw = ca->m.w * getMarkerScale() / 4.0f;
+                mh = ca->m.w * getMarkerScale() / 4.0f;
+                mx = ca->m.depthX - mw / 2.0f;
+                my = ca->m.depthY - mh / 2.0f;
+                if (y >= my && y <= my + mh && x >= mx + cs->px && x <= mx + mw + cs->px) {
+                    hit = true;
+                    ca->m.hit0 = &(ca->m.depthX);
+                    ca->m.hit1 = &(ca->m.depthY);
+                    break;
+                }
+                // top handle
+                mw = ca->m.w * getMarkerScale() / 6.0f;
+                mh = ca->m.w * getMarkerScale() / 6.0f;
+                mx = (ca->m.markerVt[0] + ca->m.markerVt[2]) / 2.0f - mw / 2.0f;
+                my = ca->m.markerVt[1] - mh / 2.0f;
+                if (y >= my && y <= my + mh && x >= mx + cs->px && x <= mx + mw + cs->px) {
+                    hit = true;
+                    ca->m.hit0 = &(ca->m.markerVt[4]);  // dummy point
+                    ca->m.hit1 = &(ca->m.markerVt[1]);
+                    break;
+                }
+                // bottom handle
+                my = ca->m.markerVt[3] - mh / 2.0f;
+                if (y >= my && y <= my + mh && x >= mx + cs->px && x <= mx + mw + cs->px) {
+                    hit = true;
+                    ca->m.hit0 = &(ca->m.markerVt[4]);  // dummy point
+                    ca->m.hit1 = &(ca->m.markerVt[3]);  // change bottom y
+                    break;
+                }
+                // left handle
+                mx = ca->m.markerVt[0] - mw / 2.0f;
+                my = (ca->m.markerVt[1] + ca->m.markerVt[3]) / 2.0f - mh / 2.0f;
+                if (y >= my && y <= my + mh && x >= mx + cs->px && x <= mx + mw + cs->px) {
+                    hit = true;
+                    ca->m.hit0 = &(ca->m.markerVt[0]);
+                    ca->m.hit1 = &(ca->m.markerVt[4]);  // dummy point
+                    break;
+                }
+                // right handle
+                mx = ca->m.markerVt[2] - mw / 2.0f;
+                if (y >= my && y <= my + mh && x >= mx + cs->px && x <= mx + mw + cs->px) {
+                    hit = true;
+                    ca->m.hit0 = &(ca->m.markerVt[2]);
+                    ca->m.hit1 = &(ca->m.markerVt[4]);  // dummy point
+                    break;
+                }
+            } break;
         }
     }
 
@@ -3728,10 +3379,8 @@ JNIEXPORT jboolean JNICALL Java_corelyzer_graphics_SceneGraph_hitMarker(JNIEnv *
 * Signature: (IIIFF)V
 */
 JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_manipulateMarker(JNIEnv *jenv, jclass jcls, jint canvas, jint track, jint section, jint marker,
-                                                                            jfloat dx, jfloat dy)
-{
-    if (!get_horizontal_depth())
-    {
+                                                                           jfloat dx, jfloat dy) {
+    if (!get_horizontal_depth()) {
         float tVar = dx;
         dx = dy;
         dy = -tVar;
@@ -3743,8 +3392,7 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_manipulateMarker(JNIEn
     t = get_scene_track(default_track_scene, track);
     cs = get_track_section(t, section);
 
-    if (cs && is_section_annotation(cs, marker))
-    {
+    if (cs && is_section_annotation(cs, marker)) {
         CoreAnnotation *ca = cs->annovec[marker];
 
         // first need to chech whether new result is within the section.
@@ -3782,33 +3430,28 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_manipulateMarker(JNIEn
         // need some more work...
         // when move span, need to change depthX
         // when move outline, need to sync other vtx and depth
-        switch (ca->m.type)
-        {
-        case CORE_SPAN_MARKER:
-            // update depthX. no matter which handle moves
-            ca->m.depthX = (ca->m.markerVt[0] + ca->m.markerVt[2]) / 2.0f;
-            break;
-        case CORE_OUTLINE_MARKER:
-        {
-            // additional update
-            // when center moves
-            if (ca->m.hit0 == &(ca->m.depthX))
-            {
-                // update markerVt
-                ca->m.markerVt[0] += dx;
-                ca->m.markerVt[2] += dx;
-                ca->m.markerVt[1] += dy;
-                ca->m.markerVt[3] += dy;
-            }
-            // when one of outlines moves
-            else
-            {
-                // update depthX, depthY
+        switch (ca->m.type) {
+            case CORE_SPAN_MARKER:
+                // update depthX. no matter which handle moves
                 ca->m.depthX = (ca->m.markerVt[0] + ca->m.markerVt[2]) / 2.0f;
-                ca->m.depthY = (ca->m.markerVt[1] + ca->m.markerVt[3]) / 2.0f;
-            }
-        }
-        break;
+                break;
+            case CORE_OUTLINE_MARKER: {
+                // additional update
+                // when center moves
+                if (ca->m.hit0 == &(ca->m.depthX)) {
+                    // update markerVt
+                    ca->m.markerVt[0] += dx;
+                    ca->m.markerVt[2] += dx;
+                    ca->m.markerVt[1] += dy;
+                    ca->m.markerVt[3] += dy;
+                }
+                // when one of outlines moves
+                else {
+                    // update depthX, depthY
+                    ca->m.depthX = (ca->m.markerVt[0] + ca->m.markerVt[2]) / 2.0f;
+                    ca->m.depthY = (ca->m.markerVt[1] + ca->m.markerVt[3]) / 2.0f;
+                }
+            } break;
         }
     }
 }
@@ -3818,9 +3461,7 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_manipulateMarker(JNIEn
 * Method:    accesPickedTrack
 * Signature: (V)I
 */
-JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_accessPickedTrack(JNIEnv *jenv, jclass jcls)
-{
-
+JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_accessPickedTrack(JNIEnv *jenv, jclass jcls) {
     return PickedTrack;
 }
 
@@ -3829,8 +3470,7 @@ JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_accessPickedTrack(JNIE
 * Method:    accesPickedSection
 * Signature: (V)I
 */
-JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_accessPickedSection(JNIEnv *jenv, jclass jcls)
-{
+JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_accessPickedSection(JNIEnv *jenv, jclass jcls) {
     return PickedSection;
 }
 
@@ -3839,8 +3479,7 @@ JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_accessPickedSection(JN
 * Method:    accesPickedGraph
 * Signature: (V)I
 */
-JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_accessPickedGraph(JNIEnv *jenv, jclass jcls)
-{
+JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_accessPickedGraph(JNIEnv *jenv, jclass jcls) {
     return PickedGraph;
 }
 
@@ -3849,8 +3488,7 @@ JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_accessPickedGraph(JNIE
 * Method:    accesPickedMarker
 * Signature: (V)I
 */
-JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_accessPickedMarker(JNIEnv *jenv, jclass jcls)
-{
+JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_accessPickedMarker(JNIEnv *jenv, jclass jcls) {
     return PickedMarker;
 }
 
@@ -3859,8 +3497,7 @@ JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_accessPickedMarker(JNI
 * Method:    accessPickedFreeDraw
 * Signature: ()I
 */
-JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_accessPickedFreeDraw(JNIEnv *jenv, jclass jcls)
-{
+JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_accessPickedFreeDraw(JNIEnv *jenv, jclass jcls) {
     return PickedFreeDraw;
 }
 
@@ -3870,8 +3507,7 @@ JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_accessPickedFreeDraw(J
 * Signature: (IIIF)I
 */
 JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_createCoreSectionMarker(JNIEnv *jenv, jclass jcls, jint track, jint section,
-                                                                                    jint group, jint type, jfloat xpos, jfloat ypos)
-{
+                                                                                  jint group, jint type, jfloat xpos, jfloat ypos) {
     TrackSceneNode *t;
     CoreSection *cs;
     t = get_scene_track(default_track_scene, track);
@@ -3893,8 +3529,7 @@ JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_createCoreSectionMarke
 * Method:    removeCoreSectionMarker
 * Signature: (III)V
 */
-JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_removeCoreSectionMarker(JNIEnv *jenv, jclass jcls, jint track, jint section, jint marker)
-{
+JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_removeCoreSectionMarker(JNIEnv *jenv, jclass jcls, jint track, jint section, jint marker) {
     TrackSceneNode *t;
     CoreSection *cs;
 
@@ -3917,8 +3552,7 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_removeCoreSectionMarke
 * Method:    isCoreSectionMarker
 * Signature: (III)Z
 */
-JNIEXPORT jboolean JNICALL Java_corelyzer_graphics_SceneGraph_isCoreSectionMarker(JNIEnv *jenv, jclass jcls, jint track, jint section, jint marker)
-{
+JNIEXPORT jboolean JNICALL Java_corelyzer_graphics_SceneGraph_isCoreSectionMarker(JNIEnv *jenv, jclass jcls, jint track, jint section, jint marker) {
     TrackSceneNode *t;
     CoreSection *cs;
 
@@ -3939,9 +3573,7 @@ JNIEXPORT jboolean JNICALL Java_corelyzer_graphics_SceneGraph_isCoreSectionMarke
 * Signature: (IIILjava/lang/String;)V
 */
 JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setCoreSectionMarkerURL(JNIEnv *jenv, jclass jcls, jint track, jint section, jint marker,
-                                                                                    jstring url)
-{
-
+                                                                                  jstring url) {
     TrackSceneNode *t;
     CoreSection *cs;
     char *nbuf;
@@ -3969,19 +3601,14 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setCoreSectionMarkerUR
 * Method:    getCoreSectionMarkerURL
 * Signature: (III)Ljava/lang/String;
 */
-JNIEXPORT jstring JNICALL Java_corelyzer_graphics_SceneGraph_getCoreSectionMarkerURL(JNIEnv *jenv, jclass jcls, jint track, jint section, jint marker)
-{
-
+JNIEXPORT jstring JNICALL Java_corelyzer_graphics_SceneGraph_getCoreSectionMarkerURL(JNIEnv *jenv, jclass jcls, jint track, jint section, jint marker) {
     TrackSceneNode *t;
     CoreSection *cs;
     t = get_scene_track(default_track_scene, track);
     cs = get_track_section(t, section);
-    if (cs && is_section_annotation(cs, marker))
-    {
+    if (cs && is_section_annotation(cs, marker)) {
         return jenv->NewStringUTF(get_marker_url(&(cs->annovec[marker]->m)));
-    }
-    else
-    {
+    } else {
         return jenv->NewStringUTF(NULL);
     }
 }
@@ -3991,8 +3618,7 @@ JNIEXPORT jstring JNICALL Java_corelyzer_graphics_SceneGraph_getCoreSectionMarke
 * Method:    getNumCoreSectionMarkers
 * Signature: (II)I
 */
-JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_getNumCoreSectionMarkers(JNIEnv *jenv, jclass jcls, jint track, jint section)
-{
+JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_getNumCoreSectionMarkers(JNIEnv *jenv, jclass jcls, jint track, jint section) {
     TrackSceneNode *t;
     CoreSection *cs;
     t = get_scene_track(default_track_scene, track);
@@ -4008,8 +3634,7 @@ JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_getNumCoreSectionMarke
 * Signature: (IIILjava/lang/String;)V
 */
 JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setCoreSectionMarkerLocal(JNIEnv *jenv, jclass jcls, jint track, jint section, jint marker,
-                                                                                    jstring filename)
-{
+                                                                                    jstring filename) {
     TrackSceneNode *t;
     CoreSection *cs;
     int i;
@@ -4021,8 +3646,7 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setCoreSectionMarkerLo
     nbuf = (char *)malloc(i * sizeof(char) + 1);
     jenv->GetStringUTFRegion(filename, 0, i, nbuf);
 
-    if (cs && is_section_annotation(cs, marker))
-    {
+    if (cs && is_section_annotation(cs, marker)) {
         set_marker_local_file(&(cs->annovec[marker]->m), nbuf);
     }
 
@@ -4034,19 +3658,15 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setCoreSectionMarkerLo
 * Method:    getCoreSectionMarkerLocal
 * Signature: (III)Ljava/lang/String;
 */
-JNIEXPORT jstring JNICALL Java_corelyzer_graphics_SceneGraph_getCoreSectionMarkerLocal(JNIEnv *jenv, jclass jcls, jint track, jint section, jint marker)
-{
+JNIEXPORT jstring JNICALL Java_corelyzer_graphics_SceneGraph_getCoreSectionMarkerLocal(JNIEnv *jenv, jclass jcls, jint track, jint section, jint marker) {
     TrackSceneNode *t;
     CoreSection *cs;
     t = get_scene_track(default_track_scene, track);
     cs = get_track_section(t, section);
-    if (cs && is_section_annotation(cs, marker))
-    {
+    if (cs && is_section_annotation(cs, marker)) {
         return jenv->NewStringUTF(get_marker_local_file(
             &(cs->annovec[marker]->m)));
-    }
-    else
-    {
+    } else {
         return jenv->NewStringUTF(NULL);
     }
 }
@@ -4057,14 +3677,12 @@ JNIEXPORT jstring JNICALL Java_corelyzer_graphics_SceneGraph_getCoreSectionMarke
 * Signature: (IIIFFFFFF)V
 */
 JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setCoreSectionMarkerVertex(JNIEnv *jenv, jclass jcls, jint track, jint section, jint marker,
-                                                                                        jfloat ax, jfloat ay, jfloat v0, jfloat v1, jfloat v2, jfloat v3)
-{
+                                                                                     jfloat ax, jfloat ay, jfloat v0, jfloat v1, jfloat v2, jfloat v3) {
     // Notice: floats here are relative to the beginning of the core section
     TrackSceneNode *t = get_scene_track(default_track_scene, track);
     CoreSection *cs = get_track_section(t, section);
 
-    if (cs && is_section_annotation(cs, marker))
-    {
+    if (cs && is_section_annotation(cs, marker)) {
         set_marker_vertex(&(cs->annovec[marker]->m), ax, ay, v0, v1, v2, v3);
     }
 }
@@ -4074,8 +3692,7 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setCoreSectionMarkerVe
 * Method:    getCoreSectionMarkerXPos
 * Signature: (III)F
 */
-JNIEXPORT jfloat JNICALL Java_corelyzer_graphics_SceneGraph_getCoreSectionMarkerXPos(JNIEnv *jenv, jclass jcls, jint track, jint section, jint marker)
-{
+JNIEXPORT jfloat JNICALL Java_corelyzer_graphics_SceneGraph_getCoreSectionMarkerXPos(JNIEnv *jenv, jclass jcls, jint track, jint section, jint marker) {
     TrackSceneNode *t;
     CoreSection *cs;
     t = get_scene_track(default_track_scene, track);
@@ -4088,8 +3705,7 @@ JNIEXPORT jfloat JNICALL Java_corelyzer_graphics_SceneGraph_getCoreSectionMarker
 * Method:    getCoreSectionMarkerYPos
 * Signature: (III)F
 */
-JNIEXPORT jfloat JNICALL Java_corelyzer_graphics_SceneGraph_getCoreSectionMarkerYPos(JNIEnv *jenv, jclass jcls, jint track, jint section, jint marker)
-{
+JNIEXPORT jfloat JNICALL Java_corelyzer_graphics_SceneGraph_getCoreSectionMarkerYPos(JNIEnv *jenv, jclass jcls, jint track, jint section, jint marker) {
     TrackSceneNode *t;
     CoreSection *cs;
     t = get_scene_track(default_track_scene, track);
@@ -4102,8 +3718,7 @@ JNIEXPORT jfloat JNICALL Java_corelyzer_graphics_SceneGraph_getCoreSectionMarker
 * Method:    getCoreSectionMarkerIconXPos
 * Signature: (III)F
 */
-JNIEXPORT jfloat JNICALL Java_corelyzer_graphics_SceneGraph_getCoreSectionMarkerIconXPos(JNIEnv *jenv, jclass jcls, jint track, jint section, jint marker)
-{
+JNIEXPORT jfloat JNICALL Java_corelyzer_graphics_SceneGraph_getCoreSectionMarkerIconXPos(JNIEnv *jenv, jclass jcls, jint track, jint section, jint marker) {
     TrackSceneNode *t;
     CoreSection *cs;
     t = get_scene_track(default_track_scene, track);
@@ -4116,8 +3731,7 @@ JNIEXPORT jfloat JNICALL Java_corelyzer_graphics_SceneGraph_getCoreSectionMarker
 * Method:    getCoreSectionMarkerIconYPos
 * Signature: (III)F
 */
-JNIEXPORT jfloat JNICALL Java_corelyzer_graphics_SceneGraph_getCoreSectionMarkerIconYPos(JNIEnv *jenv, jclass jcls, jint track, jint section, jint marker)
-{
+JNIEXPORT jfloat JNICALL Java_corelyzer_graphics_SceneGraph_getCoreSectionMarkerIconYPos(JNIEnv *jenv, jclass jcls, jint track, jint section, jint marker) {
     TrackSceneNode *t;
     CoreSection *cs;
     t = get_scene_track(default_track_scene, track);
@@ -4130,8 +3744,7 @@ JNIEXPORT jfloat JNICALL Java_corelyzer_graphics_SceneGraph_getCoreSectionMarker
 * Method:    getCoreSectionMarkerV0
 * Signature: (III)F
 */
-JNIEXPORT jfloat JNICALL Java_corelyzer_graphics_SceneGraph_getCoreSectionMarkerV0(JNIEnv *jenv, jclass jcls, jint track, jint section, jint marker)
-{
+JNIEXPORT jfloat JNICALL Java_corelyzer_graphics_SceneGraph_getCoreSectionMarkerV0(JNIEnv *jenv, jclass jcls, jint track, jint section, jint marker) {
     TrackSceneNode *t;
     CoreSection *cs;
     t = get_scene_track(default_track_scene, track);
@@ -4144,8 +3757,7 @@ JNIEXPORT jfloat JNICALL Java_corelyzer_graphics_SceneGraph_getCoreSectionMarker
 * Method:    getCoreSectionMarkerV1
 * Signature: (III)F
 */
-JNIEXPORT jfloat JNICALL Java_corelyzer_graphics_SceneGraph_getCoreSectionMarkerV1(JNIEnv *jenv, jclass jcls, jint track, jint section, jint marker)
-{
+JNIEXPORT jfloat JNICALL Java_corelyzer_graphics_SceneGraph_getCoreSectionMarkerV1(JNIEnv *jenv, jclass jcls, jint track, jint section, jint marker) {
     TrackSceneNode *t;
     CoreSection *cs;
     t = get_scene_track(default_track_scene, track);
@@ -4158,8 +3770,7 @@ JNIEXPORT jfloat JNICALL Java_corelyzer_graphics_SceneGraph_getCoreSectionMarker
 * Method:    getCoreSectionMarkerV2
 * Signature: (III)F
 */
-JNIEXPORT jfloat JNICALL Java_corelyzer_graphics_SceneGraph_getCoreSectionMarkerV2(JNIEnv *jenv, jclass jcls, jint track, jint section, jint marker)
-{
+JNIEXPORT jfloat JNICALL Java_corelyzer_graphics_SceneGraph_getCoreSectionMarkerV2(JNIEnv *jenv, jclass jcls, jint track, jint section, jint marker) {
     TrackSceneNode *t;
     CoreSection *cs;
     t = get_scene_track(default_track_scene, track);
@@ -4172,8 +3783,7 @@ JNIEXPORT jfloat JNICALL Java_corelyzer_graphics_SceneGraph_getCoreSectionMarker
 * Method:    getCoreSectionMarkerV3
 * Signature: (III)F
 */
-JNIEXPORT jfloat JNICALL Java_corelyzer_graphics_SceneGraph_getCoreSectionMarkerV3(JNIEnv *jenv, jclass jcls, jint track, jint section, jint marker)
-{
+JNIEXPORT jfloat JNICALL Java_corelyzer_graphics_SceneGraph_getCoreSectionMarkerV3(JNIEnv *jenv, jclass jcls, jint track, jint section, jint marker) {
     TrackSceneNode *t;
     CoreSection *cs;
     t = get_scene_track(default_track_scene, track);
@@ -4187,17 +3797,14 @@ JNIEXPORT jfloat JNICALL Java_corelyzer_graphics_SceneGraph_getCoreSectionMarker
 * Signature: (IIIZ)V
 */
 JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setCoreSectionMarkerVisibility(JNIEnv *jenv, jclass jcls, jint track, jint section, jint marker,
-                                                                                            jboolean vis)
-{
-
+                                                                                         jboolean vis) {
     TrackSceneNode *t;
     CoreSection *cs;
 
     t = get_scene_track(default_track_scene, track);
     cs = get_track_section(t, section);
 
-    if (cs && is_section_annotation(cs, marker))
-    {
+    if (cs && is_section_annotation(cs, marker)) {
         set_marker_visibility(&(cs->annovec[marker]->m), vis);
     }
 }
@@ -4207,21 +3814,16 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setCoreSectionMarkerVi
 * Method:    getCoreSectionMarkerVisibility
 * Signature: (III)Z
 */
-JNIEXPORT jboolean JNICALL Java_corelyzer_graphics_SceneGraph_getCoreSectionMarkerVisibility(JNIEnv *jenv, jclass jcls, jint track, jint section, jint marker)
-{
-
+JNIEXPORT jboolean JNICALL Java_corelyzer_graphics_SceneGraph_getCoreSectionMarkerVisibility(JNIEnv *jenv, jclass jcls, jint track, jint section, jint marker) {
     TrackSceneNode *t;
     CoreSection *cs;
 
     t = get_scene_track(default_track_scene, track);
     cs = get_track_section(t, section);
 
-    if (cs && is_section_annotation(cs, marker))
-    {
+    if (cs && is_section_annotation(cs, marker)) {
         return get_marker_visibility(&(cs->annovec[marker]->m));
-    }
-    else
-    {
+    } else {
         return true;
     }
 }
@@ -4232,17 +3834,14 @@ JNIEXPORT jboolean JNICALL Java_corelyzer_graphics_SceneGraph_getCoreSectionMark
 * Signature: (IIII)V
 */
 JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setCoreSectionMarkerGroup(JNIEnv *jenv, jclass jcls, jint track, jint section, jint marker,
-                                                                                    jint groupid)
-{
-
+                                                                                    jint groupid) {
     TrackSceneNode *t;
     CoreSection *cs;
 
     t = get_scene_track(default_track_scene, track);
     cs = get_track_section(t, section);
 
-    if (cs && is_section_annotation(cs, marker))
-    {
+    if (cs && is_section_annotation(cs, marker)) {
         set_marker_group(&(cs->annovec[marker]->m), groupid);
     }
 }
@@ -4252,21 +3851,16 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setCoreSectionMarkerGr
 * Method:    getCoreSectionMarkerGroup
 * Signature: (III)I
 */
-JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_getCoreSectionMarkerGroup(JNIEnv *jenv, jclass jcls, jint track, jint section, jint marker)
-{
-
+JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_getCoreSectionMarkerGroup(JNIEnv *jenv, jclass jcls, jint track, jint section, jint marker) {
     TrackSceneNode *t;
     CoreSection *cs;
 
     t = get_scene_track(default_track_scene, track);
     cs = get_track_section(t, section);
 
-    if (cs && is_section_annotation(cs, marker))
-    {
+    if (cs && is_section_annotation(cs, marker)) {
         return get_marker_group(&(cs->annovec[marker]->m));
-    }
-    else
-    {
+    } else {
         return -1;
     }
 }
@@ -4277,16 +3871,14 @@ JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_getCoreSectionMarkerGr
 * Signature: (IIII)V
 */
 JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setCoreSectionMarkerType(JNIEnv *jenv, jclass jcls, jint track, jint section, jint marker,
-                                                                                    jint typeId)
-{
+                                                                                   jint typeId) {
     TrackSceneNode *t;
     CoreSection *cs;
 
     t = get_scene_track(default_track_scene, track);
     cs = get_track_section(t, section);
 
-    if (cs && is_section_annotation(cs, marker))
-    {
+    if (cs && is_section_annotation(cs, marker)) {
         set_marker_type(&(cs->annovec[marker]->m), typeId);
     }
 }
@@ -4296,21 +3888,16 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setCoreSectionMarkerTy
 * Method:    getCoreSectionMarkerType
 * Signature: (III)I
 */
-JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_getCoreSectionMarkerType(JNIEnv *jenv, jclass jcls, jint track, jint section, jint marker)
-{
-
+JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_getCoreSectionMarkerType(JNIEnv *jenv, jclass jcls, jint track, jint section, jint marker) {
     TrackSceneNode *t;
     CoreSection *cs;
 
     t = get_scene_track(default_track_scene, track);
     cs = get_track_section(t, section);
 
-    if (cs && is_section_annotation(cs, marker))
-    {
+    if (cs && is_section_annotation(cs, marker)) {
         return get_marker_type(&(cs->annovec[marker]->m));
-    }
-    else
-    {
+    } else {
         return -1;
     }
 }
@@ -4320,8 +3907,7 @@ JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_getCoreSectionMarkerTy
 * Method:    setCoreSectionMarkerText
 * Signature: (IIILjava/lang/String;)V
 */
-JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setCoreSectionMarkerText(JNIEnv *jenv, jclass jcls, jint track, jint section, jint marker, jstring aText)
-{
+JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setCoreSectionMarkerText(JNIEnv *jenv, jclass jcls, jint track, jint section, jint marker, jstring aText) {
     TrackSceneNode *t;
     CoreSection *cs;
     char *nbuf;
@@ -4348,8 +3934,7 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setCoreSectionMarkerTe
 * Method:    setCoreSectionMarkerRelationText
 * Signature: (IIILjava/lang/String;)V
 */
-JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setCoreSectionMarkerRelationText(JNIEnv *jenv, jclass jcls, jint track, jint section, jint marker, jstring aText)
-{
+JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setCoreSectionMarkerRelationText(JNIEnv *jenv, jclass jcls, jint track, jint section, jint marker, jstring aText) {
     TrackSceneNode *t;
     CoreSection *cs;
     char *nbuf;
@@ -4376,19 +3961,15 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setCoreSectionMarkerRe
 * Method:    getCoreSectionMarkerText
 * Signature: (III)Ljava/lang/String;
 */
-JNIEXPORT jstring JNICALL Java_corelyzer_graphics_SceneGraph_getCoreSectionMarkerText(JNIEnv *jenv, jclass jcls, jint track, jint section, jint marker)
-{
+JNIEXPORT jstring JNICALL Java_corelyzer_graphics_SceneGraph_getCoreSectionMarkerText(JNIEnv *jenv, jclass jcls, jint track, jint section, jint marker) {
     TrackSceneNode *t;
     CoreSection *cs;
     t = get_scene_track(default_track_scene, track);
     cs = get_track_section(t, section);
 
-    if (cs && is_section_annotation(cs, marker))
-    {
+    if (cs && is_section_annotation(cs, marker)) {
         return jenv->NewStringUTF(get_marker_label(&(cs->annovec[marker]->m)));
-    }
-    else
-    {
+    } else {
         return jenv->NewStringUTF(NULL);
     }
 }
@@ -4398,19 +3979,15 @@ JNIEXPORT jstring JNICALL Java_corelyzer_graphics_SceneGraph_getCoreSectionMarke
 * Method:    getCoreSectionMarkerRelationText
 * Signature: (III)Ljava/lang/String;
 */
-JNIEXPORT jstring JNICALL Java_corelyzer_graphics_SceneGraph_getCoreSectionMarkerRelationText(JNIEnv *jenv, jclass jcls, jint track, jint section, jint marker)
-{
+JNIEXPORT jstring JNICALL Java_corelyzer_graphics_SceneGraph_getCoreSectionMarkerRelationText(JNIEnv *jenv, jclass jcls, jint track, jint section, jint marker) {
     TrackSceneNode *t;
     CoreSection *cs;
     t = get_scene_track(default_track_scene, track);
     cs = get_track_section(t, section);
 
-    if (cs && is_section_annotation(cs, marker))
-    {
+    if (cs && is_section_annotation(cs, marker)) {
         return jenv->NewStringUTF(get_marker_relation_label(&(cs->annovec[marker]->m)));
-    }
-    else
-    {
+    } else {
         return jenv->NewStringUTF(NULL);
     }
 }
@@ -4421,8 +3998,7 @@ JNIEXPORT jstring JNICALL Java_corelyzer_graphics_SceneGraph_getCoreSectionMarke
 * Signature: (IIFFFFFFFFLjava/lang/String;Ljava/lang/String;)Z
 */
 JNIEXPORT jboolean JNICALL Java_corelyzer_graphics_SceneGraph_isDuplicateAnnotation(JNIEnv *jenv, jclass jcls, jint trackId, jint sectionId, jfloat x, jfloat y, jfloat v0, jfloat v1, jfloat v2, jfloat v3,
-                                                                                    jstring jUrlString, jstring jLocalString)
-{
+                                                                                    jstring jUrlString, jstring jLocalString) {
     TrackSceneNode *t;
     CoreSection *cs;
     char *urlString;
@@ -4432,8 +4008,7 @@ JNIEXPORT jboolean JNICALL Java_corelyzer_graphics_SceneGraph_isDuplicateAnnotat
     t = get_scene_track(default_track_scene, trackId);
     cs = get_track_section(t, sectionId);
 
-    if (!cs)
-    {
+    if (!cs) {
         return false;
     }
 
@@ -4460,16 +4035,14 @@ JNIEXPORT jboolean JNICALL Java_corelyzer_graphics_SceneGraph_isDuplicateAnnotat
 * Signature: (IIIZ)I
 */
 JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setCoreSectionMarkerFocus(JNIEnv *jenv, jclass jcls, jint track, jint section, jint marker,
-                                                                                    jboolean flag)
-{
+                                                                                    jboolean flag) {
     TrackSceneNode *t;
     CoreSection *cs;
 
     t = get_scene_track(default_track_scene, track);
     cs = get_track_section(t, section);
 
-    if (cs && is_section_annotation(cs, marker))
-    {
+    if (cs && is_section_annotation(cs, marker)) {
         set_marker_focus(&(cs->annovec[marker]->m), flag);
     }
 }
@@ -4480,9 +4053,7 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setCoreSectionMarkerFo
 * Signature: (IFFFF)I
 */
 JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_createFreeDrawRectangle(JNIEnv *jenv, jclass jcls, jint plugin, jfloat x, jfloat y,
-                                                                                    jfloat w, jfloat h)
-{
-
+                                                                                  jfloat w, jfloat h) {
     int pfdr = create_free_draw_rectangle(plugin, -1, -1, x, y, w, h);
     attach_free_draw_to_scene(default_track_scene, pfdr);
     return pfdr;
@@ -4494,8 +4065,7 @@ JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_createFreeDrawRectangl
 * Signature: (IIFFFF)I
 */
 JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_createFreeDrawRectangleForTrack(JNIEnv *jenv, jclass jcls, jint plugin, jint track,
-                                                                                            jfloat x, jfloat y, jfloat w, jfloat h)
-{
+                                                                                          jfloat x, jfloat y, jfloat w, jfloat h) {
     int pfdr = create_free_draw_rectangle(plugin, track, -1, x, y, w, h);
     attach_free_draw_to_track(get_scene_track(track), pfdr);
     return pfdr;
@@ -4507,9 +4077,7 @@ JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_createFreeDrawRectangl
 * Signature: (IIIFF)I
 */
 JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_createFreeDrawRectangleForSection(JNIEnv *jenv, jclass jcls, jint plugin, jint track, jint section,
-                                                                                            jfloat y, jfloat h)
-{
-
+                                                                                            jfloat y, jfloat h) {
     int pfdr_id;
     TrackSceneNode *t;
     CoreSection *cs;
@@ -4530,8 +4098,7 @@ JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_createFreeDrawRectangl
 * Method:    repositionFreeDrawRectangle
 * Signature: (IFF)V
 */
-JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_repositionFreeDrawRectangle(JNIEnv *jenv, jclass jcls, jint fdid, jfloat x, jfloat y)
-{
+JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_repositionFreeDrawRectangle(JNIEnv *jenv, jclass jcls, jint fdid, jfloat x, jfloat y) {
     set_free_draw_x(fdid, x);
     set_free_draw_y(fdid, y);
 }
@@ -4541,8 +4108,7 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_repositionFreeDrawRect
 * Method:    moveFreeDrawRectangle
 * Signature: (IFF)V
 */
-JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_moveFreeDrawRectangle(JNIEnv *jenv, jclass jcls, jint fdid, jfloat x, jfloat y)
-{
+JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_moveFreeDrawRectangle(JNIEnv *jenv, jclass jcls, jint fdid, jfloat x, jfloat y) {
     if (!is_free_draw_rectangle(fdid))
         return;
     x = x + get_free_draw_x(fdid);
@@ -4556,8 +4122,7 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_moveFreeDrawRectangle(
 * Method:    destroyFreeDrawRectangle
 * Signature: (I)V
 */
-JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_destroyFreeDrawRectangle(JNIEnv *jenv, jclass jcls, jint fdid)
-{
+JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_destroyFreeDrawRectangle(JNIEnv *jenv, jclass jcls, jint fdid) {
     free_free_draw_rectangle(fdid);
 }
 
@@ -4566,8 +4131,7 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_destroyFreeDrawRectang
 * Method:    markFreeDrawScaleIndependent
 * Signature: (IZ)V
 */
-JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_markFreeDrawScaleIndependent(JNIEnv *jenv, jclass jcls, jint fdid, jboolean flag)
-{
+JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_markFreeDrawScaleIndependent(JNIEnv *jenv, jclass jcls, jint fdid, jboolean flag) {
     set_free_draw_scale_independence(fdid, flag);
 }
 
@@ -4576,8 +4140,7 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_markFreeDrawScaleIndep
 * Method:    setFreeDrawVisiblity
 * Signature: (IZ)V
 */
-JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setFreeDrawVisiblity(JNIEnv *jenv, jclass jcls, jint fdid, jboolean flag)
-{
+JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setFreeDrawVisiblity(JNIEnv *jenv, jclass jcls, jint fdid, jboolean flag) {
     set_free_draw_visibility(fdid, flag);
 }
 
@@ -4586,8 +4149,7 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setFreeDrawVisiblity(J
 * Method:    getFreeDrawPluginID
 * Signature: (I)I
 */
-JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_getFreeDrawPluginID(JNIEnv *jenv, jclass jcls, jint fdid)
-{
+JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_getFreeDrawPluginID(JNIEnv *jenv, jclass jcls, jint fdid) {
     return get_free_draw_plugin(fdid);
 }
 
@@ -4598,20 +4160,17 @@ JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_getFreeDrawPluginID(JN
 //************************ END JNI FUNCTIONS ********************************//
 
 //====================================================================
-float get_scene_center_x()
-{
+float get_scene_center_x() {
     return center_x;
 }
 
 //====================================================================
-float get_scene_center_y()
-{
+float get_scene_center_y() {
     return center_y;
 }
 
 //====================================================================
-void translate_scene_center(float dx, float dy)
-{
+void translate_scene_center(float dx, float dy) {
 #ifdef DEBUG
     printf("Translating scene from %f, %f to %f, %f\n",
            center_x, center_y, center_x + dx, center_y + dy);
@@ -4634,8 +4193,7 @@ void translate_scene_center(float dx, float dy)
     center_x += dx;
     center_y += dy;
 
-    for (int i = 0; i < num_canvases(); ++i)
-    {
+    for (int i = 0; i < num_canvases(); ++i) {
         float cx, cy, cz;
         int camera;
 
@@ -4651,14 +4209,12 @@ void translate_scene_center(float dx, float dy)
 }
 
 //=======================================================================
-void update_center_point()
-{
+void update_center_point() {
     int i;
     float max_x = 0.0f, max_y = 0.0f;
     float min_x = 0.0f, min_y = 0.0f;
 
-    for (i = 0; i < num_canvases(); ++i)
-    {
+    for (i = 0; i < num_canvases(); ++i) {
         if (!is_canvas(i))
             continue;
         float x, y, z, w, h;
@@ -4701,17 +4257,13 @@ bool click_in_annotation_marker(CoreAnnotation *ca, const float tx, const float 
 }
 
 //=======================================================================
-void perform_pick(int canvas, float _x, float _y)
-{
+void perform_pick(int canvas, float _x, float _y) {
     float x, y;
 
-    if (get_horizontal_depth())
-    {
+    if (get_horizontal_depth()) {
         x = _x;
         y = _y;
-    }
-    else
-    { // rotate 90 degree to match the coordinates
+    } else {  // rotate 90 degree to match the coordinates
         x = _y;
         y = -_x;
     }
@@ -4748,7 +4300,7 @@ void perform_pick(int canvas, float _x, float _y)
     int *order = (int *)malloc(sizeof(int) * zlen);
     get_scene_track_zorder(default_track_scene, order);
 
-    for (i = 0; i < zlen && PickedTrack == -1; ++i) // track
+    for (i = 0; i < zlen && PickedTrack == -1; ++i)  // track
     {
         if (!is_track(default_track_scene, order[i]))
             continue;
@@ -4771,7 +4323,7 @@ void perform_pick(int canvas, float _x, float _y)
         get_track_section_zorder(tsn, cs_order);
 
         // bounding box test
-        for (k = 0; k < cs_zlen && PickedSection == -1; ++k) // section
+        for (k = 0; k < cs_zlen && PickedSection == -1; ++k)  // section
         {
             float w, h;
 
@@ -4781,32 +4333,29 @@ void perform_pick(int canvas, float _x, float _y)
             cs = get_track_section(tsn, cs_order[k]);
 
             float startPx = cs->px;
-            if (cs->src == -1) // no image section
+            if (cs->src == -1)  // no image section
             {
-                w = cs->width * INCH_PER_CM;  // inch
-                w *= cdpix;                   // pixel in canvas
-                h = cs->height * INCH_PER_CM; // inch
-                h *= cdpiy;                   // pixel in canvas
+                w = cs->width * INCH_PER_CM;   // inch
+                w *= cdpix;                    // pixel in canvas
+                h = cs->height * INCH_PER_CM;  // inch
+                h *= cdpiy;                    // pixel in canvas
 
-                if (cs->orientation == PORTRAIT)
-                {
+                if (cs->orientation == PORTRAIT) {
                     float t = w;
                     w = h;
                     h = t;
                 }
-            }
-            else // image
+            } else  // image
             {
-                w = (float)get_texset_src_width(cs->src);  // pixel in src width
-                h = (float)get_texset_src_height(cs->src); // pixel in src height
+                w = (float)get_texset_src_width(cs->src);   // pixel in src width
+                h = (float)get_texset_src_height(cs->src);  // pixel in src height
 
                 float intTop = (cs->intervalTop / 2.54f) * cs->dpi_x;
                 float intBot = (cs->intervalBottom / 2.54f) * cs->dpi_x;
                 float visibleW = intBot - intTop;
 
                 // check the orientation
-                if (cs->orientation == PORTRAIT)
-                {
+                if (cs->orientation == PORTRAIT) {
                     float t;
                     t = w;
                     w = h;
@@ -4816,23 +4365,20 @@ void perform_pick(int canvas, float _x, float _y)
                 w = visibleW;
                 startPx = cs->px + (cdpix * intTop / cs->dpi_x);
 
-                w /= cs->dpi_x; // inch
-                h /= cs->dpi_y; // inch
-                w *= cdpix;     // pixel in canvas
-                h *= cdpiy;     // pixel in canvas
+                w /= cs->dpi_x;  // inch
+                h /= cs->dpi_y;  // inch
+                w *= cdpix;      // pixel in canvas
+                h *= cdpiy;      // pixel in canvas
             }
 
             // check horizontal range
             // offset?
-            if (cs->graph_offset == 0.0f)
-            {
+            if (cs->graph_offset == 0.0f) {
                 if (tx < startPx)
                     continue;
                 if (tx > (startPx + w))
                     continue;
-            }
-            else
-            {
+            } else {
                 // adjust offset
                 const float min_var = startPx > startPx + cs->graph_offset ? startPx + cs->graph_offset : startPx;
                 const float max_var = startPx + w > startPx + w + cs->graph_offset ? startPx + w : startPx + w + cs->graph_offset;
@@ -4844,14 +4390,12 @@ void perform_pick(int canvas, float _x, float _y)
             }
 
             // see if it's part of the actual image before checking
-            if (ty >= cs->py && ty <= cs->py + h)
-            {
+            if (ty >= cs->py && ty <= cs->py + h) {
                 PickedSection = cs_order[k];
 
                 // is annotation marker inside core section rectangle?
                 // TODO Check lithology markers
-                for (l = 0; l < cs->annovec.size() && PickedMarker == -1; l++)
-                {
+                for (l = 0; l < cs->annovec.size() && PickedMarker == -1; l++) {
                     CoreAnnotation *ca = cs->annovec[l];
                     if (!ca)
                         continue;
@@ -4865,13 +4409,11 @@ void perform_pick(int canvas, float _x, float _y)
 
             // within the horizontal bounds of a section.
             // check for graphs
-            if (ty < cs->py)
-            {
+            if (ty < cs->py) {
                 // traverse marker first and then graph
 
                 // is annotation marker above core section?
-                for (l = 0; l < cs->annovec.size() && PickedMarker == -1; l++)
-                {
+                for (l = 0; l < cs->annovec.size() && PickedMarker == -1; l++) {
                     CoreAnnotation *ca = cs->annovec[l];
                     if (!ca)
                         continue;
@@ -4884,8 +4426,7 @@ void perform_pick(int canvas, float _x, float _y)
                 for (l = 0;
                      l < cs->graphvec.size() && PickedGraph == -1 &&
                      PickedMarker == -1;
-                     l++)
-                {
+                     l++) {
                     Box *b;
                     b = get_graph_box(cs, cs->graphvec[l]);
                     if (!b)
@@ -4904,8 +4445,7 @@ void perform_pick(int canvas, float _x, float _y)
 #endif
 
                 // test freedraw
-                for (l = 0; l < cs->freedrawvec.size() && PickedGraph == -1 && PickedMarker == -1 && PickedFreeDraw == -1; l++)
-                {
+                for (l = 0; l < cs->freedrawvec.size() && PickedGraph == -1 && PickedMarker == -1 && PickedFreeDraw == -1; l++) {
                     int fdid = cs->freedrawvec[l];
 
                     if (!is_free_draw_rectangle(fdid))
@@ -4917,19 +4457,16 @@ void perform_pick(int canvas, float _x, float _y)
                     mw = get_free_draw_width(fdid);
                     mh = get_free_draw_height(fdid);
 
-                    if (ty >= my && ty <= my + mh && tx >= mx + startPx && tx <= mx + mw + startPx)
-                    {
+                    if (ty >= my && ty <= my + mh && tx >= mx + startPx && tx <= mx + mw + startPx) {
                         PickedFreeDraw = fdid;
                     }
                 }
             }
 
             // is annotation marker below core section?
-            if (ty > cs->py + h && PickedMarker == -1)
-            {
+            if (ty > cs->py + h && PickedMarker == -1) {
                 // TODO Check lithology markers
-                for (l = 0; l < cs->annovec.size() && PickedMarker == -1; l++)
-                {
+                for (l = 0; l < cs->annovec.size() && PickedMarker == -1; l++) {
                     CoreAnnotation *ca = cs->annovec[l];
                     if (!ca)
                         continue;
@@ -4939,27 +4476,22 @@ void perform_pick(int canvas, float _x, float _y)
                 }
             }
 
-            if (PickedGraph != -1 || PickedMarker != -1 || PickedFreeDraw != -1)
-            {
+            if (PickedGraph != -1 || PickedMarker != -1 || PickedFreeDraw != -1) {
                 PickedSection = cs_order[k];
             }
 
-        } // done going through each section in track
+        }  // done going through each section in track
 
-        if (PickedSection != -1)
-        {
+        if (PickedSection != -1) {
             PickedTrack = order[i];
-        }
-        else
-        {
+        } else {
             // check free draws of tracks
             // convert tx, ty from dots to meters
             float fx, fy;
             fx = tx / cdpix * 2.54f / 100.0f;
             fy = ty / cdpiy * 2.54f / 100.0f;
 
-            for (unsigned int l = 0; l < tsn->freedrawvec.size() && PickedFreeDraw == -1; l++)
-            {
+            for (unsigned int l = 0; l < tsn->freedrawvec.size() && PickedFreeDraw == -1; l++) {
                 int fdid = tsn->freedrawvec[l];
 
                 if (!is_free_draw_rectangle(fdid))
@@ -4971,8 +4503,7 @@ void perform_pick(int canvas, float _x, float _y)
                 mw = get_free_draw_width(fdid);
                 mh = get_free_draw_height(fdid);
 
-                if (ty >= my && ty <= my + mh && tx >= mx && tx <= mx + mw)
-                {
+                if (ty >= my && ty <= my + mh && tx >= mx && tx <= mx + mw) {
                     PickedFreeDraw = fdid;
                     PickedTrack = order[i];
                 }
@@ -4980,28 +4511,23 @@ void perform_pick(int canvas, float _x, float _y)
         }
 
         free(cs_order);
-    } // done going through each track
+    }  // done going through each track
 
     free(order);
 }
 
 //=======================================================================
-void scale_scene(float ds)
-{
+void scale_scene(float ds) {
     // limit min/max zoom level
-    if (ds == 0.0f)
-    {
+    if (ds == 0.0f) {
         ds = 1.0f;
     }
 
     float _allScale = allScale * ds;
 
-    if (_allScale < MIN_SCALE || _allScale > MAX_SCALE)
-    {
+    if (_allScale < MIN_SCALE || _allScale > MAX_SCALE) {
         return;
-    }
-    else
-    {
+    } else {
         allScale = _allScale;
     }
 
@@ -5015,18 +4541,15 @@ void scale_scene(float ds)
 
     // for each canvas, scale it's distance from the center point
     // and scale the dimensions of the canvas
-    for (id = 0; id < num_canvases(); ++id)
-    {
+    for (id = 0; id < num_canvases(); ++id) {
         int camera;
-        if (!is_canvas(id))
-        {
+        if (!is_canvas(id)) {
             continue;
         }
 
         camera = get_canvas_camera(id);
 
-        if (!is_camera(camera))
-        {
+        if (!is_camera(camera)) {
             continue;
         }
 
@@ -5070,8 +4593,7 @@ void scale_scene(float ds)
  * Method:    setBackgroundColor
  * Signature: (FFF)V
  */
-JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setBackgroundColor(JNIEnv *jenv, jclass jcls, jfloat r, jfloat g, jfloat b)
-{
+JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setBackgroundColor(JNIEnv *jenv, jclass jcls, jfloat r, jfloat g, jfloat b) {
     float aColor[3] = {r, g, b};
     set_bgcolor(aColor);
 }
@@ -5081,8 +4603,7 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setBackgroundColor(JNI
  * Method:    getBackgroundColor
  * Signature: ()[F
  */
-JNIEXPORT jfloatArray JNICALL Java_corelyzer_graphics_SceneGraph_getBackgroundColor(JNIEnv *jenv, jclass jcls)
-{
+JNIEXPORT jfloatArray JNICALL Java_corelyzer_graphics_SceneGraph_getBackgroundColor(JNIEnv *jenv, jclass jcls) {
     float *aColor = get_bgcolor();
 
     jfloatArray retArray = jenv->NewFloatArray(3);
@@ -5096,8 +4617,7 @@ JNIEXPORT jfloatArray JNICALL Java_corelyzer_graphics_SceneGraph_getBackgroundCo
  * Method:    setCrossHair
  * Signature: (Z)V
  */
-JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setCrossHair(JNIEnv *jenv, jclass jcls, jboolean hasCrossHair)
-{
+JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setCrossHair(JNIEnv *jenv, jclass jcls, jboolean hasCrossHair) {
     set_crosshair(hasCrossHair);
 }
 
@@ -5106,8 +4626,7 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setCrossHair(JNIEnv *j
  * Method:    hasCrossHair
  * Signature: ()Z
  */
-JNIEXPORT jboolean JNICALL Java_corelyzer_graphics_SceneGraph_hasCrossHair(JNIEnv *jenv, jclass jcls)
-{
+JNIEXPORT jboolean JNICALL Java_corelyzer_graphics_SceneGraph_hasCrossHair(JNIEnv *jenv, jclass jcls) {
     return has_crosshair();
 }
 
@@ -5116,8 +4635,7 @@ JNIEXPORT jboolean JNICALL Java_corelyzer_graphics_SceneGraph_hasCrossHair(JNIEn
  * Method:    setDepthOrientation
  * Signature: (Z)V
  */
-JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setDepthOrientation(JNIEnv *jenv, jclass jcls, jboolean orientation)
-{
+JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setDepthOrientation(JNIEnv *jenv, jclass jcls, jboolean orientation) {
     set_horizontal_depth(orientation);
 }
 
@@ -5126,8 +4644,7 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setDepthOrientation(JN
  * Method:    getDepthOrientation
  * Signature: ()Z
  */
-JNIEXPORT jboolean JNICALL Java_corelyzer_graphics_SceneGraph_getDepthOrientation(JNIEnv *jenv, jclass jcls)
-{
+JNIEXPORT jboolean JNICALL Java_corelyzer_graphics_SceneGraph_getDepthOrientation(JNIEnv *jenv, jclass jcls) {
     return get_horizontal_depth();
 }
 
@@ -5136,8 +4653,7 @@ JNIEXPORT jboolean JNICALL Java_corelyzer_graphics_SceneGraph_getDepthOrientatio
  * Method:    setShowOrigin
  * Signature: (Z)V
  */
-JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setShowOrigin(JNIEnv *jenv, jclass jcls, jboolean b)
-{
+JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setShowOrigin(JNIEnv *jenv, jclass jcls, jboolean b) {
     set_show_origin(b);
 }
 
@@ -5146,8 +4662,7 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setShowOrigin(JNIEnv *
  * Method:    getShowOrigin
  * Signature: ()Z
  */
-JNIEXPORT jboolean JNICALL Java_corelyzer_graphics_SceneGraph_getShowOrigin(JNIEnv *jenv, jclass jcls)
-{
+JNIEXPORT jboolean JNICALL Java_corelyzer_graphics_SceneGraph_getShowOrigin(JNIEnv *jenv, jclass jcls) {
     return is_show_origin();
 }
 
@@ -5156,8 +4671,7 @@ JNIEXPORT jboolean JNICALL Java_corelyzer_graphics_SceneGraph_getShowOrigin(JNIE
  * Method:    setShowSectionText
  * Signature: (Z)V
  */
-JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setShowSectionText(JNIEnv *jenv, jclass jcls, jboolean b)
-{
+JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setShowSectionText(JNIEnv *jenv, jclass jcls, jboolean b) {
     set_show_section_text(b);
 }
 
@@ -5166,14 +4680,12 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setShowSectionText(JNI
  * Method:    getShowSectionText
  * Signature: ()Z
  */
-JNIEXPORT jboolean JNICALL Java_corelyzer_graphics_SceneGraph_getShowSectionText(JNIEnv *jenv, jclass jcls)
-{
+JNIEXPORT jboolean JNICALL Java_corelyzer_graphics_SceneGraph_getShowSectionText(JNIEnv *jenv, jclass jcls) {
     return is_show_section_text();
 }
 
 /* Duplicate a section(trackId, sectionId) to new track newTrackID */
-int duplicateSection(int trackId, int sectionId, int newTrackId)
-{
+int duplicateSection(int trackId, int sectionId, int newTrackId) {
     TrackSceneNode *t;
     TrackSceneNode *newTrack;
     CoreSection *cs;
@@ -5220,7 +4732,7 @@ int duplicateSection(int trackId, int sectionId, int newTrackId)
     newSection->height = cs->height;
     newSection->depth = cs->depth;
     newSection->graph_offset = cs->graph_offset;
-    newSection->src = cs->src; // texture index
+    newSection->src = cs->src;  // texture index
     inc_texset_ref_count(newSection->src);
 
     // put into newTrack
@@ -5238,8 +4750,7 @@ int duplicateSection(int trackId, int sectionId, int newTrackId)
  * Method:    setRemoteControl
  * Signature: (Z)V
  */
-JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setRemoteControl(JNIEnv *jenv, jclass jcls, jboolean b)
-{
+JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setRemoteControl(JNIEnv *jenv, jclass jcls, jboolean b) {
     set_remote_controlled(b);
 }
 
@@ -5248,8 +4759,7 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setRemoteControl(JNIEn
  * Method:    setTieDepth
  * Signature: (ZF)V
  */
-JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setTieDepth(JNIEnv *jenv, jclass jcls, jboolean isEnabled, jfloat depth)
-{
+JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setTieDepth(JNIEnv *jenv, jclass jcls, jboolean isEnabled, jfloat depth) {
     setTieDepth(isEnabled, depth);
 }
 
@@ -5258,8 +4768,7 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setTieDepth(JNIEnv *je
  * Method:    resetDefaultTrackYPos
  * Signature: ()V
  */
-JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_resetDefaultTrackYPos(JNIEnv *jenv, jclass jcls)
-{
+JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_resetDefaultTrackYPos(JNIEnv *jenv, jclass jcls) {
     reset_default_track_ypos();
 }
 
@@ -5268,8 +4777,7 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_resetDefaultTrackYPos(
  * Method:    staggerTrackSections
  * Signature: (IZ)V
  */
-JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_staggerTrackSections(JNIEnv *jenv, jclass jcls, jint trackId, jboolean stagger)
-{
+JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_staggerTrackSections(JNIEnv *jenv, jclass jcls, jint trackId, jboolean stagger) {
     stagger_track_sections(trackId, stagger);
 }
 
@@ -5278,8 +4786,7 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_staggerTrackSections(J
  * Method:    trackIsStaggered
  * Signature: (I)Z
  */
-JNIEXPORT jboolean JNICALL Java_corelyzer_graphics_SceneGraph_trackIsStaggered(JNIEnv *jenv, jclass jcls, jint trackId)
-{
+JNIEXPORT jboolean JNICALL Java_corelyzer_graphics_SceneGraph_trackIsStaggered(JNIEnv *jenv, jclass jcls, jint trackId) {
     TrackSceneNode *track = get_scene_track(trackId);
     return track->staggered;
 }
@@ -5290,8 +4797,7 @@ JNIEXPORT jboolean JNICALL Java_corelyzer_graphics_SceneGraph_trackIsStaggered(J
  * Signature: (IIFZZ)V
  */
 JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_trimSections(JNIEnv *jenv, jclass jcls, jint trackId, jint sectionId, jfloat trim,
-                                                                       jboolean fromBottom, jboolean trimSelAndDeeper)
-{
+                                                                       jboolean fromBottom, jboolean trimSelAndDeeper) {
     trim_sections(trackId, sectionId, trim, fromBottom, trimSelAndDeeper);
 }
 
@@ -5300,8 +4806,7 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_trimSections(JNIEnv *j
  * Method:    stackSections
  * Signature: (II)V
  */
-JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_stackSections(JNIEnv *jenv, jclass jcls, jint trackId, jint sectionId)
-{
+JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_stackSections(JNIEnv *jenv, jclass jcls, jint trackId, jint sectionId) {
     stack_sections(trackId, sectionId);
 }
 
@@ -5310,8 +4815,7 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_stackSections(JNIEnv *
  * Method:    setDebug
  * Signature: (Z)V
  */
-JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setDebug(JNIEnv *jenv, jclass jcls, jboolean b)
-{
+JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setDebug(JNIEnv *jenv, jclass jcls, jboolean b) {
     setDebug(b);
 }
 
@@ -5320,7 +4824,6 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setDebug(JNIEnv *jenv,
  * Method:    getDebug
  * Signature: ()Z
  */
-JNIEXPORT jboolean JNICALL Java_corelyzer_graphics_SceneGraph_getDebug(JNIEnv *jenv, jclass jcls)
-{
+JNIEXPORT jboolean JNICALL Java_corelyzer_graphics_SceneGraph_getDebug(JNIEnv *jenv, jclass jcls) {
     return getDebug();
 }
