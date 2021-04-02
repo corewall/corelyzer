@@ -4689,6 +4689,18 @@ void update_center_point()
 }
 
 //=======================================================================
+bool click_in_annotation_marker(CoreAnnotation *ca, const float tx, const float ty, const float cs_px, const float startPx) {
+    float mx, my, mw, mh;
+    mx = ca->m.px + (cs_px - startPx);
+    my = ca->m.py;
+    mw = ca->m.w * getMarkerScale();
+    mh = ca->m.h * getMarkerScale();
+
+    // is (tx, ty) in rect (mx, my), (mx + w, my + h)?
+    return (ty >= my && ty <= my + mh && tx >= mx + startPx && tx <= mx + mw + startPx);
+}
+
+//=======================================================================
 void perform_pick(int canvas, float _x, float _y)
 {
     float x, y;
@@ -4832,26 +4844,18 @@ void perform_pick(int canvas, float _x, float _y)
             }
 
             // see if it's part of the actual image before checking
-            // things associated with section
             if (ty >= cs->py && ty <= cs->py + h)
             {
                 PickedSection = cs_order[k];
 
-                // if marker locates inside section image?
+                // is annotation marker inside core section rectangle?
                 // TODO Check lithology markers
                 for (l = 0; l < cs->annovec.size() && PickedMarker == -1; l++)
                 {
                     CoreAnnotation *ca = cs->annovec[l];
                     if (!ca)
                         continue;
-                    float mx, my, mw, mh;
-                    mx = ca->m.px;
-                    my = ca->m.py;
-                    mw = ca->m.w * getMarkerScale();
-                    mh = ca->m.h * getMarkerScale();
-
-                    if (ty >= my && ty <= my + mh && tx >= mx + startPx && tx <= mx + mw + startPx)
-                    {
+                    if (click_in_annotation_marker(ca, tx, ty, cs->px, startPx)) {
                         PickedMarker = l;
                     }
                 }
@@ -4865,20 +4869,13 @@ void perform_pick(int canvas, float _x, float _y)
             {
                 // traverse marker first and then graph
 
-                // test marker
+                // is annotation marker above core section?
                 for (l = 0; l < cs->annovec.size() && PickedMarker == -1; l++)
                 {
                     CoreAnnotation *ca = cs->annovec[l];
                     if (!ca)
                         continue;
-                    float mx, my, mw, mh;
-                    mx = ca->m.px;
-                    my = ca->m.py;
-                    mw = ca->m.w * getMarkerScale();
-                    mh = ca->m.h * getMarkerScale();
-
-                    if (ty >= my && ty <= my + mh && tx >= mx + startPx && tx <= mx + mw + startPx)
-                    {
+                    if (click_in_annotation_marker(ca, tx, ty, cs->px, startPx)) {
                         PickedMarker = l;
                     }
                 }
@@ -4927,8 +4924,7 @@ void perform_pick(int canvas, float _x, float _y)
                 }
             }
 
-            // check for Annotation Markers
-            //if( ty > cs->py + h && PickedGraph == -1)
+            // is annotation marker below core section?
             if (ty > cs->py + h && PickedMarker == -1)
             {
                 // TODO Check lithology markers
@@ -4937,14 +4933,7 @@ void perform_pick(int canvas, float _x, float _y)
                     CoreAnnotation *ca = cs->annovec[l];
                     if (!ca)
                         continue;
-                    float mx, my, mw, mh;
-                    mx = ca->m.px;
-                    my = ca->m.py;
-                    mw = ca->m.w * getMarkerScale();
-                    mh = ca->m.h * getMarkerScale();
-
-                    if (ty >= my && ty <= my + mh && tx >= mx + startPx && tx <= mx + mw + startPx)
-                    {
+                    if (click_in_annotation_marker(ca, tx, ty, cs->px, startPx)) {
                         PickedMarker = l;
                     }
                 }
