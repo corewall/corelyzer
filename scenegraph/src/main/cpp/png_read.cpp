@@ -45,13 +45,12 @@
 
 #include <png.h>
 
-void read_png(const char* filename, int* w, int* h, GLenum* format, 
-              char*& pixels)
-{
-    if(!w || !h || !format || !filename) return;
-    FILE* fptr = fopen(filename,"rb");
-    if(!fptr)
-    {
+void read_png(const char *filename, int *w, int *h, GLenum *format,
+              char *&pixels) {
+    if (!w || !h || !format || !filename)
+        return;
+    FILE *fptr = fopen(filename, "rb");
+    if (!fptr) {
         printf("READ PNG: Can't open file %s\n", filename);
         return;
     }
@@ -59,82 +58,78 @@ void read_png(const char* filename, int* w, int* h, GLenum* format,
     // png structures
 
     png_structp png_ptr;
-    png_infop   info_ptr;
-    
-    png_ptr = png_create_read_struct( PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
-    if( !png_ptr ) return;
+    png_infop info_ptr;
 
-    info_ptr = png_create_info_struct( png_ptr );
-    if( !info_ptr ) return;
+    png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
+    if (!png_ptr)
+        return;
+
+    info_ptr = png_create_info_struct(png_ptr);
+    if (!info_ptr)
+        return;
 
     png_init_io(png_ptr, fptr);
-    png_read_png( png_ptr, info_ptr,
-                  PNG_TRANSFORM_STRIP_16 | PNG_TRANSFORM_PACKING, NULL);
+    png_read_png(png_ptr, info_ptr,
+                 PNG_TRANSFORM_STRIP_16 | PNG_TRANSFORM_PACKING, NULL);
 
     int components = 0;
 
-    switch( png_get_color_type(png_ptr,info_ptr))
-    {
-    case PNG_COLOR_TYPE_GRAY:
-        *format = GL_LUMINANCE;
-        components = 1;
-        break;
-    case PNG_COLOR_TYPE_RGB:
-        *format = GL_RGB;
-        components = 3;
-        break;
-    case PNG_COLOR_TYPE_RGB_ALPHA:
-        *format = GL_RGBA;
-        components = 4;
-        break;
-    default:
-        break;
+    switch (png_get_color_type(png_ptr, info_ptr)) {
+        case PNG_COLOR_TYPE_GRAY:
+            *format = GL_LUMINANCE;
+            components = 1;
+            break;
+        case PNG_COLOR_TYPE_RGB:
+            *format = GL_RGB;
+            components = 3;
+            break;
+        case PNG_COLOR_TYPE_RGB_ALPHA:
+            *format = GL_RGBA;
+            components = 4;
+            break;
+        default:
+            break;
     }
 
-    if( !components )
-    {
+    if (!components) {
         printf("Unsupported PNG color mode\n");
-        png_destroy_read_struct( &png_ptr, &info_ptr, NULL);
+        png_destroy_read_struct(&png_ptr, &info_ptr, NULL);
         fclose(fptr);
         return;
     }
 
-    if ( png_get_bit_depth( png_ptr, info_ptr ) != 8 )
-    {
+    if (png_get_bit_depth(png_ptr, info_ptr) != 8) {
         printf("Unsupported PNG bit depth\n");
-        png_destroy_read_struct( &png_ptr, &info_ptr, NULL);
+        png_destroy_read_struct(&png_ptr, &info_ptr, NULL);
         fclose(fptr);
         return;
     }
 
     // try to get rows
 
-    png_bytep *b = png_get_rows( png_ptr, info_ptr );
+    png_bytep *b = png_get_rows(png_ptr, info_ptr);
 
-    if( !b)
-    {
+    if (!b) {
         printf("Can't get pixels from PNG\n");
-        png_destroy_read_struct( &png_ptr, &info_ptr, NULL);
+        png_destroy_read_struct(&png_ptr, &info_ptr, NULL);
         fclose(fptr);
         return;
     }
 
-    *w = (int) png_get_image_width( png_ptr, info_ptr);
-    *h = (int) png_get_image_height( png_ptr, info_ptr);
+    *w = (int)png_get_image_width(png_ptr, info_ptr);
+    *h = (int)png_get_image_height(png_ptr, info_ptr);
 
-    pixels = new char[ (*w) * (*h) * components ];
-    memset( pixels, 0, (*w) * (*h) * components );
+    pixels = new char[(*w) * (*h) * components];
+    memset(pixels, 0, (*w) * (*h) * components);
 
-    for( int y = 0; y < *h; ++y)
-        for( int x = 0; x < *w; ++x)
-            for( int c = 0; c < components; ++c)
-            {
-                pixels[ y * (*w) * components +  x * components + c] = 
-                    (char) b[y][x * components + c];
-
+    for (int y = 0; y < *h; ++y)
+        for (int x = 0; x < *w; ++x)
+            for (int c = 0; c < components; ++c) {
+                pixels[y * (*w) * components + x * components + c] =
+                    (char)b[y][x * components + c];
             }
 
-    png_destroy_read_struct( &png_ptr, &info_ptr, NULL);
+    png_destroy_read_struct(&png_ptr, &info_ptr, NULL);
     fclose(fptr);
 
     // done

@@ -27,47 +27,41 @@
 #include "corelyzer_system.h"
 
 //====================================================================
-JNIEnv* jenv = NULL;
+JNIEnv *jenv = NULL;
 jobject plugin_manager_object;
-jclass  plugin_manager_class;
+jclass plugin_manager_class;
 jmethodID plugin_manager_get_plugin;
 
 //====================================================================
-void set_current_jnienv(JNIEnv* e)
-{
+void set_current_jnienv(JNIEnv *e) {
     jenv = e;
 }
 
 //====================================================================
-JNIEnv* get_current_jnienv()
-{
+JNIEnv *get_current_jnienv() {
     return jenv;
 }
 
 //====================================================================
-void set_plugin_manager_object(jobject manager)
-{
+void set_plugin_manager_object(jobject manager) {
     plugin_manager_object = jenv->NewGlobalRef(manager);
-    plugin_manager_class  = jenv->GetObjectClass(plugin_manager_object);
-    plugin_manager_get_plugin = jenv->GetMethodID( plugin_manager_class,
-                                                   "getPlugin",
-                                                   "(I)Lcorelyzer/plugin/CorelyzerPlugin;");
+    plugin_manager_class = jenv->GetObjectClass(plugin_manager_object);
+    plugin_manager_get_plugin = jenv->GetMethodID(plugin_manager_class,
+                                                  "getPlugin",
+                                                  "(I)Lcorelyzer/plugin/CorelyzerPlugin;");
 }
 
 //====================================================================
-jobject get_plugin_manager_object()
-{
+jobject get_plugin_manager_object() {
     return plugin_manager_object;
 }
 
 //====================================================================
-jclass get_plugin_manager_class()
-{
+jclass get_plugin_manager_class() {
     return plugin_manager_class;
 }
 
 //====================================================================
-jmethodID get_plugin_manager_get_plugin()
-{
+jmethodID get_plugin_manager_get_plugin() {
     return plugin_manager_get_plugin;
 }

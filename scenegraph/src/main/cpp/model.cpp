@@ -23,103 +23,97 @@
  * cavern@evl.uic.edu
  *
  *****************************************************************************/
- 
 
 #include "model.h"
-#include "textureresource_ex.h"
-#include "common.h"
 
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <math.h>
+
 #include <stack>
+
+#include "common.h"
+#include "textureresource_ex.h"
 
 // brg 2/19/2016: Render logging is so verbose that it can slow framerate
 // to the point of annoyance: log based on this switch instead of DEBUG.
 //#define VERBOSE_RENDER_LOGGING
 
 //======================================================================
-void create_model_grid( int src, ModelGridsLOD*& m)
-{    
-    if( !is_texset(src) ) 
-    {
+void create_model_grid(int src, ModelGridsLOD *&m) {
+    if (!is_texset(src)) {
         m = NULL;
         return;
     }
 
     // allocate memory
 
-    m       = new ModelGridsLOD();
-    m->grid = new ModelNode*[get_texset_num_levels(src)];
+    m = new ModelGridsLOD();
+    m->grid = new ModelNode *[get_texset_num_levels(src)];
     m->cols = new int[get_texset_num_levels(src)];
     m->rows = new int[get_texset_num_levels(src)];
-    m->lod  = 0;
-    m->src  = src;
+    m->lod = 0;
+    m->src = src;
 
     // build grids at all levels
 
-    for( int l = 0; l < get_texset_num_levels(src); ++l)
-    {
-        int cols, rows; 
+    for (int l = 0; l < get_texset_num_levels(src); ++l) {
+        int cols, rows;
         float scale;
 
-        cols  = get_texset_num_cols(src,l);
-        rows  = get_texset_num_rows(src,l);
-        scale = get_texset_scale(src,l);
-        m->grid[l] = new ModelNode[ cols * rows ];
+        cols = get_texset_num_cols(src, l);
+        rows = get_texset_num_rows(src, l);
+        scale = get_texset_scale(src, l);
+        m->grid[l] = new ModelNode[cols * rows];
         m->cols[l] = cols;
         m->rows[l] = rows;
 
-        for( int r = 0; r < rows; ++r)
-        {
-            for(int c = 0; c < cols; ++c)
-            {
-                texBlock* tb = get_tex_block(src,l,c,r);
+        for (int r = 0; r < rows; ++r) {
+            for (int c = 0; c < cols; ++c) {
+                texBlock *tb = get_tex_block(src, l, c, r);
                 int index = r * cols + c;
 
-                m->grid[l][index].w   = (float) tb->dataW;
-                m->grid[l][index].h   = (float) tb->dataH;
-                m->grid[l][index].x   = (float) tb->imgx;
-                m->grid[l][index].y   = (float) tb->imgy;
+                m->grid[l][index].w = (float)tb->dataW;
+                m->grid[l][index].h = (float)tb->dataH;
+                m->grid[l][index].x = (float)tb->imgx;
+                m->grid[l][index].y = (float)tb->imgy;
                 m->grid[l][index].col = c;
                 m->grid[l][index].row = r;
 
                 m->grid[l][index].tex_crd[NW_CORNER][TEX_S] = 0.0f;
                 m->grid[l][index].tex_crd[NW_CORNER][TEX_T] = 0.0f;
                 m->grid[l][index].tex_crd[SE_CORNER][TEX_S] =
-                    (((float) tb->dataW) * scale) / ((float) tb->texW);
+                    (((float)tb->dataW) * scale) / ((float)tb->texW);
                 m->grid[l][index].tex_crd[SE_CORNER][TEX_T] =
-                    (((float) tb->dataH) * scale) / ((float) tb->texH);
+                    (((float)tb->dataH) * scale) / ((float)tb->texH);
 #ifdef DEBUG
                 printf("Data size %f x %f -> Coords from 0,0 to %f, %f\n",
                        m->grid[l][index].w, m->grid[l][index].h,
                        m->grid[l][index].tex_crd[SE_CORNER][TEX_S],
                        m->grid[l][index].tex_crd[SE_CORNER][TEX_T]);
 #endif
-            } 
-        } // end for each row and column
-    } // end for each level
-    
+            }
+        }  // end for each row and column
+    }      // end for each level
 }
 
 //======================================================================
 // TODO: more to delete: need to free texBlock*?
-void free_model_grid(ModelGridsLOD* m)
-{
-    if(!m) return;
+void free_model_grid(ModelGridsLOD *m) {
+    if (!m)
+        return;
 
-    if(m->cols) {
-        delete [] m->cols;
+    if (m->cols) {
+        delete[] m->cols;
     }
 
-    if(m->rows) {
-        delete [] m->rows;
+    if (m->rows) {
+        delete[] m->rows;
     }
 
-    for(int i = 0; i < get_texset_num_levels(m->src); ++i)
-    {
-        if(m->grid[i]) {
-            delete [] m->grid[i];
+    for (int i = 0; i < get_texset_num_levels(m->src); ++i) {
+        if (m->grid[i]) {
+            delete[] m->grid[i];
         }
     }
 
@@ -127,63 +121,63 @@ void free_model_grid(ModelGridsLOD* m)
 }
 
 //======================================================================
-void set_model_grid_lod(ModelGridsLOD* m, int lod)
-{
-    if(!m) return;
-    if( lod < 0 || lod > get_texset_num_levels(m->src) - 1) return;
+void set_model_grid_lod(ModelGridsLOD *m, int lod) {
+    if (!m)
+        return;
+    if (lod < 0 || lod > get_texset_num_levels(m->src) - 1)
+        return;
     m->lod = lod;
 }
 //======================================================================
-int get_model_grid_lod(ModelGridsLOD* m)
-{
-    if(!m) return -1;
+int get_model_grid_lod(ModelGridsLOD *m) {
+    if (!m)
+        return -1;
     return m->lod;
 }
 
 //======================================================================
 typedef struct ModelDrawStackNode_s {
-    int  col;
-    int  row;
-    int  span_x;
-    int  span_y;
-    char next_subgrid; // value between NW, NE, SE, and SW_CORNER
+    int col;
+    int row;
+    int span_x;
+    int span_y;
+    char next_subgrid;  // value between NW, NE, SE, and SW_CORNER
 } ModelDrawStackNode;
 
-void render_model_grid(ModelGridsLOD* m, Canvas* c)
-{
-
+void render_model_grid(ModelGridsLOD *m, Canvas *c) {
 #ifdef VERBOSE_LOGGING
     printf("\n\t--- Render Model Grid ---\n");
     printf("Rendering ModelGridsLOD at address 0x%x\n", m);
 #endif
 
-    if(!m || !c)
-    {
+    if (!m || !c) {
         printf("ERROR: ModelGridsLOD or Canvas don't exist!\n");
         return;
     }
 
-    std::stack< ModelDrawStackNode > dstack;
-    
-    int l    = m->lod;
+    std::stack<ModelDrawStackNode> dstack;
+
+    int l = m->lod;
     int cols = m->cols[l];
     int rows = m->rows[l];
-    ModelNode* grid = m->grid[l];
-	
-	// 6/29/2012 brg: Strangely slow drawing performance led me to discover that the
-	// algorithm below was drawing the same nodes upwards of 30x per render call!
-	// For now, track how many times a node has been drawn, ensuring we only draw it
-	// once. TODO: find flaw in algorithm itself and fix.
-	const int totalNodes = cols * rows;
-	char *nodeDrawCounts = new char[totalNodes];
-	for ( int i = 0; i < totalNodes; i++ ) { nodeDrawCounts[i] = 0; }
+    ModelNode *grid = m->grid[l];
+
+    // 6/29/2012 brg: Strangely slow drawing performance led me to discover that the
+    // algorithm below was drawing the same nodes upwards of 30x per render call!
+    // For now, track how many times a node has been drawn, ensuring we only draw it
+    // once. TODO: find flaw in algorithm itself and fix.
+    const int totalNodes = cols * rows;
+    char *nodeDrawCounts = new char[totalNodes];
+    for (int i = 0; i < totalNodes; i++) {
+        nodeDrawCounts[i] = 0;
+    }
 
     float x, y, z;
-    get_camera_position( c->camera, &x, &y, &z);
+    get_camera_position(c->camera, &x, &y, &z);
 
 #ifdef VERBOSE_RENDER_LOGGING
     printf("Camera position %.2f, %.2f\n", x, y);
-    printf("Camera LR %.2f, %.2f\n", (x+c->coverage_x), (y+c->coverage_y));
+    printf("Camera LR %.2f, %.2f\n", (x + c->coverage_x), (y + c->coverage_y));
     printf("Camera coverage: %.2f, %.2f\n", c->coverage_x, c->coverage_y);
 #endif
 
@@ -193,61 +187,59 @@ void render_model_grid(ModelGridsLOD* m, Canvas* c)
     float cd = y + c->coverage_y;  // down
 
 #ifdef VERBOSE_RENDER_LOGGING
-        printf("== Orig Cam: (%.2f, %.2f) - (%.2f %.2f)\n",
-               cl, cu, cr, cd);
+    printf("== Orig Cam: (%.2f, %.2f) - (%.2f %.2f)\n",
+           cl, cu, cr, cd);
 #endif
 
     // setup stack
 
     ModelDrawStackNode snode;
-    snode.col    = cols - 1;
-    snode.row    = rows - 1;
+    snode.col = cols - 1;
+    snode.row = rows - 1;
     snode.span_x = cols - 1;
     snode.span_y = rows - 1;
     snode.next_subgrid = NW_CORNER;
 
-    dstack.push( snode );
+    dstack.push(snode);
 
     // run through iterative quadtree like algorithm
 
     glEnable(GL_TEXTURE_2D);
     // glColor3f(1,1,1);
 
-    while( dstack.size() > 0)
-    {
-        // make sure that the space between upper left most node to 
+    while (dstack.size() > 0) {
+        // make sure that the space between upper left most node to
         // lower right node of sub grid intersects the camera space
         // otherwise pop the dstack and continue loop
-        
-        float ulx, uly, llx, lly; // upper left x,y and lower left x,y
-        int ulc, ulr, llc, llr;   // uper left col, row and lower left col,row
+
+        float ulx, uly, llx, lly;  // upper left x,y and lower left x,y
+        int ulc, ulr, llc, llr;    // uper left col, row and lower left col,row
 
         ulc = dstack.top().col - dstack.top().span_x;
         ulr = dstack.top().row - dstack.top().span_y;
         llc = dstack.top().col;
         llr = dstack.top().row;
 
-        ModelNode* n;
-        n   = &(grid[ (ulr * cols) + ulc ]);
+        ModelNode *n;
+        n = &(grid[(ulr * cols) + ulc]);
         ulx = n->x;
         uly = n->y;
-        n   = &(grid[ (llr * cols) + llc ]);
+        n = &(grid[(llr * cols) + llc]);
         llx = n->x + n->w;
         lly = n->y + n->h;
 
         // check horizontal or vertical depth
         // notice comparision should occure in model's origin/space/coord sys
         float _cl, _cu, _cr, _cd;
-        if(get_horizontal_depth())
-        {
+        if (get_horizontal_depth()) {
             _cl = cl;
             _cu = cu;
             _cr = cr;
             _cd = cd;
         } else {
-            _cl =  cu;
+            _cl = cu;
             _cu = -cr;
-            _cr =  cd;
+            _cr = cd;
             _cd = -cl;
         }
 
@@ -256,8 +248,7 @@ void render_model_grid(ModelGridsLOD* m, Canvas* c)
                ulc, ulr, llc, llr);
 #endif
 
-        if(ulx > _cr || uly > _cd || llx < _cl || lly < _cu)
-        {
+        if (ulx > _cr || uly > _cd || llx < _cl || lly < _cu) {
 #ifdef VERBOSE_RENDER_LOGGING
             printf("\tModel Area of (%.2f,%.2f) to (%.2f,%.2f) SKIPPED!\n",
                    ulx, uly, llx, lly);
@@ -268,165 +259,155 @@ void render_model_grid(ModelGridsLOD* m, Canvas* c)
             continue;
         }
 #ifdef VERBOSE_RENDER_LOGGING
-        else
-        {
+        else {
             printf("\tModel Area of (%.2f,%.2f) to (%.2f,%.2f) OK!\n",
-                   ulx,uly,llx,lly);
+                   ulx, uly, llx, lly);
             printf("\tCamera space covering (%.2f,%.2f) to (%.2f,%.2f)\n",
                    _cl, _cu, _cr, _cd);
         }
 #endif
 
         // is the span zero?
-        if( dstack.top().span_x == 0 && dstack.top().span_y == 0)
-        {
+        if (dstack.top().span_x == 0 && dstack.top().span_y == 0) {
             // draw
-            n = &(grid[ (dstack.top().row * cols ) + dstack.top().col]);
+            n = &(grid[(dstack.top().row * cols) + dstack.top().col]);
             dstack.pop();
 
-            if(!n)
+            if (!n)
                 continue;
 
 #ifdef VERBOSE_RENDER_LOGGING
-            printf("\t!!! Drawing node at col: %d, row %d !!!\n", n->col, 
+            printf("\t!!! Drawing node at col: %d, row %d !!!\n", n->col,
                    n->row);
             printf("\t!!! Starts at (%.2f, %.2f) to (%.2f, %.2f) !!!\n",
                    n->x, n->y, n->x + n->w, n->y + n->h);
 #endif
 
-			// 6/29/2012 brg: don't draw again if node has already been drawn!
-			nodeDrawCounts[ n->row * cols + n->col ]++;
-			if ( nodeDrawCounts[ n->row * cols + n->col ] > 1 )
-				continue;
-            
-            bind_texblock( m->src, l, n->col, n->row);
+            // 6/29/2012 brg: don't draw again if node has already been drawn!
+            nodeDrawCounts[n->row * cols + n->col]++;
+            if (nodeDrawCounts[n->row * cols + n->col] > 1)
+                continue;
+
+            bind_texblock(m->src, l, n->col, n->row);
 
             float *nwtc = &(n->tex_crd[0][0]);
             float *setc = &(n->tex_crd[1][0]);
 
             glBegin(GL_QUADS);
             {
-                glTexCoord2f( nwtc[TEX_S], nwtc[TEX_T]);
-                glVertex2f( n->x,        n->y        );
+                glTexCoord2f(nwtc[TEX_S], nwtc[TEX_T]);
+                glVertex2f(n->x, n->y);
 
-                glTexCoord2f( nwtc[TEX_S], setc[TEX_T]);
-                glVertex2f( n->x,        n->y + n->h );
+                glTexCoord2f(nwtc[TEX_S], setc[TEX_T]);
+                glVertex2f(n->x, n->y + n->h);
 
-                glTexCoord2f( setc[TEX_S], setc[TEX_T]);
-                glVertex2f( n->x + n->w, n->y + n->h );
+                glTexCoord2f(setc[TEX_S], setc[TEX_T]);
+                glVertex2f(n->x + n->w, n->y + n->h);
 
-                glTexCoord2f( setc[TEX_S], nwtc[TEX_T]);
-                glVertex2f( n->x + n->w, n->y        );
+                glTexCoord2f(setc[TEX_S], nwtc[TEX_T]);
+                glVertex2f(n->x + n->w, n->y);
             }
             glEnd();
 
             continue;
         }
 
-        
-        switch( dstack.top().next_subgrid )
-        {
-        case NW_CORNER:
-            dstack.top().next_subgrid = NE_CORNER;
-            snode.span_x = dstack.top().span_x / 2;
-            snode.span_y = dstack.top().span_y / 2;
-            snode.col = dstack.top().col - int(ceil(dstack.top().span_x * .5));
-            snode.row = dstack.top().row - int(ceil(dstack.top().span_y * .5));
-            snode.next_subgrid = NW_CORNER;
-            
-#ifdef VERBOSE_RENDER_LOGGING
-            printf("NW CORNER: Pushing node (%d, %d) onto stack\n",
-                   snode.col, snode.row);
-#endif
-            dstack.push(snode);
-
-            break;
-        case NE_CORNER:
-            dstack.top().next_subgrid = SE_CORNER;
-            snode.span_x = dstack.top().span_x / 2;
-            snode.span_y = dstack.top().span_y / 2;
-            snode.col = dstack.top().col;
-            snode.row = dstack.top().row - int(ceil(dstack.top().span_y * .5));
-            snode.next_subgrid = NW_CORNER;
+        switch (dstack.top().next_subgrid) {
+            case NW_CORNER:
+                dstack.top().next_subgrid = NE_CORNER;
+                snode.span_x = dstack.top().span_x / 2;
+                snode.span_y = dstack.top().span_y / 2;
+                snode.col = dstack.top().col - int(ceil(dstack.top().span_x * .5));
+                snode.row = dstack.top().row - int(ceil(dstack.top().span_y * .5));
+                snode.next_subgrid = NW_CORNER;
 
 #ifdef VERBOSE_RENDER_LOGGING
-            printf("NE CORNER: Pushing node (%d, %d) onto stack\n",
-                   snode.col, snode.row);
+                printf("NW CORNER: Pushing node (%d, %d) onto stack\n",
+                       snode.col, snode.row);
 #endif
-            dstack.push(snode);
+                dstack.push(snode);
 
-            break;
-        case SE_CORNER:
-            dstack.top().next_subgrid = SW_CORNER;
-            snode.span_x = dstack.top().span_x / 2;
-            snode.span_y = dstack.top().span_y / 2;
-            snode.col = dstack.top().col;
-            snode.row = dstack.top().row;
-            snode.next_subgrid = NW_CORNER;
+                break;
+            case NE_CORNER:
+                dstack.top().next_subgrid = SE_CORNER;
+                snode.span_x = dstack.top().span_x / 2;
+                snode.span_y = dstack.top().span_y / 2;
+                snode.col = dstack.top().col;
+                snode.row = dstack.top().row - int(ceil(dstack.top().span_y * .5));
+                snode.next_subgrid = NW_CORNER;
 
 #ifdef VERBOSE_RENDER_LOGGING
-            printf("SE CORNER: Pushing node (%d, %d) onto stack\n",
-                   snode.col, snode.row);
+                printf("NE CORNER: Pushing node (%d, %d) onto stack\n",
+                       snode.col, snode.row);
 #endif
-            dstack.push(snode);
+                dstack.push(snode);
 
-            break;
-        case SW_CORNER:
-            dstack.top().next_subgrid = UNDEF_CORNER;
-            snode.span_x = dstack.top().span_x / 2;
-            snode.span_y = dstack.top().span_y / 2;
-            snode.col = dstack.top().col - int(ceil(dstack.top().span_x * .5));
-            snode.row = dstack.top().row;
-            snode.next_subgrid = NW_CORNER;
+                break;
+            case SE_CORNER:
+                dstack.top().next_subgrid = SW_CORNER;
+                snode.span_x = dstack.top().span_x / 2;
+                snode.span_y = dstack.top().span_y / 2;
+                snode.col = dstack.top().col;
+                snode.row = dstack.top().row;
+                snode.next_subgrid = NW_CORNER;
 
 #ifdef VERBOSE_RENDER_LOGGING
-            printf("SW CORNER: Pushing node (%d, %d) onto stack\n",
-                   snode.col, snode.row);
+                printf("SE CORNER: Pushing node (%d, %d) onto stack\n",
+                       snode.col, snode.row);
 #endif
-            dstack.push(snode);
+                dstack.push(snode);
 
-            break;
-        case UNDEF_CORNER:
-        default:
-            dstack.pop();
-            break;
-        } // end switch to process next sub grid or not
-        
-    } // end while stack not empty
-	
-	delete[] nodeDrawCounts; // 6/29/2012 brg
-	    
-	// go through the whole grid and draw the outline of the blocks
+                break;
+            case SW_CORNER:
+                dstack.top().next_subgrid = UNDEF_CORNER;
+                snode.span_x = dstack.top().span_x / 2;
+                snode.span_y = dstack.top().span_y / 2;
+                snode.col = dstack.top().col - int(ceil(dstack.top().span_x * .5));
+                snode.row = dstack.top().row;
+                snode.next_subgrid = NW_CORNER;
+
+#ifdef VERBOSE_RENDER_LOGGING
+                printf("SW CORNER: Pushing node (%d, %d) onto stack\n",
+                       snode.col, snode.row);
+#endif
+                dstack.push(snode);
+
+                break;
+            case UNDEF_CORNER:
+            default:
+                dstack.pop();
+                break;
+        }  // end switch to process next sub grid or not
+
+    }  // end while stack not empty
+
+    delete[] nodeDrawCounts;  // 6/29/2012 brg
+
+    // go through the whole grid and draw the outline of the blocks
     if (getDebug()) {
         int i, j;
 
         glBindTexture(GL_TEXTURE_2D, 0);
-        glColor3f(1,0,0);
+        glColor3f(1, 0, 0);
         glBegin(GL_LINES);
 
-        for( i = 0; i < rows; ++i)
-        {
-            for( j = 0; j < cols; ++j)
-            {
+        for (i = 0; i < rows; ++i) {
+            for (j = 0; j < cols; ++j) {
                 int id = (i * cols) + j;
-                glVertex2f( grid[id].x + grid[id].w, grid[id].y);
-                glVertex2f( grid[id].x,              grid[id].y);
+                glVertex2f(grid[id].x + grid[id].w, grid[id].y);
+                glVertex2f(grid[id].x, grid[id].y);
 
-                glVertex2f( grid[id].x,              grid[id].y);
-                glVertex2f( grid[id].x,              grid[id].y + grid[id].h);
+                glVertex2f(grid[id].x, grid[id].y);
+                glVertex2f(grid[id].x, grid[id].y + grid[id].h);
 
-                glVertex2f( grid[id].x,              grid[id].y + grid[id].h);
-                glVertex2f( grid[id].x + grid[id].w, grid[id].y + grid[id].h);
+                glVertex2f(grid[id].x, grid[id].y + grid[id].h);
+                glVertex2f(grid[id].x + grid[id].w, grid[id].y + grid[id].h);
 
-                glVertex2f( grid[id].x + grid[id].w, grid[id].y + grid[id].h);
-                glVertex2f( grid[id].x + grid[id].w, grid[id].y);
+                glVertex2f(grid[id].x + grid[id].w, grid[id].y + grid[id].h);
+                glVertex2f(grid[id].x + grid[id].w, grid[id].y);
             }
-
         }
 
         glEnd();
     }
 }
-
-
-

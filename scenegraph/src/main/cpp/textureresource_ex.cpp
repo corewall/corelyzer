@@ -25,8 +25,9 @@
  *****************************************************************************/
 
 #if defined(WIN32) || defined(_WIN32)
+#include <io.h>  // For access().
 #include <windows.h>
-#include <io.h>   // For access().
+
 #include <iostream>
 #endif
 
@@ -34,16 +35,16 @@
 #include "string.h"
 #endif
 
+#include <png.h>
 #include <stdio.h>
 #include <stdlib.h>
-
 #include <tiff.h>
 #include <tiffio.h>
-#include <png.h>
 
 // For checking file system
-#include <sys/types.h>  // For stat().
 #include <sys/stat.h>   // For stat().
+#include <sys/types.h>  // For stat().
+
 #include <string>
 
 extern "C" {
@@ -52,8 +53,8 @@ extern "C" {
 #define XMD_H
 #endif
 
-#include <jpeglib.h>
 #include <jerror.h>
+#include <jpeglib.h>
 
 // For JPEG2000
 //#include "openjpeg.h"
@@ -82,14 +83,14 @@ using namespace std;
   sample error callback expecting a FILE* client object
  */
 void error_callback(const char *msg, void *client_data) {
-    FILE *stream = (FILE*)client_data;
+    FILE *stream = (FILE *)client_data;
     fprintf(stream, "[JP2 - ERROR] %s", msg);
 }
 /**
   sample warning callback expecting a FILE* client object
  */
 void warning_callback(const char *msg, void *client_data) {
-    FILE *stream = (FILE*)client_data;
+    FILE *stream = (FILE *)client_data;
     fprintf(stream, "[JP2 - WARNING] %s", msg);
 }
 /**
@@ -102,30 +103,29 @@ void info_callback(const char *msg, void *client_data) {
 
 int get_file_format(char *filename) {
     unsigned int i;
-    static const char *extension[] = {"pgx", "pnm", "pgm", "ppm", "bmp","tif", "j2k", "jp2", "jpt", "j2c" };
-    static const int format[] = { PGX_DFMT, PXM_DFMT, PXM_DFMT, PXM_DFMT, BMP_DFMT, TIF_DFMT, J2K_CFMT, JP2_CFMT, JPT_CFMT, J2K_CFMT };
-    char * ext = strrchr(filename, '.');
+    static const char *extension[] = {"pgx", "pnm", "pgm", "ppm", "bmp", "tif", "j2k", "jp2", "jpt", "j2c"};
+    static const int format[] = {PGX_DFMT, PXM_DFMT, PXM_DFMT, PXM_DFMT, BMP_DFMT, TIF_DFMT, J2K_CFMT, JP2_CFMT, JPT_CFMT, J2K_CFMT};
+    char *ext = strrchr(filename, '.');
     if (ext == NULL)
-	return -1;
+        return -1;
     ext++;
     if (ext) {
-		for (i = 0; i < sizeof(format)/sizeof(*format); i++) {
+        for (i = 0; i < sizeof(format) / sizeof(*format); i++) {
 #ifdef WIN32
-			if (_strnicmp(ext, extension[i], 3) == 0) {
+            if (_strnicmp(ext, extension[i], 3) == 0) {
 #else
-			if (strnicmp(ext, extension[i], 3) == 0) {
+            if (strnicmp(ext, extension[i], 3) == 0) {
 #endif
-				return format[i];
-			}
-		}
+                return format[i];
+            }
+        }
     }
 
     return -1;
 }
 
 #ifdef CORELYZER_JPEG2000_SUPPORT
-void pokeOpjImg(opj_image_t * opjimage)
-{
+void pokeOpjImg(opj_image_t *opjimage) {
     int x0 = opjimage->x0;
     int y0 = opjimage->y0;
     int x1 = opjimage->x1;
@@ -134,217 +134,186 @@ void pokeOpjImg(opj_image_t * opjimage)
     int numcomps = opjimage->numcomps;
 
     printf("x0: %d, y0: %d, x1: %d, y1: %d, numcomps: %d\n",
-	    x0, y0, x1, y1, numcomps);
+           x0, y0, x1, y1, numcomps);
 }
 #endif
-
 };
+
+#include <math.h>
+#include <setjmp.h>
+#include <squish.h>
 
 #include <string>
 #include <vector>
-#include <math.h>
-#include <setjmp.h>
 
+#include "cache.h"
+#include "canvas.h"
 #include "textureresource_ex.h"
 #include "util.h"
 #include "utility.h"
-#include "cache.h"
-#include "canvas.h"
-
-#include <squish.h>
-
 
 #ifdef USE_FASTDXT
 #include "libdxt.h"
 #endif
 
-extern char* default_block_dir;
+extern char *default_block_dir;
 
-vector< MultiLevelTextureSetEX* > texsetvec;
+vector<MultiLevelTextureSetEX *> texsetvec;
 
 // determine whether this is bigendian system
 const int i = 1;
-#define is_bigendian() ( (*(char*)&i) == 0 )
+#define is_bigendian() ((*(char *)&i) == 0)
 
 // 4/5/2018: This f'n is used only on big endian systems
-unsigned long swap_bytes (unsigned long nLongNumber)
-{
-   return (((nLongNumber&0x000000FF)<<24)+((nLongNumber&0x0000FF00)<<8)+
-   ((nLongNumber&0x00FF0000)>>8)+((nLongNumber&0xFF000000)>>24));
+unsigned long swap_bytes(unsigned long nLongNumber) {
+    return (((nLongNumber & 0x000000FF) << 24) + ((nLongNumber & 0x0000FF00) << 8) +
+            ((nLongNumber & 0x00FF0000) >> 8) + ((nLongNumber & 0xFF000000) >> 24));
 }
 
-void replace_windows_seperators(string &fname)
-{
+void replace_windows_seperators(string &fname) {
     int p;
     string sep("/");
-    while( (p = fname.find("\\")) != fname.length() && p >= 0 )
-    {
+    while ((p = fname.find("\\")) != fname.length() && p >= 0) {
 #ifdef DEBUG
         printf("Replacing \\ with / at %d\n", p);
 #endif
-        fname = fname.replace(p,1,sep);
+        fname = fname.replace(p, 1, sep);
     }
 }
 
 //====================================================================
-void copy_pixels_to_rgba(char* in_pix, char* out_pix, int in_fmt, 
-                         int w, int h )
-{
-    if( in_fmt == RGBA )
-    {
-        memcpy( out_pix, in_pix, w * h * 4);
+void copy_pixels_to_rgba(char *in_pix, char *out_pix, int in_fmt,
+                         int w, int h) {
+    if (in_fmt == RGBA) {
+        memcpy(out_pix, in_pix, w * h * 4);
         return;
     }
 
-    if( in_fmt == BGRA )
-    {
-        memcpy( out_pix, in_pix, w * h * 4);
-        for( int i = 0; i < w * h * 4; i += 4)
-        {
-            out_pix[i]   = in_pix[i+2];
-            out_pix[i+2] = in_pix[i];
+    if (in_fmt == BGRA) {
+        memcpy(out_pix, in_pix, w * h * 4);
+        for (int i = 0; i < w * h * 4; i += 4) {
+            out_pix[i] = in_pix[i + 2];
+            out_pix[i + 2] = in_pix[i];
         }
         return;
     }
 
-   
-    memset( out_pix, 255, w * h * 4 );
+    memset(out_pix, 255, w * h * 4);
 
-    if( in_fmt == GREY )
-    {
-        for( int i = 0; i < w * h * 4; i += 4)
-        {
+    if (in_fmt == GREY) {
+        for (int i = 0; i < w * h * 4; i += 4) {
             int ii;
             ii = i / 4;
-            out_pix[i]   = in_pix[ii];
-            out_pix[i+1] = in_pix[ii];
-            out_pix[i+2] = in_pix[ii];
+            out_pix[i] = in_pix[ii];
+            out_pix[i + 1] = in_pix[ii];
+            out_pix[i + 2] = in_pix[ii];
         }
         return;
     }
 
-    if( in_fmt == BGR )
-    {
-        for( int i = 0; i < w * h * 4; i += 4)
-        {
+    if (in_fmt == BGR) {
+        for (int i = 0; i < w * h * 4; i += 4) {
             int ii;
             ii = (i / 4) * 3;
 
-            out_pix[i]   = in_pix[ii+2];
-            out_pix[i+1] = in_pix[ii+1];
-            out_pix[i+2] = in_pix[ii];
-
+            out_pix[i] = in_pix[ii + 2];
+            out_pix[i + 1] = in_pix[ii + 1];
+            out_pix[i + 2] = in_pix[ii];
         }
         return;
     }
 
     // RGB
-    for( int i = 0; i < w * h * 4; i += 4)
-    {
+    for (int i = 0; i < w * h * 4; i += 4) {
         int ii;
         ii = (i / 4) * 3;
-        
-        out_pix[i]   = in_pix[ii];
-        out_pix[i+1] = in_pix[ii+1];
-        out_pix[i+2] = in_pix[ii+2];
 
+        out_pix[i] = in_pix[ii];
+        out_pix[i + 1] = in_pix[ii + 1];
+        out_pix[i + 2] = in_pix[ii + 2];
     }
-
-
 }
 
 //====================================================================
 // Given in and out buffers, scale a part of the buffer to fit into out buffer
 //====================================================================
-void get_sub_image_scaled( char* in_pix, char* out_pix, int x, int y,
-                           int w, int h, float s, MultiLevelTextureSetEX* t)
-{
-    if( !in_pix || !out_pix || !t )
+void get_sub_image_scaled(char *in_pix, char *out_pix, int x, int y,
+                          int w, int h, float s, MultiLevelTextureSetEX *t) {
+    if (!in_pix || !out_pix || !t)
         return;
-    if( s == 0 )
+    if (s == 0)
         return;
-    if( x < 0 || x >= t->src_w )
+    if (x < 0 || x >= t->src_w)
         return;
-    if( y < 0 || y >= t->src_h )
+    if (y < 0 || y >= t->src_h)
         return;
 
-    int   copy_w, copy_h, skip_x, skip_y;
-    copy_w = int( w * s );
-    copy_h = int( h * s );
+    int copy_w, copy_h, skip_x, skip_y;
+    copy_w = int(w * s);
+    copy_h = int(h * s);
     skip_x = copy_w / w;
     skip_y = copy_h / h;
 
-    memset( out_pix, 0, w * h * t->components );
-    if( t->src_w < x + w )
+    memset(out_pix, 0, w * h * t->components);
+    if (t->src_w < x + w)
         copy_w = t->src_w - x;
-    if( t->src_h < y + h )
+    if (t->src_h < y + h)
         copy_h = t->src_h - y;
 
-    for( int i = 0; i < h; ++i)
-    {
-        for( int j = 0; j < w; ++j)
-        {
-            for( int k = 0; k < t->components; ++k)
-            {
-                if( y + (i * skip_y) < t->src_h && x + (j * skip_x) < t->src_w)
-                {
-                    out_pix[ (i * w + j) * t->components + k] =
-                        in_pix[ ((y + (i * skip_y)) * t->src_w + 
-                                 (x + (j * skip_x))) * t->components + k];
-                }
-                else
-                {
-                    out_pix[ (i * w + j) * t->components + k] = 0;
+    for (int i = 0; i < h; ++i) {
+        for (int j = 0; j < w; ++j) {
+            for (int k = 0; k < t->components; ++k) {
+                if (y + (i * skip_y) < t->src_h && x + (j * skip_x) < t->src_w) {
+                    out_pix[(i * w + j) * t->components + k] =
+                        in_pix[((y + (i * skip_y)) * t->src_w +
+                                (x + (j * skip_x))) *
+                                   t->components +
+                               k];
+                } else {
+                    out_pix[(i * w + j) * t->components + k] = 0;
                 }
             }
         }
     }
-
 }
 
 // Crossplatform way of check if a directory exists
-bool isDirectoryExists(const char* aPath)
-{
+bool isDirectoryExists(const char *aPath) {
 #ifdef WIN32
-	if ( _access( aPath, 0 ) == 0 )
+    if (_access(aPath, 0) == 0)
 #else
-	if (access(aPath, 0) == 0)
+    if (access(aPath, 0) == 0)
 #endif
     {
         struct stat status;
-        stat( aPath, &status );
+        stat(aPath, &status);
 
-        if ( status.st_mode & S_IFDIR )
-        {
+        if (status.st_mode & S_IFDIR) {
             return true;
-        }
-        else
-        {
-			// It's actually a file!
+        } else {
+            // It's actually a file!
             return false;
         }
-    }
-    else
-    {
-		// path does not exist
+    } else {
+        // path does not exist
         return false;
     }
 }
 
 // Check whether texture block files already exhist.
 // An integrity ticket file?
-bool isTextureBlocksExist(const char* filename, const char *blockDir)
-{
-    if(!filename || !blockDir) return false;
+bool isTextureBlocksExist(const char *filename, const char *blockDir) {
+    if (!filename || !blockDir)
+        return false;
 
 #ifdef DEBUG
-	printf("isTextureBlocksExist(): %s (block %s)\n", filename, blockDir);
+    printf("isTextureBlocksExist(): %s (block %s)\n", filename, blockDir);
 #endif
 
     string filenameString(filename);
     string blockDirString(blockDir);
 
-	replace_windows_seperators(filenameString);
+    replace_windows_seperators(filenameString);
     replace_windows_seperators(blockDirString);
 
 #ifdef DEBUG
@@ -360,129 +329,122 @@ bool isTextureBlocksExist(const char* filename, const char *blockDir)
 //====================================================================
 // 90% of time in the most detailed level tile generation!!!
 
-#define SQUISH  (1)
+#define SQUISH (1)
 #define FASTDXT (2)
 
-void delete_texset(MultiLevelTextureSetEX *texset)
-{
-    if(texset) {
+void delete_texset(MultiLevelTextureSetEX *texset) {
+    if (texset) {
         // Delete stuff inside MultiTexSet*
-        for(int i = 0; i < texset->levels; ++i) {
-            delete [] texset->tex[i];
+        for (int i = 0; i < texset->levels; ++i) {
+            delete[] texset->tex[i];
         }
 
-        delete [] texset->src_name;
-        delete [] texset->blkdir;
+        delete[] texset->src_name;
+        delete[] texset->blkdir;
 
-        delete [] texset->scales;
-        delete [] texset->rows;
-        delete [] texset->cols;
-        delete [] texset->tex;
-        delete [] texset->pyramid_level;        
+        delete[] texset->scales;
+        delete[] texset->rows;
+        delete[] texset->cols;
+        delete[] texset->tex;
+        delete[] texset->pyramid_level;
     }
 }
 
-void build_tex_blocks(char* pixels, MultiLevelTextureSetEX* set, bool hasDir, int library)
-{
+void build_tex_blocks(char *pixels, MultiLevelTextureSetEX *set, bool hasDir, int library) {
 #ifdef DEBUG
-	printf("-- Building tex blocks with library (1. Squish, 2. FastDXT) %d\n", library);
+    printf("-- Building tex blocks with library (1. Squish, 2. FastDXT) %d\n", library);
 #endif
 
-    if( !set )
-    {
+    if (!set) {
 #ifdef DEBUG
-	    printf("- [build_tex_blocks] No set, return.\n");
-#endif
-
-        return;
-    }
-
-    if( !pixels && !hasDir)
-    {
-#ifdef DEBUG
-	    printf("- [build_tex_blocks] No pixels, has no dir.\n");
+        printf("- [build_tex_blocks] No set, return.\n");
 #endif
 
         return;
     }
 
-    if( set->levels < 1 )
+    if (!pixels && !hasDir) {
+#ifdef DEBUG
+        printf("- [build_tex_blocks] No pixels, has no dir.\n");
+#endif
+
+        return;
+    }
+
+    if (set->levels < 1)
         set->levels = 1;
 
     // max number of levels before all the pixels fit into 1 texBlock
     int lh, lv;
-    lh = (int) ceil( float(set->src_w) / float(set->blksize));
-    lv = (int) ceil( float(set->src_h) / float(set->blksize));
-    float exponent; // blksize * 2 ^ exp can encompass image
+    lh = (int)ceil(float(set->src_w) / float(set->blksize));
+    lv = (int)ceil(float(set->src_h) / float(set->blksize));
+    float exponent;  // blksize * 2 ^ exp can encompass image
 
-    if( lh > lv )
-        exponent = ceilf( log((float) lh) / log(2.0f)) + 1;
+    if (lh > lv)
+        exponent = ceilf(log((float)lh) / log(2.0f)) + 1;
     else
-        exponent = ceilf( log((float) lv) / log(2.0f)) + 1;
+        exponent = ceilf(log((float)lv) / log(2.0f)) + 1;
 
-    if( exponent < set->levels ) set->levels = (int) exponent;
+    if (exponent < set->levels)
+        set->levels = (int)exponent;
 
-    set->scales = new float[ set->levels ];
-    set->rows   = new int[ set->levels ];
-    set->cols   = new int[ set->levels ];
-    set->tex    = new texBlock*[ set->levels ];
-    set->pyramid_level = new int[ set->levels];
+    set->scales = new float[set->levels];
+    set->rows = new int[set->levels];
+    set->cols = new int[set->levels];
+    set->tex = new texBlock *[set->levels];
+    set->pyramid_level = new int[set->levels];
 
     // make sure imgblock directory is there
 
     char cwd[1024];
-    char const * dummy = GETCWD( cwd, 1024 );
+    char const *dummy = GETCWD(cwd, 1024);
 
     // Check if the block dir exists
-    FILE* fptr0 = fopen(set->blkdir, "r");
-    if(!fptr0)
-    {
+    FILE *fptr0 = fopen(set->blkdir, "r");
+    if (!fptr0) {
 #ifdef DEBUG
         printf("Couldn't change CWD to %s\n", set->blkdir);
         printf("Making directory %s\n", set->blkdir);
         printf("CWD is %s\n", cwd);
 #endif
-        MKDIR( set->blkdir );
-    }
-    else
-    {
+        MKDIR(set->blkdir);
+    } else {
         fclose(fptr0);
     }
 
-    char* tex_data = new char[ set->blksize * set->blksize * set->components ];
+    char *tex_data = new char[set->blksize * set->blksize * set->components];
 
     // DXT3 related
     int dxt3_size = 0;
 
 #ifdef USE_FASTDXT
-        dxt3_size = set->blksize * set->blksize * set->components;
+    dxt3_size = set->blksize * set->blksize * set->components;
 #else
-        dxt3_size = squish::GetStorageRequirements( set->blksize,
-                                                    set->blksize,
-                                                    squish::kDxt3 );    
+    dxt3_size = squish::GetStorageRequirements(set->blksize,
+                                               set->blksize,
+                                               squish::kDxt3);
 #endif
 
 #ifdef DEBUG
     printf("blksize: %d, components: %d\n", set->blksize, set->components);
     printf("dxt_size: %d\n", dxt3_size);
-#endif    
+#endif
 
-    char* tex_to_file = new char[ dxt3_size ];
-    char* tex_rgba = new char[ set->blksize * set->blksize * 4 ];
+    char *tex_to_file = new char[dxt3_size];
+    char *tex_rgba = new char[set->blksize * set->blksize * 4];
 
     // end DXT3 related until later when writing to file
 
-    float final_scale    = 1.0f / powf( 2.0f, exponent);
+    float final_scale = 1.0f / powf(2.0f, exponent);
     float scale_interval = 1.0f;
-    int   level_interval = 1;
+    int level_interval = 1;
 
-    if( set->levels != 1)
-    {
-        scale_interval = float(1.0 - final_scale) / float( set->levels - 1);
-        level_interval = (int) ceil( exponent / set->levels) + 1;
+    if (set->levels != 1) {
+        scale_interval = float(1.0 - final_scale) / float(set->levels - 1);
+        level_interval = (int)ceil(exponent / set->levels) + 1;
     }
 
-    // make texture blocks and store them off into the appropriate 
+    // make texture blocks and store them off into the appropriate
     // directories
 
 #ifdef DEBUG
@@ -493,19 +455,18 @@ void build_tex_blocks(char* pixels, MultiLevelTextureSetEX* set, bool hasDir, in
     printf("-- [OPTIMIZE] Working on %d levels in build_tex_blocks()\n", set->levels);
 #endif
 
-    for( int k = 0; k < set->levels; ++k)
-    {
+    for (int k = 0; k < set->levels; ++k) {
         int level;
-        if( k * level_interval < exponent )
+        if (k * level_interval < exponent)
             level = k * level_interval;
         else
-            level = (int) exponent;
+            level = (int)exponent;
 
         // make level directory
-        
+
         char level_dir[5];
         sprintf(level_dir, "%d", level);
-        set->scales[k] = 1.0f / powf( 2.0f, (float)level );
+        set->scales[k] = 1.0f / powf(2.0f, (float)level);
         set->pyramid_level[k] = level;
 
 #ifdef DEBUG
@@ -515,13 +476,13 @@ void build_tex_blocks(char* pixels, MultiLevelTextureSetEX* set, bool hasDir, in
                float(set->src_h) * set->scales[k]);
 #endif
 
-        set->cols[k]   = (int) ceil( float( set->src_w * set->scales[k]) /
-                                     float( set->blksize));
-        set->rows[k]   = (int) ceil( float( set->src_h * set->scales[k]) /
-                                     float( set->blksize));
+        set->cols[k] = (int)ceil(float(set->src_w * set->scales[k]) /
+                                 float(set->blksize));
+        set->rows[k] = (int)ceil(float(set->src_h * set->scales[k]) /
+                                 float(set->blksize));
 
         float lvl_blksize = set->blksize / set->scales[k];
-        set->tex[k]       = new texBlock[ set->cols[k] * set->rows[k] ];
+        set->tex[k] = new texBlock[set->cols[k] * set->rows[k]];
 
 #ifdef DEBUG
         printf("-- [OPTIMIZE] Level %d, Rows %d, Cols %d ###\n", k, set->rows[k],
@@ -532,34 +493,30 @@ void build_tex_blocks(char* pixels, MultiLevelTextureSetEX* set, bool hasDir, in
 
         // go through rows and columns
 
-        for( int i = 0; i < set->rows[k]; ++i)
-        {
-            for( int j = 0; j < set->cols[k]; ++j)
-            {
+        for (int i = 0; i < set->rows[k]; ++i) {
+            for (int j = 0; j < set->cols[k]; ++j) {
                 int id = i * set->cols[k] + j;
 
-                set->tex[k][id].imgx        = int(j * (lvl_blksize));
-                set->tex[k][id].imgy        = int(i * (lvl_blksize));
-                set->tex[k][id].texW        = set->blksize;
-                set->tex[k][id].texH        = set->blksize;
-                set->tex[k][id].dataW       = int(lvl_blksize);
-                set->tex[k][id].dataH       = int(lvl_blksize);
-                set->tex[k][id].texData     = NULL;
-                set->tex[k][id].texId       = 0;
-                set->tex[k][id].components  = set->components;
+                set->tex[k][id].imgx = int(j * (lvl_blksize));
+                set->tex[k][id].imgy = int(i * (lvl_blksize));
+                set->tex[k][id].texW = set->blksize;
+                set->tex[k][id].texH = set->blksize;
+                set->tex[k][id].dataW = int(lvl_blksize);
+                set->tex[k][id].dataH = int(lvl_blksize);
+                set->tex[k][id].texData = NULL;
+                set->tex[k][id].texId = 0;
+                set->tex[k][id].components = set->components;
 
                 // make sure our dataW & dataH aren't incorrect
-                
+
                 int real_x, real_y;
                 real_x = set->tex[k][id].imgx;
                 real_y = set->tex[k][id].imgy;
-                if( real_x + set->tex[k][id].dataW >= set->src_w)
-                {
+                if (real_x + set->tex[k][id].dataW >= set->src_w) {
                     set->tex[k][id].dataW = int(set->src_w - real_x);
                 }
 
-                if( real_y + set->tex[k][id].dataH >= set->src_h)
-                {
+                if (real_y + set->tex[k][id].dataH >= set->src_h) {
                     set->tex[k][id].dataH = int(set->src_h - real_y);
                 }
 
@@ -578,15 +535,15 @@ void build_tex_blocks(char* pixels, MultiLevelTextureSetEX* set, bool hasDir, in
                 blockfile_name = "";
 
 #ifndef _WIN32
-                if( set->blkdir[0] != '/')
+                if (set->blkdir[0] != '/')
                     blockfile_name = cwd;
 
-		        blockfile_name += "/";
+                blockfile_name += "/";
 #else
-		        if( set->blkdir[1] != ':') {
+                if (set->blkdir[1] != ':') {
                     blockfile_name = cwd;
-		            blockfile_name += "/";
-		        }
+                    blockfile_name += "/";
+                }
 #endif
 
                 blockfile_name += set->blkdir;
@@ -596,45 +553,39 @@ void build_tex_blocks(char* pixels, MultiLevelTextureSetEX* set, bool hasDir, in
                 blockfile_name += "/";
 
                 // Check if level dir exists
-                FILE* fptr1 = fopen(blockfile_name.c_str(), "r");
-                if(!fptr1)
-                {
-                    MKDIR( blockfile_name.c_str());
-                }
-                else
-                {
+                FILE *fptr1 = fopen(blockfile_name.c_str(), "r");
+                if (!fptr1) {
+                    MKDIR(blockfile_name.c_str());
+                } else {
                     fclose(fptr1);
                 }
                 basedir = blockfile_name;
 
                 blockfile_name += "b";
-                sprintf(buf,"%d",j);
+                sprintf(buf, "%d", j);
                 blockfile_name += buf;
                 blockfile_name += "_";
-                sprintf(buf,"%d",i);
+                sprintf(buf, "%d", i);
                 blockfile_name += buf;
 
                 // make sure it isn't there already
-                FILE* fptr = fopen(blockfile_name.c_str(),"rb");
-                if( !fptr )
-                {
+                FILE *fptr = fopen(blockfile_name.c_str(), "rb");
+                if (!fptr) {
 #ifdef DEBUG
                     printf("Making blockfile %s\n", blockfile_name.c_str());
 #endif
 
                     // get pixels scaled to right size
 
-                    get_sub_image_scaled( pixels, tex_data, real_x, real_y,
-                                          set->blksize, set->blksize, 
-                                          1.0f / set->scales[k], set);
+                    get_sub_image_scaled(pixels, tex_data, real_x, real_y,
+                                         set->blksize, set->blksize,
+                                         1.0f / set->scales[k], set);
 
-                    fptr = fopen( blockfile_name.c_str(), "wb");
-                    if( fptr )
-                    {
+                    fptr = fopen(blockfile_name.c_str(), "wb");
+                    if (fptr) {
                         // if S3TC DXT3 available compress, otherwise
                         // store raw blocks
-                        if( !is_s3tc_available() )
-                        {
+                        if (!is_s3tc_available()) {
 #ifdef DEBUG
                             printf("---> [INFO] S3TC DXT3 not available, using raw blocks\n");
 #endif
@@ -643,11 +594,9 @@ void build_tex_blocks(char* pixels, MultiLevelTextureSetEX* set, bool hasDir, in
                                    set->blksize * set->blksize * set->components,
                                    fptr);
                             fclose(fptr);
-                        }
-                        else
-                        {
+                        } else {
 #ifdef DEBUG
-	                        printf("---> [INFO] Compress with S3TC DXT3 with ((1. Squish, 2. FastDXT) %d.\n", library);
+                            printf("---> [INFO] Compress with S3TC DXT3 with ((1. Squish, 2. FastDXT) %d.\n", library);
                             // printf("DXT3 Compression block %d, %d of size: %d, %d\n",
                             //    i, j,
                             //    set->tex[k][id].texW, set->tex[k][id].texH);
@@ -682,32 +631,28 @@ void build_tex_blocks(char* pixels, MultiLevelTextureSetEX* set, bool hasDir, in
                                 fwrite(tex_to_file, sizeof(char), dxt3_size, fptr);
                             }*/
 #ifdef USE_FASTDXT
-                                int outNBytes = CompressDXT((byte *) tex_rgba, (byte *) tex_to_file,
-                                                            set->blksize, set->blksize, FORMAT_DXT1, 2);
+                            int outNBytes = CompressDXT((byte *)tex_rgba, (byte *)tex_to_file,
+                                                        set->blksize, set->blksize, FORMAT_DXT1, 2);
 
-                                fwrite(&outNBytes, sizeof(int), 1, fptr);
-                                fwrite(tex_to_file, sizeof(char), outNBytes, fptr);
+                            fwrite(&outNBytes, sizeof(int), 1, fptr);
+                            fwrite(tex_to_file, sizeof(char), outNBytes, fptr);
 #else
-                                squish::CompressImage((squish::u8*)tex_rgba,
-                                                      set->blksize,
-                                                      set->blksize,tex_to_file,
-                                                      squish::kDxt3 |
+                            squish::CompressImage((squish::u8 *)tex_rgba,
+                                                  set->blksize,
+                                                  set->blksize, tex_to_file,
+                                                  squish::kDxt3 |
                                                       squish::kColourRangeFit);
 
-                                fwrite(&dxt3_size,  sizeof(int),  1, fptr);
-                                fwrite(tex_to_file, sizeof(char), dxt3_size, fptr);                            
+                            fwrite(&dxt3_size, sizeof(int), 1, fptr);
+                            fwrite(tex_to_file, sizeof(char), dxt3_size, fptr);
 #endif
                             fclose(fptr);
                         }
-                    }
-                    else
-                    {
+                    } else {
                         printf("ERROR: Couldn't write to blockfile %s\n",
                                blockfile_name.c_str());
                     }
-                }
-                else
-                {
+                } else {
                     fclose(fptr);
 #ifdef DEBUG
                     printf("Blockfile %s already exists, using that file\n",
@@ -715,23 +660,22 @@ void build_tex_blocks(char* pixels, MultiLevelTextureSetEX* set, bool hasDir, in
 #endif
                 }
 
-                set->tex[k][id].blockfile = new char[blockfile_name.size() +1];
-                strcpy( set->tex[k][id].blockfile, blockfile_name.c_str());
+                set->tex[k][id].blockfile = new char[blockfile_name.size() + 1];
+                strcpy(set->tex[k][id].blockfile, blockfile_name.c_str());
             }
-        } // end looping through rows and columns
+        }  // end looping through rows and columns
 
-    } // end for each level
+    }  // end for each level
 
-    if( tex_data )
-        delete [] tex_data;
-    if( tex_rgba )
-        delete [] tex_rgba;
-    if( tex_to_file )
-        delete [] tex_to_file;
+    if (tex_data)
+        delete[] tex_data;
+    if (tex_rgba)
+        delete[] tex_rgba;
+    if (tex_to_file)
+        delete[] tex_to_file;
 }
 
-void build_tex_blocks(char* pixels, MultiLevelTextureSetEX* set, bool hasDir)
-{
+void build_tex_blocks(char *pixels, MultiLevelTextureSetEX *set, bool hasDir) {
 #ifdef USE_FASTDXT
     build_tex_blocks(pixels, set, hasDir, FASTDXT);
 #else
@@ -739,37 +683,32 @@ void build_tex_blocks(char* pixels, MultiLevelTextureSetEX* set, bool hasDir)
 #endif
 }
 
-void build_tex_blocks(char* pixels, MultiLevelTextureSetEX* set)
-{
+void build_tex_blocks(char *pixels, MultiLevelTextureSetEX *set) {
     // Default library to use: Squish or FastDXT
 #ifdef USE_FASTDXT
     build_tex_blocks(pixels, set, false, FASTDXT);
 #else
     build_tex_blocks(pixels, set, SQUISH);
-#endif    
+#endif
 }
-
 
 //====================================================================
 // Places the texture set into the vector, if it isn't already there
 //====================================================================
-int insert_texset(MultiLevelTextureSetEX* set)
-{
-    if(!set) return -1;
+int insert_texset(MultiLevelTextureSetEX *set) {
+    if (!set)
+        return -1;
 
     // make sure it isn't already there
     unsigned int i;
-    for (i = 0; i < texsetvec.size(); ++i)
-    {
+    for (i = 0; i < texsetvec.size(); ++i) {
         if (texsetvec[i] == set)
             return i;
     }
 
     // find a null spot
-    for (i = 0; i < texsetvec.size(); ++i)
-    {
-        if( texsetvec[i] == NULL )
-        {
+    for (i = 0; i < texsetvec.size(); ++i) {
+        if (texsetvec[i] == NULL) {
             texsetvec[i] = set;
             return i;
         }
@@ -783,10 +722,9 @@ int insert_texset(MultiLevelTextureSetEX* set)
 /* Private function to generate SHA1-prefix texture block directory string
    The caller is responsible to release the string after using it.
 */
-char* generateBlockDirString(string basedir, string fname)
-{
+char *generateBlockDirString(string basedir, string fname) {
     int point = fname.rfind('/');
-    string blkdir = fname.substr( point + 1 );
+    string blkdir = fname.substr(point + 1);
     blkdir = basedir + blkdir;
 
     char *output = new char[blkdir.length() + 1];
@@ -832,46 +770,45 @@ char* generateBlockDirString(string basedir, string fname)
 }
 
 //====================================================================
-// Load JPEG file 
+// Load JPEG file
 //====================================================================
 
 // 5/16/2012 brg: Intended to grab image width/height data without actually loading
 // the pixel data as in genTextureBlocks(), which takes too much time to be practical.
-void read_jpeg_dimensions(FILE *filePtr, int &width, int &height)
-{
+void read_jpeg_dimensions(FILE *filePtr, int &width, int &height) {
     jpeg_decompress_struct cinfo;
     jpeg_error_mgr jerr;
-	
-    cinfo.err = jpeg_std_error(&jerr);
-	
-    // setup decompression and I/O
-    jpeg_create_decompress( &cinfo );
-    jpeg_stdio_src( &cinfo, filePtr );
-    jpeg_read_header( &cinfo, TRUE );
-	
-    jpeg_start_decompress( &cinfo );
-	
-	width = cinfo.output_width;
-    height = cinfo.output_height;
-	
-	// Because we aren't actually reading any scanlines, can't call
-	// jpeg_finish_decompress() or we'll crash
-	//	jpeg_finish_decompress( &cinfo );
 
-	jpeg_destroy_decompress( &cinfo );
+    cinfo.err = jpeg_std_error(&jerr);
+
+    // setup decompression and I/O
+    jpeg_create_decompress(&cinfo);
+    jpeg_stdio_src(&cinfo, filePtr);
+    jpeg_read_header(&cinfo, TRUE);
+
+    jpeg_start_decompress(&cinfo);
+
+    width = cinfo.output_width;
+    height = cinfo.output_height;
+
+    // Because we aren't actually reading any scanlines, can't call
+    // jpeg_finish_decompress() or we'll crash
+    //	jpeg_finish_decompress( &cinfo );
+
+    jpeg_destroy_decompress(&cinfo);
 }
 
-MultiLevelTextureSetEX* create_texset_from_jpeg(const char* filename, int nlevels, int blksize)
-{
+MultiLevelTextureSetEX *create_texset_from_jpeg(const char *filename, int nlevels, int blksize) {
     // For measure time
 #ifdef OPT
     aInitialize();
 #endif
 
-    if(!filename) return NULL;
+    if (!filename)
+        return NULL;
 
 #ifdef DEBUG
-    printf("Replacing \\ with / for string:\n%s\n",filename);
+    printf("Replacing \\ with / for string:\n%s\n", filename);
 #endif
 
     string fname(filename);
@@ -882,14 +819,13 @@ MultiLevelTextureSetEX* create_texset_from_jpeg(const char* filename, int nlevel
 #endif
 
     jpeg_decompress_struct cinfo;
-    jpeg_error_mgr         jerr;
+    jpeg_error_mgr jerr;
 
-    FILE* fptr = fopen( fname.c_str(), "rb");
-    if( fptr == NULL )
-    {
+    FILE *fptr = fopen(fname.c_str(), "rb");
+    if (fptr == NULL) {
         printf("Cannot open %s\n", filename);
         jpeg_destroy_decompress(&cinfo);
-        return NULL; //-1;
+        return NULL;  //-1;
     }
 
     // create texture set struct and init basic info
@@ -899,15 +835,15 @@ MultiLevelTextureSetEX* create_texset_from_jpeg(const char* filename, int nlevel
     printf("Opened file pointer.  Starting creation process\n");
 #endif
 
-    MultiLevelTextureSetEX* texset = new MultiLevelTextureSetEX();
+    MultiLevelTextureSetEX *texset = new MultiLevelTextureSetEX();
 
-    texset->tex        = NULL;
-    texset->cols       = NULL;
-    texset->rows       = NULL;
+    texset->tex = NULL;
+    texset->cols = NULL;
+    texset->rows = NULL;
     texset->references = 0;
-    texset->blksize    = blksize;
+    texset->blksize = blksize;
 
-    texset->src_name = new char[ strlen(fname.c_str()) + 1];
+    texset->src_name = new char[strlen(fname.c_str()) + 1];
     strcpy(texset->src_name, fname.c_str());
 
     // Generate a unique directory name to store the texture blocks generated.
@@ -929,21 +865,20 @@ MultiLevelTextureSetEX* create_texset_from_jpeg(const char* filename, int nlevel
     cinfo.err = jpeg_std_error(&jerr);
 
     // setup decompression and I/O
-    jpeg_create_decompress( &cinfo );
+    jpeg_create_decompress(&cinfo);
 
-    jpeg_stdio_src( &cinfo, fptr);
+    jpeg_stdio_src(&cinfo, fptr);
 
-    jpeg_read_header(&cinfo,TRUE);
+    jpeg_read_header(&cinfo, TRUE);
 
-    jpeg_start_decompress( &cinfo);
+    jpeg_start_decompress(&cinfo);
 
     //determine color space, only support RGB on jpegs
 
     texset->components = 0;
-    switch( cinfo.out_color_space )
-    {
+    switch (cinfo.out_color_space) {
         case JCS_RGB:
-            texset->components  = 3;
+            texset->components = 3;
             texset->src_format = RGB;
             break;
 
@@ -956,20 +891,18 @@ MultiLevelTextureSetEX* create_texset_from_jpeg(const char* filename, int nlevel
             break;
     }
 
-    if( !texset->components )
-    {
-
+    if (!texset->components) {
 #ifdef DEBUG
         printf("Unsupported JPEG color mode!\n");
 #endif
-        jpeg_finish_decompress( &cinfo );
-        jpeg_destroy_decompress( &cinfo);
+        jpeg_finish_decompress(&cinfo);
+        jpeg_destroy_decompress(&cinfo);
         fclose(fptr);
 
-        delete [] texset->blkdir;
-        delete [] texset->src_name;
+        delete[] texset->blkdir;
+        delete[] texset->src_name;
         delete texset;
-        return NULL; //-1;
+        return NULL;  //-1;
     }
 
     // Image width and height
@@ -980,9 +913,9 @@ MultiLevelTextureSetEX* create_texset_from_jpeg(const char* filename, int nlevel
     // size of a row, and allocation of buffers for reading & storing pixels
     int row_stride = cinfo.output_width * cinfo.output_components;
 
-    char* pixels = NULL;
-    char* buffer = NULL;
-    
+    char *pixels = NULL;
+    char *buffer = NULL;
+
     // Grab each scanline and store
     // Ignore scanning if textures are already created
 
@@ -994,21 +927,19 @@ MultiLevelTextureSetEX* create_texset_from_jpeg(const char* filename, int nlevel
 
 #ifdef DEBUG
     printf("- [TODO] Texture block dir exists: %d\n", hasDir);
-#endif    
+#endif
 
-    if(!hasDir)
-    {
-        pixels = new char[ row_stride * texset->src_h ];
-        buffer = new char[ row_stride ]; 
+    if (!hasDir) {
+        pixels = new char[row_stride * texset->src_h];
+        buffer = new char[row_stride];
 
-        while( cinfo.output_scanline < cinfo.output_height )
-        {
-            jpeg_read_scanlines( &cinfo, (JSAMPLE**) &buffer, 1);
-            memcpy( pixels + ((cinfo.output_scanline - 1) * row_stride),
-                    buffer, row_stride);
+        while (cinfo.output_scanline < cinfo.output_height) {
+            jpeg_read_scanlines(&cinfo, (JSAMPLE **)&buffer, 1);
+            memcpy(pixels + ((cinfo.output_scanline - 1) * row_stride),
+                   buffer, row_stride);
         }
 
-        delete [] buffer;
+        delete[] buffer;
     }
 
 #ifdef OPT
@@ -1017,17 +948,16 @@ MultiLevelTextureSetEX* create_texset_from_jpeg(const char* filename, int nlevel
 
     // determine dpi
 
-    switch( cinfo.density_unit )
-    {
-        case 0: // UNKNOWN
+    switch (cinfo.density_unit) {
+        case 0:  // UNKNOWN
             texset->src_dpi_x = 150;
             texset->src_dpi_x = 150;
             break;
-        case 1: // DPI
+        case 1:  // DPI
             texset->src_dpi_x = cinfo.X_density;
             texset->src_dpi_y = cinfo.Y_density;
             break;
-        case 2: // DPCM, 2.54 cm / 1 inch
+        case 2:  // DPCM, 2.54 cm / 1 inch
             texset->src_dpi_x = cinfo.X_density * 2.54f;
             texset->src_dpi_y = cinfo.Y_density * 2.54f;
             break;
@@ -1039,12 +969,11 @@ MultiLevelTextureSetEX* create_texset_from_jpeg(const char* filename, int nlevel
 
     // close up jpeg stuff
 
-    if(!hasDir)
-    {
-        jpeg_finish_decompress( &cinfo );
+    if (!hasDir) {
+        jpeg_finish_decompress(&cinfo);
     }
 
-    jpeg_destroy_decompress( &cinfo );
+    jpeg_destroy_decompress(&cinfo);
     fclose(fptr);
 
 #ifdef OPT
@@ -1055,11 +984,10 @@ MultiLevelTextureSetEX* create_texset_from_jpeg(const char* filename, int nlevel
     texset->levels = nlevels;
 
     // Start building and saving texture blocks
-    build_tex_blocks( pixels, texset, hasDir );
+    build_tex_blocks(pixels, texset, hasDir);
 
-    if(pixels != NULL)
-    {
-        delete [] pixels;    
+    if (pixels != NULL) {
+        delete[] pixels;
     }
 
 #ifdef OPT
@@ -1067,12 +995,12 @@ MultiLevelTextureSetEX* create_texset_from_jpeg(const char* filename, int nlevel
 #endif
 
 #ifdef OPT
-    fprintf(stdout, "[JPEG] Prep jpeg\t%f\n", (time2-time1));
-    fprintf(stdout, "[JPEG] JPEG scan\t%f\n", (time3-time2));
-    fprintf(stdout, "[JPEG] Finishup\t%f\n----\n", (time4-time3));
+    fprintf(stdout, "[JPEG] Prep jpeg\t%f\n", (time2 - time1));
+    fprintf(stdout, "[JPEG] JPEG scan\t%f\n", (time3 - time2));
+    fprintf(stdout, "[JPEG] Finishup\t%f\n----\n", (time4 - time3));
 
-    fprintf(stdout, "[JPEG] JPEG Part\t%f\n", (time4-time1));
-    fprintf(stdout, "[JPEG] Block Part\t%f\n", (time5-time4));
+    fprintf(stdout, "[JPEG] JPEG Part\t%f\n", (time4 - time1));
+    fprintf(stdout, "[JPEG] Block Part\t%f\n", (time5 - time4));
 #endif
 
     return texset;
@@ -1085,68 +1013,69 @@ MultiLevelTextureSetEX* create_texset_from_jpeg(const char* filename, int nlevel
 
 // 5/16/2012 brg: Intended to grab image width/height data without actually loading
 // the pixel data as in genTextureBlocks(), which takes too much time to be practical.
-bool read_png_dimensions(FILE* filePtr, int &width, int &height)
-{
+bool read_png_dimensions(FILE *filePtr, int &width, int &height) {
     png_structp png_ptr;
-    png_infop   info_ptr;
-    
-    png_ptr = png_create_read_struct( PNG_LIBPNG_VER_STRING, NULL, NULL, NULL );
-    if ( !png_ptr ) return false;
-	
+    png_infop info_ptr;
+
+    png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
+    if (!png_ptr)
+        return false;
+
     info_ptr = png_create_info_struct(png_ptr);
-    if ( !info_ptr ) return false;
-	
-    png_init_io( png_ptr, filePtr );
-	png_read_info( png_ptr, info_ptr );
-	
-	width = (int)png_get_image_width( png_ptr, info_ptr );
-    height = (int)png_get_image_height( png_ptr, info_ptr );
-	
-	return true;
+    if (!info_ptr)
+        return false;
+
+    png_init_io(png_ptr, filePtr);
+    png_read_info(png_ptr, info_ptr);
+
+    width = (int)png_get_image_width(png_ptr, info_ptr);
+    height = (int)png_get_image_height(png_ptr, info_ptr);
+
+    return true;
 }
 
-MultiLevelTextureSetEX* create_texset_from_png(const char* filename, int nlevels, int blksize)
-{
+MultiLevelTextureSetEX *create_texset_from_png(const char *filename, int nlevels, int blksize) {
 #ifdef OPT
     // For measure time
     aInitialize();
-#endif    
+#endif
 
-    if(!filename) return NULL; // -1;
+    if (!filename)
+        return NULL;  // -1;
     string fname(filename);
     replace_windows_seperators(fname);
 
-    FILE* fptr = fopen(fname.c_str(), "rb");
-    if( !fptr )
-    {
+    FILE *fptr = fopen(fname.c_str(), "rb");
+    if (!fptr) {
         printf("Cant open file %s\n", filename);
-        return NULL; //-1;
+        return NULL;  //-1;
     }
 
     // png structures
 
     png_structp png_ptr;
-    png_infop   info_ptr;
-    
-    png_ptr = png_create_read_struct( PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
-    if(!png_ptr) return NULL; //-1;
+    png_infop info_ptr;
+
+    png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
+    if (!png_ptr)
+        return NULL;  //-1;
 
     info_ptr = png_create_info_struct(png_ptr);
-    if(!info_ptr) return NULL; //-1;
-
+    if (!info_ptr)
+        return NULL;  //-1;
 
     // create texture set struct and init basic info
     // name, block directory, block sizes
 
-    MultiLevelTextureSetEX* texset = new MultiLevelTextureSetEX();
+    MultiLevelTextureSetEX *texset = new MultiLevelTextureSetEX();
 
-    texset->tex        = NULL;
-    texset->cols       = NULL;
-    texset->rows       = NULL;
+    texset->tex = NULL;
+    texset->cols = NULL;
+    texset->rows = NULL;
     texset->references = 0;
-    texset->blksize    = blksize;
+    texset->blksize = blksize;
 
-    texset->src_name = new char[ strlen(fname.c_str()) + 1];
+    texset->src_name = new char[strlen(fname.c_str()) + 1];
     strcpy(texset->src_name, fname.c_str());
 
     // Generate a unique directory name to store the texture blocks generated.
@@ -1167,135 +1096,120 @@ MultiLevelTextureSetEX* create_texset_from_png(const char* filename, int nlevels
     double time2 = aTime();
 
     // Skip read image data if texture blocks already exist
-    if(!hasDir)
-    {
+    if (!hasDir) {
         // high level read: read all PNG into memory
-        png_read_png( png_ptr, info_ptr,
-                      PNG_TRANSFORM_STRIP_16 | PNG_TRANSFORM_PACKING, NULL);    
-    }
-    else
-    {
+        png_read_png(png_ptr, info_ptr,
+                     PNG_TRANSFORM_STRIP_16 | PNG_TRANSFORM_PACKING, NULL);
+    } else {
         // low level, read info up to real image data
-        png_read_info( png_ptr, info_ptr );
+        png_read_info(png_ptr, info_ptr);
     }
 
 #ifdef OPT
     double time3 = aTime();
 #endif
-                                    
+
     // make sure attributes ok (color mode & bit depth)
 
     texset->components = 0;
-    switch( png_get_color_type(png_ptr,info_ptr))
-    {
-    case PNG_COLOR_TYPE_GRAY:
-        texset->components = 1;
-        texset->src_format = GREY;
-        break;
-    case PNG_COLOR_TYPE_RGB:
-        texset->components = 3;
-        texset->src_format = RGB;
-        break;
-    case PNG_COLOR_TYPE_RGB_ALPHA:
-        texset->components = 4;
-        texset->src_format = RGBA;
-        break;
-    default:
-        break;
+    switch (png_get_color_type(png_ptr, info_ptr)) {
+        case PNG_COLOR_TYPE_GRAY:
+            texset->components = 1;
+            texset->src_format = GREY;
+            break;
+        case PNG_COLOR_TYPE_RGB:
+            texset->components = 3;
+            texset->src_format = RGB;
+            break;
+        case PNG_COLOR_TYPE_RGB_ALPHA:
+            texset->components = 4;
+            texset->src_format = RGBA;
+            break;
+        default:
+            break;
     }
 
-    if( !texset->components )
-    {
+    if (!texset->components) {
         printf("Unsupported PNG color mode\n");
-        png_destroy_read_struct( &png_ptr, &info_ptr, NULL);
+        png_destroy_read_struct(&png_ptr, &info_ptr, NULL);
         fclose(fptr);
-        delete [] texset->blkdir;
-        delete [] texset->src_name;
+        delete[] texset->blkdir;
+        delete[] texset->src_name;
         delete texset;
-        return NULL ; //-1;
+        return NULL;  //-1;
     }
 
-    if ( png_get_bit_depth( png_ptr, info_ptr ) != 8 )
-    {
+    if (png_get_bit_depth(png_ptr, info_ptr) != 8) {
         printf("Unsupported PNG bit depth\n");
-        png_destroy_read_struct( &png_ptr, &info_ptr, NULL);
+        png_destroy_read_struct(&png_ptr, &info_ptr, NULL);
         fclose(fptr);
-        delete [] texset->blkdir;
-        delete [] texset->src_name;
+        delete[] texset->blkdir;
+        delete[] texset->src_name;
         delete texset;
-        return NULL; //-1;
+        return NULL;  //-1;
     }
 
     // get dimensions and dpi
 
-    texset->src_w = (int) png_get_image_width(png_ptr, info_ptr);
-    texset->src_h = (int) png_get_image_height(png_ptr, info_ptr);
-    texset->src_dpi_x = ((float) png_get_x_pixels_per_meter(png_ptr,info_ptr)) 
-        / 100.0f * 2.54f;
-    texset->src_dpi_y = ((float) png_get_y_pixels_per_meter(png_ptr,info_ptr)) 
-        / 100.0f * 2.54f;
+    texset->src_w = (int)png_get_image_width(png_ptr, info_ptr);
+    texset->src_h = (int)png_get_image_height(png_ptr, info_ptr);
+    texset->src_dpi_x = ((float)png_get_x_pixels_per_meter(png_ptr, info_ptr)) / 100.0f * 2.54f;
+    texset->src_dpi_y = ((float)png_get_y_pixels_per_meter(png_ptr, info_ptr)) / 100.0f * 2.54f;
 
     // copy pixels
-    char* pixels = NULL;
+    char *pixels = NULL;
 
     // Skip load image file if texture blocks already exist
-    if(!hasDir)
-    {
-        // try to get rows    
-        png_bytep *b = png_get_rows( png_ptr, info_ptr );
+    if (!hasDir) {
+        // try to get rows
+        png_bytep *b = png_get_rows(png_ptr, info_ptr);
 
-        if(!b)
-        {
+        if (!b) {
             printf("Can't get pixels from PNG\n");
-            png_destroy_read_struct( &png_ptr, &info_ptr, NULL);
+            png_destroy_read_struct(&png_ptr, &info_ptr, NULL);
             fclose(fptr);
-            delete [] texset->blkdir;
-            delete [] texset->src_name;
+            delete[] texset->blkdir;
+            delete[] texset->src_name;
             delete texset;
-            return NULL; //-1;
+            return NULL;  //-1;
         }
 
-        pixels = new char[texset->components*texset->src_w*texset->src_h];
-        memset(pixels, 0, texset->components*texset->src_w*texset->src_h);
+        pixels = new char[texset->components * texset->src_w * texset->src_h];
+        memset(pixels, 0, texset->components * texset->src_w * texset->src_h);
 
-        for( int y = 0; y < texset->src_h; ++y)
-        {
-            for( int x = 0; x < texset->src_w; ++x)
-            {
-                for( int c = 0; c < texset->components; ++c)
-                {
-                    pixels[ y * texset->src_w * texset->components +
-                            x * texset->components + c] =
-                        (char) b[y][x * texset->components +c];
-
+        for (int y = 0; y < texset->src_h; ++y) {
+            for (int x = 0; x < texset->src_w; ++x) {
+                for (int c = 0; c < texset->components; ++c) {
+                    pixels[y * texset->src_w * texset->components +
+                           x * texset->components + c] =
+                        (char)b[y][x * texset->components + c];
                 }
             }
         }
     }
 
-    png_destroy_read_struct( &png_ptr, &info_ptr, NULL);
+    png_destroy_read_struct(&png_ptr, &info_ptr, NULL);
     fclose(fptr);
 
 #ifdef OPT
     double time4 = aTime();
-#endif    
+#endif
 
     // build texblocks and insert tex set
     texset->levels = nlevels;
-    build_tex_blocks( pixels, texset, hasDir );
+    build_tex_blocks(pixels, texset, hasDir);
 
-    if(!pixels)
-    {
-        delete [] pixels;    
+    if (!pixels) {
+        delete[] pixels;
     }
 
     double time5 = aTime();
 
 #ifdef OPT
-    printf("[PNG] init\t%f\n",   (time2-time1));
-    printf("[PNG] read\t%f\n",   (time3-time2));
-    printf("[PNG] fill\t%f\n",   (time4-time3));
-    printf("[PNG] TexBlk\t%f\n", (time5-time4));
+    printf("[PNG] init\t%f\n", (time2 - time1));
+    printf("[PNG] read\t%f\n", (time3 - time2));
+    printf("[PNG] fill\t%f\n", (time4 - time3));
+    printf("[PNG] TexBlk\t%f\n", (time5 - time4));
 #endif
 
     return texset;
@@ -1307,176 +1221,163 @@ MultiLevelTextureSetEX* create_texset_from_png(const char* filename, int nlevels
 //====================================================================
 
 // prefixed with BMP to avoid collisions with standard Windows typedefs
-typedef unsigned char  BMP_BYTE;
+typedef unsigned char BMP_BYTE;
 typedef unsigned short BMP_WORD;
-typedef unsigned int   BMP_DWORD;
+typedef unsigned int BMP_DWORD;
 
-bool IsBigEndian()
-{
+bool IsBigEndian() {
     short word = 0x0001;
-    if( (*(char*)& word) != 0x01 )
+    if ((*(char *)&word) != 0x01)
         return true;
     return false;
 }
 
-BMP_WORD Flip(BMP_WORD in)
-{
-    return( (in >> 8) | (in << 8) );
+BMP_WORD Flip(BMP_WORD in) {
+    return ((in >> 8) | (in << 8));
 }
 
-BMP_DWORD Flip(BMP_DWORD in)
-{
-    return ( ((in & 0xFF000000) >> 24) | ((in & 0x000000FF) << 24) |
-             ((in & 0x00FF0000) >> 8 ) | ((in & 0x0000FF00) << 8 ));
+BMP_DWORD Flip(BMP_DWORD in) {
+    return (((in & 0xFF000000) >> 24) | ((in & 0x000000FF) << 24) |
+            ((in & 0x00FF0000) >> 8) | ((in & 0x0000FF00) << 8));
 }
 
 struct BMPHeader {
-    BMP_WORD  sig;
+    BMP_WORD sig;
     BMP_DWORD filesize;
     BMP_DWORD reserved;
     BMP_DWORD dataoffset;
 };
 
 struct BMPInfoHeader {
-	BMP_DWORD infoheadersize;
-	BMP_DWORD bmpwidth;
-	BMP_DWORD bmpheight;
-	BMP_WORD  planes;
-	BMP_WORD  bpp;
-	BMP_DWORD compression;
-	BMP_DWORD compressedimgsize;
-	BMP_DWORD hppm; //horizontal pixels/meter
-	BMP_DWORD vppm; //vertical pixels/meter
-	BMP_DWORD numcolorsused;
-	BMP_DWORD numimportantcolors;
+    BMP_DWORD infoheadersize;
+    BMP_DWORD bmpwidth;
+    BMP_DWORD bmpheight;
+    BMP_WORD planes;
+    BMP_WORD bpp;
+    BMP_DWORD compression;
+    BMP_DWORD compressedimgsize;
+    BMP_DWORD hppm;  //horizontal pixels/meter
+    BMP_DWORD vppm;  //vertical pixels/meter
+    BMP_DWORD numcolorsused;
+    BMP_DWORD numimportantcolors;
 };
 
 // 5/16/2012 brg: Intended to grab image width/height data without actually loading
 // the pixel data as in genTextureBlocks(), which takes too much time to be practical.
-bool read_bmp_header( FILE *filePtr, BMPHeader &header, BMPInfoHeader &infoHeader )
-{
-	// Ensure typedef sizes are as expected. BMP_DWORD used to be typedef'd as an unsigned long, which is
-	// 8 bytes when compiled for an 64-bit environment, not 4 as is assumed in the BMP reading logic.
-	if ( sizeof(BMP_DWORD) != 4 || sizeof(BMP_WORD) != 2 || sizeof(BMP_BYTE) != 1 )
-	{
-		printf("Unexpected typedef sizing!\nDWORD size = %ld (expected 4), BMP_WORD size = %ld (2), BMP_BYTE size = %ld (1)\n",
-			   sizeof(BMP_DWORD), sizeof(BMP_WORD), sizeof(BMP_BYTE));
-		fclose(filePtr);
-		return false;
-	}
-    
-	size_t dummy = fread((char*) &(header.sig), sizeof(BMP_WORD), 1, filePtr);
-    if( IsBigEndian() && header.sig != 0x424D )
-    {
+bool read_bmp_header(FILE *filePtr, BMPHeader &header, BMPInfoHeader &infoHeader) {
+    // Ensure typedef sizes are as expected. BMP_DWORD used to be typedef'd as an unsigned long, which is
+    // 8 bytes when compiled for an 64-bit environment, not 4 as is assumed in the BMP reading logic.
+    if (sizeof(BMP_DWORD) != 4 || sizeof(BMP_WORD) != 2 || sizeof(BMP_BYTE) != 1) {
+        printf("Unexpected typedef sizing!\nDWORD size = %ld (expected 4), BMP_WORD size = %ld (2), BMP_BYTE size = %ld (1)\n",
+               sizeof(BMP_DWORD), sizeof(BMP_WORD), sizeof(BMP_BYTE));
+        fclose(filePtr);
+        return false;
+    }
+
+    size_t dummy = fread((char *)&(header.sig), sizeof(BMP_WORD), 1, filePtr);
+    if (IsBigEndian() && header.sig != 0x424D) {
+        printf("BMP file signature wrong!\n");
+        fclose(filePtr);
+        return false;
+    } else if (!IsBigEndian() && header.sig != 0x4D42) {
         printf("BMP file signature wrong!\n");
         fclose(filePtr);
         return false;
     }
-    else if( !IsBigEndian() && header.sig != 0x4D42 )
-    {
-        printf("BMP file signature wrong!\n");
-        fclose(filePtr);
-        return false;
-    }
-	
-	dummy = fread(&(header.filesize),   sizeof(BMP_DWORD), 1, filePtr);
-    dummy = fread(&(header.reserved),   sizeof(BMP_DWORD), 1, filePtr);
+
+    dummy = fread(&(header.filesize), sizeof(BMP_DWORD), 1, filePtr);
+    dummy = fread(&(header.reserved), sizeof(BMP_DWORD), 1, filePtr);
     dummy = fread(&(header.dataoffset), sizeof(BMP_DWORD), 1, filePtr);
-	
-    if( IsBigEndian() )
-    {
-        header.sig        = Flip(header.sig);
-        header.filesize   = Flip(header.filesize);
-        header.reserved   = Flip(header.reserved);
+
+    if (IsBigEndian()) {
+        header.sig = Flip(header.sig);
+        header.filesize = Flip(header.filesize);
+        header.reserved = Flip(header.reserved);
         header.dataoffset = Flip(header.dataoffset);
     }
-	
-    dummy = fread(&(infoHeader.infoheadersize),     sizeof(BMP_DWORD), 1, filePtr);
-    dummy = fread(&(infoHeader.bmpwidth),           sizeof(BMP_DWORD), 1, filePtr);
-    dummy = fread(&(infoHeader.bmpheight),          sizeof(BMP_DWORD), 1, filePtr);
-    dummy = fread(&(infoHeader.planes),             sizeof(BMP_WORD),  1, filePtr);
-    dummy = fread(&(infoHeader.bpp),                sizeof(BMP_WORD),  1, filePtr);
-    dummy = fread(&(infoHeader.compression),        sizeof(BMP_DWORD), 1, filePtr);
-    dummy = fread(&(infoHeader.compressedimgsize),  sizeof(BMP_DWORD), 1, filePtr);
-    dummy = fread(&(infoHeader.hppm),               sizeof(BMP_DWORD), 1, filePtr);
-    dummy = fread(&(infoHeader.vppm),               sizeof(BMP_DWORD), 1, filePtr);
-    dummy = fread(&(infoHeader.numcolorsused),      sizeof(BMP_DWORD), 1, filePtr);
+
+    dummy = fread(&(infoHeader.infoheadersize), sizeof(BMP_DWORD), 1, filePtr);
+    dummy = fread(&(infoHeader.bmpwidth), sizeof(BMP_DWORD), 1, filePtr);
+    dummy = fread(&(infoHeader.bmpheight), sizeof(BMP_DWORD), 1, filePtr);
+    dummy = fread(&(infoHeader.planes), sizeof(BMP_WORD), 1, filePtr);
+    dummy = fread(&(infoHeader.bpp), sizeof(BMP_WORD), 1, filePtr);
+    dummy = fread(&(infoHeader.compression), sizeof(BMP_DWORD), 1, filePtr);
+    dummy = fread(&(infoHeader.compressedimgsize), sizeof(BMP_DWORD), 1, filePtr);
+    dummy = fread(&(infoHeader.hppm), sizeof(BMP_DWORD), 1, filePtr);
+    dummy = fread(&(infoHeader.vppm), sizeof(BMP_DWORD), 1, filePtr);
+    dummy = fread(&(infoHeader.numcolorsused), sizeof(BMP_DWORD), 1, filePtr);
     dummy = fread(&(infoHeader.numimportantcolors), sizeof(BMP_DWORD), 1, filePtr);
-	
-    if( IsBigEndian() )
-    {
-        infoHeader.infoheadersize     = Flip( infoHeader.infoheadersize );
-        infoHeader.bmpwidth           = Flip( infoHeader.bmpwidth );
-        infoHeader.bmpheight          = Flip( infoHeader.bmpheight );
-        infoHeader.planes             = Flip( infoHeader.planes );
-        infoHeader.bpp                = Flip( infoHeader.bpp );
-        infoHeader.compression        = Flip( infoHeader.compression );
-        infoHeader.compressedimgsize  = Flip( infoHeader.compressedimgsize );
-        infoHeader.hppm               = Flip( infoHeader.hppm );
-        infoHeader.vppm               = Flip( infoHeader.vppm );
-        infoHeader.numcolorsused      = Flip( infoHeader.numcolorsused );
-        infoHeader.numimportantcolors = Flip( infoHeader.numimportantcolors );
+
+    if (IsBigEndian()) {
+        infoHeader.infoheadersize = Flip(infoHeader.infoheadersize);
+        infoHeader.bmpwidth = Flip(infoHeader.bmpwidth);
+        infoHeader.bmpheight = Flip(infoHeader.bmpheight);
+        infoHeader.planes = Flip(infoHeader.planes);
+        infoHeader.bpp = Flip(infoHeader.bpp);
+        infoHeader.compression = Flip(infoHeader.compression);
+        infoHeader.compressedimgsize = Flip(infoHeader.compressedimgsize);
+        infoHeader.hppm = Flip(infoHeader.hppm);
+        infoHeader.vppm = Flip(infoHeader.vppm);
+        infoHeader.numcolorsused = Flip(infoHeader.numcolorsused);
+        infoHeader.numimportantcolors = Flip(infoHeader.numimportantcolors);
     }
-	
+
     // for now, don't bother supporting RLE compression or less than 24 bpp
-	if ( infoHeader.compression != 0 )
-    {
+    if (infoHeader.compression != 0) {
         printf("Not supporting compressed bitmaps for now.\n");
         fclose(filePtr);
         return false;
     }
-    
-	if ( infoHeader.bpp != 24 )
-    {
+
+    if (infoHeader.bpp != 24) {
         printf("Not supporting BMP files less than true color. %d\n", infoHeader.bpp);
         fclose(filePtr);
         return false;
     }
-	
-	return true;
+
+    return true;
 }
 
-MultiLevelTextureSetEX* create_texset_from_bmp(const char* filename, int nlevels, int blksize)
-{
+MultiLevelTextureSetEX *create_texset_from_bmp(const char *filename, int nlevels, int blksize) {
 #ifdef OPT
     aInitialize();
 #endif
 
-    if(!filename) return NULL; //-1;
+    if (!filename)
+        return NULL;  //-1;
     string fname(filename);
     replace_windows_seperators(fname);
-    FILE* fptr = fopen(fname.c_str(),"rb");
-    if(!fptr)
-    {
+    FILE *fptr = fopen(fname.c_str(), "rb");
+    if (!fptr) {
         printf("Can't open file %s\n", filename);
-        return NULL; //-1;
+        return NULL;  //-1;
     }
 
 #ifdef OPT
     double time1 = aTime();
 #endif
 
-	BMPHeader header;
-	BMPInfoHeader infoheader;
-	if ( !read_bmp_header( fptr, header, infoheader ))
-		return NULL;
+    BMPHeader header;
+    BMPInfoHeader infoheader;
+    if (!read_bmp_header(fptr, header, infoheader))
+        return NULL;
 
     // create texture set struct and init basic info
     // name, block directory, block sizes
 
-    MultiLevelTextureSetEX* texset = new MultiLevelTextureSetEX();
+    MultiLevelTextureSetEX *texset = new MultiLevelTextureSetEX();
 
-    texset->tex        = NULL;
-    texset->cols       = NULL;
-    texset->rows       = NULL;
+    texset->tex = NULL;
+    texset->cols = NULL;
+    texset->rows = NULL;
     texset->references = 0;
-    texset->blksize    = blksize;
+    texset->blksize = blksize;
 
-    texset->src_name = new char[ strlen(fname.c_str()) + 1];
+    texset->src_name = new char[strlen(fname.c_str()) + 1];
     strcpy(texset->src_name, fname.c_str());
 
     // Generate a unique directory name to store the texture blocks generated.
-    string basedir(default_block_dir);    
+    string basedir(default_block_dir);
     texset->blkdir = generateBlockDirString(basedir, fname);
     string blkdir(texset->blkdir);
 
@@ -1484,10 +1385,10 @@ MultiLevelTextureSetEX* create_texset_from_bmp(const char* filename, int nlevels
 
     texset->src_format = RGB;
     texset->components = 3;
-    texset->src_dpi_x  = ((float)infoheader.hppm) * 2.54f / 100.0f;
-    texset->src_dpi_y  = ((float)infoheader.vppm) * 2.54f / 100.0f;
-    texset->src_w      = abs((int) infoheader.bmpwidth);
-    texset->src_h      = abs((int) infoheader.bmpheight);
+    texset->src_dpi_x = ((float)infoheader.hppm) * 2.54f / 100.0f;
+    texset->src_dpi_y = ((float)infoheader.vppm) * 2.54f / 100.0f;
+    texset->src_w = abs((int)infoheader.bmpwidth);
+    texset->src_h = abs((int)infoheader.bmpheight);
 
 #ifdef OPT
     double time2 = aTime();
@@ -1497,36 +1398,33 @@ MultiLevelTextureSetEX* create_texset_from_bmp(const char* filename, int nlevels
 
     // get the pixels
 
-    char* pixels = NULL;
+    char *pixels = NULL;
 
-    if (!hasDir)
-    {
-        pixels = new char[ texset->src_w * texset->src_h * texset->components ];
-        memset( pixels,255, texset->src_w * texset->src_h * texset->components);
+    if (!hasDir) {
+        pixels = new char[texset->src_w * texset->src_h * texset->components];
+        memset(pixels, 255, texset->src_w * texset->src_h * texset->components);
         char pad;
-        int padcount = int( ceil(float( texset->src_w * 3) / 4.0f));
+        int padcount = int(ceil(float(texset->src_w * 3) / 4.0f));
         padcount = (4 * padcount) - (texset->src_w * 3);
 
-        fseek( fptr, header.dataoffset, SEEK_SET);
+        fseek(fptr, header.dataoffset, SEEK_SET);
 
-        // 
+        //
         // for( int r = 0; r < texset->src_h; r++) works for certain BMP files, but
         // I can't find them at the moment. The following code works for LacCore images
-        //                                                                                 
+        //
         size_t dummy = 0;
-        for (int r = texset->src_h - 1; r > -1; --r)
-        {
-            for( int c = 0; c < texset->src_w; c++)
-            {
-                dummy = fread( pixels + r * texset->src_w * 3 + c * 3 + 2, 1, 1, fptr);
-                dummy = fread( pixels + r * texset->src_w * 3 + c * 3 + 1, 1, 1, fptr);
-                dummy = fread( pixels + r * texset->src_w * 3 + c * 3    , 1, 1, fptr);
+        for (int r = texset->src_h - 1; r > -1; --r) {
+            for (int c = 0; c < texset->src_w; c++) {
+                dummy = fread(pixels + r * texset->src_w * 3 + c * 3 + 2, 1, 1, fptr);
+                dummy = fread(pixels + r * texset->src_w * 3 + c * 3 + 1, 1, 1, fptr);
+                dummy = fread(pixels + r * texset->src_w * 3 + c * 3, 1, 1, fptr);
             }
 
             //bmp is padded to fit on 32 bit boundry
             for (int i = 0; i < padcount; i++)
-                dummy = fread(&pad,1,1,fptr);
-        }    
+                dummy = fread(&pad, 1, 1, fptr);
+        }
     }
 
     fclose(fptr);
@@ -1538,8 +1436,8 @@ MultiLevelTextureSetEX* create_texset_from_bmp(const char* filename, int nlevels
 #endif
 
     texset->levels = nlevels;
-    build_tex_blocks( pixels, texset, hasDir );
-    delete [] pixels;
+    build_tex_blocks(pixels, texset, hasDir);
+    delete[] pixels;
 
 #ifdef OPT
     double time4 = aTime();
@@ -1559,62 +1457,59 @@ MultiLevelTextureSetEX* create_texset_from_bmp(const char* filename, int nlevels
 
 // 5/16/2012 brg: Intended to grab image width/height data without actually loading
 // the pixel data as in genTextureBlocks(), which takes too much time to be practical.
-void read_tiff_dimensions( TIFF * const tiff, uint32 &width, uint32 &height )
-{
-    TIFFGetField( tiff, TIFFTAG_IMAGEWIDTH, &width );
-    TIFFGetField( tiff, TIFFTAG_IMAGELENGTH, &height );
+void read_tiff_dimensions(TIFF *const tiff, uint32 &width, uint32 &height) {
+    TIFFGetField(tiff, TIFFTAG_IMAGEWIDTH, &width);
+    TIFFGetField(tiff, TIFFTAG_IMAGELENGTH, &height);
 }
 
-MultiLevelTextureSetEX* create_texset_from_tiff(const char* filename, int nlevels, int blksize)
-{
+MultiLevelTextureSetEX *create_texset_from_tiff(const char *filename, int nlevels, int blksize) {
 #ifdef OPT
     aInitialize();
 
     double time1 = aTime();
 #endif
 
-    if(!filename) return NULL; //-1;
+    if (!filename)
+        return NULL;  //-1;
 
     string fname(filename);
     replace_windows_seperators(fname);
 
-    TIFF* tif;
-    tif = TIFFOpen(fname.c_str(),"r");
-    if( !tif )
-    {
+    TIFF *tif;
+    tif = TIFFOpen(fname.c_str(), "r");
+    if (!tif) {
         printf("ERROR: Could not open tiff file %s\n", filename);
-        return NULL; //-1;
+        return NULL;  //-1;
     }
 
-    MultiLevelTextureSetEX* texset = new MultiLevelTextureSetEX();
-    texset->tex        = NULL;
-    texset->cols       = NULL;
-    texset->rows       = NULL;
+    MultiLevelTextureSetEX *texset = new MultiLevelTextureSetEX();
+    texset->tex = NULL;
+    texset->cols = NULL;
+    texset->rows = NULL;
     texset->references = 0;
-    texset->blksize    = blksize;
+    texset->blksize = blksize;
 
-    texset->src_name = new char[ strlen(fname.c_str()) + 1];
+    texset->src_name = new char[strlen(fname.c_str()) + 1];
     strcpy(texset->src_name, fname.c_str());
 
     // Generate a unique directory name to store the texture blocks generated.
-    string basedir(default_block_dir);    
+    string basedir(default_block_dir);
     texset->blkdir = generateBlockDirString(basedir, fname);
     string blkdir(texset->blkdir);
 
     // get attributes
 
-    uint32* pixels = NULL;
+    uint32 *pixels = NULL;
     uint32 w, h;
 
-
     // image dimensions
-	read_tiff_dimensions( tif, w, h );
+    read_tiff_dimensions(tif, w, h);
 
-//    TIFFGetField(tif,TIFFTAG_IMAGEWIDTH, &w);
-//    TIFFGetField(tif,TIFFTAG_IMAGELENGTH, &h);
+    //    TIFFGetField(tif,TIFFTAG_IMAGEWIDTH, &w);
+    //    TIFFGetField(tif,TIFFTAG_IMAGELENGTH, &h);
 
-    texset->src_w = (int) w;
-    texset->src_h = (int) h;
+    texset->src_w = (int)w;
+    texset->src_h = (int)h;
     texset->components = 4;
     texset->src_format = RGBA;
 
@@ -1622,43 +1517,38 @@ MultiLevelTextureSetEX* create_texset_from_tiff(const char* filename, int nlevel
 
 #ifdef OPT
     double time2 = aTime();
-#endif    
+#endif
 
-    if(!hasDir)
-    {
+    if (!hasDir) {
         // get the pixels
 
-        pixels = (uint32*) _TIFFmalloc( w * h * sizeof(uint32));
+        pixels = (uint32 *)_TIFFmalloc(w * h * sizeof(uint32));
 
-        if( !pixels )
-        {
+        if (!pixels) {
             delete texset;
             TIFFClose(tif);
-            return NULL; //-1;
+            return NULL;  //-1;
         }
 
-        unsigned int status = TIFFReadRGBAImage( tif, w, h, pixels, 0);
+        unsigned int status = TIFFReadRGBAImage(tif, w, h, pixels, 0);
 
-        if(status == 0) // false
+        if (status == 0)  // false
         {
             TIFFClose(tif);
             _TIFFfree(pixels);
-            return NULL; //-1;
+            return NULL;  //-1;
         }
 
         // Take care of big-endian systems, eg. PPC
-        if(is_bigendian())
-        {
+        if (is_bigendian()) {
             unsigned int row;
-            for (row = 0; row < h; ++row)
-            {
+            for (row = 0; row < h; ++row) {
                 // Make sure our channels are in the right order
                 uint32 i;
                 uint32 rowStart = row * w;
-                uint32 rowEnd   = rowStart + w;
+                uint32 rowEnd = rowStart + w;
 
-                for (i = rowStart; i < rowEnd; i++)
-                {
+                for (i = rowStart; i < rowEnd; i++) {
                     pixels[i] = swap_bytes(pixels[i]);
                 }
             }
@@ -1666,32 +1556,29 @@ MultiLevelTextureSetEX* create_texset_from_tiff(const char* filename, int nlevel
 
         // Image is actually upside down and is ABGR not RGBA!!!
 
-    #ifdef DEBUG
+#ifdef DEBUG
         printf("Flipping Horizontal!\n");
-    #endif
+#endif
 
         int halfh = texset->src_h / 2;
         int i, k;
-        for( i = 0; i < halfh; ++i)
-        {
-            for( k = 0; k < texset->src_w; ++k)
-            {
+        for (i = 0; i < halfh; ++i) {
+            for (k = 0; k < texset->src_w; ++k) {
                 uint32 t;
-                t = pixels[ (i * texset->src_w) + k];
-                pixels[ (i * texset->src_w) + k ] =
-                    pixels[ ((texset->src_h - i - 1) * texset->src_w) + k];
-                pixels[ ((texset->src_h - i - 1) * texset->src_w) + k] = t;
-
+                t = pixels[(i * texset->src_w) + k];
+                pixels[(i * texset->src_w) + k] =
+                    pixels[((texset->src_h - i - 1) * texset->src_w) + k];
+                pixels[((texset->src_h - i - 1) * texset->src_w) + k] = t;
             }
         }
 
-    } // !hasDir
+    }  // !hasDir
 
 #ifdef OPT
     double time3 = aTime();
-#endif    
+#endif
 
-/*
+    /*
 #ifdef DEBUG
     printf("Converting pixels from ABGR to RGBA\n");
 #endif
@@ -1714,12 +1601,12 @@ MultiLevelTextureSetEX* create_texset_from_tiff(const char* filename, int nlevel
 
     // image resolution
     //uint32 frac_comp[2];
-	float frac_comp;
+    float frac_comp;
     uint16 units;
 
-    TIFFGetField(tif,TIFFTAG_RESOLUTIONUNIT, &units);
-    
-	/*
+    TIFFGetField(tif, TIFFTAG_RESOLUTIONUNIT, &units);
+
+    /*
 	TIFFGetField(tif,TIFFTAG_XRESOLUTION, &(frac_comp[0]));
 	
 	
@@ -1748,19 +1635,19 @@ MultiLevelTextureSetEX* create_texset_from_tiff(const char* filename, int nlevel
     }    
 	*/
 
-	// get x resolution
-	TIFFGetField(tif,TIFFTAG_XRESOLUTION, &frac_comp);
-	texset->src_dpi_x = frac_comp;
-	// get y resolution
-	TIFFGetField(tif,TIFFTAG_YRESOLUTION, &frac_comp);
-	texset->src_dpi_y = frac_comp;
-	// check unit
-	if( units == RESUNIT_CENTIMETER) // DPCM --> DPI
-	{
-		texset->src_dpi_x *= 2.54f;
-		texset->src_dpi_y *= 2.54f;
-	}
-	
+    // get x resolution
+    TIFFGetField(tif, TIFFTAG_XRESOLUTION, &frac_comp);
+    texset->src_dpi_x = frac_comp;
+    // get y resolution
+    TIFFGetField(tif, TIFFTAG_YRESOLUTION, &frac_comp);
+    texset->src_dpi_y = frac_comp;
+    // check unit
+    if (units == RESUNIT_CENTIMETER)  // DPCM --> DPI
+    {
+        texset->src_dpi_x *= 2.54f;
+        texset->src_dpi_y *= 2.54f;
+    }
+
     TIFFClose(tif);
 
 #ifdef OPT
@@ -1770,14 +1657,13 @@ MultiLevelTextureSetEX* create_texset_from_tiff(const char* filename, int nlevel
     // build texblocks and insert tex set
 
     texset->levels = nlevels;
-    build_tex_blocks( (char*) pixels, texset, hasDir );
+    build_tex_blocks((char *)pixels, texset, hasDir);
 
 #ifdef OPT
     double time5 = aTime();
 #endif
 
-    if(pixels != NULL)
-    {
+    if (pixels != NULL) {
         _TIFFfree(pixels);
     }
 
@@ -1788,11 +1674,11 @@ MultiLevelTextureSetEX* create_texset_from_tiff(const char* filename, int nlevel
 #ifdef OPT
     double time6 = aTime();
 
-    printf("[TIF] Header:\t%.3f\n", (time2-time1));
-    printf("[TIF] Pixels:\t%.3f\n", (time3-time2));
-    printf("[TIF] DPI:\t%.3f\n", (time4-time3));
-    printf("[TIF] Block:\t%.3f\n", (time5-time4));
-    printf("[TIF] TIFree:\t%.3f\n", (time6-time5));
+    printf("[TIF] Header:\t%.3f\n", (time2 - time1));
+    printf("[TIF] Pixels:\t%.3f\n", (time3 - time2));
+    printf("[TIF] DPI:\t%.3f\n", (time4 - time3));
+    printf("[TIF] Block:\t%.3f\n", (time5 - time4));
+    printf("[TIF] TIFree:\t%.3f\n", (time6 - time5));
 #endif
 
     return texset;
@@ -1801,14 +1687,14 @@ MultiLevelTextureSetEX* create_texset_from_tiff(const char* filename, int nlevel
 
 #ifdef CORELYZER_JPEG2000_SUPPORT
 // TODO
-MultiLevelTextureSetEX* create_texset_from_jp2k(const char* filename, int nlevels, int blksize)
-{
+MultiLevelTextureSetEX *create_texset_from_jp2k(const char *filename, int nlevels, int blksize) {
     printf("Processing '%s'\n", filename);
 
     // FIXME
     aInitialize();
 
-    if(!filename) return NULL;
+    if (!filename)
+        return NULL;
 
     string fname(filename);
     replace_windows_seperators(fname);
@@ -1818,11 +1704,11 @@ MultiLevelTextureSetEX* create_texset_from_jp2k(const char* filename, int nlevel
 
     // JPEG2000 stuff
     opj_dparameters_t parameters;
-    opj_event_mgr_t   event_mgr;
-    opj_image_t *     image = NULL;
+    opj_event_mgr_t event_mgr;
+    opj_image_t *image = NULL;
 
-    opj_dinfo_t*      dinfo = NULL;
-    opj_cio_t*        cio = NULL;
+    opj_dinfo_t *dinfo = NULL;
+    opj_cio_t *cio = NULL;
 
     // configure the event callbacks (not required)
     memset(&event_mgr, 0, sizeof(opj_event_mgr_t));
@@ -1834,9 +1720,8 @@ MultiLevelTextureSetEX* create_texset_from_jp2k(const char* filename, int nlevel
     opj_set_default_decoder_parameters(&parameters);
 
     // get file parameters
-    parameters.decod_format = get_file_format((char*) filename);
-    if(parameters.decod_format == -1)
-    {
+    parameters.decod_format = get_file_format((char *)filename);
+    if (parameters.decod_format == -1) {
         printf("decode_format is -1, bail.\n");
         return NULL;
     }
@@ -1847,11 +1732,10 @@ MultiLevelTextureSetEX* create_texset_from_jp2k(const char* filename, int nlevel
 
     // Estimate file size and read it to memory
     int file_length;
-    unsigned char * src = NULL;
-    FILE* fsrc = fopen(fname.c_str(), "rb");
+    unsigned char *src = NULL;
+    FILE *fsrc = fopen(fname.c_str(), "rb");
 
-    if(fsrc == NULL)
-    {
+    if (fsrc == NULL) {
         printf("Cannot open %s\n", filename);
         free(src);
         return NULL;
@@ -1859,15 +1743,15 @@ MultiLevelTextureSetEX* create_texset_from_jp2k(const char* filename, int nlevel
 
     // create texture set struct and init basic info
     // name, block directory, block sizes
-    MultiLevelTextureSetEX* texset = new MultiLevelTextureSetEX();
+    MultiLevelTextureSetEX *texset = new MultiLevelTextureSetEX();
 
-    texset->tex        = NULL;
-    texset->cols       = NULL;
-    texset->rows       = NULL;
+    texset->tex = NULL;
+    texset->cols = NULL;
+    texset->rows = NULL;
     texset->references = 0;
-    texset->blksize    = blksize;
+    texset->blksize = blksize;
 
-    texset->src_name = new char[ strlen(fname.c_str()) + 1];
+    texset->src_name = new char[strlen(fname.c_str()) + 1];
     strcpy(texset->src_name, fname.c_str());
 
     // Generate a unique directory name to store the texture blocks generated.
@@ -1879,13 +1763,13 @@ MultiLevelTextureSetEX* create_texset_from_jp2k(const char* filename, int nlevel
 
     // FIXME
     double time3 = aTime();
-    printf("[J2P] DS init: %.3f\n", (time3 - time2));    
+    printf("[J2P] DS init: %.3f\n", (time3 - time2));
 
     // get file size
     fseek(fsrc, 0, SEEK_END);
     file_length = ftell(fsrc);
     fseek(fsrc, 0, SEEK_SET);
-    src = (unsigned char *) malloc(file_length);
+    src = (unsigned char *)malloc(file_length);
     fread(src, 1, file_length, fsrc);
     fclose(fsrc);
 
@@ -1893,169 +1777,164 @@ MultiLevelTextureSetEX* create_texset_from_jp2k(const char* filename, int nlevel
     double time4 = aTime();
     printf("[J2P] Est file length:\t%.3f\n", (time4 - time3));
     printf("Estimate file_length = %d\n", file_length);
-    
+
     /* decode the code-stream */
     /* ---------------------- */
     printf("File in format: %d\n", parameters.decod_format);
 
-    switch(parameters.decod_format) {
-	case J2K_CFMT:
-	    {
-		/* JPEG-2000 codestream */
-	    // FIXME
-	    printf("[J2P] J2K_CFMT!\n");
+    switch (parameters.decod_format) {
+        case J2K_CFMT: {
+            /* JPEG-2000 codestream */
+            // FIXME
+            printf("[J2P] J2K_CFMT!\n");
 
-		/* get a decoder handle */
-		dinfo = opj_create_decompress(CODEC_J2K);
+            /* get a decoder handle */
+            dinfo = opj_create_decompress(CODEC_J2K);
 
-		/* catch events using our callbacks and give a local context */
-		opj_set_event_mgr((opj_common_ptr)dinfo, &event_mgr, stderr);
+            /* catch events using our callbacks and give a local context */
+            opj_set_event_mgr((opj_common_ptr)dinfo, &event_mgr, stderr);
 
-		/* setup the decoder decoding parameters using user parameters */
-		opj_setup_decoder(dinfo, &parameters);
+            /* setup the decoder decoding parameters using user parameters */
+            opj_setup_decoder(dinfo, &parameters);
 
-		/* open a byte stream */
-		cio = opj_cio_open((opj_common_ptr)dinfo, src, file_length);
+            /* open a byte stream */
+            cio = opj_cio_open((opj_common_ptr)dinfo, src, file_length);
 
-		/* decode the stream and fill the image structure */
-		image = opj_decode(dinfo, cio);
-		if(!image) {
-		    fprintf(stderr, "ERROR -> j2k_to_image: failed to decode image!\n");
-		    opj_destroy_decompress(dinfo);
-		    opj_cio_close(cio);
-		    return NULL;
-		}
+            /* decode the stream and fill the image structure */
+            image = opj_decode(dinfo, cio);
+            if (!image) {
+                fprintf(stderr, "ERROR -> j2k_to_image: failed to decode image!\n");
+                opj_destroy_decompress(dinfo);
+                opj_cio_close(cio);
+                return NULL;
+            }
 
-		pokeOpjImg(image);
-		//------------------------------------
-	    texset->components = image->numcomps;
-	    switch (image->color_space)
-	    {
-            case CLRSPC_SRGB:
-                texset->src_format = RGB; break;
+            pokeOpjImg(image);
+            //------------------------------------
+            texset->components = image->numcomps;
+            switch (image->color_space) {
+                case CLRSPC_SRGB:
+                    texset->src_format = RGB;
+                    break;
 
-            case CLRSPC_GRAY:
-                texset->src_format = GREY; break;
-        }
+                case CLRSPC_GRAY:
+                    texset->src_format = GREY;
+                    break;
+            }
 
-        texset->src_w = abs(image->x0 - image->x1);
-        texset->src_h = abs(image->y0 - image->y1);
+            texset->src_w = abs(image->x0 - image->x1);
+            texset->src_h = abs(image->y0 - image->y1);
 
-		//------------------------------------
+            //------------------------------------
 
-		/* close the byte stream */
-		opj_cio_close(cio);
-	    }
-	    break;
+            /* close the byte stream */
+            opj_cio_close(cio);
+        } break;
 
-	case JP2_CFMT:
-	    {
-		/* JPEG 2000 compressed image data */
-	    // FIXME
-	    printf("[J2P] JP2_CFMT!\n");
+        case JP2_CFMT: {
+            /* JPEG 2000 compressed image data */
+            // FIXME
+            printf("[J2P] JP2_CFMT!\n");
 
-		/* get a decoder handle */
-		dinfo = opj_create_decompress(CODEC_JP2);
+            /* get a decoder handle */
+            dinfo = opj_create_decompress(CODEC_JP2);
 
-		/* catch events using our callbacks and give a local context */
-		opj_set_event_mgr((opj_common_ptr)dinfo, &event_mgr, stderr);
+            /* catch events using our callbacks and give a local context */
+            opj_set_event_mgr((opj_common_ptr)dinfo, &event_mgr, stderr);
 
-		/* setup the decoder decoding parameters using the current image and user parameters */
-		opj_setup_decoder(dinfo, &parameters);
+            /* setup the decoder decoding parameters using the current image and user parameters */
+            opj_setup_decoder(dinfo, &parameters);
 
-		/* open a byte stream */
-		cio = opj_cio_open((opj_common_ptr)dinfo, src, file_length);
+            /* open a byte stream */
+            cio = opj_cio_open((opj_common_ptr)dinfo, src, file_length);
 
-		/* decode the stream and fill the image structure */
-		// FIXME
-		double b4De = aTime();
+            /* decode the stream and fill the image structure */
+            // FIXME
+            double b4De = aTime();
 
-		image = opj_decode(dinfo, cio);
-		if(!image) {
-		    fprintf(stderr, "ERROR -> j2k_to_image: failed to decode image!\n");
-		    opj_destroy_decompress(dinfo);
-		    opj_cio_close(cio);
-		    return NULL;
-		}
+            image = opj_decode(dinfo, cio);
+            if (!image) {
+                fprintf(stderr, "ERROR -> j2k_to_image: failed to decode image!\n");
+                opj_destroy_decompress(dinfo);
+                opj_cio_close(cio);
+                return NULL;
+            }
 
-        // FIXME
-        double afDe = aTime();
-        printf("[JP2] decode:\t%.3f\n", (afDe - b4De));
+            // FIXME
+            double afDe = aTime();
+            printf("[JP2] decode:\t%.3f\n", (afDe - b4De));
 
-		//------------------------------------
-        pokeOpjImg(image);
+            //------------------------------------
+            pokeOpjImg(image);
 
-	    texset->components = image->numcomps;
-	    switch(image->color_space)
-	    {
-            case CLRSPC_SRGB:
-                texset->src_format = RGB; break;
+            texset->components = image->numcomps;
+            switch (image->color_space) {
+                case CLRSPC_SRGB:
+                    texset->src_format = RGB;
+                    break;
 
-            case CLRSPC_GRAY:
-                texset->src_format = GREY; break;
-        }
+                case CLRSPC_GRAY:
+                    texset->src_format = GREY;
+                    break;
+            }
 
-        texset->src_w = abs(image->x0 - image->x1);
-        texset->src_h = abs(image->y0 - image->y1);
+            texset->src_w = abs(image->x0 - image->x1);
+            texset->src_h = abs(image->y0 - image->y1);
 
-        texset->src_dpi_x = 254.0f; // fixme
-        texset->src_dpi_y = 254.0f; // fixme
+            texset->src_dpi_x = 254.0f;  // fixme
+            texset->src_dpi_y = 254.0f;  // fixme
 
-        texset->levels = nlevels;
+            texset->levels = nlevels;
 
-        printf("Before building texture\n");
+            printf("Before building texture\n");
 
-        char* pixels;
-        pixels = (char *)image->comps[0].data;
+            char *pixels;
+            pixels = (char *)image->comps[0].data;
 
-        build_tex_blocks(pixels, texset);
+            build_tex_blocks(pixels, texset);
 
-        printf("After building texture\n");
+            printf("After building texture\n");
 
-		//------------------------------------
+            //------------------------------------
 
-		/* close the byte stream */
-		opj_cio_close(cio);
+            /* close the byte stream */
+            opj_cio_close(cio);
+        } break;
 
-	    }
-	    break;
+        case JPT_CFMT: {
+            /* JPEG 2000, JPIP */
+            // FIXME
+            printf("[JPT_CFMT] J2K_CFMT!\n");
 
-	case JPT_CFMT:
-	    {
-		/* JPEG 2000, JPIP */
-	    // FIXME
-	    printf("[JPT_CFMT] J2K_CFMT!\n");
+            /* get a decoder handle */
+            dinfo = opj_create_decompress(CODEC_JPT);
 
-		/* get a decoder handle */
-		dinfo = opj_create_decompress(CODEC_JPT);
+            /* catch events using our callbacks and give a local context */
+            opj_set_event_mgr((opj_common_ptr)dinfo, &event_mgr, stderr);
 
-		/* catch events using our callbacks and give a local context */
-		opj_set_event_mgr((opj_common_ptr)dinfo, &event_mgr, stderr);
+            /* setup the decoder decoding parameters using user parameters */
+            opj_setup_decoder(dinfo, &parameters);
 
-		/* setup the decoder decoding parameters using user parameters */
-		opj_setup_decoder(dinfo, &parameters);
+            /* open a byte stream */
+            cio = opj_cio_open((opj_common_ptr)dinfo, src, file_length);
 
-		/* open a byte stream */
-		cio = opj_cio_open((opj_common_ptr)dinfo, src, file_length);
+            /* decode the stream and fill the image structure */
+            image = opj_decode(dinfo, cio);
+            if (!image) {
+                fprintf(stderr, "ERROR -> j2k_to_image: failed to decode image!\n");
+                opj_destroy_decompress(dinfo);
+                opj_cio_close(cio);
+                return NULL;
+            }
 
-		/* decode the stream and fill the image structure */
-		image = opj_decode(dinfo, cio);
-		if(!image) {
-		    fprintf(stderr, "ERROR -> j2k_to_image: failed to decode image!\n");
-		    opj_destroy_decompress(dinfo);
-		    opj_cio_close(cio);
-		    return NULL;
-		}
+            pokeOpjImg(image);
 
-		pokeOpjImg(image);
+            /* close the byte stream */
+            opj_cio_close(cio);
+        } break;
 
-		/* close the byte stream */
-		opj_cio_close(cio);
-	    }
-	    break;
-
-	default:
-	    fprintf(stderr, "skipping file..\n");
+        default:
+            fprintf(stderr, "skipping file..\n");
     }
 
     // FIXME
@@ -2070,284 +1949,287 @@ MultiLevelTextureSetEX* create_texset_from_jp2k(const char* filename, int nlevel
     return texset;
     // return NULL;
 }
-#endif // #ifdef CORELYZER_JPEG2000_SUPPORT
-
+#endif  // #ifdef CORELYZER_JPEG2000_SUPPORT
 
 //====================================================================
-void free_texset(int set, bool del_disk_blocks)
-{
-    if(!is_texset(set)) return;
-    MultiLevelTextureSetEX* t = texsetvec[set];
+void free_texset(int set, bool del_disk_blocks) {
+    if (!is_texset(set))
+        return;
+    MultiLevelTextureSetEX *t = texsetvec[set];
     texsetvec[set] = NULL;
-    
+
     // delete texBlocks, and texture objects if they exist
 #ifdef DEBUG
     printf("deleting texBlocks\n");
 #endif
 
-//    glBindTexture(GL_TEXTURE_2D, 0);
+    //    glBindTexture(GL_TEXTURE_2D, 0);
 
-    if( t->tex && t->cols && t->rows)
-    {
-        for( int l = 0; l < t->levels; ++l)
-        {
-            if( !t->tex[l] ) continue;
-            
-            for( int r = 0; r < t->rows[l]; ++r)
-            {
-                for( int c = 0; c < t->cols[l]; ++c)
-                {
+    if (t->tex && t->cols && t->rows) {
+        for (int l = 0; l < t->levels; ++l) {
+            if (!t->tex[l])
+                continue;
+
+            for (int r = 0; r < t->rows[l]; ++r) {
+                for (int c = 0; c < t->cols[l]; ++c) {
                     int index = (r * t->cols[l]) + c;
 #ifdef DEBUG
-					printf("level %d, row %d, col %d, index %d\n", l, r, c,
+                    printf("level %d, row %d, col %d, index %d\n", l, r, c,
                            index);
 #endif
-                    if( t->tex[l][index].texData)
-                        delete [] t->tex[l][index].texData;
-                    if( t->tex[l][index].blockfile)
-                        delete [] t->tex[l][index].blockfile;
+                    if (t->tex[l][index].texData)
+                        delete[] t->tex[l][index].texData;
+                    if (t->tex[l][index].blockfile)
+                        delete[] t->tex[l][index].blockfile;
 
-                    if( t->tex[l][index].texId && 
-                        glIsTexture(t->tex[l][index].texId) )
-                    {
+                    if (t->tex[l][index].texId &&
+                        glIsTexture(t->tex[l][index].texId)) {
 #ifdef DEBUG
                         printf("Deleting GL texture object\n");
 #endif
-                        glDeleteTextures(1,&(t->tex[l][index].texId));
-                    }               
+                        glDeleteTextures(1, &(t->tex[l][index].texId));
+                    }
                 }
             }
 
 #ifdef DEBUG
             printf("Deleting row\n");
 #endif
-            if( t->tex[l] )
-                delete [] t->tex[l];
+            if (t->tex[l])
+                delete[] t->tex[l];
         }
 
 #ifdef DEBUG
         printf("Deleting t->tex, t->rows, t->cols\n");
 #endif
-        delete [] t->tex;
-        delete [] t->rows;
-        delete [] t->cols;
+        delete[] t->tex;
+        delete[] t->rows;
+        delete[] t->cols;
     }
 
 #ifdef DEBUG
     printf("Deleting strings and scales\n");
 #endif
 
-    if( t->src_name ) delete [] t->src_name;
-    if( t->scales   ) delete [] t->scales;
-    if( t->blkdir   ) delete [] t->blkdir;
+    if (t->src_name)
+        delete[] t->src_name;
+    if (t->scales)
+        delete[] t->scales;
+    if (t->blkdir)
+        delete[] t->blkdir;
 
 #ifdef DEBUG
     printf("Deleting object\n");
 #endif
 
     delete t;
-    
-    
 }
 
 //=========================================================================
-void free_all_texsets( bool del_disk_blocks)
-{
-    for (unsigned int i = 0; i < texsetvec.size(); ++i)
-    {
+void free_all_texsets(bool del_disk_blocks) {
+    for (unsigned int i = 0; i < texsetvec.size(); ++i) {
 #ifdef DEBUG
         printf("freeing texset %d\n", i);
 #endif
-		free_texset(i, del_disk_blocks);
+        free_texset(i, del_disk_blocks);
     }
 
     texsetvec.clear();
 }
 
 //=========================================================================
-bool is_texset( int s )
-{
-	if (s < 0) return false;
-	const int texsetVecSize = texsetvec.size();
-    if(s >= texsetVecSize) return false;
+bool is_texset(int s) {
+    if (s < 0)
+        return false;
+    const int texsetVecSize = texsetvec.size();
+    if (s >= texsetVecSize)
+        return false;
     return (texsetvec[s] != NULL);
 }
 
 //========================================================================
-void set_texset_url(int s, char* url)
-{
-    if(!is_texset(s) || !url) return;
-    if( texsetvec[s]->src_url)
-        delete [] texsetvec[s]->src_url;
-    texsetvec[s]->src_url = new char[ strlen(url) + 1];
+void set_texset_url(int s, char *url) {
+    if (!is_texset(s) || !url)
+        return;
+    if (texsetvec[s]->src_url)
+        delete[] texsetvec[s]->src_url;
+    texsetvec[s]->src_url = new char[strlen(url) + 1];
     strcpy(texsetvec[s]->src_url, url);
 }
 
 //========================================================================
-void inc_texset_ref_count( int s)
-{
-    if(!is_texset(s)) return;
+void inc_texset_ref_count(int s) {
+    if (!is_texset(s))
+        return;
     texsetvec[s]->references += 1;
 }
 
 //========================================================================
-void dec_texset_ref_count( int s)
-{
-    if(!is_texset(s)) return;
+void dec_texset_ref_count(int s) {
+    if (!is_texset(s))
+        return;
     texsetvec[s]->references -= 1;
 }
 
 //========================================================================
-int get_texset_ref_count(int s)
-{
-    if(!is_texset(s)) return -1;
+int get_texset_ref_count(int s) {
+    if (!is_texset(s))
+        return -1;
     return texsetvec[s]->references;
 }
 
 //========================================================================
-int get_texset_num_components(int s)
-{
-    if(!is_texset(s)) return -1;
+int get_texset_num_components(int s) {
+    if (!is_texset(s))
+        return -1;
     return texsetvec[s]->components;
 }
 
 //========================================================================
-int get_texset_pixel_format(int s)
-{
-    if(!is_texset(s)) return -1;
+int get_texset_pixel_format(int s) {
+    if (!is_texset(s))
+        return -1;
     return texsetvec[s]->src_format;
 }
 
 //========================================================================
-int get_texset_num_levels(int s)
-{
-    if(!is_texset(s)) return -1;
+int get_texset_num_levels(int s) {
+    if (!is_texset(s))
+        return -1;
     return texsetvec[s]->levels;
 }
 
 //========================================================================
-int get_texset_src_width(int s)
-{
-    if(!is_texset(s)) return -1;
+int get_texset_src_width(int s) {
+    if (!is_texset(s))
+        return -1;
     return texsetvec[s]->src_w;
 }
 
 //========================================================================
-int get_texset_src_height(int s)
-{
-    if(!is_texset(s)) return -1;
+int get_texset_src_height(int s) {
+    if (!is_texset(s))
+        return -1;
     return texsetvec[s]->src_h;
 }
 
 //========================================================================
-int get_texset_block_size(int s)
-{
-    if(!is_texset(s)) return -1;
+int get_texset_block_size(int s) {
+    if (!is_texset(s))
+        return -1;
     return texsetvec[s]->blksize;
 }
 
 //========================================================================
-float get_texset_src_dpi_x(int s)
-{
-    if(!is_texset(s)) return -1;
+float get_texset_src_dpi_x(int s) {
+    if (!is_texset(s))
+        return -1;
     return texsetvec[s]->src_dpi_x;
 }
 
 //========================================================================
-float get_texset_src_dpi_y(int s)
-{
-    if(!is_texset(s)) return -1;
+float get_texset_src_dpi_y(int s) {
+    if (!is_texset(s))
+        return -1;
     return texsetvec[s]->src_dpi_y;
 }
 
 //========================================================================
-int get_texset_num_cols(int s, int level)
-{
-    if(!is_texset(s)) return -1;
-    if( level < 0 || level >= texsetvec[s]->levels) return -1;
+int get_texset_num_cols(int s, int level) {
+    if (!is_texset(s))
+        return -1;
+    if (level < 0 || level >= texsetvec[s]->levels)
+        return -1;
     return texsetvec[s]->cols[level];
 }
 //========================================================================
-int get_texset_num_rows(int s, int level)
-{
-    if(!is_texset(s)) return -1;
-    if( level < 0 || level >= texsetvec[s]->levels) return -1;
+int get_texset_num_rows(int s, int level) {
+    if (!is_texset(s))
+        return -1;
+    if (level < 0 || level >= texsetvec[s]->levels)
+        return -1;
     return texsetvec[s]->rows[level];
 }
 
 //========================================================================
-int get_texset_level_in_pyramid(int s, int level)
-{
-    if(!is_texset(s)) return -1;
-    if( level < 0 || level >= texsetvec[s]->levels) return -1;
+int get_texset_level_in_pyramid(int s, int level) {
+    if (!is_texset(s))
+        return -1;
+    if (level < 0 || level >= texsetvec[s]->levels)
+        return -1;
     return texsetvec[s]->pyramid_level[level];
 }
 
 //========================================================================
-float get_texset_scale(int s, int level)
-{
-    if(!is_texset(s)) return -1;
-    if( level < 0 || level >= texsetvec[s]->levels) return -1;
+float get_texset_scale(int s, int level) {
+    if (!is_texset(s))
+        return -1;
+    if (level < 0 || level >= texsetvec[s]->levels)
+        return -1;
     return texsetvec[s]->scales[level];
 }
 
 //========================================================================
-char* get_texset_name(int s)
-{
-    if(!is_texset(s)) return NULL;
+char *get_texset_name(int s) {
+    if (!is_texset(s))
+        return NULL;
     return texsetvec[s]->src_name;
 }
 
 //========================================================================
-char* get_texset_url(int s)
-{
-    if(!is_texset(s)) return NULL;
+char *get_texset_url(int s) {
+    if (!is_texset(s))
+        return NULL;
     return texsetvec[s]->src_url;
 }
 
 //========================================================================
-texBlock* get_tex_block(int set, int level, int col, int row)
-{
-    if(!is_texset(set)) return NULL;
-    MultiLevelTextureSetEX* t = texsetvec[set];
-    if( level < 0 || level >= t->levels) return NULL;
-    if( col < 0 || col >= t->cols[level]) return NULL;
-    if( row < 0 || row >= t->rows[level]) return NULL;
+texBlock *get_tex_block(int set, int level, int col, int row) {
+    if (!is_texset(set))
+        return NULL;
+    MultiLevelTextureSetEX *t = texsetvec[set];
+    if (level < 0 || level >= t->levels)
+        return NULL;
+    if (col < 0 || col >= t->cols[level])
+        return NULL;
+    if (row < 0 || row >= t->rows[level])
+        return NULL;
 
-    return &( t->tex[level][( row * t->cols[level]) + col]);
+    return &(t->tex[level][(row * t->cols[level]) + col]);
 }
 
 //=======================================================================
-void bind_texblock( int set, int level, int col, int row)
-{
-
+void bind_texblock(int set, int level, int col, int row) {
 #ifdef DEBUG
-	printf("Trying to bind texblock in set %d, level %d, col %d, row %d\n",
-	    set,level,col,row);
+    printf("Trying to bind texblock in set %d, level %d, col %d, row %d\n",
+           set, level, col, row);
 #endif
 
-    if(!is_texset(set)) return;
+    if (!is_texset(set))
+        return;
 
-    MultiLevelTextureSetEX* t = texsetvec[set];
+    MultiLevelTextureSetEX *t = texsetvec[set];
 
-    if( level < 0 || level >= t->levels) return;
-    if( col < 0 || col >= t->cols[level]) return;
-    if( row < 0 || row >= t->rows[level]) return;
-    
+    if (level < 0 || level >= t->levels)
+        return;
+    if (col < 0 || col >= t->cols[level])
+        return;
+    if (row < 0 || row >= t->rows[level])
+        return;
+
     int id = (row * t->cols[level]) + col;
 
-    if( !is_tex_cache_entry( &(t->tex[level][id])) )
-    {
+    if (!is_tex_cache_entry(&(t->tex[level][id]))) {
 #ifdef DEBUG
-	    printf("Tex Cache Miss\n");
+        printf("Tex Cache Miss\n");
 #endif
 
         // TODO Spawn a thread to do IOs?
-        tex_cache_miss(set,level,col,row);
+        tex_cache_miss(set, level, col, row);
     }
 
 #ifdef DEBUG
-printf("Binding texture object %d\n", t->tex[level][id].texId);
+    printf("Binding texture object %d\n", t->tex[level][id].texId);
 #endif
 
     glBindTexture(GL_TEXTURE_2D, t->tex[level][id].texId);
@@ -2359,64 +2241,56 @@ printf("Binding texture object %d\n", t->tex[level][id].texId);
 // loading. Loading the image through genTextureBlocks() and grabbing its
 // dimensions then takes far too long to be practical for use in this
 // context.
-int get_image_depth_pix(char *fileName, bool isVertical)
-{
-	int depthPix = 0, width = 0, height = 0;
-    
-	if (!fileName) return 0;
-	string fname(fileName);
-	replace_windows_seperators(fname);
-	FILE* fptr = fopen(fname.c_str(),"rb");
-	if (!fptr)
-	{
-		printf("Can't open file %s\n", fileName);
-		return 0;
-	}
-	
-	if ( strstr(fileName,".JPEG") || strstr(fileName,".jpeg") ||
-	   strstr(fileName,".JPG")  || strstr(fileName,".jpg") )
-    {
-		read_jpeg_dimensions( fptr, width, height );
-    }
-    else if ( strstr(fileName,".PNG") || strstr(fileName,".png"))
-    {
-        const bool success = read_png_dimensions( fptr, width, height );
-		if ( !success )	return 0;
-    }
-    else if ( strstr(fileName, ".BMP") || strstr(fileName, ".bmp"))
-    {
-		BMPHeader header;
-		BMPInfoHeader infoHeader;
-		const bool success = read_bmp_header( fptr, header, infoHeader );
-		if ( !success ) return 0;
+int get_image_depth_pix(char *fileName, bool isVertical) {
+    int depthPix = 0, width = 0, height = 0;
 
-		width = infoHeader.bmpwidth;
-		height = infoHeader.bmpheight;
+    if (!fileName)
+        return 0;
+    string fname(fileName);
+    replace_windows_seperators(fname);
+    FILE *fptr = fopen(fname.c_str(), "rb");
+    if (!fptr) {
+        printf("Can't open file %s\n", fileName);
+        return 0;
     }
-    else if ( strstr(fileName,".TIFF") || strstr(fileName,".tiff") ||
-			strstr(fileName,".TIF")  || strstr(fileName,".tif") )
-    {
-		fclose( fptr ); // TIFF library has its own file opening routine
-		fptr = NULL;
-		
-		TIFF *tiff = TIFFOpen( fname.c_str(), "r" );
-		uint32 tiffWidth = 0, tiffHeight = 0;
-		read_tiff_dimensions( tiff, tiffWidth, tiffHeight );
-		width = (int)tiffWidth;
-		height = (int)tiffHeight;
-    }
-    else
-    {
+
+    if (strstr(fileName, ".JPEG") || strstr(fileName, ".jpeg") ||
+        strstr(fileName, ".JPG") || strstr(fileName, ".jpg")) {
+        read_jpeg_dimensions(fptr, width, height);
+    } else if (strstr(fileName, ".PNG") || strstr(fileName, ".png")) {
+        const bool success = read_png_dimensions(fptr, width, height);
+        if (!success)
+            return 0;
+    } else if (strstr(fileName, ".BMP") || strstr(fileName, ".bmp")) {
+        BMPHeader header;
+        BMPInfoHeader infoHeader;
+        const bool success = read_bmp_header(fptr, header, infoHeader);
+        if (!success)
+            return 0;
+
+        width = infoHeader.bmpwidth;
+        height = infoHeader.bmpheight;
+    } else if (strstr(fileName, ".TIFF") || strstr(fileName, ".tiff") ||
+               strstr(fileName, ".TIF") || strstr(fileName, ".tif")) {
+        fclose(fptr);  // TIFF library has its own file opening routine
+        fptr = NULL;
+
+        TIFF *tiff = TIFFOpen(fname.c_str(), "r");
+        uint32 tiffWidth = 0, tiffHeight = 0;
+        read_tiff_dimensions(tiff, tiffWidth, tiffHeight);
+        width = (int)tiffWidth;
+        height = (int)tiffHeight;
+    } else {
         printf("Could not get dimensions of image %s, unsupported format\n", fileName);
         free(fileName);
-		return 0;
+        return 0;
     }
-	
-	free(fileName);
-	if ( fptr )
-		fclose( fptr );
-	
-	depthPix = isVertical ? height : width;
-	
-	return depthPix;
+
+    free(fileName);
+    if (fptr)
+        fclose(fptr);
+
+    depthPix = isVertical ? height : width;
+
+    return depthPix;
 }

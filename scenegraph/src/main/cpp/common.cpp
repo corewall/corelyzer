@@ -28,13 +28,10 @@
 
 static bool DEBUG_MODE = false;
 
-void setDebug(bool b)
-{
+void setDebug(bool b) {
     DEBUG_MODE = b;
 }
 
-bool getDebug()
-{
-    return DEBUG_MODE;    
+bool getDebug() {
+    return DEBUG_MODE;
 }
-

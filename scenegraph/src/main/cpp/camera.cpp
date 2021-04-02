@@ -25,39 +25,40 @@
  *****************************************************************************/
 
 #include "camera.h"
-#include "matrix.h"
-#include <vector>
+
 #include <math.h>
 
-//========================================================================
-std::vector< Camera > camvec;
+#include <vector>
+
+#include "matrix.h"
 
 //========================================================================
-bool is_camera(int i)
-{
-    if (i < 0) return false;
-	const int camVecSize = camvec.size();
-	if (i >= camVecSize) return false;
+std::vector<Camera> camvec;
+
+//========================================================================
+bool is_camera(int i) {
+    if (i < 0)
+        return false;
+    const int camVecSize = camvec.size();
+    if (i >= camVecSize)
+        return false;
     return camvec[i].valid;
 }
 
 //========================================================================
-int create_camera()
-{
+int create_camera() {
     // see if there is already an existing invalid camera
-    for (unsigned int i = 0; i < camvec.size(); i++)
-    {
-        if( camvec[i].valid == false ) 
-        {
+    for (unsigned int i = 0; i < camvec.size(); i++) {
+        if (camvec[i].valid == false) {
             camvec[i].valid = true;
-            make_identity( camvec[i].m );
+            make_identity(camvec[i].m);
             camvec[i].pos[0] = camvec[i].pos[1] = camvec[i].pos[2] = 0.0f;
             return i;
         }
     }
-    
+
     Camera cam;
-    make_identity( cam.m );
+    make_identity(cam.m);
     cam.pos[0] = cam.pos[1] = cam.pos[2] = 0.0f;
     cam.valid = true;
     camvec.push_back(cam);
@@ -65,26 +66,24 @@ int create_camera()
 }
 
 //========================================================================
-void free_camera(int cam)
-{
-    if( !is_camera(cam)) return;
+void free_camera(int cam) {
+    if (!is_camera(cam))
+        return;
     camvec[cam].valid = false;
 }
 
-void free_all_camera()
-{
-	camvec.clear();
+void free_all_camera() {
+    camvec.clear();
 }
 //========================================================================
-int num_cameras()
-{
+int num_cameras() {
     return camvec.size();
 }
 
 //========================================================================
-void position_camera( int id, float x, float y, float z)
-{
-    if( !is_camera(id) ) return;
+void position_camera(int id, float x, float y, float z) {
+    if (!is_camera(id))
+        return;
 
     camvec[id].pos[0] = x;
     camvec[id].pos[1] = y;
@@ -92,9 +91,9 @@ void position_camera( int id, float x, float y, float z)
 }
 
 //========================================================================
-void orient_camera( int id, float p, float y, float r)
-{
-    if(!is_camera(id)) return;
+void orient_camera(int id, float p, float y, float r) {
+    if (!is_camera(id))
+        return;
     GLfloat *m = camvec[id].m;
     GLfloat a[16];
     GLfloat b[16];
@@ -110,17 +109,17 @@ void orient_camera( int id, float p, float y, float r)
     GLfloat sy = sinf(y);
 
     // yaw then pitch then roll
-    b[5]  = cp;
-    b[6]  = sp;
-    b[9]  = -sp;
+    b[5] = cp;
+    b[6] = sp;
+    b[9] = -sp;
     b[10] = cp;
-    a[0]  = cy;
-    a[2]  = -sy;
-    a[8]  = sy;
+    a[0] = cy;
+    a[2] = -sy;
+    a[8] = sy;
     a[10] = cy;
 
-    mul_matrix(m,a,b);
-    copy_matrix(a,m);
+    mul_matrix(m, a, b);
+    copy_matrix(a, m);
     make_identity(b);
 
     b[0] = cr;
@@ -128,44 +127,47 @@ void orient_camera( int id, float p, float y, float r)
     b[4] = -sr;
     b[5] = cr;
 
-    mul_matrix(m,a,b);
+    mul_matrix(m, a, b);
 }
 
 //========================================================================
-void orient_camera(int id, float* mat)
-{
-    if(!is_camera(id)) return;
-    if( !mat ) return;
-    
-    for(int i = 0; i < 16; i++)
+void orient_camera(int id, float *mat) {
+    if (!is_camera(id))
+        return;
+    if (!mat)
+        return;
+
+    for (int i = 0; i < 16; i++)
         camvec[id].m[i] = mat[i];
 }
 
 //========================================================================
-void get_camera_position(int id, float *x, float *y, float *z)
-{
-    if(!is_camera(id)) return;
-    if( !x || !y || !z ) return;
-    
+void get_camera_position(int id, float *x, float *y, float *z) {
+    if (!is_camera(id))
+        return;
+    if (!x || !y || !z)
+        return;
+
     *x = camvec[id].pos[0];
     *y = camvec[id].pos[1];
     *z = camvec[id].pos[2];
 }
 
 //========================================================================
-void get_camera_orientation(int id, float* r)
-{
-    if(!is_camera(id)) return;
-    if(!r) return;
-    for(int i = 0; i < 16; i++)
+void get_camera_orientation(int id, float *r) {
+    if (!is_camera(id))
+        return;
+    if (!r)
+        return;
+    for (int i = 0; i < 16; i++)
         r[i] = camvec[id].m[i];
 }
 
 //------------------------------------
 //========================================================================
-void translate_camera( int id, float x, float y, float z)
-{
-    if(!is_camera(id)) return;
+void translate_camera(int id, float x, float y, float z) {
+    if (!is_camera(id))
+        return;
     // orient vector based on our rotation matrix
     float tx, ty, tz;
     GLfloat *m = camvec[id].m;
@@ -180,13 +182,13 @@ void translate_camera( int id, float x, float y, float z)
 }
 
 //========================================================================
-void turn_camera( int id, float p, float y, float r)
-{
-    if(!is_camera(id)) return;
+void turn_camera(int id, float p, float y, float r) {
+    if (!is_camera(id))
+        return;
     GLfloat *m = camvec[id].m;
     GLfloat a[16];
     GLfloat b[16];
- 
+
     make_identity(b);
     make_identity(a);
 
@@ -200,35 +202,35 @@ void turn_camera( int id, float p, float y, float r)
     // yaw then pitch then roll
     GLfloat temp[16];
 
-    a[0]  = cy;
-    a[2]  = -sy;
-    a[8]  = sy;
+    a[0] = cy;
+    a[2] = -sy;
+    a[8] = sy;
     a[10] = cy;
-    
-    b[5]  = cp;
-    b[6]  = sp;
-    b[9]  = -sp;
+
+    b[5] = cp;
+    b[6] = sp;
+    b[9] = -sp;
     b[10] = cp;
-    
-    mul_matrix(temp,a,b);
-    copy_matrix(a,temp);
+
+    mul_matrix(temp, a, b);
+    copy_matrix(a, temp);
     make_identity(b);
-    
+
     b[0] = cr;
     b[1] = sr;
     b[4] = -sr;
     b[5] = cr;
-    
-    mul_matrix(temp,a,b);
-    copy_matrix(a,m);
-    mul_matrix(m,a,temp);
+
+    mul_matrix(temp, a, b);
+    copy_matrix(a, m);
+    mul_matrix(m, a, temp);
 }
 
 //========================================================================
 // make sure by accident it these can't happen more than once
-void apply_camera_matrix(int id)
-{
-    if(!is_camera(id)) return;
+void apply_camera_matrix(int id) {
+    if (!is_camera(id))
+        return;
     /*
     gluLookAt( camvec[id].pos[0], 
                camvec[id].pos[1], 
@@ -240,12 +242,10 @@ void apply_camera_matrix(int id)
                camvec[id].m[5], 
                camvec[id].m[6]);
     */
-    glTranslatef( -camvec[id].pos[0], -camvec[id].pos[1], -camvec[id].pos[2]);
-    glMultMatrixf( camvec[id].m );
+    glTranslatef(-camvec[id].pos[0], -camvec[id].pos[1], -camvec[id].pos[2]);
+    glMultMatrixf(camvec[id].m);
 }
 
 //========================================================================
-void unapply_camera_matrix(int id)
-{
+void unapply_camera_matrix(int id) {
 }
-

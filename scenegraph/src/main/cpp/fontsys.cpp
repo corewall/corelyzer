@@ -30,11 +30,11 @@
 
 #include <ft2build.h>
 #include FT_FREETYPE_H
-#include <vector>
-#include <queue>
-
 #include <stdio.h>
 #include <stdlib.h>
+
+#include <queue>
+#include <vector>
 
 #ifndef __APPLE__
 #include <GL/gl.h>
@@ -44,130 +44,124 @@
 #include <OpenGL/glu.h>
 #endif
 
-#include "fontsys.h"
 #include <freetype/ftglyph.h>
 
-#define CHAR_HEIGHT       48
-#define CHAR_FIXED_WIDTH  32
+#include "fontsys.h"
+
+#define CHAR_HEIGHT 48
+#define CHAR_FIXED_WIDTH 32
 #define LINE_VERT_ADVANCE 52
-#define ASCII_COUNT       256
+#define ASCII_COUNT 256
 
 struct CWFont {
-    char* name;
-    char* filename;
+    char *name;
+    char *filename;
     GLuint listBase;
     GLuint numLists;
     GLuint *texids;
-    unsigned int advanceX[ ASCII_COUNT ]; //to advance before the next char
-    GLuint glyphMap[ ASCII_COUNT ]; //fast map of ascii chars to Display List 
+    unsigned int advanceX[ASCII_COUNT];  //to advance before the next char
+    GLuint glyphMap[ASCII_COUNT];        //fast map of ascii chars to Display List
 };
 
 #ifndef GL_CLAMP_TO_EDGE
 #define GL_CLAMP_TO_EDGE 0x812F
 #endif
 
-std::vector< CWFont* > fontvec;
-std::queue< int >      fontloadqueue;
-bool                   initialized_sys = false;
-FT_Library             fontlibrary;
-GLuint                 unknown_char;
-int                    current_font = -1;
+std::vector<CWFont *> fontvec;
+std::queue<int> fontloadqueue;
+bool initialized_sys = false;
+FT_Library fontlibrary;
+GLuint unknown_char;
+int current_font = -1;
 
 //=======================================================================
-int next_p2(int i)
-{
-	int val = 1;
-	while( val < i ) val *= 2;
-	return val;
+int next_p2(int i) {
+    int val = 1;
+    while (val < i)
+        val *= 2;
+    return val;
 }
 
 //=======================================================================
-void init_font_sys()
-{
-    unknown_char = glGenLists( 1 );
-    glNewList( unknown_char, GL_COMPILE );
+void init_font_sys() {
+    unknown_char = glGenLists(1);
+    glNewList(unknown_char, GL_COMPILE);
     glBindTexture(GL_TEXTURE_2D, 0);
     glBegin(GL_LINE_STRIP);
-        glVertex2f(3,3);
-        glVertex2f(3,45);
-        glVertex2f(29,45);
-        glVertex2f(29,3);
-        glVertex2f(3,3);
+    glVertex2f(3, 3);
+    glVertex2f(3, 45);
+    glVertex2f(29, 45);
+    glVertex2f(29, 3);
+    glVertex2f(3, 3);
     glEnd();
-    glTranslatef(32,0,0);
+    glTranslatef(32, 0, 0);
     glEndList();
 
     initialized_sys = true;
 }
 
 //=======================================================================
-void load_font(int font)
-{
-    if(!initialized_sys) init_font_sys();
-    if(!is_font(font)) return;
+void load_font(int font) {
+    if (!initialized_sys)
+        init_font_sys();
+    if (!is_font(font))
+        return;
 
     CWFont *cwf = fontvec[font];
 
-    FT_Face  face;
+    FT_Face face;
     FT_Error err;
-    err = FT_New_Face( fontlibrary, cwf->filename, 0, &face);
+    err = FT_New_Face(fontlibrary, cwf->filename, 0, &face);
 
-    if(err)
-    {
+    if (err) {
         printf("Failed to load font file %s\n", cwf->filename);
         return;
     }
 
-    err = FT_Set_Pixel_Sizes( face, 32,48);
-    if(err)
-    {
+    err = FT_Set_Pixel_Sizes(face, 32, 48);
+    if (err) {
         printf("Failed to set face dimensions to 32x48\n");
         return;
     }
 
-    std::vector< int > supported_chars;
-    
+    std::vector<int> supported_chars;
+
     int i;
-    for( i = 0; i < ASCII_COUNT; ++i)
-    {
-        int glyph_index = FT_Get_Char_Index(face,i);
-        if( glyph_index)
+    for (i = 0; i < ASCII_COUNT; ++i) {
+        int glyph_index = FT_Get_Char_Index(face, i);
+        if (glyph_index)
             supported_chars.push_back(i);
     }
 
     cwf->numLists = supported_chars.size();
-    cwf->listBase = glGenLists( cwf->numLists );
-    cwf->texids = new GLuint[ cwf->numLists ];
+    cwf->listBase = glGenLists(cwf->numLists);
+    cwf->texids = new GLuint[cwf->numLists];
     glEnable(GL_TEXTURE_2D);
-    glGenTextures( cwf->numLists, cwf->texids );
+    glGenTextures(cwf->numLists, cwf->texids);
 
     int list_index = 0;
-    for( i = 0; i < ASCII_COUNT; ++i)
-    {
+    for (i = 0; i < ASCII_COUNT; ++i) {
         cwf->glyphMap[i] = unknown_char;
         cwf->advanceX[i] = 32;
-        
-        if(supported_chars[list_index] != i)
-        {
+
+        if (supported_chars[list_index] != i) {
             continue;
         }
 
-        if( FT_Load_Glyph(face, FT_Get_Char_Index(face,i), FT_LOAD_DEFAULT) )
-        {
+        if (FT_Load_Glyph(face, FT_Get_Char_Index(face, i), FT_LOAD_DEFAULT)) {
             list_index++;
             continue;
         }
 
         FT_Glyph glyph;
-        if( FT_Get_Glyph( face->glyph, &glyph ) )
-        {
+        if (FT_Get_Glyph(face->glyph, &glyph)) {
             list_index++;
             continue;
         }
 
-        FT_Glyph_To_Bitmap( &glyph, FT_RENDER_MODE_NORMAL, 0, 1);
-        FT_BitmapGlyph bmp_glyph = (FT_BitmapGlyph) glyph;
-        FT_Bitmap& bmp = bmp_glyph->bitmap;
+        FT_Glyph_To_Bitmap(&glyph, FT_RENDER_MODE_NORMAL, 0, 1);
+        FT_BitmapGlyph bmp_glyph = (FT_BitmapGlyph)glyph;
+        FT_Bitmap &bmp = bmp_glyph->bitmap;
 
         // create texture
         int w, h;
@@ -178,12 +172,10 @@ void load_font(int font)
 
         GLubyte *data;
         data = new GLubyte[w * h];
-        for( int j = 0; j < h; j++)
-        {
-            for(int k = 0; k < w; k++)
-            {
-                if( k < bmp.width && j < bmp.rows )
-                    data[k + j * w] = bmp.buffer[ k + j * bmp.width];
+        for (int j = 0; j < h; j++) {
+            for (int k = 0; k < w; k++) {
+                if (k < bmp.width && j < bmp.rows)
+                    data[k + j * w] = bmp.buffer[k + j * bmp.width];
                 else
                     data[k + j * w] = 0;
             }
@@ -197,25 +189,28 @@ void load_font(int font)
         glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, w, h, 0, GL_ALPHA,
                      GL_UNSIGNED_BYTE, data);
 
-        delete [] data;
+        delete[] data;
 
         // create display list
         float x, y;
         x = float(bmp.width) / float(w);
         y = float(bmp.rows) / float(h);
         cwf->glyphMap[i] = cwf->listBase + list_index;
-        cwf->advanceX[i] = (unsigned int)
-            (((float)face->glyph->advance.x) / 64.0f);
+        cwf->advanceX[i] = (unsigned int)(((float)face->glyph->advance.x) / 64.0f);
 
-        glNewList( cwf->glyphMap[i], GL_COMPILE);
+        glNewList(cwf->glyphMap[i], GL_COMPILE);
         glBindTexture(GL_TEXTURE_2D, cwf->texids[list_index]);
         glTranslatef((float)bmp_glyph->left, (float)bmp_glyph->top - bmp.rows, 0);
         glBegin(GL_QUADS);
         {
-            glTexCoord2d(0,0); glVertex2i(0, bmp.rows);
-            glTexCoord2d(0,y); glVertex2i(0,0);
-            glTexCoord2d(x,y); glVertex2i(bmp.width, 0);
-            glTexCoord2d(x,0); glVertex2i(bmp.width, bmp.rows);
+            glTexCoord2d(0, 0);
+            glVertex2i(0, bmp.rows);
+            glTexCoord2d(0, y);
+            glVertex2i(0, 0);
+            glTexCoord2d(x, y);
+            glVertex2i(bmp.width, 0);
+            glTexCoord2d(x, 0);
+            glVertex2i(bmp.width, bmp.rows);
         }
         glEnd();
         glTranslatef((float)cwf->advanceX[i] - bmp_glyph->left,
@@ -229,95 +224,90 @@ void load_font(int font)
 }
 
 //=======================================================================
-int queue_font_to_load(const char* ttfname)
-{
-    CWFont* cwf = new CWFont();
-    cwf->filename = new char[strlen(ttfname) +1];
-    strcpy(cwf->filename,ttfname);
-    cwf->name = new char[strlen(ttfname) +1];
-    strcpy(cwf->name,ttfname);
+int queue_font_to_load(const char *ttfname) {
+    CWFont *cwf = new CWFont();
+    cwf->filename = new char[strlen(ttfname) + 1];
+    strcpy(cwf->filename, ttfname);
+    cwf->name = new char[strlen(ttfname) + 1];
+    strcpy(cwf->name, ttfname);
     fontvec.push_back(cwf);
-    fontloadqueue.push(fontvec.size() -1);
+    fontloadqueue.push(fontvec.size() - 1);
     return fontvec.size() - 1;
 }
 
 //=======================================================================
-void process_font_load_queue()
-{
-    FT_Init_FreeType( &fontlibrary );
+void process_font_load_queue() {
+    FT_Init_FreeType(&fontlibrary);
 
-    while( fontloadqueue.size() > 0)
-    {
-        load_font( fontloadqueue.front() );
-	    fontloadqueue.pop();
+    while (fontloadqueue.size() > 0) {
+        load_font(fontloadqueue.front());
+        fontloadqueue.pop();
     }
 
-    FT_Done_FreeType( fontlibrary );
+    FT_Done_FreeType(fontlibrary);
 }
 
 //=======================================================================
-void set_current_font(int font)
-{
-    if( !is_font(font)) return;
+void set_current_font(int font) {
+    if (!is_font(font))
+        return;
     current_font = font;
 }
 
 //=======================================================================
-bool is_font(int font)
-{
-	if (font < 0) return false;
-	const int fontVecSize = fontvec.size() - 1;
-    if (font > fontVecSize) return false;
+bool is_font(int font) {
+    if (font < 0)
+        return false;
+    const int fontVecSize = fontvec.size() - 1;
+    if (font > fontVecSize)
+        return false;
     return (fontvec[font] != NULL);
 }
 
 //=======================================================================
-int get_num_fonts()
-{
+int get_num_fonts() {
     return fontvec.size();
 }
 
 //=======================================================================
-int get_current_font()
-{
+int get_current_font() {
     return current_font;
 }
 
 //=======================================================================
-const char* get_font_name()
-{
-    if(!is_font(current_font)) return NULL;
+const char *get_font_name() {
+    if (!is_font(current_font))
+        return NULL;
     return fontvec[current_font]->name;
 }
 
 //=======================================================================
-int get_char_escapement(char c)
-{
-    if(!is_font(current_font)) return 0;
+int get_char_escapement(char c) {
+    if (!is_font(current_font))
+        return 0;
     return fontvec[current_font]->advanceX[c];
 }
 
 //=======================================================================
-void render_string(const char* str, int start, int end)
-{
-
+void render_string(const char *str, int start, int end) {
     // make sure we have loaded all the fonts we should have by now
     //printf("processing font system\n");
     process_font_load_queue();
     //printf("queued fonts processed\n");
     // continue on
-    if(!is_font(current_font)) { return; }
-    CWFont* cwf = fontvec[current_font];
+    if (!is_font(current_font)) {
+        return;
+    }
+    CWFont *cwf = fontvec[current_font];
 
     glEnable(GL_TEXTURE_2D);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glPushMatrix();
     {
-        glScalef(1,-1,1);
-        for(int i = start; i <= end; i++)
-        {
-            glCallLists( 1, GL_UNSIGNED_INT, &(cwf->glyphMap[str[i]]) );
+        glScalef(1, -1, 1);
+        for (int i = start; i <= end; i++) {
+            glCallLists(1, GL_UNSIGNED_INT, &(cwf->glyphMap[str[i]]));
         }
     }
     glPopMatrix();
@@ -325,26 +315,25 @@ void render_string(const char* str, int start, int end)
 }
 
 //=======================================================================
-void render_scaled_string(const char* str, int start, int end, float scaling)
-{
-	
+void render_scaled_string(const char *str, int start, int end, float scaling) {
     // make sure we have loaded all the fonts we should have by now
     //printf("processing font system\n");
     process_font_load_queue();
     //printf("queued fonts processed\n");
     // continue on
-    if(!is_font(current_font)) { return; }
-    CWFont* cwf = fontvec[current_font];
-	
+    if (!is_font(current_font)) {
+        return;
+    }
+    CWFont *cwf = fontvec[current_font];
+
     glEnable(GL_TEXTURE_2D);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glPushMatrix();
     {
         glScalef(scaling * 1.0f, scaling * -1.0f, 1.0f);
-        for(int i = start; i <= end; i++)
-        {
-            glCallLists( 1, GL_UNSIGNED_INT, &(cwf->glyphMap[str[i]]) );
+        for (int i = start; i <= end; i++) {
+            glCallLists(1, GL_UNSIGNED_INT, &(cwf->glyphMap[str[i]]));
         }
     }
     glPopMatrix();
@@ -352,46 +341,46 @@ void render_scaled_string(const char* str, int start, int end, float scaling)
 }
 
 //=======================================================================
-void render_string_label(const char* str, int start, int end)
-{
-
+void render_string_label(const char *str, int start, int end) {
     // make sure we have loaded all the fonts we should have by now
     //printf("processing font system\n");
     process_font_load_queue();
     //printf("queued fonts processed\n");
     // continue on
-    if(!is_font(current_font)) { return; }
-    CWFont* cwf = fontvec[current_font];
-	
-	// draw backgrond label: dark blue
-	glColor4f(0, 0 ,0.3f, 0.5f);
-	// calculate size of quad
-	float w = 0;;
-	for (int i=start; i<=end; i++) {
-		w += cwf->advanceX[str[i]];
-	}
-	w = w +6;
-	float h = -48 +6;
-	glBegin(GL_QUADS);
-	{
-		glVertex2f(-6, 6);	// left upper
-		glVertex2f(-6, h);	// left lower
-		glVertex2f(w, h);	// right lower
-		glVertex2f(w, 6);	// right upper
-	}
-	glEnd();
-	
-	// draw string: white
-	glColor3f(1,1,1);	
+    if (!is_font(current_font)) {
+        return;
+    }
+    CWFont *cwf = fontvec[current_font];
+
+    // draw backgrond label: dark blue
+    glColor4f(0, 0, 0.3f, 0.5f);
+    // calculate size of quad
+    float w = 0;
+    ;
+    for (int i = start; i <= end; i++) {
+        w += cwf->advanceX[str[i]];
+    }
+    w = w + 6;
+    float h = -48 + 6;
+    glBegin(GL_QUADS);
+    {
+        glVertex2f(-6, 6);  // left upper
+        glVertex2f(-6, h);  // left lower
+        glVertex2f(w, h);   // right lower
+        glVertex2f(w, 6);   // right upper
+    }
+    glEnd();
+
+    // draw string: white
+    glColor3f(1, 1, 1);
     glEnable(GL_TEXTURE_2D);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glPushMatrix();
     {
-        glScalef(1,-1,1);
-        for(int i = start; i <= end; i++)
-        {
-            glCallLists( 1, GL_UNSIGNED_INT, &(cwf->glyphMap[str[i]]) );
+        glScalef(1, -1, 1);
+        for (int i = start; i <= end; i++) {
+            glCallLists(1, GL_UNSIGNED_INT, &(cwf->glyphMap[str[i]]));
         }
     }
     glPopMatrix();
@@ -399,49 +388,47 @@ void render_string_label(const char* str, int start, int end)
 }
 
 //=======================================================================
-void render_string_shadowed(const char* str, int start, int end, 
-							float* color, float offset)
-{
-
+void render_string_shadowed(const char *str, int start, int end,
+                            float *color, float offset) {
     // make sure we have loaded all the fonts we should have by now
     //printf("processing font system\n");
     process_font_load_queue();
     //printf("queued fonts processed\n");
     // continue on
-    if(!is_font(current_font)) { return; }
-    CWFont* cwf = fontvec[current_font];
-	
-	// draw backgrond shadow: almost black
-	glEnable(GL_TEXTURE_2D);
-	glEnable(GL_BLEND);
-	glColor3f(0, 0 ,0.1f);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    if (!is_font(current_font)) {
+        return;
+    }
+    CWFont *cwf = fontvec[current_font];
+
+    // draw backgrond shadow: almost black
+    glEnable(GL_TEXTURE_2D);
+    glEnable(GL_BLEND);
+    glColor3f(0, 0, 0.1f);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glPushMatrix();
-    glTranslatef(offset,offset,0);
-	{
-        glScalef(1,-1,1);
-        for(int i = start; i <= end; i++)
-        {
-            glCallLists( 1, GL_UNSIGNED_INT, &(cwf->glyphMap[str[i]]) );
+    glTranslatef(offset, offset, 0);
+    {
+        glScalef(1, -1, 1);
+        for (int i = start; i <= end; i++) {
+            glCallLists(1, GL_UNSIGNED_INT, &(cwf->glyphMap[str[i]]));
         }
     }
-	glPopMatrix();
+    glPopMatrix();
 
-	// draw string: white
-	if (color != NULL)
-		glColor3f(color[0], color[1], color[2]);
-	else
-		glColor3f(1,1,1);	
+    // draw string: white
+    if (color != NULL)
+        glColor3f(color[0], color[1], color[2]);
+    else
+        glColor3f(1, 1, 1);
 
     glEnable(GL_TEXTURE_2D);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glPushMatrix();
     {
-        glScalef(1,-1,1);
-        for(int i = start; i <= end; i++)
-        {
-            glCallLists( 1, GL_UNSIGNED_INT, &(cwf->glyphMap[str[i]]) );
+        glScalef(1, -1, 1);
+        for (int i = start; i <= end; i++) {
+            glCallLists(1, GL_UNSIGNED_INT, &(cwf->glyphMap[str[i]]));
         }
     }
     glPopMatrix();
@@ -449,45 +436,44 @@ void render_string_shadowed(const char* str, int start, int end,
 }
 
 //=======================================================================
-void render_string_outlined(const char* str, int start, int end)
-{
-	// this is a bit expensive font drawing
-	// Since we need to draw strings five times.
+void render_string_outlined(const char *str, int start, int end) {
+    // this is a bit expensive font drawing
+    // Since we need to draw strings five times.
 
     // make sure we have loaded all the fonts we should have by now
     //printf("processing font system\n");
     process_font_load_queue();
     //printf("queued fonts processed\n");
     // continue on
-    if(!is_font(current_font)) { return; }
-    CWFont* cwf = fontvec[current_font];
-	
-	// draw outline: almost black. draw it with four directional offset
-	glEnable(GL_TEXTURE_2D);
-	glEnable(GL_BLEND);
-	glColor3f(0, 0, 0.1f);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    if (!is_font(current_font)) {
+        return;
+    }
+    CWFont *cwf = fontvec[current_font];
+
+    // draw outline: almost black. draw it with four directional offset
+    glEnable(GL_TEXTURE_2D);
+    glEnable(GL_BLEND);
+    glColor3f(0, 0, 0.1f);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glPushMatrix();
-    glTranslatef(2,2,0);
-	{
-        glScalef(1,-1,1);
-        for(int i = start; i <= end; i++)
-        {
-            glCallLists( 1, GL_UNSIGNED_INT, &(cwf->glyphMap[str[i]]) );
+    glTranslatef(2, 2, 0);
+    {
+        glScalef(1, -1, 1);
+        for (int i = start; i <= end; i++) {
+            glCallLists(1, GL_UNSIGNED_INT, &(cwf->glyphMap[str[i]]));
         }
     }
-	glPopMatrix();
-	glPushMatrix();
-    glTranslatef(-2,-2,0);
-	{
-        glScalef(1,-1,1);
-        for(int i = start; i <= end; i++)
-        {
-            glCallLists( 1, GL_UNSIGNED_INT, &(cwf->glyphMap[str[i]]) );
+    glPopMatrix();
+    glPushMatrix();
+    glTranslatef(-2, -2, 0);
+    {
+        glScalef(1, -1, 1);
+        for (int i = start; i <= end; i++) {
+            glCallLists(1, GL_UNSIGNED_INT, &(cwf->glyphMap[str[i]]));
         }
     }
-	glPopMatrix();
-/*	glPushMatrix();
+    glPopMatrix();
+    /*	glPushMatrix();
     glTranslatef(0,2,0);
 	{
         glScalef(1,-1,1);
@@ -508,17 +494,16 @@ void render_string_outlined(const char* str, int start, int end)
     }
 	glPopMatrix();
 */
-	// draw string: white
-	glColor3f(1,1,1);	
+    // draw string: white
+    glColor3f(1, 1, 1);
     glEnable(GL_TEXTURE_2D);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glPushMatrix();
     {
-        glScalef(1,-1,1);
-        for(int i = start; i <= end; i++)
-        {
-            glCallLists( 1, GL_UNSIGNED_INT, &(cwf->glyphMap[str[i]]) );
+        glScalef(1, -1, 1);
+        for (int i = start; i <= end; i++) {
+            glCallLists(1, GL_UNSIGNED_INT, &(cwf->glyphMap[str[i]]));
         }
     }
     glPopMatrix();
