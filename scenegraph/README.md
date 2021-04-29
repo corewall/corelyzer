@@ -12,11 +12,14 @@ Xcode and command-line developer tools must be installed.
 Includes and libraries for the required libtiff, libjpeg,
 libpng, freetype, and squish are provided in deps/mac.
 
-To build Corelyzer using the provided Gradle wrapper:
+Modify JDK and system include paths in scenegraph/build.gradle to reflect
+your configuration.
+
+Then, build Corelyzer with the included Gradle wrapper:
 
     ../gradlew clean build-jni-mac
 
-The generated Scenegraph JAR file and jnilib will be found in scenegraph/dist.
+The generated Scenegraph JAR file and native binary (jnilib) will be found in scenegraph/dist.
 
 
 #### Windows
