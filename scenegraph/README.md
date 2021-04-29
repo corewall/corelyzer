@@ -46,15 +46,12 @@ Install required dev tools:
     sudo apt install mesa-common-dev libglu1-mesa-dev
     sudo apt install libfreetype6-dev libpng-dev libjpeg-dev libtiff-dev libsquish-dev
 
-Clone the Corelyzer GitHub repo and checkout the linux_build branch:
+Clone the Corelyzer GitHub repo and move to the scenegraph dir:
 
     git clone https://github.com/corewall/corelyzer
-    cd corelyzer
-    git checkout linux_build
-
     cd scenegraph
 
-Update the Java include paths in the build-jni-linux task in build.gradle
+In scenegraph/build.gradle, modify the Java include paths in the `build-jni-linux` task
 to reflect your configuration.
 
 Use the provided Gradle wrapper to build:
