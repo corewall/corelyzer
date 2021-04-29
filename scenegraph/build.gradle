@@ -67,7 +67,8 @@ task 'build-jni-mac'(dependsOn: 'copy-jni-files') {
 			src.absolutePath,
 			dist.absolutePath,
 			build.absolutePath,
-			'/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/Library/Frameworks/JavaVM.framework/Versions/Current/Headers',
+			'/Library/Java/JavaVirtualMachines/adoptopenjdk-11.jdk/Contents/Home/include',
+			'/Library/Java/JavaVirtualMachines/adoptopenjdk-11.jdk/Contents/Home/include/darwin',
 			file('deps/mac/include').absolutePath,
 			file('deps/mac/include/freetype2').absolutePath]
 
@@ -98,7 +99,7 @@ def linkMac(arch, libs, rfile, dir) {
 	ant {
 		echo("Linking ${arch}.jnilib")
 		exec(executable: 'c++', dir: dir, failonerror: true) {
-			arg(value: '-mmacosx-version-min=10.12')
+			arg(value: '-mmacosx-version-min=10.10')
 			arg(value: '-g')
 			arg(value: '-bundle')
 			arg(value: '-isysroot')
@@ -106,8 +107,6 @@ def linkMac(arch, libs, rfile, dir) {
 			arg(value: '-O')
 			arg(value: '-arch')
 			arg(value: arch)
-			arg(value: '-framework')
-			arg(value: 'JavaVM')
 			arg(value: '-framework')
 			arg(value: 'OpenGL')
 			arg(value: '-lstdc++')
@@ -132,7 +131,7 @@ def compileMac(src, arch, includes, dir) {
 	ant {
 		echo("Compiling ${src.name} for Mac ${arch}")
 		exec(executable: 'c++', dir: dir, logError: true, failonerror: true) {
-			arg(value: '-mmacosx-version-min=10.12')
+			arg(value: '-mmacosx-version-min=10.10')
 			arg(value: '-c')
 			arg(value: '-isysroot')
 			arg(value: '/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk')
