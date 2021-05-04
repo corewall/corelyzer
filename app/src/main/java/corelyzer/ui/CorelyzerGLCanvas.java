@@ -620,9 +620,10 @@ public class CorelyzerGLCanvas implements GLEventListener, MouseListener, MouseW
 	private Component getPopupParent() { return CorelyzerApp.getApp().getPopupParent(this); }
 
 	private void doDeleteSection() {
-		if (JOptionPane.YES_OPTION == JOptionPane.showConfirmDialog(getPopupParent(), "Are you sure?")) {
+		final String msg = "Are you sure you want to delete this section image?";
+		final String title = "Confirm Delete Image";
+		if (JOptionPane.showConfirmDialog(getPopupParent(), msg, title, JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
 			CorelyzerApp app = CorelyzerApp.getApp();
-
 			if (app != null) {
 				app.getController().deleteSection(selectedTrack, selectedTrackSection);
 				app.updateGLWindows();
