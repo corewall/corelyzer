@@ -646,8 +646,12 @@ public class CorelyzerGLCanvas implements GLEventListener, MouseListener, MouseW
 	
 	private void doStackSections()
 	{
-		SceneGraph.stackSections(selectedTrack, selectedTrackSection);
-		CorelyzerApp.getApp().updateGLWindows();
+		final String msg = "Stacking sections cannot be undone, continue?";
+		final String title = "Confirm Stack Sections";
+		if (JOptionPane.showConfirmDialog(getPopupParent(), msg, title, JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
+			SceneGraph.stackSections(selectedTrack, selectedTrackSection);
+			CorelyzerApp.getApp().updateGLWindows();
+		}
 	}
 
 	private void doExportTrack() {
