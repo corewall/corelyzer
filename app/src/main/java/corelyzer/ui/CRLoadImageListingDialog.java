@@ -565,6 +565,7 @@ public class CRLoadImageListingDialog extends JDialog {
 	// load user processed csv file
 	// each line inlcudes five tuples
 	// filename, orientation, length, dpix, dpiy, depth
+	static private File lastUsedDir = new File(".");
 	private void selectAndLoadCSVFileToList(final String delimiter) {
 		// show up general info message
 		JOptionPane.showMessageDialog(this, "Image Listing Files must be in Comma Separated Values (.csv) format.\n\n"
@@ -574,11 +575,13 @@ public class CRLoadImageListingDialog extends JDialog {
 				+ "- Orientation must be 'Horizontal' or 'Vertical' (excluding quotes).\n"
 				+ "- Headers and comment lines, if included, must start with # to avoid errors.");
 
-		JFileChooser chooser = new JFileChooser();
+		JFileChooser chooser = new JFileChooser(lastUsedDir);
 		chooser.setFileFilter(new FileNameExtensionFilter("Comma Separated Values (.csv)", "csv"));
 		File selectedFile = null;
-		if (chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION)
+		if (chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
 			selectedFile = chooser.getSelectedFile();
+			lastUsedDir = chooser.getCurrentDirectory();
+		}
 
 		if (selectedFile == null) return;
 
