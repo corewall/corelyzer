@@ -64,7 +64,7 @@ import javax.swing.event.TableModelListener;
 
 import net.miginfocom.swing.MigLayout;
 
-import corelyzer.data.CheckBoxTable;
+import corelyzer.data.GraphSectionPropsTable;
 import corelyzer.data.CoreSection;
 import corelyzer.data.CoreSectionGraph;
 import corelyzer.data.Session;
@@ -108,7 +108,7 @@ public class CRGraphDialog extends JFrame {
 	private JTextField excludeMinText, excludeMaxText;
 	private JCheckBox leaveGapsBox;
 
-	private CheckBoxTable fieldsTable;
+	private GraphSectionPropsTable fieldsTable;
 
 	// 9/30/2011 brg: Why are we maintaining member variables that never
 	// change and can easily be acessed w/ foo.getModel()?
@@ -251,7 +251,7 @@ public class CRGraphDialog extends JFrame {
 		JPanel fieldsPanel = new JPanel(new MigLayout("insets 5", "[grow]", "[][grow]"));
 		fieldsPanel.add(new JLabel("Properties fields:"), "wrap");
 		final JScrollPane fieldsScrollPane = new JScrollPane();
-		fieldsTable = new CheckBoxTable();
+		fieldsTable = new GraphSectionPropsTable();
 		fieldsScrollPane.setViewportView( fieldsTable );
 		fieldsPanel.add(fieldsScrollPane, "grow");
 		

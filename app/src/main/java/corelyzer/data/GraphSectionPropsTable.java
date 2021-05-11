@@ -16,16 +16,16 @@ import javax.swing.table.AbstractTableModel;
  * checkbox, the checkbox will not toggle on or off. The only way to toggle a
  * checkbox on or off is to actually click on the checkbox.
  */
-public class CheckBoxTable extends JTable {
+public class GraphSectionPropsTable extends JTable {
 
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = -5528482465862859451L;
-	public CheckBoxTableModel model;
+	public GraphSectionPropsTableModel model;
 
-	public CheckBoxTable() {
-		model = new CheckBoxTableModel();
+	public GraphSectionPropsTable() {
+		model = new GraphSectionPropsTableModel();
 		setModel(model);
 		setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
@@ -88,8 +88,8 @@ public class CheckBoxTable extends JTable {
 	}
 }
 
-/** Used as the table model for a CheckBoxTable */
-class CheckBoxTableModel extends AbstractTableModel {
+/** Used as the table model for a GraphSectionPropsTable */
+class GraphSectionPropsTableModel extends AbstractTableModel {
 
 	/**
 	 * 
@@ -104,7 +104,7 @@ class CheckBoxTableModel extends AbstractTableModel {
 
 	//public TableModelListener checklistener;
 
-	public CheckBoxTableModel() {
+	public GraphSectionPropsTableModel() {
 		checkVec = new Vector<Boolean>();
 		labelVec = new Vector<String>();
 		colorVec = new Vector<Color>();
