@@ -72,20 +72,19 @@ public class CheckBoxTable extends JTable {
 	@Override
 	public void setPreferredSize(final Dimension d) {
 		super.setPreferredSize(d);
-		getColumnModel().getColumn(0).setPreferredWidth(60);
-		//getColumnModel().getColumn(1).setPreferredWidth(d.width - 60);
-		getColumnModel().getColumn(1).setPreferredWidth(60);
-		getColumnModel().getColumn(2).setPreferredWidth(30);
-		getColumnModel().getColumn(3).setPreferredWidth(d.width - 120);
+		getColumnModel().getColumn(0).setPreferredWidth(50);
+		getColumnModel().getColumn(1).setPreferredWidth(200);
+		getColumnModel().getColumn(2).setPreferredWidth(50);
+		getColumnModel().getColumn(3).setPreferredWidth(d.width - 300);
 	}
 
 	@Override
 	public void setSize(final int width, final int height) {
 		super.setSize(width, height);
-		getColumnModel().getColumn(0).setPreferredWidth(60);
-		getColumnModel().getColumn(1).setPreferredWidth(/*width - */60);
-		getColumnModel().getColumn(2).setPreferredWidth(30);
-		getColumnModel().getColumn(3).setPreferredWidth(width - 120);
+		getColumnModel().getColumn(0).setPreferredWidth(50);
+		getColumnModel().getColumn(1).setPreferredWidth(200);
+		getColumnModel().getColumn(2).setPreferredWidth(50);
+		getColumnModel().getColumn(3).setPreferredWidth(width - 300);
 	}
 }
 
