@@ -32,6 +32,7 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.text.DecimalFormat;
 
 import javax.swing.border.*;
 import javax.swing.BorderFactory;
@@ -1043,7 +1044,9 @@ public class SectionImagePropertyDialog extends JDialog {
 		this.intervalBottomField.setText(String.valueOf(intervalBottom));
 
 		// Depth
-		this.topDepthField.setText(String.valueOf(topDepth + intervalTop / 100.0f));
+		DecimalFormat df = new DecimalFormat("#.###");
+		float dval = (topDepth + intervalTop / 100.0f);
+		this.topDepthField.setText(df.format(dval));
 
 		// Keep a copy of original numbers
 		this.pre_dpix = dpix;
