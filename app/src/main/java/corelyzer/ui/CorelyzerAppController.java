@@ -623,7 +623,21 @@ public class CorelyzerAppController implements ActionListener, AboutHandler, Qui
 		String aFilename = aFile.getAbsolutePath();
 		if (extension.toLowerCase().equals("cml")) {
 			System.out.println("---> [INFO] Loading CML: " + aFile);
-			loadStateFile(aFilename);
+			Thread t = new Thread(new Runnable() {
+				public void run() {
+					// Wait two seconds before trying to open a session file that was
+					// double-clicked or otherwise opened through the host OS interface.
+					// Crude workaround for Issue #18 (Scenegraph isn't fully initialized
+					// at load session time.)
+					try {
+						Thread.sleep(2000);
+					} catch (Exception e) {
+						System.out.println(e.getLocalizedMessage());
+					}
+					loadStateFile(aFilename);
+				}
+			});
+			t.start();
 		} else {
 			String message = "Do not know how to handle file '" + aFilename + "' with extension: '" + extension + "'";
 			JOptionPane.showMessageDialog(view.getMainFrame(), message);
@@ -1327,10 +1341,8 @@ public class CorelyzerAppController implements ActionListener, AboutHandler, Qui
 
 		// ProgressDialog progress = new ProgressDialog();
 		JProgressBar progress = view.getProgressUI();
-		progress.setIndeterminate(true);
 		progress.setString("Checking Package File...");
-		// progress.setIndeterminant();
-		// progress.setVisible(true);
+		// progress.setIndeterminate(true);
 
 		try {
 			while ((en = zin.getNextEntry()) != null) {
