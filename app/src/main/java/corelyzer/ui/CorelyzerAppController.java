@@ -1341,8 +1341,16 @@ public class CorelyzerAppController implements ActionListener, AboutHandler, Qui
 
 		// ProgressDialog progress = new ProgressDialog();
 		JProgressBar progress = view.getProgressUI();
+
+		// On Mac, when the progress bar is indeterminate, the status string will not
+		// be displayed. It's more important for users to see the message in this
+		// case because unzipping a large CAR file can take a long time. Without
+		// a message, it looks like the app is hung/frozen. setIndeterminate()
+		// only on non-Mac platforms. 
 		progress.setString("Checking Package File...");
-		// progress.setIndeterminate(true);
+		if (!CorelyzerApp.isOSX()) {
+			progress.setIndeterminate(true);
+		}
 
 		try {
 			while ((en = zin.getNextEntry()) != null) {
