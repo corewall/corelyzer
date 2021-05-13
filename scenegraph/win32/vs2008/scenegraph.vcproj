@@ -124,7 +124,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;$(ProjectDir)\..\..\deps\x64\include&quot;;&quot;C:\Program Files\Java\jdk1.7.0_79\include&quot;;&quot;C:\Program Files\Java\jdk1.7.0_79\include\win32&quot;"
+				AdditionalIncludeDirectories="&quot;$(ProjectDir)\..\..\deps\x64\include&quot;;&quot;C:\Program Files\AdoptOpenJDK\jdk-11.0.9.11-hotspot\include&quot;;&quot;C:\Program Files\AdoptOpenJDK\jdk-11.0.9.11-hotspot\include\win32&quot;"
 				PreprocessorDefinitions="WIN32;_WIN32;;_DEBUG;DEBUG;USE_FASTDXT"
 				MinimalRebuild="false"
 				BasicRuntimeChecks="0"
@@ -145,7 +145,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="opengl32.lib glu32.lib libpng13.lib libtiff.lib turbojpeg-static.lib freetype.lib pthreadVC2.lib"
-				AdditionalLibraryDirectories="&quot;$(ProjectDir)\..\..\deps\x64&quot;;&quot;C:\Program Files\Java\jdk1.7.0_79\lib&quot;"
+				AdditionalLibraryDirectories="&quot;$(ProjectDir)\..\..\deps\x64&quot;;&quot;C:\Program Files\AdoptOpenJDK\jdk-11.0.9.11-hotspot\lib&quot;"
 				IgnoreDefaultLibraryNames="libcmt.lib"
 				GenerateDebugInformation="true"
 				AssemblyDebug="1"
@@ -282,7 +282,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="2"
-				AdditionalIncludeDirectories="&quot;$(ProjectDir)\..\..\deps\x64\include&quot;;&quot;C:\Program Files\Java\jdk1.7.0_79\include&quot;;&quot;C:\Program Files\Java\jdk1.7.0_79\include\win32&quot;"
+				AdditionalIncludeDirectories="&quot;$(ProjectDir)\..\..\deps\x64\include&quot;;&quot;C:\Program Files\AdoptOpenJDK\jdk-11.0.9.11-hotspot\include&quot;;&quot;C:\Program Files\AdoptOpenJDK\jdk-11.0.9.11-hotspot\include\win32&quot;"
 				PreprocessorDefinitions="WIN32;_WIN32;NDEBUG;USE_FASTDXT"
 				RuntimeLibrary="2"
 				BufferSecurityCheck="true"
@@ -301,7 +301,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="opengl32.lib glu32.lib libpng13.lib libtiff.lib turbojpeg-static.lib freetype.lib pthreadVC2.lib"
-				AdditionalLibraryDirectories="&quot;$(ProjectDir)\..\..\deps\x64&quot;;&quot;C:\Program Files\Java\jdk1.7.0_79\lib&quot;"
+				AdditionalLibraryDirectories="&quot;$(ProjectDir)\..\..\deps\x64&quot;;&quot;C:\Program Files\AdoptOpenJDK\jdk-11.0.9.11-hotspot\lib&quot;"
 				IgnoreDefaultLibraryNames="libcmt.lib"
 				GenerateDebugInformation="true"
 				AssemblyDebug="2"
