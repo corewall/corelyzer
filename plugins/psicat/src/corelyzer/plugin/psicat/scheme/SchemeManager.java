@@ -157,6 +157,7 @@ public class SchemeManager {
             try {
                 factory.newSAXParser().parse(url.openStream(), handler);
                 for (String key : handler.getParsed()) {
+                    System.out.println("key = " + key);
                     sources.put(key, url);
                 }
             } catch (final SAXException e) {

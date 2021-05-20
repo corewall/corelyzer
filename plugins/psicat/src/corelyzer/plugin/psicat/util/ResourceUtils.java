@@ -29,9 +29,15 @@ public class ResourceUtils {
 
         try {
             // check if it is a file
+            File f = new File(".");
+            System.out.println("Current dir: " + f.getAbsolutePath());
             File file = new File(name);
+            System.out.println("Looking for file " + name);
             if (file.exists()) {
+                System.out.println("Exists!");
                 urls.add(new URL("file:" + file.getAbsolutePath()));
+            } else {
+                System.out.println("File doesn't exist, sad.");
             }
 
             // check if we can get it from our classloader

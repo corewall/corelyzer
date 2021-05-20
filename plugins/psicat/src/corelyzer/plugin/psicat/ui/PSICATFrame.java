@@ -21,8 +21,12 @@ import javax.swing.WindowConstants;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
-import org.jdesktop.layout.GroupLayout;
-import org.jdesktop.layout.LayoutStyle;
+// import org.jdesktop.layout.GroupLayout;
+// import org.jdesktop.layout.LayoutStyle;
+// import javax.swing.GroupLayout;
+// import javax.swing.LayoutStyle;
+
+import javax.swing.BoxLayout;
 
 import corelyzer.plugin.psicat.PSICATPlugin;
 import corelyzer.ui.CorelyzerApp;
@@ -136,56 +140,73 @@ public class PSICATFrame extends JFrame {
         symbolsCheckbox.setEnabled(false);
         symbolsCheckbox.setMargin(new java.awt.Insets(0, 0, 0, 0));
 
-        GroupLayout dataPanelLayout = new GroupLayout(dataPanel);
-        dataPanel.setLayout(dataPanelLayout);
-        dataPanelLayout.setHorizontalGroup(dataPanelLayout.createParallelGroup(
-                GroupLayout.LEADING).add(
-                dataPanelLayout.createSequentialGroup().addContainerGap().add(
-                        dataPanelLayout
-                                .createParallelGroup(GroupLayout.LEADING).add(
-                                        annotationsCheckbox).add(
-                                        lithologiesCheckbox).add(
-                                        symbolsCheckbox)).addContainerGap(232,
-                        Short.MAX_VALUE)));
-        dataPanelLayout.setVerticalGroup(dataPanelLayout.createParallelGroup(
-                GroupLayout.LEADING).add(
-                dataPanelLayout.createSequentialGroup().addContainerGap().add(
-                        annotationsCheckbox).addPreferredGap(
-                        LayoutStyle.RELATED).add(lithologiesCheckbox)
-                        .addPreferredGap(LayoutStyle.RELATED).add(
-                                symbolsCheckbox).addContainerGap(113,
-                                Short.MAX_VALUE)));
 
-        GroupLayout layout = new GroupLayout(getContentPane());
-        getContentPane().setLayout(layout);
-        layout.setHorizontalGroup(layout.createParallelGroup(
-                GroupLayout.LEADING).add(
-                layout.createSequentialGroup().addContainerGap().add(
-                        layout.createParallelGroup(GroupLayout.LEADING).add(
-                                dataPanel, GroupLayout.DEFAULT_SIZE,
-                                GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE).add(
-                                GroupLayout.TRAILING,
-                                layout.createSequentialGroup().add(fileText,
-                                        GroupLayout.DEFAULT_SIZE, 267,
-                                        Short.MAX_VALUE).addPreferredGap(
-                                        LayoutStyle.RELATED).add(browseButton))
-                                .add(instructionsLabel)).addContainerGap()));
-        layout.setVerticalGroup(layout.createParallelGroup(GroupLayout.LEADING)
-                .add(
-                        layout.createSequentialGroup().addContainerGap().add(
-                                instructionsLabel).addPreferredGap(
-                                LayoutStyle.RELATED).add(
-                                layout
-                                        .createParallelGroup(
-                                                GroupLayout.BASELINE).add(
-                                                browseButton).add(fileText,
-                                                GroupLayout.PREFERRED_SIZE,
-                                                GroupLayout.DEFAULT_SIZE,
-                                                GroupLayout.PREFERRED_SIZE))
-                                .addPreferredGap(LayoutStyle.RELATED).add(
-                                        dataPanel, GroupLayout.DEFAULT_SIZE,
-                                        GroupLayout.DEFAULT_SIZE,
-                                        Short.MAX_VALUE).addContainerGap()));
+        // private JCheckBox annotationsCheckbox;
+        // private JButton browseButton;
+        // private JPanel dataPanel;
+        // private JTextField fileText;
+        // private JLabel instructionsLabel;
+        // private JCheckBox lithologiesCheckbox;
+        // private JCheckBox symbolsCheckbox;
+        BoxLayout boxLayout = new BoxLayout(dataPanel, BoxLayout.PAGE_AXIS);
+        dataPanel.setLayout(boxLayout);
+        dataPanel.add(annotationsCheckbox);
+        dataPanel.add(browseButton);
+        dataPanel.add(fileText);
+        dataPanel.add(instructionsLabel);
+        dataPanel.add(lithologiesCheckbox);
+        dataPanel.add(symbolsCheckbox);
+
+        // GroupLayout dataPanelLayout = new GroupLayout(dataPanel);
+        // dataPanel.setLayout(dataPanelLayout);
+        // dataPanelLayout.setHorizontalGroup(dataPanelLayout.createParallelGroup(
+        //         GroupLayout.Alignment.LEADING).add(
+        //         dataPanelLayout.createSequentialGroup().addContainerGap().addComponent(
+        //                 dataPanelLayout
+        //                         .createParallelGroup(GroupLayout.Alignment.LEADING).addComponent(
+        //                                 annotationsCheckbox).addComponent(
+        //                                 lithologiesCheckbox).addComponent(
+        //                                 symbolsCheckbox)).addContainerGap(232,
+        //                 Short.MAX_VALUE)));
+        // dataPanelLayout.setVerticalGroup(dataPanelLayout.createParallelGroup(
+        //         GroupLayout.Alignment.LEADING).addComponent(
+        //         dataPanelLayout.createSequentialGroup().addContainerGap().addComponent(
+        //                 annotationsCheckbox).addPreferredGap(
+        //                 LayoutStyle.ComponentPlacement.RELATED).add(lithologiesCheckbox)
+        //                 .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED).add(
+        //                         symbolsCheckbox).addContainerGap(113,
+        //                         Short.MAX_VALUE)));
+
+        // GroupLayout layout = new GroupLayout(getContentPane());
+        getContentPane().add(dataPanel);
+        // layout.setHorizontalGroup(layout.createParallelGroup(
+        //         GroupLayout.Alignment.LEADING).add(
+        //         layout.createSequentialGroup().addContainerGap().add(
+        //                 layout.createParallelGroup(GroupLayout.Alignment.LEADING).addComponent(
+        //                         dataPanel, GroupLayout.DEFAULT_SIZE,
+        //                         GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE).add(
+        //                         GroupLayout.Alignment.TRAILING,
+        //                         layout.createSequentialGroup().add(fileText,
+        //                                 GroupLayout.DEFAULT_SIZE, 267,
+        //                                 Short.MAX_VALUE).addPreferredGap(
+        //                                 LayoutStyle.ComponentPlacement.RELATED).add(browseButton))
+        //                         .add(instructionsLabel)).addContainerGap()));
+        // layout.setVerticalGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+        //         .add(
+        //                 layout.createSequentialGroup().addContainerGap().add(
+        //                         instructionsLabel).addPreferredGap(
+        //                         LayoutStyle.ComponentPlacement.RELATED).add(
+        //                         layout
+        //                                 .createParallelGroup(
+        //                                         GroupLayout.BASELINE).add(
+        //                                         browseButton).add(fileText,
+        //                                         GroupLayout.PREFERRED_SIZE,
+        //                                         GroupLayout.DEFAULT_SIZE,
+        //                                         GroupLayout.PREFERRED_SIZE))
+        //                         .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED).add(
+        //                                 dataPanel, GroupLayout.DEFAULT_SIZE,
+        //                                 GroupLayout.DEFAULT_SIZE,
+        //                                 Short.MAX_VALUE).addContainerGap()));
         pack();
     }
 
@@ -259,6 +280,7 @@ public class PSICATFrame extends JFrame {
         try {
             ZipFile zip = new ZipFile(file);
             for (ZipEntry entry : Collections.list(zip.entries())) {
+                System.out.println("ZIP file entry = " + entry.getName());
                 if (entry.getName().startsWith("annotations")) {
                     annotationsCheckbox.setEnabled(true);
                 } else if (entry.getName().equals(

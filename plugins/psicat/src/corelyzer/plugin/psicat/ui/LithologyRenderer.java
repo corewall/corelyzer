@@ -14,13 +14,13 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
 
-import javax.media.opengl.GL;
-import javax.media.opengl.GLException;
+import com.jogamp.opengl.GL2;
+import com.jogamp.opengl.GLException;
 
-import com.sun.opengl.util.texture.Texture;
-import com.sun.opengl.util.texture.TextureIO;
+import com.jogamp.opengl.util.texture.Texture;
+import com.jogamp.opengl.util.texture.TextureIO;
 
-import corelyzer.helper.SceneGraph;
+import corelyzer.graphics.SceneGraph;
 import corelyzer.plugin.freedraw.FreedrawContext;
 import corelyzer.plugin.freedraw.FreedrawRenderer;
 import corelyzer.plugin.psicat.scheme.SchemeEntry;
@@ -134,7 +134,7 @@ public class LithologyRenderer implements FreedrawRenderer {
         return color;
     }
 
-    private Texture getTexture(final SchemeEntry entry) {
+    private Texture getTexture(final SchemeEntry entry, final GL2 gl) {
         // no entry so return null
         if ((entry == null) || !entry.getMap().containsKey("image")) {
             return null;
@@ -168,8 +168,8 @@ public class LithologyRenderer implements FreedrawRenderer {
                     .substring(imagePath.lastIndexOf('.') + 1));
 
             // set up some parameters
-            texture.setTexParameteri(GL.GL_TEXTURE_WRAP_S, GL.GL_CLAMP);
-            texture.setTexParameteri(GL.GL_TEXTURE_WRAP_T, GL.GL_CLAMP);
+            texture.setTexParameteri(gl, GL2.GL_TEXTURE_WRAP_S, GL2.GL_CLAMP);
+            texture.setTexParameteri(gl, GL2.GL_TEXTURE_WRAP_T, GL2.GL_CLAMP);
             textureCache.put(entry, texture);
             return texture;
         } catch (MalformedURLException e) {
@@ -288,16 +288,16 @@ public class LithologyRenderer implements FreedrawRenderer {
      */
     public void render(final FreedrawContext context) {
         // set our gl parameters
-        GL gl = context.getGl();
+        GL2 gl = context.getGl();
 
-        gl.glPushAttrib(GL.GL_ALL_ATTRIB_BITS);
+        gl.glPushAttrib(GL2.GL_ALL_ATTRIB_BITS);
 
-        boolean textureEnabled = gl.glIsEnabled(GL.GL_TEXTURE_2D);
+        boolean textureEnabled = gl.glIsEnabled(GL2.GL_TEXTURE_2D);
         if (!textureEnabled) {
-            gl.glEnable(GL.GL_TEXTURE_2D);
+            gl.glEnable(GL2.GL_TEXTURE_2D);
         }
-        gl.glTexEnvi(GL.GL_TEXTURE_ENV, GL.GL_TEXTURE_ENV_MODE, GL.GL_BLEND);
-        gl.glEnable(GL.GL_BLEND);
+        gl.glTexEnvi(GL2.GL_TEXTURE_ENV, GL2.GL_TEXTURE_ENV_MODE, GL2.GL_BLEND);
+        gl.glEnable(GL2.GL_BLEND);
 
         // figure out our depth extents
         double left = SceneGraph.getCanvasPositionX(0) / 72 * 2.54 / 100;
@@ -316,10 +316,10 @@ public class LithologyRenderer implements FreedrawRenderer {
             }
         }
 
-        gl.glDisable(GL.GL_BLEND);
+        gl.glDisable(GL2.GL_BLEND);
 
         if (!textureEnabled) {
-            gl.glDisable(GL.GL_TEXTURE_2D);
+            gl.glDisable(GL2.GL_TEXTURE_2D);
         }
 
         gl.glPopAttrib();
@@ -327,18 +327,18 @@ public class LithologyRenderer implements FreedrawRenderer {
 
     private void renderBorder(final FreedrawContext context,
             final Interval interval) {
-        GL gl = context.getGl();
+        GL2 gl = context.getGl();
 
         float x = (float) interval.top;
         float y = context.getY();
         float w = (float) (interval.bot - interval.top);
         float h = context.getH();
 
-        gl.glBlendFunc(GL.GL_ONE, GL.GL_ONE);
+        gl.glBlendFunc(GL2.GL_ONE, GL2.GL_ONE);
 
         gl.glLineWidth(1);
         gl.glColor4f(1, 1, 1, 1);
-        gl.glBegin(GL.GL_LINE_STRIP);
+        gl.glBegin(GL2.GL_LINE_STRIP);
         {
             gl.glVertex3f(x, y, 0);
             gl.glVertex3f(x, y + h, 0);
@@ -351,8 +351,8 @@ public class LithologyRenderer implements FreedrawRenderer {
 
     private void renderInterval(final FreedrawContext context,
             final Interval interval) {
-        // get our GL
-        GL gl = context.getGl();
+        // get our GL2
+        GL2 gl = context.getGl();
 
         // init some coordinates
         float x = (float) interval.top;
@@ -373,10 +373,10 @@ public class LithologyRenderer implements FreedrawRenderer {
             gl.glColor3f(color[0], color[1], color[2]);
 
             // get our texture
-            Texture t = getTexture(entry);
+            Texture t = getTexture(entry, gl);
             if (t == null) {
                 // just draw a colored box
-                gl.glBegin(GL.GL_QUADS);
+                gl.glBegin(GL2.GL_QUADS);
                 {
                     gl.glVertex3f(x, y, 0);
                     gl.glVertex3f(x, y + h, 0);
@@ -385,10 +385,10 @@ public class LithologyRenderer implements FreedrawRenderer {
                 }
                 gl.glEnd();
             } else {
-                gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE);
-                t.bind();
+                gl.glBlendFunc(GL2.GL_SRC_ALPHA, GL2.GL_ONE);
+                t.bind(gl);
                 // render texture
-                gl.glBegin(GL.GL_QUADS);
+                gl.glBegin(GL2.GL_QUADS);
                 {
                     int blocks = (int) Math
                             .floor(((interval.bot - interval.top) / step));
