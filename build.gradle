@@ -25,15 +25,17 @@ task 'package-check'(dependsOn: [':app:build'])  {
 			logger.error("!! The library must be generated (or re-generated for this version), see scenegraph/README.md for instructions.")
 			throw new Error("Missing required scenegraph library or version mismatch.  Expected: scenegraph/dist/scenegraph-${version}.jar")
 		}
-		def javaRuntimeDir = file("packages/java_runtime")
-		if (!javaRuntimeDir.exists()) {
-			throw new Error("Error: Missing packages/java_runtime directory")
-		}
-		if (javaRuntimeFile == null) {
-			throw new Error("Error: javaRuntimeFile var is null.\nTo resolve, update javaRuntimeFile var with your Java 11 runtime in build.gradle.")
-		}
-		if (javaRuntimeDir.listFiles().find { it.name.equals(javaRuntimeFile) } == null) {
-			throw new Error("Error: Missing Java runtime '${javaRuntimeFile}' in packages/java_runtime")
+		if (!OperatingSystem.current().isLinux()) {
+			def javaRuntimeDir = file("packages/java_runtime")
+			if (!javaRuntimeDir.exists()) {
+				throw new Error("Error: Missing packages/java_runtime directory")
+			}
+			if (javaRuntimeFile == null) {
+				throw new Error("Error: javaRuntimeFile var is null.\nTo resolve, update javaRuntimeFile var with your Java 11 runtime in build.gradle.")
+			}
+			if (javaRuntimeDir.listFiles().find { it.name.equals(javaRuntimeFile) } == null) {
+				throw new Error("Error: Missing Java runtime '${javaRuntimeFile}' in packages/java_runtime")
+			}
 		}
 	}
 }
