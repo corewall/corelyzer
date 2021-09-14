@@ -32,7 +32,8 @@ class LacCoreSectionParser extends SectionIDParser {
         super();
         name = "LacCore";
         final String EXP = "[A-Z0-9]+";
-        final String LAKEYEAR = "[A-Z0-9]+?[0-9]{2}"; // Lake: 1+ alphanumeric, Year: exactly 2 numbers
+        // 8/16/2021 brg: LAKEYEAR component is now optional
+        final String LAKEYEAR = "([A-Z0-9]+?[0-9]{2}-)?"; // Lake: 1+ alphanumeric, Year: exactly 2 numbers
         final String SITE = "[0-9]+";
         final String HOLE = "[A-Z]+";
         final String SITEHOLE = SITE + HOLE;
@@ -44,7 +45,7 @@ class LacCoreSectionParser extends SectionIDParser {
         final String SUFFIX = "(_.+)?"; // optional
 
         // parentheses are capturing group for full hole/track ID
-        final String laccorePattern = "(?<hole>" + EXP + "-" + LAKEYEAR + "-" + SITEHOLE + ")-" + CORETOOL + "-" + SECTION + HALF + SUFFIX;
+        final String laccorePattern = "(?<hole>" + EXP + "-" + LAKEYEAR + SITEHOLE + ")-" + CORETOOL + "-" + SECTION + HALF + SUFFIX;
         pattern = Pattern.compile(laccorePattern);
     }
 }

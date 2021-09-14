@@ -62,6 +62,25 @@ public class SectionIDParserFactory {
             "GLAD9-PET06-1A-31MX-1", // invalid two-letter tool code
             "OGDP-OLD14-1A-1G-1-X" // invalid half A/W/WR
         };
+        String[] laccore_no_lakeyear_ids = {
+            // valid IDs
+            "1001-1A-5P-1", // exp can be numeric
+            "OGDP-1X-1G-5", // Lake code can be entirely numeric
+            "OGDP-1X-1G-5", // Lake code can end in a number, so must allow 2+ digits
+            "OGDP-1P-1H-1",
+            "OGDP-1A-1G-1", // no archive/working/whole-round
+            "OGDP-1A-1G-1-A", // archive
+            "OGDP-1A-1G-1-W", // working
+            "OGDP-1A-1G-1-WR", // whole-round
+            "OGDP-1A-1G-CC-A", // core catcher
+            "OGDP-1A-1G-CC", // core catcher no half
+            "OGDP-1A-1G-7-A", // 7th section
+            "OGDP-1A-1G-99-A", // max valid section is 99
+            "GLAD9-1A-31MC-1", // valid two-letter tool code
+            "OGDP-99ZZ-999Q-99-A", // crazy but technically valid site, hole, core, and section counts
+            "OGDP-10X-1P-7_f", // minimal suffix
+            "OGDP-10X-1Q-CC-A_f11_bunchofotherstuff@#%", // long but still valid suffix        
+        };
         String[] iodp_ids = { // all valid IODP IDs
             "318-U1357A-1H-1",
             "318-U1357A-1H-1-A",
@@ -102,9 +121,10 @@ public class SectionIDParserFactory {
 
         Vector<String[]> idLists = new Vector<String[]>();
         // idLists.add(laccore_ids);
+        idLists.add(laccore_no_lakeyear_ids);
         // idLists.add(iodp_ids);
         // idLists.add(icdp_ids);
-        idLists.add(default_ids);
+        // idLists.add(default_ids);
         for (String[] ids : idLists) {
             SectionIDParser p = SectionIDParserFactory.getMatchingParser(ids[0]);
             System.out.println("Using " + p.getName() + " parser.");
