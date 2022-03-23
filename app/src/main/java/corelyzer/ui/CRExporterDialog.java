@@ -64,6 +64,7 @@ import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
 
 import corelyzer.data.CoreSection;
+import corelyzer.data.Session;
 import corelyzer.data.TrackSceneNode;
 import corelyzer.data.WellLogDataSet;
 import corelyzer.graphics.SceneGraph;
@@ -348,72 +349,68 @@ public class CRExporterDialog extends JDialog {
 		// progress.setProgressMax(app.getDataFileListModel().size());
 		// progress.setVisible(true);
 
-		for (int i = 0; i < app.getDataFileListModel().size(); i++) {
-			WellLogDataSet d = (WellLogDataSet) app.getDataFileListModel().elementAt(i);
-
-			String name = d.getSourceFilename();
-
-			File f = new File(name);
-
-			if (f.exists()) {
-				String filename = f.getName();
-				System.out.println("---- Dataset f: " + i + ", " + filename);
-				this.copyFile(name, dataDirPath + sp + filename);
-
-				progress.setValue(i);
-			}
-		}
-
-		// Tracks & Images
-		progress.setString("Exporting track and images");
-
-		for (int i = 0; i < app.getTrackListModel().size(); i++) {
-			TrackSceneNode t = (TrackSceneNode) app.getTrackListModel().elementAt(i);
-
-			String trackName = SceneGraph.getTrackName(t.getId());
-			System.out.println("---- Process Track " + trackName);
-
-			// dig into track to find images
-			int tid = t.getId();
-
-			progress.setMaximum(t.getNumCores());
-			for (int j = 0; j < t.getNumCores(); j++) {
-				progress.setValue( j + 1 );
-
-				CoreSection cs = t.getCoreSection(j);
-				int csid = cs.getId();
-
-				String name = SceneGraph.getImageName(SceneGraph.getImageIdForSection(tid, csid));
-
-				if (name == null) {
-					System.out.println("---> section: tid:" + tid + ", csid" + csid + " name is null");
-					continue;
-				}
-
+		for (int i = 0; i < app.getSessionListModel().size(); i++) {
+			Session s = (Session)app.getSessionListModel().elementAt(i);
+			System.out.println("---- Session: " + s.getName());
+			for (WellLogDataSet d : s.getDatasets()) {
+				String name = d.getSourceFilename();
 				File f = new File(name);
-
 				if (f.exists()) {
 					String filename = f.getName();
-					System.out.println("---- Core Image: Name: " + filename);
-					this.copyFile(name, imgDirPath + sp + filename);
+					System.out.println("---- Dataset f: " + i + ", " + filename);
+					this.copyFile(name, dataDirPath + sp + filename);
+
+					progress.setValue(i);
 				}
+			}
+			for (TrackSceneNode t : s.getTrackSceneNodes()) {
+				// Tracks & Images
+				progress.setString("Exporting track and images");
+				String trackName = SceneGraph.getTrackName(t.getId());
+				System.out.println("---- Process Track " + trackName);
 
-				// Annotation
-				int nmarkers = SceneGraph.getNumCoreSectionMarkers(tid, csid);
-				System.out.println("-- Exporting " + nmarkers + " markers from" + tid + ", " + csid);
-				for (int k = 0; k < nmarkers; k++) {
-					// TODO get annotationMarkerId from k?!;
-					String anno_name = SceneGraph.getCoreSectionMarkerLocal(tid, csid, k);
+				// dig into track to find images
+				int tid = t.getId();
 
-					File af = new File(anno_name);
+				progress.setMaximum(t.getNumCores());
+				for (int j = 0; j < t.getNumCores(); j++) {
+					progress.setValue( j + 1 );
 
-					if (af.exists()) {
-						String anno_filename = af.getName();
-						System.out.println("-- Annotation name: " + anno_name);
-						// this.copyFile(anno_name,
-						// annoDirPath + sp + anno_filename);
+					CoreSection cs = t.getCoreSection(j);
+					int csid = cs.getId();
 
-						this.handleAnnotationAndAttachments(anno_name, annoDirPath + sp + anno_filename);
+					String name = SceneGraph.getImageName(SceneGraph.getImageIdForSection(tid, csid));
+
+					if (name == null) {
+						System.out.println("---> section: tid:" + tid + ", csid" + csid + " name is null");
+						continue;
+					}
+
+					File f = new File(name);
+
+					if (f.exists()) {
+						String filename = f.getName();
+						System.out.println("---- Core Image: Name: " + filename);
+						this.copyFile(name, imgDirPath + sp + filename);
+					}
+
+					// Annotation
+					int nmarkers = SceneGraph.getNumCoreSectionMarkers(tid, csid);
+					System.out.println("-- Exporting " + nmarkers + " markers from" + tid + ", " + csid);
+					for (int k = 0; k < nmarkers; k++) {
+						// TODO get annotationMarkerId from k?!;
+						String anno_name = SceneGraph.getCoreSectionMarkerLocal(tid, csid, k);
+
+						File af = new File(anno_name);
+
+						if (af.exists()) {
+							String anno_filename = af.getName();
+							System.out.println("-- Annotation name: " + anno_name);
+							// this.copyFile(anno_name,
+							// annoDirPath + sp + anno_filename);
+
+							this.handleAnnotationAndAttachments(anno_name, annoDirPath + sp + anno_filename);
+						}
 					}
 				}
 			}
