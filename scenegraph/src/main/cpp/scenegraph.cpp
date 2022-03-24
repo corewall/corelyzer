@@ -4257,6 +4257,70 @@ bool click_in_annotation_marker(CoreAnnotation *ca, const float tx, const float 
 }
 
 //=======================================================================
+bool click_in_core_section_image(CoreSection *core, const float tx, const float ty, const float cdpix, const float cdpiy) {
+    float w, h;
+    float startPx = core->px;
+
+    if (core->src == -1)  // no image section
+    {
+        w = core->width * INCH_PER_CM;   // inch
+        w *= cdpix;                    // pixel in canvas
+        h = core->height * INCH_PER_CM;  // inch
+        h *= cdpiy;                    // pixel in canvas
+
+        if (core->orientation == PORTRAIT) {
+            float t = w;
+            w = h;
+            h = t;
+        }
+    } else { // image
+        w = (float)get_texset_src_width(core->src);   // pixel in src width
+        h = (float)get_texset_src_height(core->src);  // pixel in src height
+
+        float intTop = (core->intervalTop / 2.54f) * core->dpi_x;
+        float intBot = (core->intervalBottom / 2.54f) * core->dpi_x;
+        float visibleW = intBot - intTop;
+
+        // check the orientation
+        if (core->orientation == PORTRAIT) {
+            float t;
+            t = w;
+            w = h;
+            h = t;
+        }
+
+        w = visibleW;
+        startPx = core->px + (cdpix * intTop / core->dpi_x);
+
+        w /= core->dpi_x;  // inch
+        h /= core->dpi_y;  // inch
+        w *= cdpix;      // pixel in canvas
+        h *= cdpiy;      // pixel in canvas
+    }
+
+    // check horizontal range
+    // offset?
+    if (core->graph_offset == 0.0f) {
+        if (tx < startPx)
+            return false;
+        if (tx > (startPx + w))
+            return false;
+    } else {
+        // adjust offset
+        const float min_var = startPx > startPx + core->graph_offset ? startPx + core->graph_offset : startPx;
+        const float max_var = startPx + w > startPx + w + core->graph_offset ? startPx + w : startPx + w + core->graph_offset;
+
+        if (tx < min_var)
+            return false;
+        if (tx > max_var)
+            return false;
+    }
+
+    // see if it's part of the actual image before checking
+    return (ty >= core->py && ty <= core->py + h);
+}
+
+//=======================================================================
 void perform_pick(int canvas, float _x, float _y) {
     float x, y;
 
@@ -4267,6 +4331,7 @@ void perform_pick(int canvas, float _x, float _y) {
         x = _y;
         y = -_x;
     }
+    printf("perform_pick()!\n");
 
 #ifdef DEBUG
     printf("Pick coord (_x, _y) = %.2f %.2f\n", _x, _y);
@@ -4293,227 +4358,167 @@ void perform_pick(int canvas, float _x, float _y) {
     float cdpix, cdpiy;
     get_canvas_dpi(canvas, &cdpix, &cdpiy);
 
-    int zlen = get_scene_track_zorder_length(default_track_scene);
+    const int zlen = get_scene_track_zorder_length(default_track_scene);
     if (zlen <= 0)
         return;
 
     int *order = (int *)malloc(sizeof(int) * zlen);
     get_scene_track_zorder(default_track_scene, order);
 
-    for (i = 0; i < zlen && PickedTrack == -1; ++i)  // track
-    {
-        if (!is_track(default_track_scene, order[i]))
+    // In zorder, first look at core images only. A click on an image should
+    // override other types e.g. graphs, even if they're on top.
+    for (int i = 0; i < zlen; i++) {
+        if (!is_track(default_track_scene, order[i])) {
             continue;
+        }
 
-        tsn = get_scene_track(default_track_scene, order[i]);
+        TrackSceneNode *track = get_scene_track(default_track_scene, order[i]);
+        const int cs_zlen = get_track_section_zorder_length(track);
+        if (cs_zlen <= 0) continue;
 
-        // go through each section in track and determine they picked something
-        // associated with the section (image, graph, marker?)
-        int cs_zlen, *cs_order;
-        float tx, ty;
-        CoreSection *cs;
+        CoreSection *core = NULL;
+        float tx = x - track->px;
+        float ty = y - track->py;
 
-        cs_zlen = get_track_section_zorder_length(tsn);
-        if (cs_zlen <= 0)
-            continue;
+        int *cs_order = (int *)malloc(sizeof(int) * cs_zlen);
+        get_track_section_zorder(track, cs_order);
+        for (int cidx = 0; cidx < cs_zlen && PickedSection == -1; cidx++) {
+            if (!is_section_model(track, cs_order[cidx])) continue;
+            core = get_track_section(track, cs_order[cidx]);
 
-        tx = x - tsn->px;
-        ty = y - tsn->py;
-        cs_order = (int *)malloc(sizeof(int) * cs_zlen);
-        get_track_section_zorder(tsn, cs_order);
-
-        // bounding box test
-        for (k = 0; k < cs_zlen && PickedSection == -1; ++k)  // section
-        {
-            float w, h;
-
-            if (!is_section_model(tsn, cs_order[k]))
-                continue;
-
-            cs = get_track_section(tsn, cs_order[k]);
-
-            float startPx = cs->px;
-            if (cs->src == -1)  // no image section
-            {
-                w = cs->width * INCH_PER_CM;   // inch
-                w *= cdpix;                    // pixel in canvas
-                h = cs->height * INCH_PER_CM;  // inch
-                h *= cdpiy;                    // pixel in canvas
-
-                if (cs->orientation == PORTRAIT) {
-                    float t = w;
-                    w = h;
-                    h = t;
-                }
-            } else  // image
-            {
-                w = (float)get_texset_src_width(cs->src);   // pixel in src width
-                h = (float)get_texset_src_height(cs->src);  // pixel in src height
-
-                float intTop = (cs->intervalTop / 2.54f) * cs->dpi_x;
-                float intBot = (cs->intervalBottom / 2.54f) * cs->dpi_x;
-                float visibleW = intBot - intTop;
-
-                // check the orientation
-                if (cs->orientation == PORTRAIT) {
-                    float t;
-                    t = w;
-                    w = h;
-                    h = t;
-                }
-
-                w = visibleW;
-                startPx = cs->px + (cdpix * intTop / cs->dpi_x);
-
-                w /= cs->dpi_x;  // inch
-                h /= cs->dpi_y;  // inch
-                w *= cdpix;      // pixel in canvas
-                h *= cdpiy;      // pixel in canvas
-            }
-
-            // check horizontal range
-            // offset?
-            if (cs->graph_offset == 0.0f) {
-                if (tx < startPx)
-                    continue;
-                if (tx > (startPx + w))
-                    continue;
-            } else {
-                // adjust offset
-                const float min_var = startPx > startPx + cs->graph_offset ? startPx + cs->graph_offset : startPx;
-                const float max_var = startPx + w > startPx + w + cs->graph_offset ? startPx + w : startPx + w + cs->graph_offset;
-
-                if (tx < min_var)
-                    continue;
-                if (tx > max_var)
-                    continue;
-            }
-
-            // see if it's part of the actual image before checking
-            if (ty >= cs->py && ty <= cs->py + h) {
-                PickedSection = cs_order[k];
+            if (click_in_core_section_image(core, tx, ty, cdpix, cdpiy)) {
+                PickedSection = cs_order[cidx];
 
                 // is annotation marker inside core section rectangle?
-                // TODO Check lithology markers
-                for (l = 0; l < cs->annovec.size() && PickedMarker == -1; l++) {
-                    CoreAnnotation *ca = cs->annovec[l];
+                for (l = 0; l < core->annovec.size() && PickedMarker == -1; l++) {
+                    CoreAnnotation *ca = core->annovec[l];
                     if (!ca)
                         continue;
-                    if (click_in_annotation_marker(ca, tx, ty, cs->px, startPx)) {
+                    const float intTop = (core->intervalTop / 2.54f) * core->dpi_x;
+                    if (click_in_annotation_marker(ca, tx, ty, core->px, core->px + (cdpix * intTop / core->dpi_x))) {
                         PickedMarker = l;
                     }
-                }
-
-                continue;
-            }
-
-            // within the horizontal bounds of a section.
-            // check for graphs
-            if (ty < cs->py) {
-                // traverse marker first and then graph
-
-                // is annotation marker above core section?
-                for (l = 0; l < cs->annovec.size() && PickedMarker == -1; l++) {
-                    CoreAnnotation *ca = cs->annovec[l];
-                    if (!ca)
-                        continue;
-                    if (click_in_annotation_marker(ca, tx, ty, cs->px, startPx)) {
-                        PickedMarker = l;
-                    }
-                }
-
-                // test graph
-                for (l = 0;
-                     l < cs->graphvec.size() && PickedGraph == -1 &&
-                     PickedMarker == -1;
-                     l++) {
-                    Box *b;
-                    b = get_graph_box(cs, cs->graphvec[l]);
-                    if (!b)
-                        continue;
-                        // only need to check vertically
-#ifdef DEBUG
-                    printf("Checking graph %d\ny:%f h:%f vs. ty:%f\n",
-                           l, b->y * cdpiy, b->h * cdpiy, ty);
-#endif
-                    if (ty >= (b->y * cdpiy) && ty <= ((b->y + b->h) * cdpiy))
-                        PickedGraph = cs->graphvec[l];
-                    delete b;
-                }
-#ifdef DEBUG
-                printf("Picked Graph %d\n", PickedGraph);
-#endif
-
-                // test freedraw
-                for (l = 0; l < cs->freedrawvec.size() && PickedGraph == -1 && PickedMarker == -1 && PickedFreeDraw == -1; l++) {
-                    int fdid = cs->freedrawvec[l];
-
-                    if (!is_free_draw_rectangle(fdid))
-                        continue;
-
-                    float mx, my, mw, mh;
-                    mx = get_free_draw_x(fdid);
-                    my = get_free_draw_y(fdid);
-                    mw = get_free_draw_width(fdid);
-                    mh = get_free_draw_height(fdid);
-
-                    if (ty >= my && ty <= my + mh && tx >= mx + startPx && tx <= mx + mw + startPx) {
-                        PickedFreeDraw = fdid;
-                    }
-                }
-            }
-
-            // is annotation marker below core section?
-            if (ty > cs->py + h && PickedMarker == -1) {
-                // TODO Check lithology markers
-                for (l = 0; l < cs->annovec.size() && PickedMarker == -1; l++) {
-                    CoreAnnotation *ca = cs->annovec[l];
-                    if (!ca)
-                        continue;
-                    if (click_in_annotation_marker(ca, tx, ty, cs->px, startPx)) {
-                        PickedMarker = l;
-                    }
-                }
-            }
-
-            if (PickedGraph != -1 || PickedMarker != -1 || PickedFreeDraw != -1) {
-                PickedSection = cs_order[k];
-            }
-
-        }  // done going through each section in track
-
-        if (PickedSection != -1) {
-            PickedTrack = order[i];
-        } else {
-            // check free draws of tracks
-            // convert tx, ty from dots to meters
-            float fx, fy;
-            fx = tx / cdpix * 2.54f / 100.0f;
-            fy = ty / cdpiy * 2.54f / 100.0f;
-
-            for (unsigned int l = 0; l < tsn->freedrawvec.size() && PickedFreeDraw == -1; l++) {
-                int fdid = tsn->freedrawvec[l];
-
-                if (!is_free_draw_rectangle(fdid))
-                    continue;
-
-                float mx, my, mw, mh;
-                mx = get_free_draw_x(fdid);
-                my = get_free_draw_y(fdid);
-                mw = get_free_draw_width(fdid);
-                mh = get_free_draw_height(fdid);
-
-                if (ty >= my && ty <= my + mh && tx >= mx && tx <= mx + mw) {
-                    PickedFreeDraw = fdid;
-                    PickedTrack = order[i];
                 }
             }
         }
-
         free(cs_order);
-    }  // done going through each track
+        if (PickedSection != -1) {
+            PickedTrack = order[i];
+            break;
+        }
+    }
+
+    // TODO: if no section was picked, search all tracks for picked graph, annotation marker, or freedraw
 
     free(order);
+
+//             // within the horizontal bounds of a section.
+//             // check for graphs
+//             if (ty < cs->py) {
+//                 // traverse marker first and then graph
+
+//                 // is annotation marker above core section?
+//                 for (l = 0; l < cs->annovec.size() && PickedMarker == -1; l++) {
+//                     CoreAnnotation *ca = cs->annovec[l];
+//                     if (!ca)
+//                         continue;
+//                     if (click_in_annotation_marker(ca, tx, ty, cs->px, startPx)) {
+//                         PickedMarker = l;
+//                     }
+//                 }
+
+//                 // test graph
+//                 for (l = 0;
+//                      l < cs->graphvec.size() && PickedGraph == -1 &&
+//                      PickedMarker == -1;
+//                      l++) {
+//                     Box *b;
+//                     b = get_graph_box(cs, cs->graphvec[l]);
+//                     if (!b)
+//                         continue;
+//                         // only need to check vertically
+// #ifdef DEBUG
+//                     printf("Checking graph %d\ny:%f h:%f vs. ty:%f\n",
+//                            l, b->y * cdpiy, b->h * cdpiy, ty);
+// #endif
+//                     if (ty >= (b->y * cdpiy) && ty <= ((b->y + b->h) * cdpiy))
+//                         PickedGraph = cs->graphvec[l];
+//                     delete b;
+//                 }
+// #ifdef DEBUG
+//                 printf("Picked Graph %d\n", PickedGraph);
+// #endif
+
+//                 // test freedraw
+//                 for (l = 0; l < cs->freedrawvec.size() && PickedGraph == -1 && PickedMarker == -1 && PickedFreeDraw == -1; l++) {
+//                     int fdid = cs->freedrawvec[l];
+
+//                     if (!is_free_draw_rectangle(fdid))
+//                         continue;
+
+//                     float mx, my, mw, mh;
+//                     mx = get_free_draw_x(fdid);
+//                     my = get_free_draw_y(fdid);
+//                     mw = get_free_draw_width(fdid);
+//                     mh = get_free_draw_height(fdid);
+
+//                     if (ty >= my && ty <= my + mh && tx >= mx + startPx && tx <= mx + mw + startPx) {
+//                         PickedFreeDraw = fdid;
+//                     }
+//                 }
+//             }
+
+//             // is annotation marker below core section?
+//             if (ty > cs->py + h && PickedMarker == -1) {
+//                 // TODO Check lithology markers
+//                 for (l = 0; l < cs->annovec.size() && PickedMarker == -1; l++) {
+//                     CoreAnnotation *ca = cs->annovec[l];
+//                     if (!ca)
+//                         continue;
+//                     if (click_in_annotation_marker(ca, tx, ty, cs->px, startPx)) {
+//                         PickedMarker = l;
+//                     }
+//                 }
+//             }
+
+//             if (PickedGraph != -1 || PickedMarker != -1 || PickedFreeDraw != -1) {
+//                 PickedSection = cs_order[k];
+//             }
+
+//         }  // done going through each section in track
+
+//         if (PickedSection != -1) {
+//             PickedTrack = order[i];
+//         } else {
+//             // check free draws of tracks
+//             // convert tx, ty from dots to meters
+//             float fx, fy;
+//             fx = tx / cdpix * 2.54f / 100.0f;
+//             fy = ty / cdpiy * 2.54f / 100.0f;
+
+//             for (unsigned int l = 0; l < tsn->freedrawvec.size() && PickedFreeDraw == -1; l++) {
+//                 int fdid = tsn->freedrawvec[l];
+
+//                 if (!is_free_draw_rectangle(fdid))
+//                     continue;
+
+//                 float mx, my, mw, mh;
+//                 mx = get_free_draw_x(fdid);
+//                 my = get_free_draw_y(fdid);
+//                 mw = get_free_draw_width(fdid);
+//                 mh = get_free_draw_height(fdid);
+
+//                 if (ty >= my && ty <= my + mh && tx >= mx && tx <= mx + mw) {
+//                     PickedFreeDraw = fdid;
+//                     PickedTrack = order[i];
+//                 }
+//             }
+//         }
+
+//         free(cs_order);
+//     }  // done going through each track
+
+//     free(order);
 }
 
 //=======================================================================
