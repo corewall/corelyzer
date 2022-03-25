@@ -4413,7 +4413,7 @@ void perform_pick(int canvas, float _x, float _y) {
                         continue;
                     const float intTop = (core->intervalTop / 2.54f) * core->dpi_x;
                     if (click_in_annotation_marker(ca, tx, ty, core->px, core->px + (cdpix * intTop / core->dpi_x))) {
-                        printf("Clicked marker %d in image of core %d\n", l, cidx);
+                        // printf("Clicked marker %d in image of core %d\n", l, cidx);
                         PickedMarker = l;
                     }
                 }
@@ -4452,94 +4452,76 @@ void perform_pick(int canvas, float _x, float _y) {
             get_core_section_image_size(core, cdpix, cdpiy, w, h);
             const float startPx = get_core_section_start_pixel(core, cdpix);
 
-            // is click in core's horizontal range?
-            if (core->graph_offset == 0.0f) {
-                if (tx < startPx)
-                    continue;
-                if (tx > (startPx + w))
-                    continue;
-            } else {
-                // adjust offset
-                const float min_var = startPx > startPx + core->graph_offset ? startPx + core->graph_offset : startPx;
-                const float max_var = startPx + w > startPx + w + core->graph_offset ? startPx + w : startPx + w + core->graph_offset;
-
-                if (tx < min_var)
-                    continue;
-                if (tx > max_var)
-                    continue;
+            // check core's annotation markers
+            for (int aidx = 0; aidx < core->annovec.size() && PickedMarker == -1; aidx++) {
+                // printf("Core %d annotation %d\n", cs_order[cidx], aidx);
+                CoreAnnotation *ca = core->annovec[aidx];
+                if (!ca) continue;
+                if (click_in_annotation_marker(ca, tx, ty, core->px, startPx)) {
+                    PickedMarker = aidx;
+                }
             }
 
-            // TODO: Annotations outside of a core's horizontal bounds cannot be selected.
-            // This is not new to 2.1.3! Do all annotation checks before the above horizontal
-            // range check!
-            // TODO: Fix the "selecting core 2 of hole A doesn't draw right if core 2 of hole
-            // B is currently selected" bug...probably some dumb logic there
-            // check for graphs, annotations, and freedraws above the core image
-            if (ty < core->py) {
-                // traverse marker first and then graph
-                // is annotation marker above core section?
-                for (int l = 0; l < core->annovec.size() && PickedMarker == -1; l++) {
-                    printf("Core %d annotation %d\n", cs_order[cidx], l);
-                    CoreAnnotation *ca = core->annovec[l];
-                    if (!ca) continue;
-                    if (click_in_annotation_marker(ca, tx, ty, core->px, startPx)) {
-                        printf("Clicked marker %d above image of core %d\n", l, cidx);
-                        PickedMarker = l;
-                    }
+            if (PickedMarker == -1) {
+                // is click in core's horizontal range?
+                if (core->graph_offset == 0.0f) {
+                    if (tx < startPx)
+                        continue;
+                    if (tx > (startPx + w))
+                        continue;
+                } else {
+                    // widen horizontal range to account for graphs that extend beyond the top/bottom of the core image
+                    const float min_var = startPx > startPx + core->graph_offset ? startPx + core->graph_offset : startPx;
+                    const float max_var = startPx + w > startPx + w + core->graph_offset ? startPx + w : startPx + w + core->graph_offset;
+
+                    if (tx < min_var)
+                        continue;
+                    if (tx > max_var)
+                        continue;
                 }
 
-                // test graph
-                for (int l = 0; l < core->graphvec.size() && PickedGraph == -1 && PickedMarker == -1; l++) {
-                    Box *b;
-                    b = get_graph_box(core, core->graphvec[l]);
-                    if (!b) continue;
-                        // only need to check vertically
+                // TODO: Fix the "selecting core 2 of hole A doesn't draw right if core 2 of hole
+                // B is currently selected" bug...probably some dumb logic there
+                // check for graphs, annotations, and freedraws above the core image
+                if (ty < core->py) {
+                    // test graph
+                    for (int l = 0; l < core->graphvec.size() && PickedGraph == -1 && PickedMarker == -1; l++) {
+                        Box *b;
+                        b = get_graph_box(core, core->graphvec[l]);
+                        if (!b) continue;
+                            // only need to check vertically
 #ifdef DEBUG
 // printf("Checking graph %d\ny:%f h:%f vs. ty:%f\n",
         // l, b->y * cdpiy, b->h * cdpiy, ty);
 #endif
-                    if (ty >= (b->y * cdpiy) && ty <= ((b->y + b->h) * cdpiy)) {
-                        PickedGraph = core->graphvec[l];
-                        printf("Picked graph %d on core %d\n", PickedGraph, cs_order[cidx]);
+                        if (ty >= (b->y * cdpiy) && ty <= ((b->y + b->h) * cdpiy)) {
+                            PickedGraph = core->graphvec[l];
+                            // printf("Picked graph %d on core %d\n", PickedGraph, cs_order[cidx]);
+                        }
+                        delete b;
                     }
-                    delete b;
-                }
 #ifdef DEBUG
 // printf("Picked Graph %d\n", PickedGraph);
 #endif
+                    // test freedraw
+                    for (int l = 0; l < core->freedrawvec.size() && PickedGraph == -1 && PickedMarker == -1 && PickedFreeDraw == -1; l++) {
+                        int fdid = core->freedrawvec[l];
 
-                // test freedraw
-                for (int l = 0; l < core->freedrawvec.size() && PickedGraph == -1 && PickedMarker == -1 && PickedFreeDraw == -1; l++) {
-                    int fdid = core->freedrawvec[l];
+                        if (!is_free_draw_rectangle(fdid))
+                            continue;
 
-                    if (!is_free_draw_rectangle(fdid))
-                        continue;
+                        float mx, my, mw, mh;
+                        mx = get_free_draw_x(fdid);
+                        my = get_free_draw_y(fdid);
+                        mw = get_free_draw_width(fdid);
+                        mh = get_free_draw_height(fdid);
 
-                    float mx, my, mw, mh;
-                    mx = get_free_draw_x(fdid);
-                    my = get_free_draw_y(fdid);
-                    mw = get_free_draw_width(fdid);
-                    mh = get_free_draw_height(fdid);
-
-                    if (ty >= my && ty <= my + mh && tx >= mx + startPx && tx <= mx + mw + startPx) {
-                        PickedFreeDraw = fdid;
+                        if (ty >= my && ty <= my + mh && tx >= mx + startPx && tx <= mx + mw + startPx) {
+                            PickedFreeDraw = fdid;
+                        }
                     }
                 }
-            }
-
-            // check for annotations below the core image
-            if (ty > core->py + h && PickedMarker == -1) {
-                // TODO Check lithology markers
-                for (int l = 0; l < core->annovec.size() && PickedMarker == -1; l++) {
-                    CoreAnnotation *ca = core->annovec[l];
-                    if (!ca)
-                        continue;
-                    if (click_in_annotation_marker(ca, tx, ty, core->px, startPx)) {
-                        printf("Clicked marker %d below image of core %d\n", l, cidx);
-                        PickedMarker = l;
-                    }
-                }
-            }
+            } // if (PickedMarker == -1)
 
             if (PickedGraph != -1 || PickedMarker != -1 || PickedFreeDraw != -1) {
                 PickedSection = cs_order[cidx];
