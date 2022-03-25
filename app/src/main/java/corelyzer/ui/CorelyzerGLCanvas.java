@@ -1727,6 +1727,10 @@ public class CorelyzerGLCanvas implements GLEventListener, MouseListener, MouseW
 			} else if (!(event.isAltDown() && selected)) {
 				// don't modify selection if Alt is down and section was already
 				// selected...user is presumably trying to move it
+				// Clear selection and re-set selection to ensure a list selection
+				// change event is triggered on the section list, causing a redraw.
+				// Fixes issue #33.
+				secList.clearSelection();
 				secList.setSelectedIndex(selectedTrackSectionIndex);
 			}
 
