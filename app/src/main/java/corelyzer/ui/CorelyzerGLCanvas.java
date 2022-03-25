@@ -1704,7 +1704,7 @@ public class CorelyzerGLCanvas implements GLEventListener, MouseListener, MouseW
 			indices.addAll(Arrays.asList(ArrayUtils.toObject(secList.getSelectedIndices())));
 			if (event.isControlDown() || (event.isMetaDown() && CorelyzerApp.MAC_OS_X)) { // toggle selection
 				if (indices.contains(selectedTrackSectionIndex))
-					indices.remove(new Integer(selectedTrackSectionIndex));
+					indices.remove(selectedTrackSectionIndex);
 				else
 					indices.add(selectedTrackSectionIndex);
 				
