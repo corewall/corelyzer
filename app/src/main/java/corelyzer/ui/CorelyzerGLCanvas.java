@@ -1699,7 +1699,7 @@ public class CorelyzerGLCanvas implements GLEventListener, MouseListener, MouseW
 			// update ui
 			CorelyzerApp.getApp().getTrackList().setSelectedIndex(selectedTrackIndex);
 			JList<CoreSection> secList = CorelyzerApp.getApp().getSectionList();
-			boolean selected = secList.isSelectedIndex(selectedTrackSectionIndex);
+			final boolean movingCoreSection = secList.isSelectedIndex(selectedTrackSectionIndex) && event.isAltDown();
 			List<Integer> indices = new ArrayList<Integer>();
 			indices.addAll(Arrays.asList(ArrayUtils.toObject(secList.getSelectedIndices())));
 			if (event.isControlDown() || (event.isMetaDown() && CorelyzerApp.MAC_OS_X)) { // toggle selection
@@ -1724,9 +1724,7 @@ public class CorelyzerGLCanvas implements GLEventListener, MouseListener, MouseW
 					}
 				}
 				secList.setSelectedIndices(toSel);
-			} else if (!(event.isAltDown() && selected)) {
-				// don't modify selection if Alt is down and section was already
-				// selected...user is presumably trying to move it
+			} else if (!movingCoreSection) { // If user is moving a core, don't modify selection
 				// Clear selection and re-set selection to ensure a list selection
 				// change event is triggered on the section list, causing a redraw.
 				// Fixes issue #33.
