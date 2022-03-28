@@ -101,6 +101,12 @@ public class SplashScreenMain {
 		splashScreenDestruct();
 	}
 
+	// TODO: findJars() gathers .jar files to be added after launch. This is
+	// no longer allowed using our current method with ClassPathHacker. I don't
+	// think we depend on this to discover any vital jar files - more often than
+	// not it creates problems as it tries to load the same plugin .jar from
+	// the working plugins dir and the repo's plugins directory. Confirm that
+	// Windows doesn't depend on this and remove along with ClassPathHacker if possible.
 	private Vector<File> findJars() {
 		FilenameFilter jarFilenameFilter = new FilenameFilter() {
 

@@ -30,6 +30,8 @@ import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
 
+// TODO: Adding to the classpath at runtime with this method is no longer allowed
+// in Java 9+. Can likely remove this class entirely.
 public class ClassPathHacker {
 	private static final Class<?>[] parameters = new Class[] { URL.class };
 
