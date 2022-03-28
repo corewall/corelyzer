@@ -534,6 +534,9 @@ public class StateWriter {
 		app = CorelyzerApp.getApp();
 		projectname = project;
 		cg = CoreGraph.getInstance();
+		if (cg.getSessions().size() == 0) {
+			return false; // don't save an empty workspace
+		}
 
 		DocumentImpl doc;
 		Element root;
