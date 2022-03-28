@@ -80,9 +80,9 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
 // import org.apache.http.NameValuePair;
-
 import com.brsanthu.googleanalytics.*;
 import com.install4j.api.launcher.StartupNotification;
+import net.miginfocom.swing.MigLayout;
 
 import corelyzer.controller.CRExperimentController;
 import corelyzer.data.CRPreferences;
@@ -105,6 +105,7 @@ import corelyzer.ui.annotation.CRNavigationSetupDialog;
 import corelyzer.ui.annotation.clast.ClastStatisticsDialog;
 import corelyzer.ui.annotation.freeform.FreeformAnnotationListDialog;
 import corelyzer.ui.annotation.sampling.SampleRequestListDialog;
+
 
 public class CorelyzerApp extends WindowAdapter implements MouseListener, StartupNotification.Listener {
 	static boolean MAC_OS_X = System.getProperty("os.name").toLowerCase().startsWith("mac os x");
@@ -302,6 +303,7 @@ public class CorelyzerApp extends WindowAdapter implements MouseListener, Startu
 	JFrame mainFrame;
 	String baseTitle; // mainFrame title i.e. "Corelyzer [version]"
 	JPanel rootPanel;
+	JProgressBar mainProgressBar;
 	JList<Session> sessionList;
 	JList<TrackSceneNode> trackList;
 
@@ -824,7 +826,7 @@ public class CorelyzerApp extends WindowAdapter implements MouseListener, Startu
 			}
 		}
 
-		return new JProgressBar();
+		return mainProgressBar;
 	}
 
 	// Returns the main user interface JPanel
@@ -2062,11 +2064,11 @@ public class CorelyzerApp extends WindowAdapter implements MouseListener, Startu
 		mainFrame.setLocation(600, 100);
 		mainFrame.addWindowListener(this);
 
-		GridLayout layout = new GridLayout(1, 1);
+		// two-row layout: session/track/section lists on top, progress bar on bottom
+		MigLayout layout = new MigLayout("insets 5, wrap", "[grow]", "[grow][]");
 		mainFrame.getContentPane().setLayout(layout);
 
 		rootPanel = new JPanel(new GridLayout(1, 5));
-		rootPanel.setBorder(BorderFactory.createTitledBorder("Main Panel"));
 
 		// add lists/panels
 		JPanel sessionPanel = new JPanel(new GridLayout(1, 1));
@@ -2161,7 +2163,15 @@ public class CorelyzerApp extends WindowAdapter implements MouseListener, Startu
 		fieldsPanel.add(fieldsScrollPane);
 		rootPanel.add(fieldsPanel);
 
-		mainFrame.getContentPane().add(rootPanel);
+		mainFrame.getContentPane().add(rootPanel, "grow");
+
+		// progress bar
+		mainProgressBar = new JProgressBar();
+        mainProgressBar.setIndeterminate(false);
+        mainProgressBar.setString("Status");
+        mainProgressBar.setStringPainted(true);
+        mainProgressBar.setValue(0);
+		mainFrame.getContentPane().add(mainProgressBar, "growx");
 
 		setupMenuStuff();
 		setupPopupMenu();
@@ -2236,6 +2246,7 @@ public class CorelyzerApp extends WindowAdapter implements MouseListener, Startu
 		// as iCores calls setAlwaysOnTop(true) on itself...does OSX only respect such calls from
 		// the main application and not a plugin? Whatever the case, these calls make everything
 		// correct at startup.
+		getMainFrame().setSize(600, 300);
 		getMainFrame().setAlwaysOnTop(false);
 		getMainFrame().setAlwaysOnTop(true);
 	}
