@@ -7,7 +7,7 @@ endif
 # brg 1/23/2012: Should match [root]/build.gradle allprojects.version.
 # Changing manually until I get plugins building under Gradle, at which
 # point we can import those settings and dispense with this.
-CORELYZER_VERSION = 2.1.1
+CORELYZER_VERSION = 2.1.3
 
 export SYSTEM = $(shell uname -s)
 export PROCESSOR = $(shell uname -p)
