@@ -4352,7 +4352,6 @@ void perform_pick(int canvas, float _x, float _y) {
         x = _y;
         y = -_x;
     }
-    printf("perform_pick()!\n");
 
 #ifdef DEBUG
     printf("Pick coord (_x, _y) = %.2f %.2f\n", _x, _y);
@@ -4484,19 +4483,18 @@ void perform_pick(int canvas, float _x, float _y) {
                             b = get_graph_box(core, core->graphvec[gidx]);
                             if (!b) continue;
                                 // only need to check vertically
-    #ifdef DEBUG
-    // printf("Checking graph %d\ny:%f h:%f vs. ty:%f\n",
-            // gidx, b->y * cdpiy, b->h * cdpiy, ty);
-    #endif
+#ifdef DEBUG
+printf("Checking graph %d\ny:%f h:%f vs. ty:%f\n", gidx, b->y * cdpiy, b->h * cdpiy, ty);
+#endif
                             if (ty >= (b->y * cdpiy) && ty <= ((b->y + b->h) * cdpiy)) {
                                 PickedGraph = core->graphvec[gidx];
                                 // printf("Picked graph %d on core %d\n", PickedGraph, cs_order[cidx]);
                             }
                             delete b;
                         }
-    #ifdef DEBUG
-    // printf("Picked Graph %d\n", PickedGraph);
-    #endif
+#ifdef DEBUG
+printf("Picked Graph %d\n", PickedGraph);
+#endif
                         // test freedraw
                         for (int fidx = 0; fidx < core->freedrawvec.size() && PickedGraph == -1 && PickedMarker == -1 && PickedFreeDraw == -1; fidx++) {
                             int fdid = core->freedrawvec[fidx];
