@@ -1569,6 +1569,9 @@ public class CorelyzerAppController implements ActionListener, AboutHandler, Qui
 						loadStateFile(path);
 					} else {
 						JOptionPane.showMessageDialog(view.getMainFrame(), "The selected file does not exist anymore");
+						view.recentSessionsMenu.remove(aItem);
+						view.preferences().removeRecentSession(path);
+						refreshSessionHistoryMenu();
 					}
 				}
 			});

@@ -547,6 +547,19 @@ public class CRPreferences {
 		return true;
 	}
 
+	// If a recent session has matching path, remove it from sessionHistory
+	public void removeRecentSession(String path) {
+		int match_idx = -1;
+		for (int i = 0; i < sessionHistory.size(); i++) {
+			if (path.equals(sessionHistory.get(i))) {
+				match_idx = i;
+			}
+		}
+		if (match_idx != -1) {
+			sessionHistory.remove(match_idx);
+		}
+	}
+
 	private void saveDirectoryConfig() {
 		try {
 			// Store off the default tex block directory
