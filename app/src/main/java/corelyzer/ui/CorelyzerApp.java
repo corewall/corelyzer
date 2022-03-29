@@ -319,8 +319,11 @@ public class CorelyzerApp extends WindowAdapter implements MouseListener, Startu
 	// File Menu
 	JMenuItem createTrackMenuItem;
 
-	JMenuItem loadDataMenuItem;
+	JMenuItem saveMenuItem;
+	JMenuItem saveStateToFileMenuItem;
+	JMenuItem exportMenuItem;
 
+	JMenuItem loadDataMenuItem;
 	JMenuItem loadStateFileMenuItem;
 	JMenuItem loadImageMenuItem;
 
@@ -1219,6 +1222,15 @@ public class CorelyzerApp extends WindowAdapter implements MouseListener, Startu
 		controller.quit();
 	}
 
+	// Enable/disable menu items that depend on 1+ sessions
+	public void enableMenuItemsOnSessionChange() {
+		CoreGraph cg = CoreGraph.getInstance();
+		final boolean enable = (cg.getNumberOfSessions() > 0);
+		saveMenuItem.setEnabled(enable);
+		saveStateToFileMenuItem.setEnabled(enable);
+		exportMenuItem.setEnabled(enable);
+	}
+
 	public void relocateToolMenu(final int id) {
 		Point p;
 		Window jf;
@@ -1530,7 +1542,7 @@ public class CorelyzerApp extends WindowAdapter implements MouseListener, Startu
 		loadStateFileMenuItem.setEnabled(false);
 		fileMenu.add(loadStateFileMenuItem);
 
-		JMenuItem saveMenuItem = new JMenuItem("Save Session", KeyEvent.VK_S);
+		saveMenuItem = new JMenuItem("Save Session", KeyEvent.VK_S);
 		saveMenuItem.setAccelerator( KeyStroke.getKeyStroke(KeyEvent.VK_S, MENU_MASK));
 		saveMenuItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent event) {
@@ -1539,7 +1551,7 @@ public class CorelyzerApp extends WindowAdapter implements MouseListener, Startu
 		});
 		fileMenu.add(saveMenuItem);
 
-		JMenuItem saveStateToFileMenuItem = new JMenuItem("Save Session As...", KeyEvent.VK_S);
+		saveStateToFileMenuItem = new JMenuItem("Save Session As...", KeyEvent.VK_S);
 		saveStateToFileMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_A, MENU_MASK));
 		saveStateToFileMenuItem.addActionListener(new ActionListener() {
 			public void actionPerformed(final ActionEvent event) {
@@ -1564,7 +1576,7 @@ public class CorelyzerApp extends WindowAdapter implements MouseListener, Startu
 		});
 		packageMenu.add(importMenuItem);
 
-		JMenuItem exportMenuItem = new JMenuItem("Export...");
+		exportMenuItem = new JMenuItem("Export...");
 		exportMenuItem.addActionListener(new ActionListener() {
 			public void actionPerformed(final ActionEvent event) {
 				controller.exportTheWholeScene();

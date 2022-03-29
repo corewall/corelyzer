@@ -29,6 +29,7 @@ import java.util.Enumeration;
 
 import corelyzer.data.Session;
 import corelyzer.data.coregraph.CoreGraph;
+import corelyzer.ui.CorelyzerApp;
 
 public class SessionListModel extends CRDefaultListModel {
 
@@ -85,6 +86,13 @@ public class SessionListModel extends CRDefaultListModel {
 		} else {
 			return cg.getNumberOfSessions();
 		}
+	}
+
+	@Override
+	public void modified() {
+		super.modified();
+		CorelyzerApp app = CorelyzerApp.getApp();
+		app.enableMenuItemsOnSessionChange();
 	}
 
 	@Override
