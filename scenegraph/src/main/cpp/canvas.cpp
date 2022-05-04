@@ -62,6 +62,7 @@ void run_through_scene_graph(Canvas *c);
 void render_crossHair(Canvas *c);
 void render_grid(Canvas *c);
 void render_scale(Canvas *c);
+void render_tie_arrows(Canvas *c);
 
 bool s3tc_available = false;
 bool checked_extensions = false;
@@ -1385,6 +1386,8 @@ void run_through_scene_graph(Canvas *c) {
     }
     glPopMatrix();
 
+    render_tie_arrows(c);
+
     // draw measuring stuff
     // how many point we have?
     if (c->mode == CANVAS_MEASURE)  // 1: Measure mode
@@ -1428,6 +1431,76 @@ void run_through_scene_graph(Canvas *c) {
             glDisable(GL_BLEND);
         }
         glPopMatrix();
+    }
+}
+
+void render_arrowhead(float fromX, float fromY, float toX, float toY) {
+    const float pi = 3.14f;
+    float theta = atan2(toY - fromY, toX - fromX);
+    float length = 50.0f;
+    float x0 = toX - length * cos(theta - pi/6);
+    float y0 = toY - length * sin(theta - pi/6);
+    float x1 = toX - length * cos(theta + pi/6);
+    float y1 = toY - length * sin(theta + pi/6);
+    glBegin(GL_POLYGON);
+    {
+        glVertex2f(toX, toY);
+        glVertex2f(x0, y0);
+        glVertex2f(x1, y1);
+    }
+    glEnd();
+}
+
+// todo: bad name
+void render_tie_arrows(Canvas *c) {
+    TrackScene *ts = get_scene(default_track_scene);
+    if (!ts) return;
+
+    // traverse tracks in zorder, rendering CoreSectionTies where they appear
+    for (int i = ts->zorder.size() - 1; i > -1; --i) {
+        if (ts->zorder[i] > -1 && ts->trackvec[ts->zorder[i]] != NULL) {
+            TrackSceneNode *track = ts->trackvec[ts->zorder[i]];
+            int secCount = get_track_section_zorder_length(track);
+            // printf("Track %s has %d sections. Scene coords (%f, %f)\n", track->name, secCount, track->px, track->py);
+            for (int sidx = 0; sidx < secCount; sidx++) {
+                CoreSection *sec = get_track_section(track, sidx);
+                for (int tidx = 0; tidx < sec->tievec.size(); tidx++) {
+                    CoreSectionTie *tie = sec->tievec[tidx];
+                    float x = tie->x + track->px + sec->px;
+                    float y = tie->y + track->py + sec->py;
+
+                    float tx, ty;
+                    if (tie->complete) {
+                        TrackSceneNode *toTrack = get_scene_track(tie->destTrack);
+                        CoreSection *toSec = get_track_section(toTrack, tie->destCore);
+                        tx = tie->ax + toTrack->px + toSec->px;
+                        ty = tie->ay + toTrack->py + toSec->py;
+                    } else {
+                        tx = c->mouseX;
+                        ty = c->mouseY;
+                    }
+
+                    glDisable(GL_TEXTURE_2D);
+                    glLineWidth(2);
+                    glLineStipple(4, 0xAAAA);
+                    glEnable(GL_LINE_STIPPLE);
+                    glColor3f(0, 1, 0);
+                    glBegin(GL_LINES);
+                    {
+                        glVertex3f(x, y, 0);
+                        glVertex3f(tx, ty, 0);
+                        // glVertex3f(0, 0, 0);
+                        // draw 5cm down and right of section upper-left
+                        // float x = (5.0f / 2.54f) * c->dpi_x;
+                        // float y = (5.0f / 2.54f) * c->dpi_y;
+                        // glVertex3f(x, y, 0);
+                    }
+                    glEnd();
+                    glDisable(GL_LINE_STIPPLE);
+                    render_arrowhead(x, y, tx, ty);
+                }
+            }
+        }
     }
 }
 

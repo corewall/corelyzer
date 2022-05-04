@@ -228,6 +228,10 @@ public class SceneGraph {
 	 */
 	public native static int createFreeDrawRectangleForTrack(int pluginid, int track, float x, float y, float w, float h);
 
+	public native static void createSectionTie(float x, float y, int trackId, int sectionId);
+
+	public native static boolean finishSectionTie(float x, float y, int trackId, int sectionId);
+
 	// ----- Canvas methods
 
 	public native static void deleteDataset(int datasetId);

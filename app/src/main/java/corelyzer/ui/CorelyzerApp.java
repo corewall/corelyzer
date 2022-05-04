@@ -343,6 +343,7 @@ public class CorelyzerApp extends WindowAdapter implements MouseListener, Startu
 	static final int APP_MARKER_MODE = 2;
 	static final int APP_CLAST_MODE = 3;
 	static final int APP_CUT_MODE = 4;
+	static final int APP_TIE_MODE = 5;
 
 	// Returns the single instance of the CorelyzerApp class
 	public static CorelyzerApp getApp() {

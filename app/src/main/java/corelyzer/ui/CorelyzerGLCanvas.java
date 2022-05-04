@@ -379,6 +379,8 @@ public class CorelyzerGLCanvas implements GLEventListener, MouseListener, MouseW
 
 		this.scenePopupMenu.addSeparator();
 
+		// this.scenePopupMenu.addSeparator();
+
 		// Mode menu
 		JMenu modeMenu = new JMenu("Mode");
 		ButtonGroup modeGroup = new ButtonGroup();
@@ -474,17 +476,25 @@ public class CorelyzerGLCanvas implements GLEventListener, MouseListener, MouseW
 			}
 		});
 
+		// Temporary TIE menu item
+		JMenuItem createTie = new JMenuItem("Create Tie");
+		createTie.addActionListener(new ActionListener() {
+			public void actionPerformed(final ActionEvent event) {
+				doCreateTie();
+			}
+		});
+
 		JMenuItem graphMenuItem = new JMenuItem("Graph...");
 		graphMenuItem.addActionListener(new ActionListener() {
-
+			
 			public void actionPerformed(final ActionEvent event) {
 				doGraphDialog();
 			}
 		});
-
+		
 		this.propertyMenuItem = new JMenuItem("Properties...");
 		this.propertyMenuItem.addActionListener(new ActionListener() {
-
+			
 			public void actionPerformed(final ActionEvent event) {
 				SectionImagePropertyDialog dialog = new SectionImagePropertyDialog(canvas);
 				dialog.setProperties(selectedTrack, selectedTrackSection);
@@ -494,10 +504,10 @@ public class CorelyzerGLCanvas implements GLEventListener, MouseListener, MouseW
 				dialog.dispose();
 			}
 		});
-
+		
 		splitMenuItem = new JMenuItem("Split...");
 		splitMenuItem.addActionListener(new ActionListener() {
-
+			
 			public void actionPerformed(final ActionEvent e) {
 				CorelyzerApp app = CorelyzerApp.getApp();
 				if (app != null) {
@@ -505,7 +515,7 @@ public class CorelyzerGLCanvas implements GLEventListener, MouseListener, MouseW
 				}
 			}
 		});
-
+		
 		JMenuItem deleteItem = new JMenuItem("Delete...");
 		deleteItem.addActionListener(new ActionListener() {
 
@@ -539,6 +549,8 @@ public class CorelyzerGLCanvas implements GLEventListener, MouseListener, MouseW
 		this.scenePopupMenu.addSeparator();
 		this.scenePopupMenu.add(lockSectionMenuItem);
 		this.scenePopupMenu.add(lockSectionGraphMenuItem);
+		this.scenePopupMenu.addSeparator();
+		this.scenePopupMenu.add(createTie);
 		this.scenePopupMenu.addSeparator();
 		this.scenePopupMenu.add(graphMenuItem);
 		this.scenePopupMenu.add(splitMenuItem);
@@ -631,6 +643,13 @@ public class CorelyzerGLCanvas implements GLEventListener, MouseListener, MouseW
 		}
 	}
 	
+	private void doCreateTie()
+	{
+		CorelyzerApp.getApp().setMode(CorelyzerApp.APP_TIE_MODE);
+		SceneGraph.createSectionTie(scenePos[0], scenePos[1], selectedTrack, selectedTrackSection);
+		CorelyzerApp.getApp().updateGLWindows();
+	}
+
 	private void doStaggerSections(final boolean stagger)
 	{
 		SceneGraph.staggerTrackSections(selectedTrack, stagger);
@@ -1167,6 +1186,14 @@ public class CorelyzerGLCanvas implements GLEventListener, MouseListener, MouseW
 
 					PAN_MODE = 0;
 					return;
+				} else if (canvasMode == CorelyzerApp.APP_TIE_MODE) {
+					if (selectedTrack != -1 && selectedTrackSection != -1) {
+						boolean result = SceneGraph.finishSectionTie(scenePos[0], scenePos[1], selectedTrack, selectedTrackSection);
+						if (result) {
+							CorelyzerApp.getApp().setMode(CorelyzerApp.APP_NORMAL_MODE);
+							System.out.println("Finished tie! Returning to APP_NORMAL_MODE");
+						}
+					}
 				}
 				
 				if (selectedFreeDraw > -1) {

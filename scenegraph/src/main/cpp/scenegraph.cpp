@@ -35,6 +35,7 @@
 #include "graph.h"
 #include "model.h"
 #include "textureresource_ex.h"
+#include "tie.h"
 #include "trackscene.h"
 
 #ifdef linux
@@ -70,6 +71,8 @@ int PickedFreeDraw = -1;
 
 bool MeasureMode = false;
 int MeasurePoints = 0;
+
+CoreSectionTie *activeTie = NULL;
 
 void perform_pick(int canvas, float x, float y);
 
@@ -4844,6 +4847,45 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_trimSections(JNIEnv *j
  */
 JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_stackSections(JNIEnv *jenv, jclass jcls, jint trackId, jint sectionId) {
     stack_sections(trackId, sectionId);
+}
+
+JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_createSectionTie(JNIEnv *jenv, jclass jcls, jfloat x, jfloat y, jint trackId, jint sectionId) {
+    if (activeTie) {
+        printf("There is already an active tie, can't start a new one!\n");
+        return;
+    }
+    TrackSceneNode *track = get_scene_track(trackId);
+    if (!track) return; 
+    CoreSection *sec = get_track_section(track, sectionId);
+    if (!sec) return;
+    const float tx = x - (track->px + sec->px);
+    const float ty = y - (track->py + sec->py);
+    CoreSectionTie* tie = create_section_tie(sec, 0, tx, ty);
+    // printf("Created tie %d\n", tie);
+    if (tie) { 
+        // printf("Setting active tie to %d!\n", tie);
+        activeTie = tie;
+    }
+    printf("createSectionTie: coords (%f, %f)\n", tx, ty);
+}
+
+JNIEXPORT jboolean JNICALL Java_corelyzer_graphics_SceneGraph_finishSectionTie(JNIEnv *jenv, jclass jcls, jfloat x, jfloat y, jint trackId, jint sectionId) {
+    if (!activeTie) {
+        printf("There is no active tie to finish!\n");
+        return false;
+    }
+    TrackSceneNode *track = get_scene_track(trackId);
+    if (!track) return false; 
+    CoreSection *sec = get_track_section(track, sectionId);
+    if (!sec) return false;
+    const float tx = x - (track->px + sec->px);
+    const float ty = y - (track->py + sec->py);
+    printf("finishSectionTie: section coords (%f, %f) - adjusted tie coord (%f, %f)\n", sec->px, sec->py, tx, ty);
+    const bool success = finish_section_tie(activeTie, sec, tx, ty);
+    if (success) {
+        activeTie = NULL;
+    }
+    return success;
 }
 
 /*
