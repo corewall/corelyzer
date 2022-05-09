@@ -1190,8 +1190,14 @@ public class CorelyzerGLCanvas implements GLEventListener, MouseListener, MouseW
 					if (selectedTrack != -1 && selectedTrackSection != -1) {
 						boolean result = SceneGraph.finishSectionTie(scenePos[0], scenePos[1], selectedTrack, selectedTrackSection);
 						if (result) {
-							CorelyzerApp.getApp().setMode(CorelyzerApp.APP_NORMAL_MODE);
-							System.out.println("Finished tie! Returning to APP_NORMAL_MODE");
+							SectionTieDialog tieDlg = new SectionTieDialog(CorelyzerApp.getApp().getToolFrame());
+							tieDlg.setLocation(new Point(prePos.x + 10, prePos.y + 10));
+							tieDlg.setModal(true);
+							tieDlg.setVisible(true);
+							if (tieDlg.confirmed) {
+								CorelyzerApp.getApp().setMode(CorelyzerApp.APP_NORMAL_MODE);
+								System.out.println("Finished tie! Returning to APP_NORMAL_MODE");
+							} // todo: otherwise delete in-progress tie?
 						}
 					}
 				}
