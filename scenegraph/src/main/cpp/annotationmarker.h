@@ -78,7 +78,11 @@ typedef struct AnnotationMarker_s {
 	bool  focused;		// editing mode
 	float depthX;		// original x depth of user marker
 	float depthY;		// original y depth of user marker
-	float markerVt[5];	// vertices storage for marker type (span, outline)
+	
+    // brg 4/21/2022: markerVt[4] seems to be a dummy var or placeholder
+    // for unimplemented logic, it's never used (beyond being set to 0)
+    // or saved in session files.
+    float markerVt[5];	// vertices storage for marker type (span, outline)
 	float *hit0, *hit1;	// current hit handle of manipulator pointer
 
     char* label;
