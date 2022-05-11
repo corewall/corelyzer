@@ -1,4 +1,4 @@
-package corelyzer.ui;
+package corelyzer.ui.tie;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;

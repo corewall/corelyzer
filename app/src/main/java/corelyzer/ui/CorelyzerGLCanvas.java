@@ -82,6 +82,8 @@ import corelyzer.ui.annotation.AnnotationType;
 import corelyzer.ui.annotation.AnnotationTypeDirectory;
 import corelyzer.ui.annotation.AnnotationUtils;
 import corelyzer.ui.annotation.freeform.CRAnnotationWindow;
+import corelyzer.ui.tie.ManageSectionTiesDialog;
+import corelyzer.ui.tie.SectionTieDialog;
 import corelyzer.util.CRUtility;
 import corelyzer.util.PropertyListUtility;
 
@@ -484,6 +486,13 @@ public class CorelyzerGLCanvas implements GLEventListener, MouseListener, MouseW
 			}
 		});
 
+		JMenuItem manageTies = new JMenuItem("Manage Ties...");
+		manageTies.addActionListener(new ActionListener() {
+			public void actionPerformed(final ActionEvent event) {
+				doManageTies();
+			}
+		});
+
 		JMenuItem graphMenuItem = new JMenuItem("Graph...");
 		graphMenuItem.addActionListener(new ActionListener() {
 			
@@ -551,6 +560,7 @@ public class CorelyzerGLCanvas implements GLEventListener, MouseListener, MouseW
 		this.scenePopupMenu.add(lockSectionGraphMenuItem);
 		this.scenePopupMenu.addSeparator();
 		this.scenePopupMenu.add(createTie);
+		this.scenePopupMenu.add(manageTies);
 		this.scenePopupMenu.addSeparator();
 		this.scenePopupMenu.add(graphMenuItem);
 		this.scenePopupMenu.add(splitMenuItem);
@@ -648,6 +658,19 @@ public class CorelyzerGLCanvas implements GLEventListener, MouseListener, MouseW
 		CorelyzerApp.getApp().setMode(CorelyzerApp.APP_TIE_MODE);
 		SceneGraph.createSectionTie(scenePos[0], scenePos[1], selectedTrack, selectedTrackSection);
 		CorelyzerApp.getApp().updateGLWindows();
+	}
+
+	private void doManageTies() {
+		int[] tieIds = SceneGraph.getSectionTieIds();
+		if (tieIds.length == 0) {
+			// pop message? Or disable menu item if there are zero ties?
+			System.out.println("There are no ties to manage!");
+			return;
+		}
+		
+		ManageSectionTiesDialog dlg = new ManageSectionTiesDialog(tieIds);
+		dlg.setAlwaysOnTop(true);
+		dlg.setVisible(true);
 	}
 
 	private void doStaggerSections(final boolean stagger)
