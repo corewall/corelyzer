@@ -44,12 +44,7 @@ struct CoreSectionTie {
 
 CoreSectionTie *get_active_tie();
 void set_active_tie(CoreSectionTie *tie);
-
 CoreSectionTie* create_section_tie(int type, int trackId, int sectionId, float x, float y);
 bool finish_section_tie(CoreSectionTie *tie, int trackId, int sectionId, float x, float y);
-
-void render_tie(CoreSectionTie *t);
-
-
 
 #endif // #ifndef CORELYZER_TIE_H
