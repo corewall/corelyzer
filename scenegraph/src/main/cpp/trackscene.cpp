@@ -414,14 +414,13 @@ void render_track_scene(int id, Canvas *c) {
 }
 
 //================================================================
-void render_arrowhead(float fromX, float fromY, float toX, float toY) {
+void render_arrowhead(float fromX, float fromY, float toX, float toY, float size) {
     const float pi = 3.14f;
     float theta = atan2(toY - fromY, toX - fromX);
-    float length = 50.0f;
-    float x0 = toX - length * cos(theta - pi/6);
-    float y0 = toY - length * sin(theta - pi/6);
-    float x1 = toX - length * cos(theta + pi/6);
-    float y1 = toY - length * sin(theta + pi/6);
+    float x0 = toX - size * cos(theta - pi/6);
+    float y0 = toY - size * sin(theta - pi/6);
+    float x1 = toX - size * cos(theta + pi/6);
+    float y1 = toY - size * sin(theta + pi/6);
     glBegin(GL_POLYGON);
     {
         glVertex2f(toX, toY);
@@ -448,6 +447,7 @@ void render_section_ties(TrackScene *ts, Canvas *c) {
     glLineWidth(3);
     glPointSize(5);
     glColor3f(0,1,0);
+    const float arrowSize = 50.0f;
     for (int tidx = 0; tidx < ts->tievec.size(); tidx++) {
         CoreSectionTie *tie = ts->tievec[tidx];
         float sx, sy;
@@ -461,7 +461,7 @@ void render_section_ties(TrackScene *ts, Canvas *c) {
                 glVertex3f(dx, dy, 0.0f);
             }
             glEnd();
-            render_arrowhead(sx, sy, dx, dy);
+            render_arrowhead(sx, sy, dx, dy, arrowSize);
         }
     }
     CoreSectionTie *activeTie = get_active_tie();
@@ -476,7 +476,7 @@ void render_section_ties(TrackScene *ts, Canvas *c) {
             glVertex3f(c->mouseX, c->mouseY, 0.0f);
         }
         glEnd();
-        render_arrowhead(sx, sy, c->mouseX, c->mouseY);
+        render_arrowhead(sx, sy, c->mouseX, c->mouseY, arrowSize);
 
     }
     glEnable(GL_TEXTURE_2D);
