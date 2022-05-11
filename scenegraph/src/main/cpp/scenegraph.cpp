@@ -72,7 +72,6 @@ int PickedFreeDraw = -1;
 bool MeasureMode = false;
 int MeasurePoints = 0;
 
-CoreSectionTie *activeTie = NULL;
 
 void perform_pick(int canvas, float x, float y);
 
@@ -4850,7 +4849,7 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_stackSections(JNIEnv *
 }
 
 JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_createSectionTie(JNIEnv *jenv, jclass jcls, jfloat x, jfloat y, jint trackId, jint sectionId) {
-    if (activeTie) {
+    if (get_active_tie() != NULL) {
         printf("There is already an active tie, can't start a new one!\n");
         return;
     }
@@ -4860,16 +4859,17 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_createSectionTie(JNIEn
     if (!sec) return;
     const float tx = x - (track->px + sec->px);
     const float ty = y - (track->py + sec->py);
-    CoreSectionTie* tie = create_section_tie(sec, 0, tx, ty);
+    CoreSectionTie* tie = create_section_tie(0, trackId, sectionId, tx, ty);
     // printf("Created tie %d\n", tie);
     if (tie) { 
         // printf("Setting active tie to %d!\n", tie);
-        activeTie = tie;
+        set_active_tie(tie);
     }
     printf("createSectionTie: coords (%f, %f)\n", tx, ty);
 }
 
 JNIEXPORT jboolean JNICALL Java_corelyzer_graphics_SceneGraph_finishSectionTie(JNIEnv *jenv, jclass jcls, jfloat x, jfloat y, jint trackId, jint sectionId) {
+    CoreSectionTie *activeTie = get_active_tie();
     if (!activeTie) {
         printf("There is no active tie to finish!\n");
         return false;
@@ -4881,9 +4881,19 @@ JNIEXPORT jboolean JNICALL Java_corelyzer_graphics_SceneGraph_finishSectionTie(J
     const float tx = x - (track->px + sec->px);
     const float ty = y - (track->py + sec->py);
     printf("finishSectionTie: section coords (%f, %f) - adjusted tie coord (%f, %f)\n", sec->px, sec->py, tx, ty);
-    const bool success = finish_section_tie(activeTie, sec, tx, ty);
+    bool success = finish_section_tie(activeTie, trackId, sectionId, tx, ty);
     if (success) {
-        activeTie = NULL;
+        TrackScene *ts = get_scene(default_track_scene);
+        if (!ts) {
+            printf("Invalid TrackScene!?\n");
+            success = false;
+        } else {
+            int tieId = add_tie(default_track_scene, activeTie);
+            if (tieId != -1) {
+                printf("Created tie with ID = %d\n", tieId);
+            }
+        }
+        set_active_tie(NULL);
     }
     return success;
 }

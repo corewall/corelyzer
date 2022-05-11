@@ -106,8 +106,6 @@ void render_highlight(CoreSection* ptr, Canvas* c);
 void init_section_annotation_markers();
 void free_section_annotation_markers();
 
-CoreSectionTie* create_section_tie(CoreSection *ptr, int type, float x, float y);
-bool finish_section_tie(CoreSectionTie *tie, CoreSection *ptr, float x, float y);
 
 // create an section annotation of a certain type, at a particular depth
 // from the top of the section in meters

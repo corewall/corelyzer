@@ -180,42 +180,6 @@ void render_section_free_draw_rects(CoreSection *ptr, Canvas *c) {
 }
 
 //================================================================
-void render_section_ties(CoreSection *ptr, Canvas *c) {
-    glDisable(GL_TEXTURE_2D); // enabled textures affect point/line color
-    glColor3f(0,1,0);
-    glPointSize(5);
-    for (int tidx = 0; tidx < ptr->tievec.size(); tidx++) {
-        CoreSectionTie *tie = ptr->tievec[tidx];
-        if (tie->complete) {
-            glLineWidth(3);
-            TrackSceneNode *parentTrack = get_scene_track(ptr->track);
-            CoreSection *parentCore = get_track_section(parentTrack, ptr->section);
-            TrackSceneNode *track = get_scene_track(tie->destTrack);
-            CoreSection *core = get_track_section(track, tie->destCore);
-            float tx_delta = (parentTrack->px - (track->px + core->px));
-            float ty_delta = (parentTrack->py - (track->py + core->py));
-            float destx = tie->ax - tx_delta;
-            float desty = tie->ay - ty_delta;
-            glBegin(GL_LINES);
-            {
-                // printf("Dest track (%f, %f), coords (%f, %f)\n", track->px + parentCore->px, track->py + parentCore->py, destx, desty);
-                glVertex3f(tie->x, tie->y, 0.0f);
-                glVertex3f(destx, desty, 0.0f);
-            }
-            glEnd();
-        } else {
-            glBegin(GL_LINES);
-            {
-                glVertex3f(tie->x, tie->y, 0.0f);
-                glVertex3f(c->mouseX, c->mouseY, 0.0f);
-            }
-            glEnd();
-        }
-    }
-    glEnable(GL_TEXTURE_2D);
-}
-
-//================================================================
 /** deprecated
 void render_section_vert_line(CoreSection *ptr, Canvas *c)
 {
@@ -752,7 +716,6 @@ void render_section_model(CoreSection *ptr, Canvas *c) {
     // Put inside render_marker() method
     render_section_markers(ptr, c); // annotation markers
     render_section_free_draw_rects(ptr, c);
-    // render_section_ties(ptr, c);
 
     // Draw source section arrow if it's in another track
     if ((ptr->parentTrack) != -1 && (ptr->parentSection != -1)) {
@@ -842,19 +805,6 @@ void init_section_annotation_markers() {
 void free_section_annotation_markers() {
     for (int i = 0; i < NUM_CORE_MARKERS; i++)
         free_marker_type_resource(coresection_marker[i]);
-}
-
-//================================================================
-CoreSectionTie* create_section_tie(CoreSection *ptr, int type, float x, float y) {
-    CoreSectionTie *tie = new CoreSectionTie(type, x, y);
-    ptr->tievec.push_back(tie);
-    return tie;
-}
-
-//================================================================
-bool finish_section_tie(CoreSectionTie *tie, CoreSection *ptr, float x, float y) {
-    tie->setDestination(ptr->section, ptr->track, x, y);
-    return true;
 }
 
 //================================================================

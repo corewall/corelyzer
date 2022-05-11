@@ -100,6 +100,34 @@ bool is_track(int scene, int trackid) {
 }
 
 //================================================================
+int add_tie(int scene, CoreSectionTie *tie) { // todo: associate tie with session by name as in track logic
+    if (!is_track_scene(scene))
+        return -1;
+
+    TrackScene *ts = trackscenevec[scene];
+    int tieId = -1;
+    for (int i = 0; i < ts->tievec.size(); i++) { // use empty slot if possible
+        if (ts->tievec[i] == NULL) {
+            ts->tievec[i] = tie;
+            tieId = i;
+            break;
+        }
+    }
+    if (tieId == -1) {
+        ts->tievec.push_back(tie);
+        tieId = ts->tievec.size() - 1;
+    }
+    return tieId;
+}
+
+//================================================================
+int remove_tie(int scene, int tieId) { // todo: associate tie with session by name as in track logic
+    // free tie
+    // set ts->tievec[tieId] to NULL
+    return 0;
+}
+
+//================================================================
 int append_track(int scene, const char *sessionName, const char *trackName) {
 #ifdef DEBUG
     if (!is_track_scene(scene)) {
@@ -370,6 +398,8 @@ void render_track_scene(int id, Canvas *c) {
         }
     }
 
+    render_section_ties(ts, c);
+
     // draw plugin free draw rectangles, scale so x,y,w,h are in meters
     glPushMatrix();
     {
@@ -381,6 +411,75 @@ void render_track_scene(int id, Canvas *c) {
         }
     }
     glPopMatrix();
+}
+
+//================================================================
+void render_arrowhead(float fromX, float fromY, float toX, float toY) {
+    const float pi = 3.14f;
+    float theta = atan2(toY - fromY, toX - fromX);
+    float length = 50.0f;
+    float x0 = toX - length * cos(theta - pi/6);
+    float y0 = toY - length * sin(theta - pi/6);
+    float x1 = toX - length * cos(theta + pi/6);
+    float y1 = toY - length * sin(theta + pi/6);
+    glBegin(GL_POLYGON);
+    {
+        glVertex2f(toX, toY);
+        glVertex2f(x0, y0);
+        glVertex2f(x1, y1);
+    }
+    glEnd();
+}
+
+//================================================================
+// Convert section-relative coord (sec_x, sec_y) to scene-space coord (sx, sy).
+// (sec_x, sec_y) is positioned relative to the upper-left of the core section
+// corresponding to trackId and sectionId.
+static void section_to_scene(int trackId, int sectionId, float sec_x, float sec_y, float &sx, float &sy) {
+    TrackSceneNode *track = get_scene_track(trackId);
+    CoreSection *section = get_track_section(track, sectionId);
+    sx = sec_x + track->px + section->px;
+    sy = sec_y + track->py + section->py;
+}
+
+//================================================================
+void render_section_ties(TrackScene *ts, Canvas *c) {
+    glDisable(GL_TEXTURE_2D); // enabled textures affect point/line color
+    glLineWidth(3);
+    glPointSize(5);
+    glColor3f(0,1,0);
+    for (int tidx = 0; tidx < ts->tievec.size(); tidx++) {
+        CoreSectionTie *tie = ts->tievec[tidx];
+        float sx, sy;
+        section_to_scene(tie->srcTrack, tie->srcCore, tie->x, tie->y, sx, sy);
+        if (tie->complete) {
+            float dx, dy;
+            section_to_scene(tie->destTrack, tie->destCore, tie->ax, tie->ay, dx, dy);
+            glBegin(GL_LINES);
+            {
+                glVertex3f(sx, sy, 0.0f);
+                glVertex3f(dx, dy, 0.0f);
+            }
+            glEnd();
+            render_arrowhead(sx, sy, dx, dy);
+        }
+    }
+    CoreSectionTie *activeTie = get_active_tie();
+    if (activeTie) {
+        TrackSceneNode *srcTrack = get_scene_track(activeTie->srcTrack);
+        CoreSection *srcCore = get_track_section(srcTrack, activeTie->srcCore);
+        const float sx = activeTie->x + srcTrack->px + srcCore->px;
+        const float sy = activeTie->y + srcTrack->py + srcCore->py;
+        glBegin(GL_LINES);
+        {
+            glVertex3f(sx, sy, 0.0f);
+            glVertex3f(c->mouseX, c->mouseY, 0.0f);
+        }
+        glEnd();
+        render_arrowhead(sx, sy, c->mouseX, c->mouseY);
+
+    }
+    glEnable(GL_TEXTURE_2D);
 }
 
 //================================================================

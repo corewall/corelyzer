@@ -4,37 +4,49 @@
 // A tie between two core section images
 struct CoreSectionTie {
     int type; // splice, visual, etc
+    int srcTrack;
+    int srcCore;
     float x; // x position of tie point...source core?
     float y; // y position of tie point
-    int destCore;
     int destTrack;
+    int destCore;
     float ax; // x,y of destination core?
     float ay;
     char *sourceDesc; // description of source tie point
     char *destDesc; // description of destination tie point
-    bool complete;
+    bool complete; // true if both endpoints been defined
+    bool selected; // for highlighting tie on selection
 
-    CoreSectionTie(int _type, float _x, float _y) {
+    CoreSectionTie(int _type, int trackId, int coreId, float _x, float _y) {
         type = _type;
+        srcTrack = trackId;
+        srcCore = coreId;
         x = _x;
         y = _y;
-        destCore = -1;
         destTrack = -1;
+        destCore = -1;
         complete = false;
+        selected = false;
     }
 
     ~CoreSectionTie() {
         // todo: free description memory
     }
 
-    void setDestination(int coreId, int trackId, float x, float y) {
-        destCore = coreId;
+    void setDestination(int trackId, int coreId, float x, float y) {
         destTrack = trackId;
+        destCore = coreId;
         ax = x;
         ay = y;
         complete = true;
     }
 };
+
+CoreSectionTie *get_active_tie();
+void set_active_tie(CoreSectionTie *tie);
+
+CoreSectionTie* create_section_tie(int type, int trackId, int sectionId, float x, float y);
+bool finish_section_tie(CoreSectionTie *tie, int trackId, int sectionId, float x, float y);
 
 void render_tie(CoreSectionTie *t);
 

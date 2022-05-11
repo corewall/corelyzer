@@ -29,7 +29,7 @@
 
 //#include "renderable.h"
 
-
+#include "tie.h"
 #include "trackscenenode.h"
 
 //---------------------------------------------------------- 
@@ -39,6 +39,7 @@ typedef struct TrackScene_s {
     std::vector< TrackSceneNode* > trackvec;
     std::vector< int > zorder;
     std::vector< int > freedrawvec;
+    std::vector<CoreSectionTie *> tievec;
 
 } TrackScene;
 
@@ -102,6 +103,9 @@ void trim_sections(const int trackid, const int sectionid, const float trim,
 				   const bool fromBottom, const bool trimSelAndDeeper);
 
 void stack_sections(const int trackid, const int sectionid);
+
+int add_tie(int scene, CoreSectionTie *tie);
+void render_section_ties(TrackScene *ts, Canvas *c);
 
 #endif
 
