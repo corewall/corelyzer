@@ -185,6 +185,14 @@ JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_createFreeDrawRectangl
 
 /*
  * Class:     corelyzer_graphics_SceneGraph
+ * Method:    getSectionTieIds
+ * Signature: ()[I
+ */
+JNIEXPORT jintArray JNICALL Java_corelyzer_graphics_SceneGraph_getSectionTieIds
+  (JNIEnv *, jclass);
+
+/*
+ * Class:     corelyzer_graphics_SceneGraph
  * Method:    createSectionTie
  * Signature: (FFII)V
  */

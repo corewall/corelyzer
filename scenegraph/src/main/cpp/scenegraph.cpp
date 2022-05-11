@@ -4859,6 +4859,22 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_stackSections(JNIEnv *
 }
 
 /*
+ * Class:     corelyzer_graphics_SceneGraph
+ * Method:    getSectionTieIds
+ * Signature: ()[I
+ */
+JNIEXPORT jintArray JNICALL Java_corelyzer_graphics_SceneGraph_getSectionTieIds(JNIEnv *jenv, jclass jcls) {
+    std::vector<int> tieIds;
+    get_tie_ids(default_track_scene, tieIds);
+    if (tieIds.size() == 0) return NULL;
+    jintArray retArray = jenv->NewIntArray(tieIds.size());
+    for (int i = 0; i < tieIds.size(); i++) {
+        jenv->SetIntArrayRegion(retArray, i, 1, &tieIds[i]);
+    }
+    return retArray;
+}
+
+/*
  * Class:     corelyzer_helper_SceneGraph
  * Method:    createSectionTie
  * Signature: (FFII)V
@@ -4872,6 +4888,8 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_createSectionTie(JNIEn
     if (!track) return; 
     CoreSection *sec = get_track_section(track, sectionId);
     if (!sec) return;
+
+    // scene-space to section-space
     const float tx = x - (track->px + sec->px);
     const float ty = y - (track->py + sec->py);
     CoreSectionTie* tie = create_section_tie(0, trackId, sectionId, tx, ty);
@@ -4900,6 +4918,7 @@ JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_finishSectionTie(JNIEn
     if (!sec) return false;
 
     int tieId = -1;
+    // scene-space to section-space
     const float tx = x - (track->px + sec->px);
     const float ty = y - (track->py + sec->py);
     printf("finishSectionTie: section coords (%f, %f) - adjusted tie coord (%f, %f)\n", sec->px, sec->py, tx, ty);

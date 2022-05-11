@@ -100,6 +100,19 @@ bool is_track(int scene, int trackid) {
 }
 
 //================================================================
+// Copy section tie IDs into idvec
+void get_tie_ids(int scene, std::vector<int> &idvec) {
+    TrackScene *ts = get_scene(scene);
+    if (!ts) return;
+    int count = 0;
+    for (int i = 0; i < ts->tievec.size(); i++) {
+        if (ts->tievec[i] != NULL) {
+            idvec.push_back(i);
+        }
+    }
+}
+
+//================================================================
 int add_tie(int scene, CoreSectionTie *tie) { // todo: associate tie with session by name as in track logic
     if (!is_track_scene(scene))
         return -1;
