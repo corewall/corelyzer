@@ -107,7 +107,7 @@ void stack_sections(const int trackid, const int sectionid);
 void get_tie_ids(int scene, std::vector<int> &idvec);
 int add_tie(int scene, CoreSectionTie *tie);
 CoreSectionTie *get_tie(int scene, int tieId);
-int remove_tie(int scene, int tieId);
+void remove_tie(int scene, int tieId);
 void render_section_ties(TrackScene *ts, Canvas *c);
 
 #endif

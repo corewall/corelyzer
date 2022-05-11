@@ -193,6 +193,14 @@ JNIEXPORT jintArray JNICALL Java_corelyzer_graphics_SceneGraph_getSectionTieIds
 
 /*
  * Class:     corelyzer_graphics_SceneGraph
+ * Method:    deleteSectionTie
+ * Signature: (I)V
+ */
+JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_deleteSectionTie
+  (JNIEnv *, jclass, jint);
+
+/*
+ * Class:     corelyzer_graphics_SceneGraph
  * Method:    createSectionTie
  * Signature: (FFII)V
  */

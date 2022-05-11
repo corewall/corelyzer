@@ -16,6 +16,7 @@ public class ManageSectionTiesDialog extends JFrame {
     public Vector<TieData> ties = new Vector<TieData>();
     private JList<TieData> tieList;
     private JButton showHideButton;
+    private JButton deleteButton;
     private JButton closeButton;
 
     public ManageSectionTiesDialog() {
@@ -35,11 +36,11 @@ public class ManageSectionTiesDialog extends JFrame {
         JPanel contentPane = new JPanel();
         setContentPane(contentPane);
 
-        contentPane.setLayout(new MigLayout("wrap", "[grow]", ""));
+        contentPane.setLayout(new MigLayout("", "[grow]", ""));
         tieList = new JList<TieData>(ties);
         JScrollPane tieListScroll = new JScrollPane(tieList);
         // contentPane.add(tieList, "wmin 300, hmin 100, hmax 120");
-        contentPane.add(tieListScroll, "wmin 300, hmin 100, hmax 120");
+        contentPane.add(tieListScroll, "wmin 300, hmin 100, hmax 120, wrap");
 
         tieList.addListSelectionListener(new ListSelectionListener() {
             public void valueChanged(ListSelectionEvent event) {
@@ -62,6 +63,17 @@ public class ManageSectionTiesDialog extends JFrame {
         });
         contentPane.add(showHideButton);
 
+        deleteButton = new JButton("Delete");
+        deleteButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent event) {
+                TieData tie = tieList.getSelectedValue();
+                SceneGraph.deleteSectionTie(tie.id);
+                ties.remove(tie);
+                CorelyzerApp.getApp().updateGLWindows();
+            }
+        });
+        contentPane.add(deleteButton);
+
         closeButton = new JButton("Close");
         closeButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent event) {
@@ -75,14 +87,13 @@ public class ManageSectionTiesDialog extends JFrame {
     }
 
     private void updateShowHideButton() {
-        if (tieList.getSelectedIndex() == -1) {
-            showHideButton.setEnabled(false);   
-            return;
-        } else {
-            showHideButton.setEnabled(true);
-        }
+        final boolean enable = tieList.getSelectedIndex() != -1;
+        showHideButton.setEnabled(enable);   
+        deleteButton.setEnabled(enable);
+        if (!enable) return;
+
         TieData cur = tieList.getSelectedValue();
-        showHideButton.setText(cur.show ? "Hide" : "Show");        
+        showHideButton.setText(cur.show ? "Hide" : "Show");
     }
 
     

@@ -134,10 +134,14 @@ int add_tie(int scene, CoreSectionTie *tie) { // todo: associate tie with sessio
 }
 
 //================================================================
-int remove_tie(int scene, int tieId) { // todo: associate tie with session by name as in track logic
-    // free tie
-    // set ts->tievec[tieId] to NULL
-    return 0;
+// todo? associate tie with session by name as in track logic
+// delete_tie() better name?
+void remove_tie(int scene, int tieId) {
+    if (tieId < 0) return;
+    TrackScene *ts = get_scene(scene);
+    CoreSectionTie *tie = ts->tievec[tieId];
+    delete tie;
+    ts->tievec[tieId] = NULL;
 }
 
 //================================================================
@@ -471,7 +475,7 @@ void render_section_ties(TrackScene *ts, Canvas *c) {
     const float arrowSize = 50.0f;
     for (int tidx = 0; tidx < ts->tievec.size(); tidx++) {
         CoreSectionTie *tie = ts->tievec[tidx];
-        if (!tie->show) continue;
+        if (!tie || !tie->show) continue;
 
         float sx, sy;
         section_to_scene(tie->srcTrack, tie->srcCore, tie->x, tie->y, sx, sy);
