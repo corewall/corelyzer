@@ -42,10 +42,13 @@ struct CoreSectionTie {
 
     void setDestination(int trackId, int coreId, float x, float y);
 
+    // getter/setter
     void setSourceDescription(char *desc);
     void setDestinationDescription(char *dest);
     char *getSourceDescription();
     char *getDestinationDescription();
+    bool getShow();
+    void setShow(bool _show);
 };
 
 CoreSectionTie *get_active_tie();

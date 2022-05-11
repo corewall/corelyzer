@@ -471,6 +471,8 @@ void render_section_ties(TrackScene *ts, Canvas *c) {
     const float arrowSize = 50.0f;
     for (int tidx = 0; tidx < ts->tievec.size(); tidx++) {
         CoreSectionTie *tie = ts->tievec[tidx];
+        if (!tie->show) continue;
+
         float sx, sy;
         section_to_scene(tie->srcTrack, tie->srcCore, tie->x, tie->y, sx, sy);
         if (tie->complete) {
@@ -498,7 +500,6 @@ void render_section_ties(TrackScene *ts, Canvas *c) {
         }
         glEnd();
         render_arrowhead(sx, sy, c->mouseX, c->mouseY, arrowSize);
-
     }
     glEnable(GL_TEXTURE_2D);
 }

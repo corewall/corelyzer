@@ -241,6 +241,22 @@ JNIEXPORT jstring JNICALL Java_corelyzer_graphics_SceneGraph_getSectionTieDestin
 
 /*
  * Class:     corelyzer_graphics_SceneGraph
+ * Method:    getSectionTieShow
+ * Signature: (I)Z
+ */
+JNIEXPORT jboolean JNICALL Java_corelyzer_graphics_SceneGraph_getSectionTieShow
+  (JNIEnv *, jclass, jint);
+
+/*
+ * Class:     corelyzer_graphics_SceneGraph
+ * Method:    setSectionTieShow
+ * Signature: (IZ)V
+ */
+JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setSectionTieShow
+  (JNIEnv *, jclass, jint, jboolean);
+
+/*
+ * Class:     corelyzer_graphics_SceneGraph
  * Method:    deleteDataset
  * Signature: (I)V
  */

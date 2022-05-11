@@ -236,6 +236,8 @@ public class SceneGraph {
 	public native static String getSectionTieSourceDescription(int tieId);
 	public native static void setSectionTieDestinationDescription(int tieId, String desc);
 	public native static String getSectionTieDestinationDescription(int tieId);
+	public native static boolean getSectionTieShow(int tieId);
+	public native static void setSectionTieShow(int tieId, boolean show);
 
 	// ----- Canvas methods
 

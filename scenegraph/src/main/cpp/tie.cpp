@@ -39,3 +39,5 @@ void CoreSectionTie::setSourceDescription(char *desc) { srcDesc = desc; }
 void CoreSectionTie::setDestinationDescription(char *desc) { destDesc = desc; }
 char *CoreSectionTie::getSourceDescription() { return srcDesc; }
 char *CoreSectionTie::getDestinationDescription() { return destDesc; }
+bool CoreSectionTie::getShow() { return show; }
+void CoreSectionTie::setShow(bool _show) { show = _show; }

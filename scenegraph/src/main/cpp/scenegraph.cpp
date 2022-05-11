@@ -4988,6 +4988,26 @@ JNIEXPORT jstring JNICALL Java_corelyzer_graphics_SceneGraph_getSectionTieDestin
 }
 
 /*
+ * Class:     corelyzer_graphics_SceneGraph
+ * Method:    getSectionTieShow
+ * Signature: (I)Z
+ */
+JNIEXPORT jboolean JNICALL Java_corelyzer_graphics_SceneGraph_getSectionTieShow(JNIEnv *jenv, jclass jcls, jint tieId) {
+    CoreSectionTie *tie = get_tie(default_track_scene, tieId);
+    return tie->getShow();
+}
+
+/*
+ * Class:     corelyzer_graphics_SceneGraph
+ * Method:    setSectionTieShow
+ * Signature: (IZ)Z
+ */
+JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setSectionTieShow(JNIEnv *jenv, jclass jcls, jint tieId, jboolean show) {
+    CoreSectionTie *tie = get_tie(default_track_scene, tieId);
+    tie->setShow(show);
+}
+
+/*
  * Class:     corelyzer_helper_SceneGraph
  * Method:    setDebug
  * Signature: (Z)V
