@@ -128,6 +128,14 @@ int remove_tie(int scene, int tieId) { // todo: associate tie with session by na
 }
 
 //================================================================
+CoreSectionTie *get_tie(int scene, int tieId) {
+    TrackScene *ts = trackscenevec[scene];
+    if (!ts || tieId == -1) return NULL;
+    CoreSectionTie *tie = ts->tievec[tieId];
+    return tie;
+}
+
+//================================================================
 int append_track(int scene, const char *sessionName, const char *trackName) {
 #ifdef DEBUG
     if (!is_track_scene(scene)) {

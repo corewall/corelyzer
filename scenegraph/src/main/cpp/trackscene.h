@@ -105,6 +105,8 @@ void trim_sections(const int trackid, const int sectionid, const float trim,
 void stack_sections(const int trackid, const int sectionid);
 
 int add_tie(int scene, CoreSectionTie *tie);
+CoreSectionTie *get_tie(int scene, int tieId);
+int remove_tie(int scene, int tieId);
 void render_section_ties(TrackScene *ts, Canvas *c);
 
 #endif

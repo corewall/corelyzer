@@ -1,4 +1,3 @@
-#include <stdlib.h>
 #include <stdio.h>
 
 #include "tie.h"
@@ -27,3 +26,16 @@ bool finish_section_tie(CoreSectionTie *tie, int trackId, int sectionId, float x
     tie->setDestination(trackId, sectionId, x, y);
     return true;
 }
+
+void CoreSectionTie::setDestination(int trackId, int coreId, float x, float y) {
+    destTrack = trackId;
+    destCore = coreId;
+    ax = x;
+    ay = y;
+    complete = true;
+}
+
+void CoreSectionTie::setSourceDescription(char *desc) { srcDesc = desc; }
+void CoreSectionTie::setDestinationDescription(char *desc) { destDesc = desc; }
+char *CoreSectionTie::getSourceDescription() { return srcDesc; }
+char *CoreSectionTie::getDestinationDescription() { return destDesc; }

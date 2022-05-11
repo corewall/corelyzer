@@ -62,6 +62,7 @@ void update_center_point();
 void scale_scene(float ds);
 char *default_block_dir = NULL;
 int duplicateSection(int trackId, int sectionId, int newTrackId);
+char *read_jstring(JNIEnv *jenv, jstring s);
 
 int PickedTrack = -1;
 int PickedSection = -1;
@@ -4161,6 +4162,15 @@ JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_getFreeDrawPluginID(JN
 
 //************************ END JNI FUNCTIONS ********************************//
 
+// Create a C char string of UTF-8 characters from jstring. TODO: The first three
+// lines of this f'n are duplicated *everywhere* in scenegraph.cpp, refactor!
+char *read_jstring(JNIEnv *jenv, jstring s) {
+    const int i = jenv->GetStringLength(s);
+    char *newstr = new char[i+1];
+    jenv->GetStringUTFRegion(s, 0, i, newstr);
+    return newstr;
+}
+
 //====================================================================
 float get_scene_center_x() {
     return center_x;
@@ -4848,6 +4858,11 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_stackSections(JNIEnv *
     stack_sections(trackId, sectionId);
 }
 
+/*
+ * Class:     corelyzer_helper_SceneGraph
+ * Method:    createSectionTie
+ * Signature: (FFII)V
+ */
 JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_createSectionTie(JNIEnv *jenv, jclass jcls, jfloat x, jfloat y, jint trackId, jint sectionId) {
     if (get_active_tie() != NULL) {
         printf("There is already an active tie, can't start a new one!\n");
@@ -4868,16 +4883,23 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_createSectionTie(JNIEn
     printf("createSectionTie: coords (%f, %f)\n", tx, ty);
 }
 
-JNIEXPORT jboolean JNICALL Java_corelyzer_graphics_SceneGraph_finishSectionTie(JNIEnv *jenv, jclass jcls, jfloat x, jfloat y, jint trackId, jint sectionId) {
+/*
+ * Class:     corelyzer_helper_SceneGraph
+ * Method:    finishSectionTie
+ * Signature: (FFII)V
+ */
+JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_finishSectionTie(JNIEnv *jenv, jclass jcls, jfloat x, jfloat y, jint trackId, jint sectionId) {
     CoreSectionTie *activeTie = get_active_tie();
     if (!activeTie) {
         printf("There is no active tie to finish!\n");
         return false;
     }
     TrackSceneNode *track = get_scene_track(trackId);
-    if (!track) return false; 
+    if (!track) return false;
     CoreSection *sec = get_track_section(track, sectionId);
     if (!sec) return false;
+
+    int tieId = -1;
     const float tx = x - (track->px + sec->px);
     const float ty = y - (track->py + sec->py);
     printf("finishSectionTie: section coords (%f, %f) - adjusted tie coord (%f, %f)\n", sec->px, sec->py, tx, ty);
@@ -4888,14 +4910,62 @@ JNIEXPORT jboolean JNICALL Java_corelyzer_graphics_SceneGraph_finishSectionTie(J
             printf("Invalid TrackScene!?\n");
             success = false;
         } else {
-            int tieId = add_tie(default_track_scene, activeTie);
+            tieId = add_tie(default_track_scene, activeTie);
             if (tieId != -1) {
                 printf("Created tie with ID = %d\n", tieId);
             }
         }
         set_active_tie(NULL);
     }
-    return success;
+    return tieId;
+}
+
+/*
+ * Class:     corelyzer_helper_SceneGraph
+ * Method:    setSectionTieSourceDescription
+ * Signature: (ILjava/lang/String;)V
+ */
+JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setSectionTieSourceDescription(JNIEnv *jenv, jclass jcls, jint tieId, jstring desc) {
+    CoreSectionTie *tie = get_tie(default_track_scene, tieId);
+    if (!tie) return;
+    char *s = read_jstring(jenv, desc);
+    printf("Setting src desc to %s\n", s);
+    tie->setSourceDescription(s);
+}
+
+/*
+ * Class:     corelyzer_helper_SceneGraph
+ * Method:    getSectionTieSourceDescription
+ * Signature: (I)Ljava/lang/String;
+ */
+JNIEXPORT jstring JNICALL Java_corelyzer_graphics_SceneGraph_getSectionTieSourceDescription(JNIEnv *jenv, jclass jcls, jint tieId) {
+    CoreSectionTie *tie = get_tie(default_track_scene, tieId);
+    if (!tie) return jenv->NewStringUTF(NULL);
+    return jenv->NewStringUTF(tie->getSourceDescription());
+}
+
+/*
+ * Class:     corelyzer_helper_SceneGraph
+ * Method:    setSectionTieDestinationDescription
+ * Signature: (ILjava/lang/String;)V
+ */
+JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setSectionTieDestinationDescription(JNIEnv *jenv, jclass jcls, jint tieId, jstring desc) {
+    CoreSectionTie *tie = get_tie(default_track_scene, tieId);
+    if (!tie) return;
+    char *s = read_jstring(jenv, desc);
+    printf("Setting dest desc to %s\n", s);
+    tie->setDestinationDescription(s);
+}
+
+/*
+ * Class:     corelyzer_helper_SceneGraph
+ * Method:    getSectionTieDestinationDescription
+ * Signature: (I)Ljava/lang/String;
+ */
+JNIEXPORT jstring JNICALL Java_corelyzer_graphics_SceneGraph_getSectionTieDestinationDescription(JNIEnv *jenv, jclass jcls, jint tieId) {
+    CoreSectionTie *tie = get_tie(default_track_scene, tieId);
+    if (!tie) return jenv->NewStringUTF(NULL);
+    return jenv->NewStringUTF(tie->getDestinationDescription());
 }
 
 /*

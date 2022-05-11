@@ -1,6 +1,8 @@
 #ifndef CORELYZER_TIE_H
 #define CORELYZER_TIE_H
 
+#include <stdlib.h>
+
 // A tie between two core section images
 struct CoreSectionTie {
     int type; // splice, visual, etc
@@ -12,10 +14,11 @@ struct CoreSectionTie {
     int destCore;
     float ax; // x,y of destination core?
     float ay;
-    char *sourceDesc; // description of source tie point
+    char *srcDesc; // description of source tie point
     char *destDesc; // description of destination tie point
     bool complete; // true if both endpoints been defined
     bool selected; // for highlighting tie on selection
+    bool show; // if false, don't draw tie line
 
     CoreSectionTie(int _type, int trackId, int coreId, float _x, float _y) {
         type = _type;
@@ -25,21 +28,24 @@ struct CoreSectionTie {
         y = _y;
         destTrack = -1;
         destCore = -1;
+        srcDesc = NULL;
+        destDesc = NULL;
         complete = false;
         selected = false;
+        show = true;
     }
 
     ~CoreSectionTie() {
-        // todo: free description memory
+        if (srcDesc) delete[] srcDesc;
+        if (destDesc) delete[] destDesc;
     }
 
-    void setDestination(int trackId, int coreId, float x, float y) {
-        destTrack = trackId;
-        destCore = coreId;
-        ax = x;
-        ay = y;
-        complete = true;
-    }
+    void setDestination(int trackId, int coreId, float x, float y);
+
+    void setSourceDescription(char *desc);
+    void setDestinationDescription(char *dest);
+    char *getSourceDescription();
+    char *getDestinationDescription();
 };
 
 CoreSectionTie *get_active_tie();

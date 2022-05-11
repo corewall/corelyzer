@@ -228,9 +228,13 @@ public class SceneGraph {
 	 */
 	public native static int createFreeDrawRectangleForTrack(int pluginid, int track, float x, float y, float w, float h);
 
+	// section tie f'ns
 	public native static void createSectionTie(float x, float y, int trackId, int sectionId);
-
-	public native static boolean finishSectionTie(float x, float y, int trackId, int sectionId);
+	public native static int finishSectionTie(float x, float y, int trackId, int sectionId);
+	public native static void setSectionTieSourceDescription(int tieId, String desc);
+	public native static String getSectionTieSourceDescription(int tieId);
+	public native static void setSectionTieDestinationDescription(int tieId, String desc);
+	public native static String getSectionTieDestinationDescription(int tieId);
 
 	// ----- Canvas methods
 
