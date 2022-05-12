@@ -440,7 +440,7 @@ void render_track_scene(int id, Canvas *c) {
 
 //================================================================
 void render_arrowhead(float fromX, float fromY, float toX, float toY, float size) {
-    const float pi = 3.14f;
+    const float pi = 3.14159f;
     float theta = atan2(toY - fromY, toX - fromX);
     float x0 = toX - size * cos(theta - pi/6);
     float y0 = toY - size * sin(theta - pi/6);
@@ -467,12 +467,25 @@ static void section_to_scene(int trackId, int sectionId, float sec_x, float sec_
 }
 
 //================================================================
+// convert section-space coord to centimeters
+static void log_to_cm(Canvas *c, float x, float y) {// float &cmx, float &cmy) {
+    float foo = (x / c->dpi_x) * 2.54f;
+    float bar = (y / c->dpi_y) * 2.54f;
+    // printf("Scene (%f,%f) -> (%f,%f)cm\n", x, y, foo, bar);
+}
+
+//================================================================
 void render_section_ties(TrackScene *ts, Canvas *c) {
     glDisable(GL_TEXTURE_2D); // enabled textures affect point/line color
     glLineWidth(3);
     glPointSize(5);
     glColor3f(0,1,0);
-    const float arrowSize = 50.0f;
+
+    // Maintain size of arrowhead when c->w/c->w0 < 1.0 or it becomes needlessly
+    // large at high zoom levels, obscuring imagery.
+    float arrowSize = 50.0f * c->w/c->w0;
+    if (arrowSize > 50.0f) { arrowSize = 50.0f; }
+
     for (int tidx = 0; tidx < ts->tievec.size(); tidx++) {
         CoreSectionTie *tie = ts->tievec[tidx];
         if (!tie || !tie->show) continue;
