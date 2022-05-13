@@ -2,7 +2,6 @@ package corelyzer.ui.tie;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.Vector;
 
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
@@ -13,8 +12,8 @@ import corelyzer.ui.CorelyzerApp;
 import net.miginfocom.swing.MigLayout;
 
 public class ManageSectionTiesDialog extends JFrame {
-    public Vector<TieData> ties = new Vector<TieData>();
     private JList<TieData> tieList;
+    private DefaultListModel<TieData> ties = new DefaultListModel<TieData>();
     private JButton showHideButton;
     private JButton deleteButton;
     private JButton closeButton;
@@ -39,7 +38,6 @@ public class ManageSectionTiesDialog extends JFrame {
         contentPane.setLayout(new MigLayout("", "[grow]", ""));
         tieList = new JList<TieData>(ties);
         JScrollPane tieListScroll = new JScrollPane(tieList);
-        // contentPane.add(tieList, "wmin 300, hmin 100, hmax 120");
         contentPane.add(tieListScroll, "wmin 300, hmin 100, hmax 120, wrap");
 
         tieList.addListSelectionListener(new ListSelectionListener() {
@@ -66,9 +64,13 @@ public class ManageSectionTiesDialog extends JFrame {
         deleteButton = new JButton("Delete");
         deleteButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent event) {
+                final int sel_idx = tieList.getSelectedIndex();
                 TieData tie = tieList.getSelectedValue();
+                ties.removeElement(tie);
+                final int new_sel = ties.size() > 0 ? Math.min(ties.size()-1, sel_idx) : -1;
+                tieList.setSelectedIndex(new_sel);
+                tieList.updateUI();
                 SceneGraph.deleteSectionTie(tie.id);
-                ties.remove(tie);
                 CorelyzerApp.getApp().updateGLWindows();
             }
         });
@@ -98,18 +100,19 @@ public class ManageSectionTiesDialog extends JFrame {
 
     
     private void gatherTieData(int[] tieIds) {
-        for (int id : tieIds) {
+        for (int i = 0; i < tieIds.length; i++) {
+            final int id = tieIds[i];
             final boolean show = SceneGraph.getSectionTieShow(id);
             final String srcDesc = SceneGraph.getSectionTieSourceDescription(id);
             final String destDesc = SceneGraph.getSectionTieDestinationDescription(id);
-            ties.add(new TieData(id, show, srcDesc, destDesc));
+            ties.add(i, new TieData(id, show, srcDesc, destDesc));
         }
     }
     
     // dummy ties for testing
     private void addDummyTies() {
         for (int i = 0; i < 10; i++) {
-            ties.add(new TieData(i+1, i % 2 == 0 ? true : false, "source desc", "dest desc"));
+            ties.add(i, new TieData(i+1, i % 2 == 0 ? true : false, "source desc", "dest desc"));
         }
     }
 
