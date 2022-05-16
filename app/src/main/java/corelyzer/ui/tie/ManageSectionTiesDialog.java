@@ -12,13 +12,15 @@ import javax.swing.event.TableModelListener;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableModel;
 
+import java.util.Vector;
+
 import corelyzer.graphics.SceneGraph;
 import corelyzer.ui.CorelyzerApp;
 import net.miginfocom.swing.MigLayout;
 
 public class ManageSectionTiesDialog extends JFrame {
     private JTable tieTable;
-    private DefaultListModel<TieData> ties = new DefaultListModel<TieData>();
+    private Vector<TieData> ties = new Vector<TieData>();
     private JButton deleteButton;
     private JButton closeButton;
 
@@ -167,8 +169,8 @@ class TieTable extends JTable {
 
 // Display and handle checkboxes in "Show" column
 class TieTableModel extends AbstractTableModel {
-    DefaultListModel<TieData> ties;
-    TieTableModel(DefaultListModel<TieData> ties) {
+    Vector<TieData> ties;
+    TieTableModel(Vector<TieData> ties) {
         super();
         this.ties = ties;
     }
@@ -204,9 +206,9 @@ class TieTableModel extends AbstractTableModel {
 		}
 	}
 
-    public int getColumnCount() { return 3; }
-    public int getRowCount() { return ties.size(); }
-    public Object getValueAt(final int row, final int col) { 
+    @Override public int getColumnCount() { return 3; }
+    @Override public int getRowCount() { return ties.size(); }
+    @Override public Object getValueAt(final int row, final int col) { 
         TieData t = ties.get(row);
         if (col == 0) {
             return Boolean.valueOf(t.show);
