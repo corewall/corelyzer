@@ -662,8 +662,7 @@ public class CorelyzerGLCanvas implements GLEventListener, MouseListener, MouseW
 
 	private void doManageTies() {
 		int[] tieIds = SceneGraph.getSectionTieIds();
-		if (tieIds.length == 0) {
-			// pop message? Or disable menu item if there are zero ties?
+		if (tieIds == null) {
 			System.out.println("There are no ties to manage!");
 			return;
 		}
