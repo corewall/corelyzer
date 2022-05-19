@@ -110,5 +110,7 @@ CoreSectionTie *get_tie(int scene, int tieId);
 void remove_tie(int scene, int tieId);
 void render_section_ties(TrackScene *ts, Canvas *c);
 
+void set_selected_tie(int tieId);
+
 #endif
 

@@ -47,6 +47,8 @@ static float defaultTrackPositionY = 0.0f;
 
 static bool is_remote_controlled = false;
 
+static int selectedTie = -1; // ID of selected tie, -1 if no selection
+
 //================================================================
 std::vector<TrackScene *> trackscenevec;
 static int renderMode = -1;
@@ -150,6 +152,11 @@ CoreSectionTie *get_tie(int scene, int tieId) {
     if (!ts || tieId == -1) return NULL;
     CoreSectionTie *tie = ts->tievec[tieId];
     return tie;
+}
+
+//================================================================
+void set_selected_tie(int tieId) {
+    selectedTie = tieId;
 }
 
 //================================================================
@@ -490,6 +497,11 @@ void render_section_ties(TrackScene *ts, Canvas *c) {
         CoreSectionTie *tie = ts->tievec[tidx];
         if (!tie || !tie->show) continue;
 
+        if (tidx == selectedTie) {
+            glColor3f(1,1,0);
+        } else {
+            glColor3f(0,1,0);
+        }
         float sx, sy;
         section_to_scene(tie->srcTrack, tie->srcCore, tie->x, tie->y, sx, sy);
         if (tie->complete) {

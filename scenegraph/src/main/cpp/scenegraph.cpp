@@ -5017,6 +5017,15 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setSectionTieShow(JNIE
 }
 
 /*
+ * Class:     corelyzer_graphics_SceneGraph
+ * Method:    setSelectedTie
+ * Signature: (I)V
+ */
+JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setSelectedTie(JNIEnv *jenv, jclass jcls, jint tieId) {
+    set_selected_tie(tieId);
+}
+
+/*
  * Class:     corelyzer_helper_SceneGraph
  * Method:    setDebug
  * Signature: (Z)V
