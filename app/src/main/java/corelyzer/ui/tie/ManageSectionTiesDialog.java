@@ -47,7 +47,10 @@ public class ManageSectionTiesDialog extends JFrame {
         tieTable.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
             public void valueChanged(ListSelectionEvent event) {
                 if (!event.getValueIsAdjusting()) {
+                    TieData tie = ties.get(tieTable.getSelectedRow());
+                    SceneGraph.setSelectedTie(tie.id);
                     updateButtons();
+                    CorelyzerApp.getApp().updateGLWindows();
                 }
             }
         });
@@ -70,10 +73,14 @@ public class ManageSectionTiesDialog extends JFrame {
                 final int row = tieTable.getSelectedRow();
                 TieData tie = ties.get(row);
                 ties.removeElement(tie);
-                final int new_sel = ties.size() > 0 ? Math.min(ties.size()-1, row) : -1;
-                tieTable.setRowSelectionInterval(new_sel, new_sel);
-                tieTable.updateUI();
                 SceneGraph.deleteSectionTie(tie.id);
+                final int new_sel = ties.size() > 0 ? Math.min(ties.size()-1, row) : -1;
+                if (new_sel != -1) { // select another row if possible
+                    tieTable.setRowSelectionInterval(new_sel, new_sel);
+                    TieData selectTie = ties.get(tieTable.getSelectedRow());
+                    SceneGraph.setSelectedTie(selectTie.id);
+                }
+                tieTable.updateUI();
                 CorelyzerApp.getApp().updateGLWindows();
             }
         });
@@ -82,6 +89,8 @@ public class ManageSectionTiesDialog extends JFrame {
         closeButton = new JButton("Close");
         closeButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent event) {
+                SceneGraph.setSelectedTie(-1);
+                CorelyzerApp.getApp().updateGLWindows();
                 setVisible(false);
             }
         });
@@ -212,9 +221,9 @@ class TieTableModel extends AbstractTableModel {
         TieData t = ties.get(row);
         if (col == 0) {
             return Boolean.valueOf(t.show);
-        } else if (row == 1) {
+        } else if (col == 1) {
             return t.srcDesc;
-        } else {
+        } else { // col == 2
             return t.destDesc;
         }
     }
