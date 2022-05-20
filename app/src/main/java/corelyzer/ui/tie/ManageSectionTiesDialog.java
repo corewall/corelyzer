@@ -21,6 +21,7 @@ import net.miginfocom.swing.MigLayout;
 public class ManageSectionTiesDialog extends JFrame {
     private JTable tieTable;
     private Vector<TieData> ties = new Vector<TieData>();
+    private JButton editButton;
     private JButton deleteButton;
     private JButton closeButton;
 
@@ -67,6 +68,14 @@ public class ManageSectionTiesDialog extends JFrame {
         JScrollPane tableScroll = new JScrollPane(tieTable);
         contentPane.add(tableScroll, "wmin 300, hmin 100, wrap, grow");
 
+        editButton = new JButton("Edit");
+        editButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                doEditTie();
+            }
+        });
+        contentPane.add(editButton, "split 3");
+
         deleteButton = new JButton("Delete");
         deleteButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent event) {
@@ -84,7 +93,7 @@ public class ManageSectionTiesDialog extends JFrame {
                 CorelyzerApp.getApp().updateGLWindows();
             }
         });
-        contentPane.add(deleteButton, "split 2");
+        contentPane.add(deleteButton);
 
         closeButton = new JButton("Close");
         closeButton.addActionListener(new ActionListener() {
@@ -100,8 +109,25 @@ public class ManageSectionTiesDialog extends JFrame {
         updateButtons();
     }
 
+    private void doEditTie() {
+        TieData tie = ties.get(tieTable.getSelectedRow());
+        SectionTieDialog tieDlg = new SectionTieDialog(CorelyzerApp.getApp().getMainFrame(), tie.id);
+        tieDlg.setDescs(tie.srcDesc, tie.destDesc);
+        tieDlg.setModal(true);
+        tieDlg.setLocationRelativeTo(this);
+        tieDlg.setVisible(true);
+        if (tieDlg.confirmed) {
+            tie.srcDesc = tieDlg.getFromDesc();
+            tie.destDesc = tieDlg.getToDesc();
+            SceneGraph.setSectionTieSourceDescription(tie.id, tie.srcDesc);
+            SceneGraph.setSectionTieDestinationDescription(tie.id, tie.destDesc);
+            tieTable.updateUI();
+        }
+    }
+
     private void updateButtons() {
         final boolean enable = tieTable.getSelectedRow() != -1;
+        editButton.setEnabled(enable);
         deleteButton.setEnabled(enable);
         if (!enable) return;
     }

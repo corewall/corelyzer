@@ -5021,8 +5021,67 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setSectionTieShow(JNIE
  * Method:    setSelectedTie
  * Signature: (I)V
  */
-JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setSelectedTie(JNIEnv *jenv, jclass jcls, jint tieId) {
+JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setSelectedTie
+(JNIEnv *jenv, jclass jcls, jint tieId) {
     set_selected_tie(tieId);
+}
+
+/*
+ * Class:     corelyzer_graphics_SceneGraph
+ * Method:    getSectionTieSourceSectionName
+ * Signature: (I)V
+ */
+JNIEXPORT jstring JNICALL Java_corelyzer_graphics_SceneGraph_getSectionTieSourceSectionName(JNIEnv *jenv, jclass jcls, jint tieId) {
+    CoreSectionTie *tie = get_tie(default_track_scene, tieId);
+    TrackSceneNode *t = get_scene_track(default_track_scene, tie->srcTrack);
+    if (!t) return NULL;
+    CoreSection *cs = get_track_section(t, tie->srcCore);
+    if (!cs) return NULL;
+
+    return jenv->NewStringUTF(get_section_name(cs));
+}
+
+/*
+ * Class:     corelyzer_graphics_SceneGraph
+ * Method:    getSectionTieDestinationSectionName
+ * Signature: (I)V
+ */
+JNIEXPORT jstring JNICALL Java_corelyzer_graphics_SceneGraph_getSectionTieDestinationSectionName(JNIEnv *jenv, jclass jcls, jint tieId) {
+    CoreSectionTie *tie = get_tie(default_track_scene, tieId);
+    TrackSceneNode *t = get_scene_track(default_track_scene, tie->destTrack);
+    if (!t) return NULL;
+    CoreSection *cs = get_track_section(t, tie->destCore);
+    if (!cs) return NULL;
+
+    return jenv->NewStringUTF(get_section_name(cs));    
+}
+
+/*
+ * Class:     corelyzer_graphics_SceneGraph
+ * Method:    getSectionTieSourcePosition
+ * Signature: (I)V
+ */
+JNIEXPORT jfloatArray JNICALL Java_corelyzer_graphics_SceneGraph_getSectionTieSourcePosition(JNIEnv *jenv, jclass jcls, jint tieId) {
+    CoreSectionTie *tie = get_tie(default_track_scene, tieId);
+    if (!tie) return NULL;
+    float posbuf[2] = {tie->x, tie->y};
+    jfloatArray pos = jenv->NewFloatArray(2);
+    jenv->SetFloatArrayRegion(pos, 0, 2, posbuf);
+    return pos;
+}
+
+/*
+ * Class:     corelyzer_graphics_SceneGraph
+ * Method:    getSectionTieDestinationPosition
+ * Signature: (I)V
+ */
+JNIEXPORT jfloatArray JNICALL Java_corelyzer_graphics_SceneGraph_getSectionTieDestinationPosition(JNIEnv *jenv, jclass jcls, jint tieId) {
+    CoreSectionTie *tie = get_tie(default_track_scene, tieId);
+    if (!tie) return NULL;
+    float posbuf[2] = {tie->ax, tie->ay};
+    jfloatArray pos = jenv->NewFloatArray(2);
+    jenv->SetFloatArrayRegion(pos, 0, 2, posbuf);
+    return pos;
 }
 
 /*

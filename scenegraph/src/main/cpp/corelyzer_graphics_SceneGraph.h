@@ -273,6 +273,38 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setSelectedTie
 
 /*
  * Class:     corelyzer_graphics_SceneGraph
+ * Method:    getSectionTieSourceSectionName
+ * Signature: (I)Ljava/lang/String;
+ */
+JNIEXPORT jstring JNICALL Java_corelyzer_graphics_SceneGraph_getSectionTieSourceSectionName
+  (JNIEnv *, jclass, jint);
+
+/*
+ * Class:     corelyzer_graphics_SceneGraph
+ * Method:    getSectionTieDestinationSectionName
+ * Signature: (I)Ljava/lang/String;
+ */
+JNIEXPORT jstring JNICALL Java_corelyzer_graphics_SceneGraph_getSectionTieDestinationSectionName
+  (JNIEnv *, jclass, jint);
+
+/*
+ * Class:     corelyzer_graphics_SceneGraph
+ * Method:    getSectionTieSourcePosition
+ * Signature: (I)[F
+ */
+JNIEXPORT jfloatArray JNICALL Java_corelyzer_graphics_SceneGraph_getSectionTieSourcePosition
+  (JNIEnv *, jclass, jint);
+
+/*
+ * Class:     corelyzer_graphics_SceneGraph
+ * Method:    getSectionTieDestinationPosition
+ * Signature: (I)[F
+ */
+JNIEXPORT jfloatArray JNICALL Java_corelyzer_graphics_SceneGraph_getSectionTieDestinationPosition
+  (JNIEnv *, jclass, jint);
+
+/*
+ * Class:     corelyzer_graphics_SceneGraph
  * Method:    deleteDataset
  * Signature: (I)V
  */

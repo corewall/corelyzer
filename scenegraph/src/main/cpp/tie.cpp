@@ -35,8 +35,14 @@ void CoreSectionTie::setDestination(int trackId, int coreId, float x, float y) {
     complete = true;
 }
 
-void CoreSectionTie::setSourceDescription(char *desc) { srcDesc = desc; }
-void CoreSectionTie::setDestinationDescription(char *desc) { destDesc = desc; }
+void CoreSectionTie::setSourceDescription(char *desc) {
+    if (srcDesc) delete[] srcDesc;
+    srcDesc = desc;
+}
+void CoreSectionTie::setDestinationDescription(char *desc) {
+    if (destDesc) delete[] destDesc;
+    destDesc = desc;
+}
 char *CoreSectionTie::getSourceDescription() { return srcDesc; }
 char *CoreSectionTie::getDestinationDescription() { return destDesc; }
 bool CoreSectionTie::getShow() { return show; }

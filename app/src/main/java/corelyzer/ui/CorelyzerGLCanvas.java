@@ -668,7 +668,9 @@ public class CorelyzerGLCanvas implements GLEventListener, MouseListener, MouseW
 		}
 		
 		ManageSectionTiesDialog dlg = new ManageSectionTiesDialog(tieIds);
+		dlg.setLocationRelativeTo(null); // center in display
 		dlg.setAlwaysOnTop(true);
+		dlg.setSize(400, 300);
 		dlg.setVisible(true);
 	}
 
@@ -1212,7 +1214,8 @@ public class CorelyzerGLCanvas implements GLEventListener, MouseListener, MouseW
 					if (selectedTrack != -1 && selectedTrackSection != -1) {
 						int tieId = SceneGraph.finishSectionTie(scenePos[0], scenePos[1], selectedTrack, selectedTrackSection);
 						if (tieId != -1) {
-							SectionTieDialog tieDlg = new SectionTieDialog(CorelyzerApp.getApp().getToolFrame());
+							SectionTieDialog tieDlg = new SectionTieDialog(CorelyzerApp.getApp().getToolFrame(), tieId);
+							tieDlg.setDescs("", "");
 							tieDlg.setLocation(new Point(prePos.x + 10, prePos.y + 10));
 							tieDlg.setModal(true);
 							tieDlg.setVisible(true);
