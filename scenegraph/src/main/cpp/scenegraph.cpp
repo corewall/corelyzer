@@ -69,6 +69,7 @@ int PickedSection = -1;
 int PickedGraph = -1;
 int PickedMarker = -1;
 int PickedFreeDraw = -1;
+int PickedTie = -1;
 
 bool MeasureMode = false;
 int MeasurePoints = 0;
@@ -3506,6 +3507,15 @@ JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_accessPickedFreeDraw(J
 
 /*
 * Class:     SceneGraph
+* Method:    accessPickedTie
+* Signature: ()I
+*/
+JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_accessPickedTie(JNIEnv *jenv, jclass jcls) {
+    return PickedTie;
+}
+
+/*
+* Class:     SceneGraph
 * Method:    createCoreSectionMarker
 * Signature: (IIIF)I
 */
@@ -4354,6 +4364,49 @@ bool click_in_core_section_image(CoreSection *core, const float tx, const float 
 }
 
 //=======================================================================
+// Get distance from point (px,py) to nearest point on line segment (x0,y0) -> (x1,y1).
+// From https://stackoverflow.com/questions/849211/shortest-distance-between-a-point-and-a-line-segment
+float pt_to_line_dist(float px, float py, float x0, float y0, float x1, float y1) {
+    const float a = px - x0;
+    const float b = py - y0;
+    const float c = x1 - x0;
+    const float d = y1 - y0;
+
+    const float dot = a * c + b * d;
+    const float len_sq = c * c + d * d;
+    float param = -1;
+    if (len_sq != 0) {
+        param = dot / len_sq;
+    }
+    float xx, yy;
+    if (param < 0) { // (x0,y0) closest
+        xx = x0;
+        yy = y0;
+    } else if (param > 1) { // (x1,y1) closest
+        xx = x1;
+        yy = y1;
+    } else { // point (xx,yy) on segment (x0,y0) -> (x1,y1) closest
+        xx = x0 + param * c;
+        yy = y0 + param * d;
+    }
+
+    const float dx = px - xx;
+    const float dy = py - yy;
+    return sqrt(dx * dx + dy * dy);
+}
+
+//=======================================================================
+// Mouse was clicked at (_x, _y). Determine selected scene components
+// and set corresponding Picked[Track|Section|Graph|Marker|FreeDraw|Tie] vars
+// accordingly.
+//
+// Only one of PickedGraph, PickedMarker, PickedFreeDraw can be set
+// to a valid value >= 0.
+// If PickedGraph or PickedMarker are set, PickedTrack and PickedSection will
+// be set as well.
+// If PickedFreeDraw is set, PickedTrack will be set. If the freedraw is associated
+// with a section, PickedSection will also be set. If the freedraw is associated
+// with a track PickedSection will *not* be set.
 void perform_pick(int canvas, float _x, float _y) {
     float x, y;
 
@@ -4378,6 +4431,7 @@ void perform_pick(int canvas, float _x, float _y) {
     PickedGraph = -1;
     PickedMarker = -1;
     PickedFreeDraw = -1;
+    PickedTie = -1;
 
     if (!is_canvas(canvas))
         return;
@@ -4436,7 +4490,25 @@ void perform_pick(int canvas, float _x, float _y) {
             break;
         }
     }
-    if (PickedSection == -1) {
+
+    // check for click on a tie line
+    if (PickedMarker == -1) {
+        TrackScene *ts = get_scene(default_track_scene);
+        for (int tie_idx = 0; tie_idx < ts->tievec.size(); tie_idx++) {
+            CoreSectionTie *tie = ts->tievec[tie_idx];
+            if (!tie || !tie->show) continue;
+            float srcx, srcy, dstx, dsty;
+            section_to_scene(tie->srcTrack, tie->srcCore, tie->x, tie->y, srcx, srcy);
+            section_to_scene(tie->destTrack, tie->destCore, tie->ax, tie->ay, dstx, dsty);
+            const float dist = pt_to_line_dist(x, y, srcx, srcy, dstx, dsty);
+            if (dist < 30.0f) { //
+                PickedTie = tie_idx;
+                break;
+            }
+        }
+    }
+
+    if (PickedSection == -1 && PickedTie == -1) {
         // No section image was picked. Search all tracks for picked graph,
         // annotation marker, or freedraw.
         for (int track_idx = 0; track_idx < zlen; track_idx++) {
@@ -4446,7 +4518,6 @@ void perform_pick(int canvas, float _x, float _y) {
             const int cs_zlen = get_track_section_zorder_length(track);
             if (cs_zlen <= 0) continue;
 
-            // CoreSection *core = NULL;
             float tx = x - track->px;
             float ty = y - track->py;
 
@@ -4558,9 +4629,9 @@ printf("Picked Graph %d\n", PickedGraph);
                         PickedTrack = track_order[track_idx];
                     }
                 }
-            } 
+            }
         } // end TrackSceneNode loop
-    } // if (PickedSection == -1) after core image search
+    } // if (PickedSection == -1 && PickedTie == -1) after core image search
     free(track_order);
 }
 

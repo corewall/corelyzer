@@ -49,6 +49,14 @@ JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_accessPickedTrack
 
 /*
  * Class:     corelyzer_graphics_SceneGraph
+ * Method:    accessPickedTie
+ * Signature: ()I
+ */
+JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_accessPickedTie
+  (JNIEnv *, jclass);
+
+/*
+ * Class:     corelyzer_graphics_SceneGraph
  * Method:    addClastPoint1
  * Signature: (FF)V
  */

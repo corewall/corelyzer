@@ -466,7 +466,7 @@ void render_arrowhead(float fromX, float fromY, float toX, float toY, float size
 // Convert section-relative coord (sec_x, sec_y) to scene-space coord (sx, sy).
 // (sec_x, sec_y) is positioned relative to the upper-left of the core section
 // corresponding to trackId and sectionId.
-static void section_to_scene(int trackId, int sectionId, float sec_x, float sec_y, float &sx, float &sy) {
+void section_to_scene(int trackId, int sectionId, float sec_x, float sec_y, float &sx, float &sy) {
     TrackSceneNode *track = get_scene_track(trackId);
     CoreSection *section = get_track_section(track, sectionId);
     sx = sec_x + track->px + section->px;

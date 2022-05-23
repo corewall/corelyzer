@@ -89,6 +89,11 @@ public class SceneGraph {
 	 */
 	public native static int accessPickedTrack();
 
+	/**
+	 * @return id of tie found on last performPick()
+	 */
+	public native static int accessPickedTie();
+
 	public native static void addClastPoint1(float x, float y);
 
 	public native static void addClastPoint2(float x, float y);

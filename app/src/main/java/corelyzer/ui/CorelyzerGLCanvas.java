@@ -121,6 +121,7 @@ public class CorelyzerGLCanvas implements GLEventListener, MouseListener, MouseW
 	private static int selectedTrackIndex = -1;
 	private static int selectedTrackSectionIndex = -1;
 	private static int selectedMarker = -1;
+	private static int selectedTie = -1;
 
 	private static int selectedGraph = -1;
 
@@ -592,7 +593,7 @@ public class CorelyzerGLCanvas implements GLEventListener, MouseListener, MouseW
 		selectedMarker = SceneGraph.accessPickedMarker();
 		selectedGraph = SceneGraph.accessPickedGraph();
 		selectedFreeDraw = SceneGraph.accessPickedFreeDraw();
-
+		selectedTie = SceneGraph.accessPickedTie();
 		if (track > -1) {
 			SceneGraph.bringTrackToFront(selectedTrack);
 			if (section > -1) {
@@ -1237,8 +1238,18 @@ public class CorelyzerGLCanvas implements GLEventListener, MouseListener, MouseW
 					return;
 				}
 
-				selectedMarker = SceneGraph.accessPickedMarker();
+				if (selectedTie >= 0) {
+					SectionTieDialog tieDlg = new SectionTieDialog(CorelyzerApp.getApp().getToolFrame(), selectedTie);
+					tieDlg.setLocation(new Point(prePos.x + 10, prePos.y + 10));
+					tieDlg.setModal(true);
+					tieDlg.setVisible(true);
+					if (tieDlg.confirmed) {
+						SceneGraph.setSectionTieSourceDescription(selectedTie, tieDlg.getFromDesc());
+						SceneGraph.setSectionTieDestinationDescription(selectedTie, tieDlg.getToDesc());
+					}					
+				}
 
+				selectedMarker = SceneGraph.accessPickedMarker();
 				if (selectedMarker < 0) {
 					if (canvasMode == CorelyzerApp.APP_MARKER_MODE) {
 						SceneGraph.setCoreSectionMarkerFocus(false);

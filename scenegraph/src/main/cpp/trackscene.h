@@ -111,6 +111,7 @@ void remove_tie(int scene, int tieId);
 void render_section_ties(TrackScene *ts, Canvas *c);
 
 void set_selected_tie(int tieId);
+void section_to_scene(int trackId, int sectionId, float sec_x, float sec_y, float &sx, float &sy);
 
 #endif
 
