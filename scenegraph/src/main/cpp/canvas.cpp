@@ -46,6 +46,11 @@
 #include <string>
 #include <vector>
 
+// Stifle deprecation warnings on macOS for GLU f'ns e.g. gluOrtho2D,
+// suggesting use of GLKMatrix4MakeOrtho(), which is 1) macOS-specific
+// and 2) a non-trivial change.
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+
 using namespace std;
 
 extern void read_png(const char *pngfilename, int *w, int *h, GLenum *format,
