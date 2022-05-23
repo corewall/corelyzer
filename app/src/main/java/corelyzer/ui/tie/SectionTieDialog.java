@@ -39,15 +39,11 @@ public class SectionTieDialog extends JDialog {
             int sx = Math.round(srcPos[0] / SceneGraph.getCanvasDPIX(0) * 2.54f);
             int dx = Math.round(destPos[0] / SceneGraph.getCanvasDPIX(0) * 2.54f);
             srcLabel.setText(srcSecId + " " + sx + "cm");
+            fromDesc.setText(SceneGraph.getSectionTieSourceDescription(tieId));
             destLabel.setText(destSecId + " " + dx + "cm");
+            toDesc.setText(SceneGraph.getSectionTieDestinationDescription(tieId));
             pack();
         }
-    }
-
-    public void setDescs(String fromDesc, String toDesc) {
-        this.fromDesc.setText(fromDesc);
-        this.toDesc.setText(toDesc);
-        pack();
     }
 
     public String getFromDesc() { return fromDesc.getText(); }
