@@ -116,10 +116,10 @@ public class ManageSectionTiesDialog extends JFrame {
         tieDlg.setLocationRelativeTo(this);
         tieDlg.setVisible(true);
         if (tieDlg.confirmed) {
-            tie.srcDesc = tieDlg.getFromDesc();
-            tie.destDesc = tieDlg.getToDesc();
-            SceneGraph.setSectionTieSourceDescription(tie.id, tie.srcDesc);
-            SceneGraph.setSectionTieDestinationDescription(tie.id, tie.destDesc);
+            tie.aDesc = tieDlg.getADesc();
+            tie.bDesc = tieDlg.getBDesc();
+            SceneGraph.setSectionTieADescription(tie.id, tie.aDesc);
+            SceneGraph.setSectionTieBDescription(tie.id, tie.bDesc);
             tieTable.updateUI();
         }
     }
@@ -135,9 +135,9 @@ public class ManageSectionTiesDialog extends JFrame {
         for (int i = 0; i < tieIds.length; i++) {
             final int id = tieIds[i];
             final boolean show = SceneGraph.getSectionTieShow(id);
-            final String srcDesc = SceneGraph.getSectionTieSourceDescription(id);
-            final String destDesc = SceneGraph.getSectionTieDestinationDescription(id);
-            ties.add(i, new TieData(id, show, srcDesc, destDesc));
+            final String aDesc = SceneGraph.getSectionTieADescription(id);
+            final String bDesc = SceneGraph.getSectionTieBDescription(id);
+            ties.add(i, new TieData(id, show, aDesc, bDesc));
         }
     }
 
@@ -158,16 +158,16 @@ public class ManageSectionTiesDialog extends JFrame {
 class TieData {
     public int id;
     public boolean show;
-    public String srcDesc, destDesc;
-    public TieData(int id, boolean show, String srcDesc, String destDesc) {
+    public String aDesc, bDesc;
+    public TieData(int id, boolean show, String aDesc, String bDesc) {
         this.id = id;
         this.show = show;
-        this.srcDesc = srcDesc;
-        this.destDesc = destDesc;
+        this.aDesc = aDesc;
+        this.bDesc = bDesc;
     }
 
     public String toString() {
-        return "ID: " + id + " Source: " + srcDesc + " Dest: " + destDesc;
+        return "ID: " + id + " A: " + aDesc + " B: " + bDesc;
     }
 }
 
@@ -214,9 +214,9 @@ class TieTableModel extends AbstractTableModel {
         if (columnIndex == 0) {
             return "Show";
         } else if (columnIndex == 1) {
-            return "Source Description";
+            return "Point A Desc.";
         } else {
-            return "Dest Description";
+            return "Point B Desc.";
         }
     }
 
@@ -247,9 +247,9 @@ class TieTableModel extends AbstractTableModel {
         if (col == 0) {
             return Boolean.valueOf(t.show);
         } else if (col == 1) {
-            return t.srcDesc;
+            return t.aDesc;
         } else { // col == 2
-            return t.destDesc;
+            return t.bDesc;
         }
     }
 }

@@ -502,33 +502,33 @@ void render_section_ties(TrackScene *ts, Canvas *c) {
         } else {
             glColor3f(0,1,0);
         }
-        float sx, sy;
-        section_to_scene(tie->srcTrack, tie->srcCore, tie->x, tie->y, sx, sy);
+        float ax, ay;
+        section_to_scene(tie->aTrack, tie->aCore, tie->ax, tie->ay, ax, ay);
         if (tie->complete) {
-            float dx, dy;
-            section_to_scene(tie->destTrack, tie->destCore, tie->ax, tie->ay, dx, dy);
+            float bx, by;
+            section_to_scene(tie->bTrack, tie->bCore, tie->bx, tie->by, bx, by);
             glBegin(GL_LINES);
             {
-                glVertex3f(sx, sy, 0.0f);
-                glVertex3f(dx, dy, 0.0f);
+                glVertex3f(ax, ay, 0.0f);
+                glVertex3f(bx, by, 0.0f);
             }
             glEnd();
-            render_arrowhead(sx, sy, dx, dy, arrowSize);
+            render_arrowhead(ax, ay, bx, by, arrowSize);
         }
     }
     CoreSectionTie *activeTie = get_active_tie();
     if (activeTie) {
-        TrackSceneNode *srcTrack = get_scene_track(activeTie->srcTrack);
-        CoreSection *srcCore = get_track_section(srcTrack, activeTie->srcCore);
-        const float sx = activeTie->x + srcTrack->px + srcCore->px;
-        const float sy = activeTie->y + srcTrack->py + srcCore->py;
+        TrackSceneNode *srcTrack = get_scene_track(activeTie->aTrack);
+        CoreSection *srcCore = get_track_section(srcTrack, activeTie->aCore);
+        const float ax = activeTie->ax + srcTrack->px + srcCore->px;
+        const float ay = activeTie->ay + srcTrack->py + srcCore->py;
         glBegin(GL_LINES);
         {
-            glVertex3f(sx, sy, 0.0f);
+            glVertex3f(ax, ay, 0.0f);
             glVertex3f(c->mouseX, c->mouseY, 0.0f);
         }
         glEnd();
-        render_arrowhead(sx, sy, c->mouseX, c->mouseY, arrowSize);
+        render_arrowhead(ax, ay, c->mouseX, c->mouseY, arrowSize);
     }
     glEnable(GL_TEXTURE_2D);
 }

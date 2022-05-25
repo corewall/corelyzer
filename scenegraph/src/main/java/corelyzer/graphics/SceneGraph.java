@@ -238,17 +238,17 @@ public class SceneGraph {
 	public native static void deleteSectionTie(int tieId);
 	public native static void createSectionTie(float x, float y, int trackId, int sectionId);
 	public native static int finishSectionTie(float x, float y, int trackId, int sectionId);
-	public native static void setSectionTieSourceDescription(int tieId, String desc);
-	public native static String getSectionTieSourceDescription(int tieId);
-	public native static void setSectionTieDestinationDescription(int tieId, String desc);
-	public native static String getSectionTieDestinationDescription(int tieId);
+	public native static void setSectionTieADescription(int tieId, String desc);
+	public native static String getSectionTieADescription(int tieId);
+	public native static void setSectionTieBDescription(int tieId, String desc);
+	public native static String getSectionTieBDescription(int tieId);
 	public native static boolean getSectionTieShow(int tieId);
 	public native static void setSectionTieShow(int tieId, boolean show);
 	public native static void setSelectedTie(int tieId);
-	public native static String getSectionTieSourceSectionName(int tieId);
-	public native static String getSectionTieDestinationSectionName(int tieId);
-	public native static float[] getSectionTieSourcePosition(int tieId);
-	public native static float[] getSectionTieDestinationPosition(int tieId);
+	public native static String getSectionTieASectionName(int tieId);
+	public native static String getSectionTieBSectionName(int tieId);
+	public native static float[] getSectionTieAPosition(int tieId);
+	public native static float[] getSectionTieBPosition(int tieId);
 
 
 	// ----- Canvas methods

@@ -225,34 +225,34 @@ JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_finishSectionTie
 
 /*
  * Class:     corelyzer_graphics_SceneGraph
- * Method:    setSectionTieSourceDescription
+ * Method:    setSectionTieADescription
  * Signature: (ILjava/lang/String;)V
  */
-JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setSectionTieSourceDescription
+JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setSectionTieADescription
   (JNIEnv *, jclass, jint, jstring);
 
 /*
  * Class:     corelyzer_graphics_SceneGraph
- * Method:    getSectionTieSourceDescription
+ * Method:    getSectionTieADescription
  * Signature: (I)Ljava/lang/String;
  */
-JNIEXPORT jstring JNICALL Java_corelyzer_graphics_SceneGraph_getSectionTieSourceDescription
+JNIEXPORT jstring JNICALL Java_corelyzer_graphics_SceneGraph_getSectionTieADescription
   (JNIEnv *, jclass, jint);
 
 /*
  * Class:     corelyzer_graphics_SceneGraph
- * Method:    setSectionTieDestinationDescription
+ * Method:    setSectionTieBDescription
  * Signature: (ILjava/lang/String;)V
  */
-JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setSectionTieDestinationDescription
+JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setSectionTieBDescription
   (JNIEnv *, jclass, jint, jstring);
 
 /*
  * Class:     corelyzer_graphics_SceneGraph
- * Method:    getSectionTieDestinationDescription
+ * Method:    getSectionTieBDescription
  * Signature: (I)Ljava/lang/String;
  */
-JNIEXPORT jstring JNICALL Java_corelyzer_graphics_SceneGraph_getSectionTieDestinationDescription
+JNIEXPORT jstring JNICALL Java_corelyzer_graphics_SceneGraph_getSectionTieBDescription
   (JNIEnv *, jclass, jint);
 
 /*
@@ -281,34 +281,34 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setSelectedTie
 
 /*
  * Class:     corelyzer_graphics_SceneGraph
- * Method:    getSectionTieSourceSectionName
+ * Method:    getSectionTieASectionName
  * Signature: (I)Ljava/lang/String;
  */
-JNIEXPORT jstring JNICALL Java_corelyzer_graphics_SceneGraph_getSectionTieSourceSectionName
+JNIEXPORT jstring JNICALL Java_corelyzer_graphics_SceneGraph_getSectionTieASectionName
   (JNIEnv *, jclass, jint);
 
 /*
  * Class:     corelyzer_graphics_SceneGraph
- * Method:    getSectionTieDestinationSectionName
+ * Method:    getSectionTieBSectionName
  * Signature: (I)Ljava/lang/String;
  */
-JNIEXPORT jstring JNICALL Java_corelyzer_graphics_SceneGraph_getSectionTieDestinationSectionName
+JNIEXPORT jstring JNICALL Java_corelyzer_graphics_SceneGraph_getSectionTieBSectionName
   (JNIEnv *, jclass, jint);
 
 /*
  * Class:     corelyzer_graphics_SceneGraph
- * Method:    getSectionTieSourcePosition
+ * Method:    getSectionTieAPosition
  * Signature: (I)[F
  */
-JNIEXPORT jfloatArray JNICALL Java_corelyzer_graphics_SceneGraph_getSectionTieSourcePosition
+JNIEXPORT jfloatArray JNICALL Java_corelyzer_graphics_SceneGraph_getSectionTieAPosition
   (JNIEnv *, jclass, jint);
 
 /*
  * Class:     corelyzer_graphics_SceneGraph
- * Method:    getSectionTieDestinationPosition
+ * Method:    getSectionTieBPosition
  * Signature: (I)[F
  */
-JNIEXPORT jfloatArray JNICALL Java_corelyzer_graphics_SceneGraph_getSectionTieDestinationPosition
+JNIEXPORT jfloatArray JNICALL Java_corelyzer_graphics_SceneGraph_getSectionTieBPosition
   (JNIEnv *, jclass, jint);
 
 /*

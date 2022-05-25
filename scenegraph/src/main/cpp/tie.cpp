@@ -23,27 +23,27 @@ CoreSectionTie* create_section_tie(int type, int trackId, int sectionId, float x
 // Set the track, section, and dest(ination) endpoint of the specified CoreSectionTie at (x,y).
 bool finish_section_tie(CoreSectionTie *tie, int trackId, int sectionId, float x, float y) {
     printf("Finishing tie: track %d core %d\n", trackId, sectionId);
-    tie->setDestination(trackId, sectionId, x, y);
+    tie->setB(trackId, sectionId, x, y);
     return true;
 }
 
-void CoreSectionTie::setDestination(int trackId, int coreId, float x, float y) {
-    destTrack = trackId;
-    destCore = coreId;
-    ax = x;
-    ay = y;
+void CoreSectionTie::setB(int trackId, int coreId, float x, float y) {
+    bTrack = trackId;
+    bCore = coreId;
+    bx = x;
+    by = y;
     complete = true;
 }
 
-void CoreSectionTie::setSourceDescription(char *desc) {
-    if (srcDesc) delete[] srcDesc;
-    srcDesc = desc;
+void CoreSectionTie::setADescription(char *desc) {
+    if (aDesc) delete[] aDesc;
+    aDesc = desc;
 }
-void CoreSectionTie::setDestinationDescription(char *desc) {
-    if (destDesc) delete[] destDesc;
-    destDesc = desc;
+void CoreSectionTie::setBDescription(char *desc) {
+    if (bDesc) delete[] bDesc;
+    bDesc = desc;
 }
-char *CoreSectionTie::getSourceDescription() { return srcDesc; }
-char *CoreSectionTie::getDestinationDescription() { return destDesc; }
+char *CoreSectionTie::getADescription() { return aDesc; }
+char *CoreSectionTie::getBDescription() { return bDesc; }
 bool CoreSectionTie::getShow() { return show; }
 void CoreSectionTie::setShow(bool _show) { show = _show; }

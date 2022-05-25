@@ -11,10 +11,10 @@ import corelyzer.graphics.SceneGraph;
 
 public class SectionTieDialog extends JDialog {
     private JPanel contentPane;
-    private JLabel srcLabel, destLabel;
+    private JLabel aLabel, bLabel;
     private JButton buttonOK;
     private JButton buttonCancel;
-    private JTextField fromDesc, toDesc;
+    private JTextField aDesc, bDesc;
     public boolean confirmed = false;
 
     public static void main(final String[] args) {
@@ -32,22 +32,22 @@ public class SectionTieDialog extends JDialog {
     
     private void setupLabels(int tieId) {
         if (tieId != -1) {
-            String srcSecId = SceneGraph.getSectionTieSourceSectionName(tieId);
-            String destSecId = SceneGraph.getSectionTieDestinationSectionName(tieId);
-            float[] srcPos = SceneGraph.getSectionTieSourcePosition(tieId);
-            float[] destPos = SceneGraph.getSectionTieDestinationPosition(tieId);
-            int sx = Math.round(srcPos[0] / SceneGraph.getCanvasDPIX(0) * 2.54f);
-            int dx = Math.round(destPos[0] / SceneGraph.getCanvasDPIX(0) * 2.54f);
-            srcLabel.setText(srcSecId + " " + sx + "cm");
-            fromDesc.setText(SceneGraph.getSectionTieSourceDescription(tieId));
-            destLabel.setText(destSecId + " " + dx + "cm");
-            toDesc.setText(SceneGraph.getSectionTieDestinationDescription(tieId));
+            String aSecId = SceneGraph.getSectionTieASectionName(tieId);
+            String bSecId = SceneGraph.getSectionTieBSectionName(tieId);
+            float[] aPos = SceneGraph.getSectionTieAPosition(tieId);
+            float[] bPos = SceneGraph.getSectionTieBPosition(tieId);
+            int ax = Math.round(aPos[0] / SceneGraph.getCanvasDPIX(0) * 2.54f);
+            int bx = Math.round(bPos[0] / SceneGraph.getCanvasDPIX(0) * 2.54f);
+            aLabel.setText(aSecId + " " + ax + "cm");
+            aDesc.setText(SceneGraph.getSectionTieADescription(tieId));
+            bLabel.setText(bSecId + " " + bx + "cm");
+            bDesc.setText(SceneGraph.getSectionTieBDescription(tieId));
             pack();
         }
     }
 
-    public String getFromDesc() { return fromDesc.getText(); }
-    public String getToDesc() { return toDesc.getText(); }
+    public String getADesc() { return aDesc.getText(); }
+    public String getBDesc() { return bDesc.getText(); }
 
     private void setupUI() {
         setTitle("Edit Section Tie");
@@ -56,15 +56,15 @@ public class SectionTieDialog extends JDialog {
 
         contentPane.setLayout(new MigLayout("wrap", "[grow]", "[grow]"));
 
-        srcLabel = new JLabel("[source core ID]");
-        contentPane.add(srcLabel);
-        fromDesc = new JTextField();
-        contentPane.add(fromDesc, "grow");
+        aLabel = new JLabel("[A core ID]");
+        contentPane.add(aLabel);
+        aDesc = new JTextField();
+        contentPane.add(aDesc, "grow");
 
-        destLabel = new JLabel("[dest core ID]");
-        contentPane.add(destLabel);
-        toDesc = new JTextField();
-        contentPane.add(toDesc, "grow");
+        bLabel = new JLabel("[B core ID]");
+        contentPane.add(bLabel);
+        bDesc = new JTextField();
+        contentPane.add(bDesc, "grow");
 
         buttonOK = new JButton("OK");
         buttonOK.addActionListener(new ActionListener() {
@@ -76,7 +76,6 @@ public class SectionTieDialog extends JDialog {
         buttonCancel = new JButton("Cancel");
         buttonCancel.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                // System.out.println("Cancel");
                 onCancel();
             }
         });

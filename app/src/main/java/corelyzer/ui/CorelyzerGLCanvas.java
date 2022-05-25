@@ -1222,8 +1222,8 @@ public class CorelyzerGLCanvas implements GLEventListener, MouseListener, MouseW
 							if (tieDlg.confirmed) {
 								CorelyzerApp.getApp().setMode(CorelyzerApp.APP_NORMAL_MODE);
 								System.out.println("Finished tie! Returning to APP_NORMAL_MODE");
-								SceneGraph.setSectionTieSourceDescription(tieId, tieDlg.getFromDesc());
-								SceneGraph.setSectionTieDestinationDescription(tieId, tieDlg.getToDesc());
+								SceneGraph.setSectionTieADescription(tieId, tieDlg.getADesc());
+								SceneGraph.setSectionTieBDescription(tieId, tieDlg.getBDesc());
 							} // todo: otherwise delete in-progress tie?
 						}
 					}
@@ -1244,8 +1244,8 @@ public class CorelyzerGLCanvas implements GLEventListener, MouseListener, MouseW
 					tieDlg.setModal(true);
 					tieDlg.setVisible(true);
 					if (tieDlg.confirmed) {
-						SceneGraph.setSectionTieSourceDescription(selectedTie, tieDlg.getFromDesc());
-						SceneGraph.setSectionTieDestinationDescription(selectedTie, tieDlg.getToDesc());
+						SceneGraph.setSectionTieADescription(selectedTie, tieDlg.getADesc());
+						SceneGraph.setSectionTieBDescription(selectedTie, tieDlg.getBDesc());
 					}					
 				}
 
