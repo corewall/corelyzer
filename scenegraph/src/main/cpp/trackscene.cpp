@@ -502,26 +502,27 @@ void render_section_ties(TrackScene *ts, Canvas *c) {
         } else {
             glColor3f(0,1,0);
         }
-        float ax, ay;
-        section_to_scene(tie->aTrack, tie->aCore, tie->ax, tie->ay, ax, ay);
-        if (tie->complete) {
-            float bx, by;
-            section_to_scene(tie->bTrack, tie->bCore, tie->bx, tie->by, bx, by);
-            glBegin(GL_LINES);
-            {
-                glVertex3f(ax, ay, 0.0f);
-                glVertex3f(bx, by, 0.0f);
-            }
-            glEnd();
-            render_arrowhead(ax, ay, bx, by, arrowSize);
+        float ax, ay, bx, by;
+        section_to_scene(tie->a->track, tie->a->section, tie->a->x, tie->a->y, ax, ay);
+        section_to_scene(tie->b->track, tie->b->section, tie->b->x, tie->b->y, bx, by);
+        glBegin(GL_LINES);
+        {
+            glVertex3f(ax, ay, 0.0f);
+            glVertex3f(bx, by, 0.0f);
         }
+        glEnd();
+        render_arrowhead(ax, ay, bx, by, arrowSize);
     }
-    CoreSectionTie *activeTie = get_active_tie();
-    if (activeTie) {
-        TrackSceneNode *srcTrack = get_scene_track(activeTie->aTrack);
-        CoreSection *srcCore = get_track_section(srcTrack, activeTie->aCore);
-        const float ax = activeTie->ax + srcTrack->px + srcCore->px;
-        const float ay = activeTie->ay + srcTrack->py + srcCore->py;
+    render_in_progress_tie(c, arrowSize);
+    glEnable(GL_TEXTURE_2D);
+}
+
+//================================================================
+void render_in_progress_tie(Canvas *c, const float arrowSize) {
+    SectionTiePoint *tp = get_in_progress_tie();
+    if (tp) {
+        float ax, ay;
+        section_to_scene(tp->track, tp->section, tp->x, tp->y, ax, ay);
         glBegin(GL_LINES);
         {
             glVertex3f(ax, ay, 0.0f);
@@ -530,7 +531,6 @@ void render_section_ties(TrackScene *ts, Canvas *c) {
         glEnd();
         render_arrowhead(ax, ay, c->mouseX, c->mouseY, arrowSize);
     }
-    glEnable(GL_TEXTURE_2D);
 }
 
 //================================================================

@@ -4498,10 +4498,10 @@ void perform_pick(int canvas, float _x, float _y) {
             CoreSectionTie *tie = ts->tievec[tie_idx];
             if (!tie || !tie->show) continue;
             float srcx, srcy, dstx, dsty;
-            section_to_scene(tie->aTrack, tie->aCore, tie->ax, tie->ay, srcx, srcy);
-            section_to_scene(tie->bTrack, tie->bCore, tie->bx, tie->by, dstx, dsty);
+            section_to_scene(tie->a->track, tie->a->section, tie->a->x, tie->a->y, srcx, srcy);
+            section_to_scene(tie->b->track, tie->b->section, tie->b->x, tie->b->y, dstx, dsty);
             const float dist = pt_to_line_dist(x, y, srcx, srcy, dstx, dsty);
-            if (dist < 30.0f) { //
+            if (dist < 30.0f) {
                 PickedTie = tie_idx;
                 break;
             }
@@ -4960,7 +4960,7 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_deleteSectionTie(JNIEn
  * Signature: (FFII)V
  */
 JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_createSectionTie(JNIEnv *jenv, jclass jcls, jfloat x, jfloat y, jint trackId, jint sectionId) {
-    if (get_active_tie() != NULL) {
+    if (get_in_progress_tie() != NULL) {
         printf("There is already an active tie, can't start a new one!\n");
         return;
     }
@@ -4972,13 +4972,7 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_createSectionTie(JNIEn
     // scene-space to section-space
     const float tx = x - (track->px + sec->px);
     const float ty = y - (track->py + sec->py);
-    CoreSectionTie* tie = create_section_tie(0, trackId, sectionId, tx, ty);
-    // printf("Created tie %d\n", tie);
-    if (tie) { 
-        // printf("Setting active tie to %d!\n", tie);
-        set_active_tie(tie);
-    }
-    printf("createSectionTie: coords (%f, %f)\n", tx, ty);
+    start_section_tie(trackId, sectionId, tx, ty);
 }
 
 /*
@@ -4987,8 +4981,7 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_createSectionTie(JNIEn
  * Signature: (FFII)V
  */
 JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_finishSectionTie(JNIEnv *jenv, jclass jcls, jfloat x, jfloat y, jint trackId, jint sectionId) {
-    CoreSectionTie *activeTie = get_active_tie();
-    if (!activeTie) {
+    if (!get_in_progress_tie()) {
         printf("There is no active tie to finish!\n");
         return false;
     }
@@ -5001,20 +4994,14 @@ JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_finishSectionTie(JNIEn
     // scene-space to section-space
     const float tx = x - (track->px + sec->px);
     const float ty = y - (track->py + sec->py);
-    printf("finishSectionTie: section coords (%f, %f) - adjusted tie coord (%f, %f)\n", sec->px, sec->py, tx, ty);
-    bool success = finish_section_tie(activeTie, trackId, sectionId, tx, ty);
-    if (success) {
+    CoreSectionTie *tie = finish_section_tie(trackId, sectionId, tx, ty);
+    if (tie) {
         TrackScene *ts = get_scene(default_track_scene);
         if (!ts) {
-            printf("Invalid TrackScene!?\n");
-            success = false;
+            printf("Invalid TrackScene, can't add completed tie.\n");
         } else {
-            tieId = add_tie(default_track_scene, activeTie);
-            if (tieId != -1) {
-                printf("Created tie with ID = %d\n", tieId);
-            }
+            tieId = add_tie(default_track_scene, tie);
         }
-        set_active_tie(NULL);
     }
     return tieId;
 }
@@ -5104,9 +5091,9 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setSelectedTie
  */
 JNIEXPORT jstring JNICALL Java_corelyzer_graphics_SceneGraph_getSectionTieASectionName(JNIEnv *jenv, jclass jcls, jint tieId) {
     CoreSectionTie *tie = get_tie(default_track_scene, tieId);
-    TrackSceneNode *t = get_scene_track(default_track_scene, tie->aTrack);
+    TrackSceneNode *t = get_scene_track(default_track_scene, tie->a->track);
     if (!t) return NULL;
-    CoreSection *cs = get_track_section(t, tie->aCore);
+    CoreSection *cs = get_track_section(t, tie->a->section);
     if (!cs) return NULL;
 
     return jenv->NewStringUTF(get_section_name(cs));
@@ -5119,9 +5106,9 @@ JNIEXPORT jstring JNICALL Java_corelyzer_graphics_SceneGraph_getSectionTieASecti
  */
 JNIEXPORT jstring JNICALL Java_corelyzer_graphics_SceneGraph_getSectionTieBSectionName(JNIEnv *jenv, jclass jcls, jint tieId) {
     CoreSectionTie *tie = get_tie(default_track_scene, tieId);
-    TrackSceneNode *t = get_scene_track(default_track_scene, tie->bTrack);
+    TrackSceneNode *t = get_scene_track(default_track_scene, tie->b->track);
     if (!t) return NULL;
-    CoreSection *cs = get_track_section(t, tie->bCore);
+    CoreSection *cs = get_track_section(t, tie->b->section);
     if (!cs) return NULL;
 
     return jenv->NewStringUTF(get_section_name(cs));    
@@ -5135,7 +5122,7 @@ JNIEXPORT jstring JNICALL Java_corelyzer_graphics_SceneGraph_getSectionTieBSecti
 JNIEXPORT jfloatArray JNICALL Java_corelyzer_graphics_SceneGraph_getSectionTieAPosition(JNIEnv *jenv, jclass jcls, jint tieId) {
     CoreSectionTie *tie = get_tie(default_track_scene, tieId);
     if (!tie) return NULL;
-    float posbuf[2] = {tie->ax, tie->ay};
+    float posbuf[2] = {tie->a->x, tie->a->y};
     jfloatArray pos = jenv->NewFloatArray(2);
     jenv->SetFloatArrayRegion(pos, 0, 2, posbuf);
     return pos;
@@ -5149,7 +5136,7 @@ JNIEXPORT jfloatArray JNICALL Java_corelyzer_graphics_SceneGraph_getSectionTieAP
 JNIEXPORT jfloatArray JNICALL Java_corelyzer_graphics_SceneGraph_getSectionTieBPosition(JNIEnv *jenv, jclass jcls, jint tieId) {
     CoreSectionTie *tie = get_tie(default_track_scene, tieId);
     if (!tie) return NULL;
-    float posbuf[2] = {tie->bx, tie->by};
+    float posbuf[2] = {tie->b->x, tie->b->y};
     jfloatArray pos = jenv->NewFloatArray(2);
     jenv->SetFloatArrayRegion(pos, 0, 2, posbuf);
     return pos;

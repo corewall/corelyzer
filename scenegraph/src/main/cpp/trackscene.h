@@ -109,6 +109,7 @@ int add_tie(int scene, CoreSectionTie *tie);
 CoreSectionTie *get_tie(int scene, int tieId);
 void remove_tie(int scene, int tieId);
 void render_section_ties(TrackScene *ts, Canvas *c);
+void render_in_progress_tie(Canvas *c, const float arrowSize);
 
 void set_selected_tie(int tieId);
 void section_to_scene(int trackId, int sectionId, float sec_x, float sec_y, float &sx, float &sy);

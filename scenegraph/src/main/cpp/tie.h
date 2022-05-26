@@ -3,48 +3,59 @@
 
 #include <stdlib.h>
 
-// A tie between two features of interest, points A and B, on 1 or 2 core
-// section images.
-struct CoreSectionTie {
-    int type; // splice, visual, etc
-    int aTrack; // Point A
-    int aCore;
-    float ax; // core-relative
-    float ay;
+struct SectionTiePoint {
+    int track, section;
+    float x, y;
+    
+    SectionTiePoint() {
+        track = -1;
+        section = -1;
+        x = 0.0f;
+        y = 0.0f;
+    }
 
-    int bTrack; // Point B
-    int bCore;
-    float bx; // core-relative
-    float by;
+    SectionTiePoint(int track, int section, float x, float y) {
+        this->track = track;
+        this->section = section;
+        this->x = x;
+        this->y = y;
+    }
+
+    SectionTiePoint(SectionTiePoint &tp) {
+        track = tp.track;
+        section = tp.section;
+        x = tp.x;
+        y = tp.y;
+    }
+};
+
+
+// A tie between two features of interest, points A and B, on section core images.
+// Points A and B may be on the same core image.
+struct CoreSectionTie {
+    SectionTiePoint *a, *b;
 
     char *aDesc; // description of point A
     char *bDesc; // description of point B
 
-    bool complete; // true if both endpoints been defined
-    bool selected; // for highlighting tie on selection
-    bool show; // if false, don't draw tie line
+    bool selected; // highlight tie on selection
+    bool show; // draw tie line?
 
-    CoreSectionTie(int _type, int trackId, int coreId, float _x, float _y) {
-        type = _type;
-        aTrack = trackId;
-        aCore = coreId;
-        ax = _x;
-        ay = _y;
-        bTrack = -1;
-        bCore = -1;
+    CoreSectionTie(SectionTiePoint &a, SectionTiePoint &b) {
+        this->a = new SectionTiePoint(a);
+        this->b = new SectionTiePoint(b);
         aDesc = NULL;
         bDesc = NULL;
-        complete = false;
         selected = false;
-        show = true;
+        show = true;        
     }
 
     ~CoreSectionTie() {
+        if (a) delete a;
+        if (b) delete b;
         if (aDesc) delete[] aDesc;
         if (bDesc) delete[] bDesc;
     }
-
-    void setB(int trackId, int coreId, float x, float y);
 
     // getter/setter
     void setADescription(char *desc);
@@ -55,9 +66,8 @@ struct CoreSectionTie {
     void setShow(bool _show);
 };
 
-CoreSectionTie *get_active_tie();
-void set_active_tie(CoreSectionTie *tie);
-CoreSectionTie* create_section_tie(int type, int trackId, int sectionId, float x, float y);
-bool finish_section_tie(CoreSectionTie *tie, int trackId, int sectionId, float x, float y);
+SectionTiePoint *get_in_progress_tie();
+bool start_section_tie(int trackId, int sectionId, float x, float y);
+CoreSectionTie *finish_section_tie(int trackid, int sectionId, float x, float y);
 
 #endif // #ifndef CORELYZER_TIE_H
