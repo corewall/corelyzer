@@ -4496,7 +4496,7 @@ void perform_pick(int canvas, float _x, float _y) {
         TrackScene *ts = get_scene(default_track_scene);
         for (int tie_idx = 0; tie_idx < ts->tievec.size(); tie_idx++) {
             CoreSectionTie *tie = ts->tievec[tie_idx];
-            if (!tie || !tie->show) continue;
+            if (!tie || !tie->show || !tie->valid()) continue;
             float ax, ay, bx, by;
             tie->a->toSceneSpace(ax, ay);
             tie->b->toSceneSpace(bx, by);

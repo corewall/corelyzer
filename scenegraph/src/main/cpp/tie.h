@@ -30,6 +30,7 @@ struct SectionTiePoint {
     }
 
     void toSceneSpace(float &scenex, float &sceney);
+    bool valid();
 };
 
 
@@ -67,6 +68,7 @@ struct CoreSectionTie {
     char *getBDescription();
     bool getShow();
     void setShow(bool _show);
+    bool valid() { return a->valid() && b->valid(); }
 };
 
 SectionTiePoint *get_in_progress_tie();

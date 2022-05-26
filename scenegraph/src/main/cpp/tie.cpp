@@ -52,3 +52,14 @@ void SectionTiePoint::toSceneSpace(float &scenex, float &sceney) {
     scenex = x + t->px + s->px;
     sceney = y + t->py + s->py;
 }
+
+// Do the parent track and section of this SectionTiePoint exist?
+bool SectionTiePoint::valid() {
+    bool valid = false;
+    TrackSceneNode *t = get_scene_track(track);
+    if (t) {
+        CoreSection *s = get_track_section(t, section);
+        valid = (s != NULL);
+    }
+    return valid;
+}

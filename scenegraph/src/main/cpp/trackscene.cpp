@@ -476,7 +476,7 @@ void render_section_ties(TrackScene *ts, Canvas *c) {
 
     for (int tidx = 0; tidx < ts->tievec.size(); tidx++) {
         CoreSectionTie *tie = ts->tievec[tidx];
-        if (!tie || !tie->show) continue;
+        if (!tie || !tie->show || !tie->valid()) continue;
 
         if (tidx == selectedTie) {
             glColor3f(1,1,0);
