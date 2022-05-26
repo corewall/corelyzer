@@ -463,25 +463,6 @@ void render_arrowhead(float fromX, float fromY, float toX, float toY, float size
 }
 
 //================================================================
-// Convert section-relative coord (sec_x, sec_y) to scene-space coord (sx, sy).
-// (sec_x, sec_y) is positioned relative to the upper-left of the core section
-// corresponding to trackId and sectionId.
-void section_to_scene(int trackId, int sectionId, float sec_x, float sec_y, float &sx, float &sy) {
-    TrackSceneNode *track = get_scene_track(trackId);
-    CoreSection *section = get_track_section(track, sectionId);
-    sx = sec_x + track->px + section->px;
-    sy = sec_y + track->py + section->py;
-}
-
-//================================================================
-// convert section-space coord to centimeters
-static void log_to_cm(Canvas *c, float x, float y) {// float &cmx, float &cmy) {
-    float foo = (x / c->dpi_x) * 2.54f;
-    float bar = (y / c->dpi_y) * 2.54f;
-    // printf("Scene (%f,%f) -> (%f,%f)cm\n", x, y, foo, bar);
-}
-
-//================================================================
 void render_section_ties(TrackScene *ts, Canvas *c) {
     glDisable(GL_TEXTURE_2D); // enabled textures affect point/line color
     glLineWidth(3);
@@ -503,12 +484,12 @@ void render_section_ties(TrackScene *ts, Canvas *c) {
             glColor3f(0,1,0);
         }
         float ax, ay, bx, by;
-        section_to_scene(tie->a->track, tie->a->section, tie->a->x, tie->a->y, ax, ay);
-        section_to_scene(tie->b->track, tie->b->section, tie->b->x, tie->b->y, bx, by);
+        tie->a->toSceneSpace(ax, ay);
+        tie->b->toSceneSpace(bx, by);
         glBegin(GL_LINES);
         {
-            glVertex3f(ax, ay, 0.0f);
-            glVertex3f(bx, by, 0.0f);
+            glVertex2f(ax, ay);
+            glVertex2f(bx, by);
         }
         glEnd();
         render_arrowhead(ax, ay, bx, by, arrowSize);
@@ -522,7 +503,7 @@ void render_in_progress_tie(Canvas *c, const float arrowSize) {
     SectionTiePoint *tp = get_in_progress_tie();
     if (tp) {
         float ax, ay;
-        section_to_scene(tp->track, tp->section, tp->x, tp->y, ax, ay);
+        tp->toSceneSpace(ax, ay);
         glBegin(GL_LINES);
         {
             glVertex3f(ax, ay, 0.0f);

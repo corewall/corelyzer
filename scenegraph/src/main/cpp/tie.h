@@ -3,6 +3,7 @@
 
 #include <stdlib.h>
 
+// Section-space point on a core section image.
 struct SectionTiePoint {
     int track, section;
     float x, y;
@@ -27,6 +28,8 @@ struct SectionTiePoint {
         x = tp.x;
         y = tp.y;
     }
+
+    void toSceneSpace(float &scenex, float &sceney);
 };
 
 

@@ -1,5 +1,8 @@
 #include <stdio.h>
 
+#include "coresection.h"
+#include "trackscene.h"
+#include "trackscenenode.h"
 #include "tie.h"
 
 static SectionTiePoint *inProgressTie = NULL;
@@ -41,3 +44,11 @@ char *CoreSectionTie::getADescription() { return aDesc; }
 char *CoreSectionTie::getBDescription() { return bDesc; }
 bool CoreSectionTie::getShow() { return show; }
 void CoreSectionTie::setShow(bool _show) { show = _show; }
+
+// Convert our section-space coord (this->x, this->y) to scene-space.
+void SectionTiePoint::toSceneSpace(float &scenex, float &sceney) {
+    TrackSceneNode *t = get_scene_track(track);
+    CoreSection *s = get_track_section(t, section);
+    scenex = x + t->px + s->px;
+    sceney = y + t->py + s->py;
+}

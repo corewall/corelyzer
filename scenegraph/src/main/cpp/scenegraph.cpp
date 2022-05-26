@@ -4497,10 +4497,10 @@ void perform_pick(int canvas, float _x, float _y) {
         for (int tie_idx = 0; tie_idx < ts->tievec.size(); tie_idx++) {
             CoreSectionTie *tie = ts->tievec[tie_idx];
             if (!tie || !tie->show) continue;
-            float srcx, srcy, dstx, dsty;
-            section_to_scene(tie->a->track, tie->a->section, tie->a->x, tie->a->y, srcx, srcy);
-            section_to_scene(tie->b->track, tie->b->section, tie->b->x, tie->b->y, dstx, dsty);
-            const float dist = pt_to_line_dist(x, y, srcx, srcy, dstx, dsty);
+            float ax, ay, bx, by;
+            tie->a->toSceneSpace(ax, ay);
+            tie->b->toSceneSpace(bx, by);
+            const float dist = pt_to_line_dist(x, y, ax, ay, bx, by);
             if (dist < 30.0f) {
                 PickedTie = tie_idx;
                 break;
