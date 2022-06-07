@@ -238,6 +238,18 @@ public class CoreGraph {
 		return s.getTrackSceneNodeWithTrackId(trackId);
 	}
 
+	public Session getTrackSession(final int trackId) {
+		Session result = null;
+		for (Session s : sessionVec) {
+			TrackSceneNode t = s.getTrackSceneNodeWithTrackId(trackId);
+			if (t != null) {
+				result = s;
+				break;
+			}
+		}
+		return result;
+	}
+
 	public void notifyListeners() {
 		for (CRDefaultListModel l : listeners) {
 			l.modified();

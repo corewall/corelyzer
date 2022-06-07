@@ -4955,11 +4955,31 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_deleteSectionTie(JNIEn
 }
 
 /*
- * Class:     corelyzer_helper_SceneGraph
+ * Class:     corelyzer_graphics_SceneGraph
  * Method:    createSectionTie
+ * Signature: (FFLjava/lang/String;IIFFLjava/lang/String;IIZ)V
+ */
+JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_createSectionTie(JNIEnv *jenv, jclass jcls,
+    jfloat ax, jfloat ay, jstring aDesc, jint aTrackId, jint aSectionId,
+    jfloat bx, jfloat by, jstring bDesc, jint bTrackId, jint bSectionId, jboolean show)
+{
+    SectionTiePoint a(aTrackId, aSectionId, ax, ay);
+    SectionTiePoint b(bTrackId, bSectionId, bx, by);
+    CoreSectionTie *tie = new CoreSectionTie(a, b);
+    char *a_desc = read_jstring(jenv, aDesc);
+    char *b_desc = read_jstring(jenv, bDesc);
+    tie->setADescription(a_desc);
+    tie->setBDescription(b_desc);
+    tie->setShow(show);
+    add_tie(default_track_scene, tie);
+}
+
+/*
+ * Class:     corelyzer_helper_SceneGraph
+ * Method:    startSectionTie
  * Signature: (FFII)V
  */
-JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_createSectionTie(JNIEnv *jenv, jclass jcls, jfloat x, jfloat y, jint trackId, jint sectionId) {
+JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_startSectionTie(JNIEnv *jenv, jclass jcls, jfloat x, jfloat y, jint trackId, jint sectionId) {
     if (get_in_progress_tie() != NULL) {
         printf("There is already an active tie, can't start a new one!\n");
         return;
@@ -5140,6 +5160,28 @@ JNIEXPORT jfloatArray JNICALL Java_corelyzer_graphics_SceneGraph_getSectionTieBP
     jfloatArray pos = jenv->NewFloatArray(2);
     jenv->SetFloatArrayRegion(pos, 0, 2, posbuf);
     return pos;
+}
+
+/*
+ * Class:     corelyzer_graphics_SceneGraph
+ * Method:    getSectionTieATrack
+ * Signature: (I)I
+ */
+JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_getSectionTieATrack(JNIEnv *jenv, jclass jcls, jint tieId) {
+    CoreSectionTie *tie = get_tie(default_track_scene, tieId);
+    if (!tie) return -1;
+    return tie->a->track;
+}
+
+/*
+ * Class:     corelyzer_graphics_SceneGraph
+ * Method:    getSectionTieBTrack
+ * Signature: (I)I
+ */
+JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_getSectionTieBTrack(JNIEnv *jenv, jclass jcls, jint tieId) {
+    CoreSectionTie *tie = get_tie(default_track_scene, tieId);
+    if (!tie) return -1;
+    return tie->b->track;
 }
 
 /*

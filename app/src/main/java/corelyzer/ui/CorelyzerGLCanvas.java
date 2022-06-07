@@ -657,7 +657,7 @@ public class CorelyzerGLCanvas implements GLEventListener, MouseListener, MouseW
 	private void doCreateTie()
 	{
 		CorelyzerApp.getApp().setMode(CorelyzerApp.APP_TIE_MODE);
-		SceneGraph.createSectionTie(scenePos[0], scenePos[1], selectedTrack, selectedTrackSection);
+		SceneGraph.startSectionTie(scenePos[0], scenePos[1], selectedTrack, selectedTrackSection);
 		CorelyzerApp.getApp().updateGLWindows();
 	}
 

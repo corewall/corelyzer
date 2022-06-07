@@ -40,7 +40,9 @@ import org.w3c.dom.Element;
 
 import corelyzer.data.ChatGroup;
 import corelyzer.data.CoreSection;
+import corelyzer.data.CoreSectionTie;
 import corelyzer.data.MarkerType;
+import corelyzer.data.SectionTiePoint;
 import corelyzer.data.Session;
 import corelyzer.data.TrackSceneNode;
 import corelyzer.data.WellLogDataSet;
@@ -639,6 +641,16 @@ public class StateWriter {
 						processTrack(doc, e, t);
 					}
 				}
+
+				// Ties
+				final int[] tieIds = SceneGraph.getSectionTieIds();
+				if (tieIds == null) continue;
+				// System.out.println("Writing ties for session " + s.getName());
+				for (int tidx = 0; tidx < tieIds.length; tidx++) {
+					final int tie = tieIds[tidx];
+					Element tieElt = createTieElement(doc, tie);
+					sessionElement.appendChild(tieElt);
+				}
 			} // end of session loop
 		} catch (Exception e) {
 			System.out.println("[EXCEPTION] Error while building XML " + e);
@@ -662,5 +674,28 @@ public class StateWriter {
 		}
 
 		return true;
+	}
+
+	private Element createTieElement(DocumentImpl doc, final int tieId) {
+		CoreSectionTie tie = new CoreSectionTie(tieId);
+		Element tieElt = doc.createElement("visual");
+		tieElt.setAttributeNS(null, "type", "tie");
+		tieElt.setAttributeNS(null, "show", Boolean.toString(SceneGraph.getSectionTieShow(tieId)));
+		setTiePointAttrs(tieElt, "a", tie.getTiePointA());
+		setTiePointAttrs(tieElt, "b", tie.getTiePointB());
+		return tieElt;
+	}
+
+	private void setTiePointAttrs(Element tieElt, String prefix, SectionTiePoint pt) {
+		tieElt.setAttributeNS(null, prefix + "track", pt.track);
+		tieElt.setAttributeNS(null, prefix + "section", pt.section);
+		tieElt.setAttributeNS(null, prefix + "x", pix_to_meters(pt.x));
+		tieElt.setAttributeNS(null, prefix + "y", pix_to_meters(pt.y));
+		tieElt.setAttributeNS(null, prefix + "desc", pt.desc);
+	}
+
+	private String pix_to_meters(float p) {
+		float meters = ((p / this.canvas_dpix) * 2.54f) / 100.0f;
+		return Float.toString(meters);
 	}
 }

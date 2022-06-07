@@ -47,6 +47,7 @@ import corelyzer.data.ChatGroup;
 import corelyzer.data.CoreSection;
 import corelyzer.data.CoreSectionGraph;
 import corelyzer.data.MarkerType;
+import corelyzer.data.SectionTiePoint;
 import corelyzer.data.Session;
 import corelyzer.data.TrackSceneNode;
 import corelyzer.data.WellLogDataSet;
@@ -1549,6 +1550,8 @@ public class StateLoader {
 						loadAnnotationXML(e, -1, -1);
 					} else if (type.equals("track")) {
 						loadTrackXML(e, session);
+					} else if (type.equals("tie")) {
+						loadTieXML(e, session);
 					}
 				} else {
 					System.err.println("---> [IGNORE] Some tagname I don't know: " + tagname);
@@ -1559,6 +1562,25 @@ public class StateLoader {
 		}
 
 		pdlg.setValue(totallength);
+	}
+
+	void loadTieXML(final Element e, final Session session) {
+		SectionTiePoint ptA = new SectionTiePoint(e.getAttribute("atrack"), e.getAttribute("asection"), Float.valueOf(e.getAttribute("ax")), Float.valueOf(e.getAttribute("ay")), e.getAttribute("adesc"));
+		SectionTiePoint ptB = new SectionTiePoint(e.getAttribute("btrack"), e.getAttribute("bsection"), Float.valueOf(e.getAttribute("bx")), Float.valueOf(e.getAttribute("by")), e.getAttribute("bdesc"));
+
+		int a_track_id, a_section_id, b_track_id, b_section_id;
+		a_track_id = SceneGraph.getTrackIDByName(session.getName(), ptA.track);
+		a_section_id = SceneGraph.getSectionIDByName(a_track_id, ptA.section);
+		b_track_id = SceneGraph.getTrackIDByName(session.getName(), ptB.track);
+		b_section_id = SceneGraph.getSectionIDByName(b_track_id, ptB.section);
+
+		final float ax = ((ptA.x * 100.0f) / 2.54f) * SceneGraph.getCanvasDPIX(0);
+		final float ay = ((ptA.y * 100.0f) / 2.54f) * SceneGraph.getCanvasDPIY(0);
+		final float bx = ((ptB.x * 100.0f) / 2.54f) * SceneGraph.getCanvasDPIX(0);
+		final float by = ((ptB.y * 100.0f) / 2.54f) * SceneGraph.getCanvasDPIY(0);
+		final boolean show = Boolean.valueOf(e.getAttribute("show"));
+
+		SceneGraph.createSectionTie(ax, ay, e.getAttribute("adesc"), a_track_id, a_section_id, bx, by, e.getAttribute("bdesc"), b_track_id, b_section_id, show);
 	}
 
 	// Load track information with XML root element

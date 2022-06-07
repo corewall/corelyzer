@@ -236,7 +236,8 @@ public class SceneGraph {
 	// section tie f'ns
 	public native static int[] getSectionTieIds();
 	public native static void deleteSectionTie(int tieId);
-	public native static void createSectionTie(float x, float y, int trackId, int sectionId);
+	public native static void createSectionTie(float ax, float ay, String aDesc, int aTrackId, int aSectionId, float bx, float by, String bDesc, int bTrackId, int bSectionId, boolean show);
+	public native static void startSectionTie(float x, float y, int trackId, int sectionId);
 	public native static int finishSectionTie(float x, float y, int trackId, int sectionId);
 	public native static void setSectionTieADescription(int tieId, String desc);
 	public native static String getSectionTieADescription(int tieId);
@@ -249,6 +250,8 @@ public class SceneGraph {
 	public native static String getSectionTieBSectionName(int tieId);
 	public native static float[] getSectionTieAPosition(int tieId);
 	public native static float[] getSectionTieBPosition(int tieId);
+	public native static int getSectionTieATrack(int tieId);
+	public native static int getSectionTieBTrack(int tieId);
 
 
 	// ----- Canvas methods
