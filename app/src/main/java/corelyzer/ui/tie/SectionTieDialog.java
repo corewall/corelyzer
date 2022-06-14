@@ -2,6 +2,7 @@ package corelyzer.ui.tie;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
 
 import javax.swing.*;
 
@@ -86,6 +87,10 @@ public class SectionTieDialog extends JDialog {
         contentPane.add(buttonCancel, "split 2, gapy 10");
         contentPane.add(buttonOK);
         getRootPane().setDefaultButton(buttonOK);
+
+        // close dialog on Escape key, thx StackOverflow
+        // https://stackoverflow.com/questions/642925/swing-how-do-i-close-a-dialog-when-the-esc-key-is-pressed
+        getRootPane().registerKeyboardAction(e -> { dispose(); }, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_IN_FOCUSED_WINDOW);
 
         pack();
     }
