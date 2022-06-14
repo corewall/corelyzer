@@ -2086,7 +2086,7 @@ public class CorelyzerAppController implements ActionListener, AboutHandler, Qui
 				}
 			}
 		};
-		// autoSave.start();
+		autoSave.start();
 
 		this.initRemoteControlServer();
 		this.initAnnotationTypeDirectory();
