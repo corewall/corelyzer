@@ -492,7 +492,8 @@ void render_section_ties(TrackScene *ts, Canvas *c) {
             glVertex2f(bx, by);
         }
         glEnd();
-        render_arrowhead(ax, ay, bx, by, arrowSize);
+        // render_arrowhead(ax, ay, bx, by, arrowSize);
+        drawCount++;
     }
     render_in_progress_tie(c, arrowSize);
     glEnable(GL_TEXTURE_2D);
@@ -510,7 +511,7 @@ void render_in_progress_tie(Canvas *c, const float arrowSize) {
             glVertex3f(c->mouseX, c->mouseY, 0.0f);
         }
         glEnd();
-        render_arrowhead(ax, ay, c->mouseX, c->mouseY, arrowSize);
+        // render_arrowhead(ax, ay, c->mouseX, c->mouseY, arrowSize);
     }
 }
 
