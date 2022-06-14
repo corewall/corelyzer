@@ -69,6 +69,7 @@ import javax.swing.JTextField;
 import corelyzer.controller.CRExperimentController;
 import corelyzer.data.CoreSection;
 import corelyzer.data.CoreSectionImage;
+import corelyzer.data.CoreSectionTieType;
 import corelyzer.data.Session;
 import corelyzer.data.TrackSceneNode;
 import corelyzer.data.WellLogDataSet;
@@ -149,6 +150,7 @@ public class CorelyzerGLCanvas implements GLEventListener, MouseListener, MouseW
 
 	JMenuItem propertyMenuItem;
 	JMenuItem splitMenuItem;
+	JMenuItem staggerSectionsItem;
 
 	// 8/2/2012 brg: TODO Index-based approach isn't ideal when inserting (rather than appending)
 	// menu items - keep references to JMenuItems instead?
@@ -479,11 +481,24 @@ public class CorelyzerGLCanvas implements GLEventListener, MouseListener, MouseW
 			}
 		});
 
-		// Temporary TIE menu item
-		JMenuItem createTie = new JMenuItem("Create Tie");
-		createTie.addActionListener(new ActionListener() {
+		JMenuItem createVisualTie = new JMenuItem("Create Visual Tie");
+		createVisualTie.addActionListener(new ActionListener() {
 			public void actionPerformed(final ActionEvent event) {
-				doCreateTie();
+				doCreateTie(CoreSectionTieType.VISUAL);
+			}
+		});
+
+		JMenuItem createDataTie = new JMenuItem("Create Data Tie");
+		createDataTie.addActionListener(new ActionListener() {
+			public void actionPerformed(final ActionEvent event) {
+				doCreateTie(CoreSectionTieType.DATA);
+			}
+		});
+
+		JMenuItem createSpliceTie = new JMenuItem("Create Splice Tie");
+		createSpliceTie.addActionListener(new ActionListener() {
+			public void actionPerformed(final ActionEvent event) {
+				doCreateTie(CoreSectionTieType.SPLICE);
 			}
 		});
 
@@ -534,7 +549,7 @@ public class CorelyzerGLCanvas implements GLEventListener, MouseListener, MouseW
 			}
 		});
 		
-		JMenuItem staggerSectionsItem = new JCheckBoxMenuItem("Stagger Sections", false);
+		staggerSectionsItem = new JCheckBoxMenuItem("Stagger Sections", false);
 		staggerSectionsItem.addActionListener(new ActionListener() {
 			public void actionPerformed(final ActionEvent e) {
 				AbstractButton b = (AbstractButton)e.getSource();
@@ -560,7 +575,9 @@ public class CorelyzerGLCanvas implements GLEventListener, MouseListener, MouseW
 		this.scenePopupMenu.add(lockSectionMenuItem);
 		this.scenePopupMenu.add(lockSectionGraphMenuItem);
 		this.scenePopupMenu.addSeparator();
-		this.scenePopupMenu.add(createTie);
+		this.scenePopupMenu.add(createVisualTie);
+		this.scenePopupMenu.add(createDataTie);
+		this.scenePopupMenu.add(createSpliceTie);
 		this.scenePopupMenu.add(manageTies);
 		this.scenePopupMenu.addSeparator();
 		this.scenePopupMenu.add(graphMenuItem);
@@ -654,10 +671,10 @@ public class CorelyzerGLCanvas implements GLEventListener, MouseListener, MouseW
 		}
 	}
 	
-	private void doCreateTie()
+	private void doCreateTie(CoreSectionTieType type)
 	{
 		CorelyzerApp.getApp().setMode(CorelyzerApp.APP_TIE_MODE);
-		SceneGraph.startSectionTie(scenePos[0], scenePos[1], selectedTrack, selectedTrackSection);
+		SceneGraph.startSectionTie(type.intValue(), scenePos[0], scenePos[1], selectedTrack, selectedTrackSection);
 		CorelyzerApp.getApp().updateGLWindows();
 	}
 
@@ -1243,8 +1260,10 @@ public class CorelyzerGLCanvas implements GLEventListener, MouseListener, MouseW
 					tieDlg.setModal(true);
 					tieDlg.setVisible(true);
 					if (tieDlg.confirmed) {
+						SceneGraph.setSectionTieType(selectedTie, tieDlg.getTieType().intValue());
 						SceneGraph.setSectionTieADescription(selectedTie, tieDlg.getADesc());
 						SceneGraph.setSectionTieBDescription(selectedTie, tieDlg.getBDesc());
+						CorelyzerApp.getApp().updateGLWindows();
 					}					
 				}
 
@@ -1821,7 +1840,8 @@ public class CorelyzerGLCanvas implements GLEventListener, MouseListener, MouseW
 			
 			// 2/5/2012 brg: check Stagger Sections menu item if necessary
 			final boolean trackIsStaggered = SceneGraph.trackIsStaggered(selectedTrack);
-			AbstractButton ab = (AbstractButton)this.scenePopupMenu.getComponent(14);
+			final int staggerItemIdx = this.scenePopupMenu.getComponentIndex(staggerSectionsItem);
+			AbstractButton ab = (AbstractButton)this.scenePopupMenu.getComponent(staggerItemIdx);
 			ab.getModel().setSelected(trackIsStaggered);
 			
 			// check section and graph lock menu items

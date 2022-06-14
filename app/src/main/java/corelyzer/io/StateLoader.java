@@ -46,6 +46,7 @@ import org.w3c.dom.Attr;
 import corelyzer.data.ChatGroup;
 import corelyzer.data.CoreSection;
 import corelyzer.data.CoreSectionGraph;
+import corelyzer.data.CoreSectionTieType;
 import corelyzer.data.MarkerType;
 import corelyzer.data.SectionTiePoint;
 import corelyzer.data.Session;
@@ -1565,6 +1566,7 @@ public class StateLoader {
 	}
 
 	void loadTieXML(final Element e, final Session session) {
+		CoreSectionTieType type = CoreSectionTieType.fromInt(Integer.parseInt(e.getAttribute("tieType")));
 		SectionTiePoint ptA = new SectionTiePoint(e.getAttribute("atrack"), e.getAttribute("asection"), Float.valueOf(e.getAttribute("ax")), Float.valueOf(e.getAttribute("ay")), e.getAttribute("adesc"));
 		SectionTiePoint ptB = new SectionTiePoint(e.getAttribute("btrack"), e.getAttribute("bsection"), Float.valueOf(e.getAttribute("bx")), Float.valueOf(e.getAttribute("by")), e.getAttribute("bdesc"));
 
@@ -1580,7 +1582,7 @@ public class StateLoader {
 		final float by = ((ptB.y * 100.0f) / 2.54f) * SceneGraph.getCanvasDPIY(0);
 		final boolean show = Boolean.valueOf(e.getAttribute("show"));
 
-		SceneGraph.createSectionTie(ax, ay, e.getAttribute("adesc"), a_track_id, a_section_id, bx, by, e.getAttribute("bdesc"), b_track_id, b_section_id, show);
+		SceneGraph.createSectionTie(type.intValue(), ax, ay, e.getAttribute("adesc"), a_track_id, a_section_id, bx, by, e.getAttribute("bdesc"), b_track_id, b_section_id, show);
 	}
 
 	// Load track information with XML root element

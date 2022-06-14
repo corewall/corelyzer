@@ -160,6 +160,13 @@ void set_selected_tie(int tieId) {
 }
 
 //================================================================
+// Called after a session is loaded or closed to reconcile ties.
+// If neither section of a tie can be found, delete.
+void update_section_ties() {
+
+}
+
+//================================================================
 int append_track(int scene, const char *sessionName, const char *trackName) {
 #ifdef DEBUG
     if (!is_track_scene(scene)) {
@@ -284,6 +291,49 @@ void free_track_section_model(int scene, int trackid, int sectionid) {
     if (!is_track(scene, trackid))
         return;
     free_model(trackscenevec[scene]->trackvec[trackid], sectionid);
+    free_associated_ties(scene, sectionid);
+}
+
+//================================================================
+// Delete ties with at least one endpoint on this section
+void free_associated_ties(int scene, int sectionId) {
+    printf("Freeing ties!\n");
+    for (int tidx = 0; tidx < trackscenevec[scene]->tievec.size(); tidx++) {
+        CoreSectionTie *tie = trackscenevec[scene]->tievec[tidx];
+        if (tie->a->section == sectionId || tie->b->section == sectionId) {
+            remove_tie(scene, tidx);
+        }
+    }
+    int count = 0;
+    for (int foo = 0; foo < trackscenevec[scene]->tievec.size(); foo++) {
+        if (trackscenevec[scene]->tievec[foo] != NULL) {
+            count++;
+        }
+    }
+    printf("Remaining ties: %d\n", count);
+}
+
+//================================================================
+// Delete all ties that originate from track being deleted
+void delete_section_ties_on_track(int scene, int trackId) {
+    TrackSceneNode *track = get_scene_track(trackId);
+    if (!track) return;
+    std::vector<int> ties_to_delete = std::vector<int>();
+    for (int sidx = 0; sidx < track->modelvec.size(); sidx++) {
+        CoreSection *sec = track->modelvec[sidx];
+        if (!sec) continue;
+        for (int tidx = 0; tidx < trackscenevec[scene]->tievec.size(); tidx++) {
+            CoreSectionTie *tie = trackscenevec[scene]->tievec[tidx];
+            if (!tie) continue;
+            if (tie->a->section == sidx) {
+                ties_to_delete.push_back(tidx);
+            }
+        }
+    }
+
+    for (int i = 0; i < ties_to_delete.size(); i++) {
+        remove_tie(scene, ties_to_delete[i]);
+    }
 }
 
 //================================================================
@@ -463,6 +513,20 @@ void render_arrowhead(float fromX, float fromY, float toX, float toY, float size
 }
 
 //================================================================
+// Set tie color based on tie type
+static void set_tie_color(SectionTieType type) {
+    if (type == VISUAL) {
+        glColor3f(0, 1, 0);
+    } else if (type == DATA) {
+        glColor3f(0, 0, 1);
+    } else if (type == SPLICE) {
+        glColor3f(1, 0, 0);
+    } else {
+        printf("Unexpected tie type %d\n", type);
+    }
+}
+
+//================================================================
 void render_section_ties(TrackScene *ts, Canvas *c) {
     glDisable(GL_TEXTURE_2D); // enabled textures affect point/line color
     glLineWidth(3);
@@ -481,7 +545,7 @@ void render_section_ties(TrackScene *ts, Canvas *c) {
         if (tidx == selectedTie) {
             glColor3f(1,1,0);
         } else {
-            glColor3f(0,1,0);
+            set_tie_color(tie->getType());
         }
         float ax, ay, bx, by;
         tie->a->toSceneSpace(ax, ay);
@@ -493,7 +557,6 @@ void render_section_ties(TrackScene *ts, Canvas *c) {
         }
         glEnd();
         // render_arrowhead(ax, ay, bx, by, arrowSize);
-        drawCount++;
     }
     render_in_progress_tie(c, arrowSize);
     glEnable(GL_TEXTURE_2D);
@@ -505,6 +568,7 @@ void render_in_progress_tie(Canvas *c, const float arrowSize) {
     if (tp) {
         float ax, ay;
         tp->toSceneSpace(ax, ay);
+        set_tie_color(get_in_progress_tie_type());
         glBegin(GL_LINES);
         {
             glVertex3f(ax, ay, 0.0f);

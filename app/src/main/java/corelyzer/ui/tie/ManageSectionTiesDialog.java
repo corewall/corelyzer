@@ -14,6 +14,7 @@ import javax.swing.table.TableModel;
 
 import java.util.Vector;
 
+import corelyzer.data.CoreSectionTieType;
 import corelyzer.graphics.SceneGraph;
 import corelyzer.ui.CorelyzerApp;
 import net.miginfocom.swing.MigLayout;
@@ -120,6 +121,8 @@ public class ManageSectionTiesDialog extends JFrame {
             tie.bDesc = tieDlg.getBDesc();
             SceneGraph.setSectionTieADescription(tie.id, tie.aDesc);
             SceneGraph.setSectionTieBDescription(tie.id, tie.bDesc);
+            tie.type = tieDlg.getTieType();
+            SceneGraph.setSectionTieType(tie.id, tie.type.intValue());
             tieTable.updateUI();
         }
     }
@@ -134,6 +137,7 @@ public class ManageSectionTiesDialog extends JFrame {
     private void gatherTieData(int[] tieIds) {
         for (int i = 0; i < tieIds.length; i++) {
             final int id = tieIds[i];
+            final CoreSectionTieType type = CoreSectionTieType.fromInt(SceneGraph.getSectionTieType(id));
             final boolean show = SceneGraph.getSectionTieShow(id);
             final String aDesc = SceneGraph.getSectionTieADescription(id);
             final String bDesc = SceneGraph.getSectionTieBDescription(id);
@@ -143,14 +147,14 @@ public class ManageSectionTiesDialog extends JFrame {
             final int bx = Math.round(bPos[0] / SceneGraph.getCanvasDPIX(0) * 2.54f);
             final String aSec = SceneGraph.getSectionTieASectionName(id);
             final String bSec = SceneGraph.getSectionTieBSectionName(id);
-            ties.add(i, new TieData(id, show, aDesc, bDesc, aSec + " " + ax + "cm", bSec + " " + bx + "cm"));
+            ties.add(i, new TieData(id, type, show, aDesc, bDesc, aSec + " " + ax + "cm", bSec + " " + bx + "cm"));
         }
     }
 
     // dummy ties for testing
     private void addDummyTies() {
         for (int i = 0; i < 10; i++) {
-            ties.add(i, new TieData(i+1, i % 2 == 0 ? true : false, "source desc", "dest desc", "0@fake1", "0@fake2"));
+            ties.add(i, new TieData(i+1, CoreSectionTieType.NONE, i % 2 == 0 ? true : false, "source desc", "dest desc", "0@fake1", "0@fake2"));
         }
     }
 
@@ -163,11 +167,13 @@ public class ManageSectionTiesDialog extends JFrame {
 
 class TieData {
     public int id;
+    public CoreSectionTieType type;
     public boolean show;
     public String aDesc, bDesc;
     public String aSectionDepth, bSectionDepth; // section name and section depth (cm)
-    public TieData(int id, boolean show, String aDesc, String bDesc, String aSectionDepth, String bSectionDepth) {
+    public TieData(int id, CoreSectionTieType type, boolean show, String aDesc, String bDesc, String aSectionDepth, String bSectionDepth) {
         this.id = id;
+        this.type = type;
         this.show = show;
         this.aDesc = aDesc;
         this.bDesc = bDesc;
@@ -188,6 +194,7 @@ class TieTable extends JTable {
     }
 
     final int showWidth = 50;
+    final int typeWidth = 50;
 
 	@Override
 	public void setPreferredSize(final Dimension d) {
@@ -208,9 +215,10 @@ class TieTable extends JTable {
 
     private void setWidths(int width) {
 		getColumnModel().getColumn(0).setPreferredWidth(showWidth);
-        final int half = Math.round((width - showWidth) / 2.0f);
-		getColumnModel().getColumn(1).setPreferredWidth(half);
+        getColumnModel().getColumn(1).setPreferredWidth(typeWidth);
+        final int half = Math.round((width - (showWidth + typeWidth)) / 2.0f);
 		getColumnModel().getColumn(2).setPreferredWidth(half);
+		getColumnModel().getColumn(3).setPreferredWidth(half);
     }
 }
 
@@ -228,6 +236,8 @@ class TieTableModel extends AbstractTableModel {
         if (columnIndex == 0) {
             return "Show";
         } else if (columnIndex == 1) {
+            return "Type";
+        } else if (columnIndex == 2) {
             return "Z";
         } else {
             return "Z'";
@@ -254,15 +264,17 @@ class TieTableModel extends AbstractTableModel {
 		}
 	}
 
-    @Override public int getColumnCount() { return 3; }
+    @Override public int getColumnCount() { return 4; }
     @Override public int getRowCount() { return ties.size(); }
     @Override public Object getValueAt(final int row, final int col) { 
         TieData t = ties.get(row);
         if (col == 0) {
             return Boolean.valueOf(t.show);
         } else if (col == 1) {
+            return t.type.toString();
+        } else if (col == 2) {
             return t.aSectionDepth;
-        } else { // col == 2
+        } else { // col == 3
             return t.bSectionDepth;
         }
     }

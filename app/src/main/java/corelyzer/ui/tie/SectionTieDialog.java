@@ -7,11 +7,12 @@ import java.awt.event.KeyEvent;
 import javax.swing.*;
 
 import net.miginfocom.swing.MigLayout;
-
+import corelyzer.data.CoreSectionTieType;
 import corelyzer.graphics.SceneGraph;
 
 public class SectionTieDialog extends JDialog {
     private JPanel contentPane;
+    private JRadioButton visualType, dataType, spliceType;
     private JLabel aLabel, bLabel;
     private JButton buttonOK;
     private JButton buttonCancel;
@@ -29,6 +30,7 @@ public class SectionTieDialog extends JDialog {
         super(parent);
         setupUI();
         setupLabels(tieId);
+        setTieType(CoreSectionTieType.fromInt(SceneGraph.getSectionTieType(tieId)));
     }
     
     private void setupLabels(int tieId) {
@@ -47,6 +49,25 @@ public class SectionTieDialog extends JDialog {
         }
     }
 
+    private void setTieType(CoreSectionTieType type) {
+        if (type == CoreSectionTieType.VISUAL) {
+            visualType.setSelected(true);
+        } else if (type == CoreSectionTieType.DATA) {
+            dataType.setSelected(true);
+        } else if (type == CoreSectionTieType.SPLICE) {
+            spliceType.setSelected(true);
+        }
+    }
+
+    public CoreSectionTieType getTieType() {
+        if (visualType.isSelected()) {
+            return CoreSectionTieType.VISUAL;
+        } else if (dataType.isSelected()) {
+            return CoreSectionTieType.DATA;
+        } else { // spliceType.isSelected()
+            return CoreSectionTieType.SPLICE;
+        }
+    }
     public String getADesc() { return aDesc.getText(); }
     public String getBDesc() { return bDesc.getText(); }
 
@@ -55,7 +76,26 @@ public class SectionTieDialog extends JDialog {
         contentPane = new JPanel();
         setContentPane(contentPane);
 
-        contentPane.setLayout(new MigLayout("wrap", "[grow]", "[][grow][][grow][]"));
+        contentPane.setLayout(new MigLayout("wrap", "[grow]", "[]10[][grow][][grow][]"));
+
+        JPanel tieTypePanel = new JPanel();
+        tieTypePanel.setLayout(new MigLayout("insets 0", "[]10[][][]", ""));
+        visualType = new JRadioButton("Visual");
+        dataType = new JRadioButton("Data");
+        spliceType = new JRadioButton("Splice");
+        
+        tieTypePanel.add(new JLabel("Tie Type: "));
+        tieTypePanel.add(visualType);
+        tieTypePanel.add(dataType);
+        tieTypePanel.add(spliceType);
+
+        ButtonGroup typeButtonGroup = new ButtonGroup();
+        typeButtonGroup.add(visualType);
+        typeButtonGroup.add(dataType);
+        typeButtonGroup.add(spliceType);
+
+        visualType.setSelected(true);
+        contentPane.add(tieTypePanel);
 
         aLabel = new JLabel("[A core ID]");
         contentPane.add(aLabel);
@@ -74,7 +114,6 @@ public class SectionTieDialog extends JDialog {
         buttonOK = new JButton("OK");
         buttonOK.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                System.out.println("OK");
                 onOK();
             }
         });

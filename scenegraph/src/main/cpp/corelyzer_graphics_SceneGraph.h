@@ -210,18 +210,18 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_deleteSectionTie
 /*
  * Class:     corelyzer_graphics_SceneGraph
  * Method:    createSectionTie
- * Signature: (FFLjava/lang/String;IIFFLjava/lang/String;IIZ)V
+ * Signature: (IFFLjava/lang/String;IIFFLjava/lang/String;IIZ)V
  */
 JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_createSectionTie
-  (JNIEnv *, jclass, jfloat, jfloat, jstring, jint, jint, jfloat, jfloat, jstring, jint, jint, jboolean);
+  (JNIEnv *, jclass, jint, jfloat, jfloat, jstring, jint, jint, jfloat, jfloat, jstring, jint, jint, jboolean);
 
 /*
  * Class:     corelyzer_graphics_SceneGraph
  * Method:    startSectionTie
- * Signature: (FFII)V
+ * Signature: (IFFII)V
  */
 JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_startSectionTie
-  (JNIEnv *, jclass, jfloat, jfloat, jint, jint);
+  (JNIEnv *, jclass, jint, jfloat, jfloat, jint, jint);
 
 /*
  * Class:     corelyzer_graphics_SceneGraph
@@ -230,6 +230,22 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_startSectionTie
  */
 JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_finishSectionTie
   (JNIEnv *, jclass, jfloat, jfloat, jint, jint);
+
+/*
+ * Class:     corelyzer_graphics_SceneGraph
+ * Method:    getSectionTieType
+ * Signature: (I)I
+ */
+JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_getSectionTieType
+  (JNIEnv *, jclass, jint);
+
+/*
+ * Class:     corelyzer_graphics_SceneGraph
+ * Method:    setSectionTieType
+ * Signature: (II)V
+ */
+JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setSectionTieType
+  (JNIEnv *, jclass, jint, jint);
 
 /*
  * Class:     corelyzer_graphics_SceneGraph

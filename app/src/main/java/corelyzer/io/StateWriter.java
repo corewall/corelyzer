@@ -680,6 +680,7 @@ public class StateWriter {
 		CoreSectionTie tie = new CoreSectionTie(tieId);
 		Element tieElt = doc.createElement("visual");
 		tieElt.setAttributeNS(null, "type", "tie");
+		tieElt.setAttributeNS(null, "tieType", Integer.toString(SceneGraph.getSectionTieType(tieId)));
 		tieElt.setAttributeNS(null, "show", Boolean.toString(SceneGraph.getSectionTieShow(tieId)));
 		setTiePointAttrs(tieElt, "a", tie.getTiePointA());
 		setTiePointAttrs(tieElt, "b", tie.getTiePointB());

@@ -6,17 +6,23 @@
 #include "tie.h"
 
 static SectionTiePoint *inProgressTie = NULL;
+static SectionTieType inProgressType = NONE;
 
 SectionTiePoint *get_in_progress_tie() {
     return inProgressTie;
 }
 
-bool start_section_tie(int trackId, int sectionId, float x, float y) {
+SectionTieType get_in_progress_tie_type() {
+    return inProgressType;
+}
+
+bool start_section_tie(SectionTieType type, int trackId, int sectionId, float x, float y) {
     if (inProgressTie) {
         printf("A tie is already in progress, can't start a new one.\n");
         return false;
     }
     inProgressTie = new SectionTiePoint(trackId, sectionId, x, y);
+    inProgressType = type;
     return true;
 }
 
@@ -26,9 +32,10 @@ CoreSectionTie *finish_section_tie(int trackId, int sectionId, float x, float y)
         return NULL;
     }
     SectionTiePoint ptB(trackId, sectionId, x, y);
-    CoreSectionTie *tie = new CoreSectionTie(*inProgressTie, ptB);
+    CoreSectionTie *tie = new CoreSectionTie(inProgressType, *inProgressTie, ptB);
     delete inProgressTie;
     inProgressTie = NULL;
+    inProgressType = NONE;
     return tie;
 }
 

@@ -236,9 +236,11 @@ public class SceneGraph {
 	// section tie f'ns
 	public native static int[] getSectionTieIds();
 	public native static void deleteSectionTie(int tieId);
-	public native static void createSectionTie(float ax, float ay, String aDesc, int aTrackId, int aSectionId, float bx, float by, String bDesc, int bTrackId, int bSectionId, boolean show);
-	public native static void startSectionTie(float x, float y, int trackId, int sectionId);
+	public native static void createSectionTie(int type, float ax, float ay, String aDesc, int aTrackId, int aSectionId, float bx, float by, String bDesc, int bTrackId, int bSectionId, boolean show);
+	public native static void startSectionTie(int type, float x, float y, int trackId, int sectionId);
 	public native static int finishSectionTie(float x, float y, int trackId, int sectionId);
+	public native static int getSectionTieType(int tieId);
+	public native static void setSectionTieType(int tieId, int type);
 	public native static void setSectionTieADescription(int tieId, String desc);
 	public native static String getSectionTieADescription(int tieId);
 	public native static void setSectionTieBDescription(int tieId, String desc);

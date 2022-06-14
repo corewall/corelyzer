@@ -3,6 +3,13 @@
 
 #include <stdlib.h>
 
+enum SectionTieType {
+    NONE = 0,
+    VISUAL,
+    DATA,
+    SPLICE
+};
+
 // Section-space point on a core section image.
 struct SectionTiePoint {
     int track, section;
@@ -37,15 +44,17 @@ struct SectionTiePoint {
 // A tie between two features of interest, points A and B, on section core images.
 // Points A and B may be on the same core image.
 struct CoreSectionTie {
+    SectionTieType type;
     SectionTiePoint *a, *b;
 
-    char *aDesc; // description of point A
-    char *bDesc; // description of point B
+    char *aDesc; // description of point A (Z in UI)
+    char *bDesc; // description of point B (Z' in UI)
 
     bool selected; // highlight tie on selection
     bool show; // draw tie line?
 
-    CoreSectionTie(SectionTiePoint &a, SectionTiePoint &b) {
+    CoreSectionTie(SectionTieType type, SectionTiePoint &a, SectionTiePoint &b) {
+        this->type = type;
         this->a = new SectionTiePoint(a);
         this->b = new SectionTiePoint(b);
         aDesc = NULL;
@@ -62,6 +71,8 @@ struct CoreSectionTie {
     }
 
     // getter/setter
+    SectionTieType getType() { return type; }
+    void setType(SectionTieType type) { this->type = type; }
     void setADescription(char *desc);
     void setBDescription(char *dest);
     char *getADescription();
@@ -72,7 +83,8 @@ struct CoreSectionTie {
 };
 
 SectionTiePoint *get_in_progress_tie();
-bool start_section_tie(int trackId, int sectionId, float x, float y);
+SectionTieType get_in_progress_tie_type();
+bool start_section_tie(SectionTieType type, int trackId, int sectionId, float x, float y);
 CoreSectionTie *finish_section_tie(int trackid, int sectionId, float x, float y);
 
 #endif // #ifndef CORELYZER_TIE_H
