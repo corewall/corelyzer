@@ -66,7 +66,7 @@ public class ManageSectionTiesDialog extends JFrame {
         });
 
         JScrollPane tableScroll = new JScrollPane(tieTable);
-        contentPane.add(tableScroll, "wmin 300, hmin 100, wrap, grow");
+        contentPane.add(tableScroll, "wmin 400, hmin 100, wrap, grow");
 
         editButton = new JButton("Edit");
         editButton.addActionListener(new ActionListener() {
@@ -165,7 +165,7 @@ class TieData {
     public int id;
     public boolean show;
     public String aDesc, bDesc;
-    public String aSectionDepth, bSectionDepth; // section name and depth (cm)
+    public String aSectionDepth, bSectionDepth; // section name and section depth (cm)
     public TieData(int id, boolean show, String aDesc, String bDesc, String aSectionDepth, String bSectionDepth) {
         this.id = id;
         this.show = show;
@@ -200,6 +200,11 @@ class TieTable extends JTable {
 		super.setSize(width, height);
         setWidths(width);
 	}
+
+    @Override
+    public Dimension getPreferredScrollableViewportSize() {
+        return new Dimension(500, 200);
+    }
 
     private void setWidths(int width) {
 		getColumnModel().getColumn(0).setPreferredWidth(showWidth);

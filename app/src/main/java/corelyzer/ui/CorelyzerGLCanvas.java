@@ -669,9 +669,8 @@ public class CorelyzerGLCanvas implements GLEventListener, MouseListener, MouseW
 		}
 		
 		ManageSectionTiesDialog dlg = new ManageSectionTiesDialog(tieIds);
-		dlg.setLocationRelativeTo(null); // center in display
+		dlg.setLocationRelativeTo(canvas);
 		dlg.setAlwaysOnTop(true);
-		dlg.setSize(400, 300);
 		dlg.setVisible(true);
 	}
 
