@@ -14,7 +14,7 @@ public class SectionTieDialog extends JDialog {
     private JLabel aLabel, bLabel;
     private JButton buttonOK;
     private JButton buttonCancel;
-    private JTextField aDesc, bDesc;
+    private JTextArea aDesc, bDesc;
     public boolean confirmed = false;
 
     public static void main(final String[] args) {
@@ -38,9 +38,9 @@ public class SectionTieDialog extends JDialog {
             float[] bPos = SceneGraph.getSectionTieBPosition(tieId);
             int ax = Math.round(aPos[0] / SceneGraph.getCanvasDPIX(0) * 2.54f);
             int bx = Math.round(bPos[0] / SceneGraph.getCanvasDPIX(0) * 2.54f);
-            aLabel.setText(aSecId + " " + ax + "cm");
+            aLabel.setText("Z: " + aSecId + " " + ax + "cm");
             aDesc.setText(SceneGraph.getSectionTieADescription(tieId));
-            bLabel.setText(bSecId + " " + bx + "cm");
+            bLabel.setText("Z': " + bSecId + " " + bx + "cm");
             bDesc.setText(SceneGraph.getSectionTieBDescription(tieId));
             pack();
         }
@@ -54,17 +54,21 @@ public class SectionTieDialog extends JDialog {
         contentPane = new JPanel();
         setContentPane(contentPane);
 
-        contentPane.setLayout(new MigLayout("wrap", "[grow]", "[grow]"));
+        contentPane.setLayout(new MigLayout("wrap", "[grow]", "[][grow][][grow][]"));
 
         aLabel = new JLabel("[A core ID]");
         contentPane.add(aLabel);
-        aDesc = new JTextField();
-        contentPane.add(aDesc, "grow");
+        aDesc = new JTextArea();
+        JScrollPane aScrollPane = new JScrollPane();
+        aScrollPane.setViewportView(aDesc);
+        contentPane.add(aScrollPane, "grow, hmin 80, wmin 300");
 
         bLabel = new JLabel("[B core ID]");
-        contentPane.add(bLabel);
-        bDesc = new JTextField();
-        contentPane.add(bDesc, "grow");
+        contentPane.add(bLabel, "gapy 10");
+        bDesc = new JTextArea();
+        JScrollPane bScrollPane = new JScrollPane();
+        bScrollPane.setViewportView(bDesc);
+        contentPane.add(bScrollPane, "grow, hmin 80, wmin 300");
 
         buttonOK = new JButton("OK");
         buttonOK.addActionListener(new ActionListener() {
@@ -79,7 +83,7 @@ public class SectionTieDialog extends JDialog {
                 onCancel();
             }
         });
-        contentPane.add(buttonCancel, "split 2");
+        contentPane.add(buttonCancel, "split 2, gapy 10");
         contentPane.add(buttonOK);
         getRootPane().setDefaultButton(buttonOK);
 
