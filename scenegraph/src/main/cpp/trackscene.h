@@ -112,6 +112,9 @@ void render_section_ties(TrackScene *ts, Canvas *c);
 void render_in_progress_tie(Canvas *c, const float arrowSize);
 
 void set_selected_tie(int tieId);
+void free_associated_ties(int scene, int sectionId);
+void update_section_ties();
+void delete_section_ties_on_track(int scene, int trackId);
 
 #endif
 

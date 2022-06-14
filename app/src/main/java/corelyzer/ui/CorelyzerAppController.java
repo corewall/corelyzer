@@ -474,6 +474,7 @@ public class CorelyzerAppController implements ActionListener, AboutHandler, Qui
 		deleteTrack(currentTrack);
 	}
 
+	// close session calls this flavor of deleteTrack()
 	public void deleteTrack(final Session s, final TrackSceneNode t) {
 		// System.out.println("---> [INFO] Closing track: " + t.getName());
 
@@ -487,6 +488,7 @@ public class CorelyzerAppController implements ActionListener, AboutHandler, Qui
 		{
 			idx = t.getId();
 			t.removeAllCoreSection();
+			SceneGraph.deleteSectionTiesOnTrack(t.getId());
 			SceneGraph.deleteTrack(t.getId());
 			// cg.removeTrack(s, t);
 		}
@@ -525,6 +527,7 @@ public class CorelyzerAppController implements ActionListener, AboutHandler, Qui
 						{
 							idx = t.getId();
 							t.removeAllCoreSection();
+							SceneGraph.deleteSectionTiesOnTrack(t.getId());
 							SceneGraph.deleteTrack(t.getId());
 							cg.removeTrack(s, t);
 						}
@@ -1697,6 +1700,9 @@ public class CorelyzerAppController implements ActionListener, AboutHandler, Qui
 			if (cg.getSessions().size() == 0) {
 				view.setCurrentSessionFile("");
 			}
+
+			// cleanup ties
+
 		}
 	}
 
@@ -2047,7 +2053,7 @@ public class CorelyzerAppController implements ActionListener, AboutHandler, Qui
 
 			public void run() {
 				while (true) {
-					// Auto-save session every 60 secons
+					// Auto-save session every 60 seconds
 					try {
 						if (!autoSavePath.contains(view.preferences().config_Directory)) {
 							File autoSaveDir = new File(view.preferences().config_Directory + sp + "autoSaves");
@@ -2080,7 +2086,7 @@ public class CorelyzerAppController implements ActionListener, AboutHandler, Qui
 				}
 			}
 		};
-		autoSave.start();
+		// autoSave.start();
 
 		this.initRemoteControlServer();
 		this.initAnnotationTypeDirectory();

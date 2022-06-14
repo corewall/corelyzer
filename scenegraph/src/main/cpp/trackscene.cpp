@@ -334,6 +334,10 @@ void delete_section_ties_on_track(int scene, int trackId) {
     for (int i = 0; i < ties_to_delete.size(); i++) {
         remove_tie(scene, ties_to_delete[i]);
     }
+
+    std::vector<int> v = std::vector<int>();
+    get_tie_ids(scene, v);
+    printf("Deleted ties on track %d, remaining tie count: %d\n", trackId, v.size());
 }
 
 //================================================================

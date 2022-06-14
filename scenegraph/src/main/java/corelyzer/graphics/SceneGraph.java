@@ -254,6 +254,8 @@ public class SceneGraph {
 	public native static float[] getSectionTieBPosition(int tieId);
 	public native static int getSectionTieATrack(int tieId);
 	public native static int getSectionTieBTrack(int tieId);
+	public native static void updateSectionTies();
+	public native static void deleteSectionTiesOnTrack(int trackId);
 
 
 	// ----- Canvas methods

@@ -5207,6 +5207,24 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setSectionTieType(JNIE
 }
 
 /*
+ * Class:     corelyzer_graphics_SceneGraph
+ * Method:    updateSectionTies
+ * Signature: ()V
+ */
+JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_updateSectionTies(JNIEnv *jenv, jclass jcls) {
+    update_section_ties();
+}
+
+/*
+ * Class:     corelyzer_graphics_SceneGraph
+ * Method:    deleteSectionTiesOnTrack
+ * Signature: (I)V
+ */
+JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_deleteSectionTiesOnTrack(JNIEnv *jenv, jclass jcls, jint trackId) {
+    delete_section_ties_on_track(default_track_scene, trackId);
+}
+
+/*
  * Class:     corelyzer_helper_SceneGraph
  * Method:    setDebug
  * Signature: (Z)V
