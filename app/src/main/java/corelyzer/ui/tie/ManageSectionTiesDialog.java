@@ -137,14 +137,20 @@ public class ManageSectionTiesDialog extends JFrame {
             final boolean show = SceneGraph.getSectionTieShow(id);
             final String aDesc = SceneGraph.getSectionTieADescription(id);
             final String bDesc = SceneGraph.getSectionTieBDescription(id);
-            ties.add(i, new TieData(id, show, aDesc, bDesc));
+            float[] aPos = SceneGraph.getSectionTieAPosition(id);
+            float[] bPos = SceneGraph.getSectionTieBPosition(id);
+            final int ax = Math.round(aPos[0] / SceneGraph.getCanvasDPIX(0) * 2.54f);
+            final int bx = Math.round(bPos[0] / SceneGraph.getCanvasDPIX(0) * 2.54f);
+            final String aSec = SceneGraph.getSectionTieASectionName(id);
+            final String bSec = SceneGraph.getSectionTieBSectionName(id);
+            ties.add(i, new TieData(id, show, aDesc, bDesc, aSec + " " + ax + "cm", bSec + " " + bx + "cm"));
         }
     }
 
     // dummy ties for testing
     private void addDummyTies() {
         for (int i = 0; i < 10; i++) {
-            ties.add(i, new TieData(i+1, i % 2 == 0 ? true : false, "source desc", "dest desc"));
+            ties.add(i, new TieData(i+1, i % 2 == 0 ? true : false, "source desc", "dest desc", "0@fake1", "0@fake2"));
         }
     }
 
@@ -159,11 +165,14 @@ class TieData {
     public int id;
     public boolean show;
     public String aDesc, bDesc;
-    public TieData(int id, boolean show, String aDesc, String bDesc) {
+    public String aSectionDepth, bSectionDepth; // section name and depth (cm)
+    public TieData(int id, boolean show, String aDesc, String bDesc, String aSectionDepth, String bSectionDepth) {
         this.id = id;
         this.show = show;
         this.aDesc = aDesc;
         this.bDesc = bDesc;
+        this.aSectionDepth = aSectionDepth;
+        this.bSectionDepth = bSectionDepth;
     }
 
     public String toString() {
@@ -214,9 +223,9 @@ class TieTableModel extends AbstractTableModel {
         if (columnIndex == 0) {
             return "Show";
         } else if (columnIndex == 1) {
-            return "Point A Desc.";
+            return "Z";
         } else {
-            return "Point B Desc.";
+            return "Z'";
         }
     }
 
@@ -247,9 +256,9 @@ class TieTableModel extends AbstractTableModel {
         if (col == 0) {
             return Boolean.valueOf(t.show);
         } else if (col == 1) {
-            return t.aDesc;
+            return t.aSectionDepth;
         } else { // col == 2
-            return t.bDesc;
+            return t.bSectionDepth;
         }
     }
 }
