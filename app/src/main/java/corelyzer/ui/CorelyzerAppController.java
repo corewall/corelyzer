@@ -43,6 +43,7 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.Hashtable;
 import java.util.Vector;
+import java.util.HashSet;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -1469,7 +1470,7 @@ public class CorelyzerAppController implements ActionListener, AboutHandler, Qui
 
 		switch (sel) {
 			case 0: // save to session file and quit
-				if (saveStateToFile()) {
+				if (saveSessionAs()) {
 					cleanThingsUp();
 					System.exit(0);
 				}
@@ -1501,7 +1502,7 @@ public class CorelyzerAppController implements ActionListener, AboutHandler, Qui
 
 		switch (sel) {
 			case 0: // save to session file and quit
-				if (saveStateToFile()) {
+				if (saveSessionAs()) {
 					cleanThingsUp();
 					// System.exit(0);
 					qr.performQuit();
@@ -1740,10 +1741,6 @@ public class CorelyzerAppController implements ActionListener, AboutHandler, Qui
 		}
 	}
 
-	public boolean saveCurrentSession() {
-		return saveStateToFile(view.getCurrentSessionFile());
-	}
-
 	// --------------------------------------------------------------
 	public boolean saveOutputToFile() {
 		// check if there exists section at this point
@@ -1776,62 +1773,83 @@ public class CorelyzerAppController implements ActionListener, AboutHandler, Qui
 		return true;
 	}
 
-	public boolean saveStateToFile() {
-		return saveStateToFile(null);
-	}
-
-	private boolean saveStateToFile(final String filePath) {
-		CoreGraph cg = CoreGraph.getInstance();
-		boolean[] isSelected = null;
-		String suggestedName = null;
-		if (cg.getNumberOfSessions() > 1) {
-			// only save selected sessions
+	private boolean[] getSessionsToSave(CoreGraph cg) {
+		boolean[] selectedSessionIndices = null;
+		if (cg.getNumberOfSessions() > 1) { // select sessions to save
 			SessionsSelectDialog s = new SessionsSelectDialog(view.getMainFrame());
 			s.pack();
 			s.setLocationRelativeTo(view.getMainFrame());
 			s.setVisible(true);
-
-			isSelected = s.getSelectedIndex();
-			suggestedName = s.getSelectedIndexName();
 			s.dispose();
-		} else {
-			isSelected = new boolean[1];
-			isSelected[0] = true;
-			suggestedName = CoreGraph.getInstance().getCurrentSession().getName();
-		}
 
-		if (isSelected == null) {
+			selectedSessionIndices = s.getSelectedIndices();
+		} else {
+			selectedSessionIndices = new boolean[1];
+			selectedSessionIndices[0] = true;
+		}
+		return selectedSessionIndices;
+	}
+
+	public boolean saveSession() {
+		return saveStateToFile(false);
+	}
+
+	public boolean saveSessionAs() {
+		return saveStateToFile(true);
+	}
+
+	private boolean saveStateToFile(boolean saveAs) {
+		CoreGraph cg = CoreGraph.getInstance();
+		boolean[] selectedSessionIndices = getSessionsToSave(cg);
+		if (selectedSessionIndices == null || selectedSessionIndices.length == 0) {
 			return false;
 		}
 
-		String selected;
-		if (filePath == null || filePath.equals("")) {
-			String title = "Save a Session file";
-			selected = FileUtility.selectASingleFile(view.getMainFrame(), title, "cml", FileUtility.SAVE, suggestedName);
-		} else {
-			selected = filePath;
+		Vector<Session> selectedSessions = new Vector<Session>();
+		for (int i = 0; i < selectedSessionIndices.length; i++) {
+			if (selectedSessionIndices[i]) { selectedSessions.add(cg.getSession(i)); }
 		}
 
-		if (selected != null) {
-			// make sure it has .xml at the end
-			String path = selected.replace('\\', '/');
+		if (selectedSessions.size() > 1 && !saveAs) {
+			HashSet<String> sessionStateFilePaths = new HashSet<String>();
+			for (Session curSession : selectedSessions) {
+				sessionStateFilePaths.add(curSession.getStateFilePath());
+			}
+			if (sessionStateFilePaths.size() > 1) {
+				System.out.println("Mixed state files for selected sessions, user must choose.");
+				saveAs = true;
+			}				
+		}
+
+		String suggestedName = selectedSessions.get(0).getName();
+
+		String destFile = selectedSessions.get(0).getStateFilePath();
+		if (saveAs || destFile.equals("")) {
+			String title = "Save a Session file";
+			destFile = FileUtility.selectASingleFile(view.getMainFrame(), title, "cml", FileUtility.SAVE, suggestedName);
+		}
+
+		if (destFile != null) {
+			// make sure it has .cml at the end
+			String path = destFile.replace('\\', '/');
 			String[] toks = path.split("/");
 			if (!toks[toks.length - 1].contains(".cml")) {
 				path = path + ".cml";
 			}
 
-			StateWriter sw = new StateWriter(isSelected);
+			StateWriter sw = new StateWriter(selectedSessionIndices);
 			boolean writeResult = sw.writeState(path);
 
 			if (!writeResult) {
-				JOptionPane.showMessageDialog(view.getMainFrame(), "Failed");
+				JOptionPane.showMessageDialog(view.getMainFrame(), "Save Failed");
+				return false;
 			}
 
 			addSessionToHistoryMenu(path);
-
-			if (writeResult) {
-				view.setCurrentSessionFile(path);
+			for (Session s : selectedSessions) {
+				s.setStateFilePath(path);
 			}
+			view.updateCurrentSessionFile();
 
 			return writeResult;
 		}

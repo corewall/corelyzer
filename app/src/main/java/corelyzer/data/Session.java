@@ -30,7 +30,7 @@ import java.util.Vector;
 public class Session {
 	String name = "UnNamed Session";
 	String DISId = "N/A_N/A";
-	String stateFilename;
+	String stateFilePath = "";
 
 	Vector<TrackSceneNode> tracks;
 	Vector<WellLogDataSet> datasets;
@@ -38,6 +38,8 @@ public class Session {
 	boolean isShow = true;
 	
 	public void sortTracks() { Collections.sort(tracks); }
+	public void clearTracks() { tracks.clear(); }
+	public void clearDatasets() { datasets.clear(); }
 
 	public Session() {
 		tracks = new Vector<TrackSceneNode>();
@@ -195,6 +197,17 @@ public class Session {
 	public void setShow(final boolean show) {
 		isShow = show;
 	}
+
+	public String getStateFilePath() {
+		return stateFilePath;
+	}
+
+	public void setStateFilePath(String newPath) {
+		stateFilePath = newPath;
+		System.out.println("Session state file path: " + newPath);
+	}
+
+	public void clearStateFilePath() { stateFilePath = ""; }
 
 	@Override
 	public String toString() {

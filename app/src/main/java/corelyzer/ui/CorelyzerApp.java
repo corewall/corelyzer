@@ -1547,7 +1547,7 @@ public class CorelyzerApp extends WindowAdapter implements MouseListener, Startu
 		saveMenuItem.setAccelerator( KeyStroke.getKeyStroke(KeyEvent.VK_S, MENU_MASK));
 		saveMenuItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent event) {
-				controller.saveCurrentSession();
+				controller.saveSession();
 			}
 		});
 		fileMenu.add(saveMenuItem);
@@ -1556,7 +1556,7 @@ public class CorelyzerApp extends WindowAdapter implements MouseListener, Startu
 		saveStateToFileMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_A, MENU_MASK));
 		saveStateToFileMenuItem.addActionListener(new ActionListener() {
 			public void actionPerformed(final ActionEvent event) {
-				controller.saveStateToFile();
+				controller.saveSessionAs();
 			}
 		});
 		fileMenu.add(saveStateToFileMenuItem);
