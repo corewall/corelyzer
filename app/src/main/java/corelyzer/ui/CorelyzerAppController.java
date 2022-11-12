@@ -1269,7 +1269,10 @@ public class CorelyzerAppController implements ActionListener, AboutHandler, Qui
 		Vector<String> hst = view.preferences().getSessionHistory();
 		String forwardSlashPath = sessionPath.replace('\\', '/');
 		if (!hst.contains(forwardSlashPath)) {
-			view.preferences().getSessionHistory().add(forwardSlashPath);
+			hst.add(forwardSlashPath);
+		} else { // if file is already in recent sessions menu, move to top
+			hst.remove(forwardSlashPath);
+			hst.add(forwardSlashPath); // last file in vector is first added to recent sessions menu
 		}
 		refreshSessionHistoryMenu();
 	}
@@ -1526,6 +1529,22 @@ public class CorelyzerAppController implements ActionListener, AboutHandler, Qui
 		}
 	}
 
+	private Vector<String> getDuplicateSessionFileNames() {
+		Vector<String> hst = view.preferences().getSessionHistory();
+		Vector<String> duplicates = new Vector<String>();
+		Vector<String> filenames = new Vector<String>();
+		int count = 0;
+		for (int i = hst.size() - 1; i >= 0 && count < CRPreferences.maxHistoryEntries; i--, count++) {
+			String f = new File(hst.get(i)).getName();
+			if (filenames.contains(f)) {
+				duplicates.add(f);
+			} else {
+				filenames.add(f);
+			}
+		}
+		return duplicates;
+	}
+
 	public void refreshSessionHistoryMenu() {
 		view.recentSessionsMenu.removeAll();
 
@@ -1553,6 +1572,7 @@ public class CorelyzerAppController implements ActionListener, AboutHandler, Qui
 		Vector<String> listedPaths = new Vector<String>();
 		int count = 0;
 
+		Vector<String> duplicates = getDuplicateSessionFileNames();
 		for (int i = hst.size() - 1; i >= 0 && count < CRPreferences.maxHistoryEntries; i--, count++) {
 			final String path = view.preferences().getSessionHistory().get(i);
 			final String name = new File(path).getName();
@@ -1562,7 +1582,8 @@ public class CorelyzerAppController implements ActionListener, AboutHandler, Qui
 			}
 			listedPaths.add(path);
 
-			JMenuItem aItem = new JMenuItem(name);
+			String menuText = duplicates.contains(name) ? path : name;
+			JMenuItem aItem = new JMenuItem(menuText);
 			aItem.setToolTipText(path);
 			aItem.addActionListener(new ActionListener() {
 				public void actionPerformed(final ActionEvent e) {
