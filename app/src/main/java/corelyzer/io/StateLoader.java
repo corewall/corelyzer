@@ -1387,6 +1387,7 @@ public class StateLoader {
 	}
 
 	public boolean loadState(String filename, final String prefix) {
+		final String originalFilename = filename;
 		// Do a XML check before really loading
 		try {
 			DOMParser parser = new DOMParser();
@@ -1468,6 +1469,7 @@ public class StateLoader {
 					}
 
 					Session s = new Session(sessionName);
+					s.setStateFilePath(originalFilename);
 					cg.addSession(s);
 
 					loadStateXML(e, s);
@@ -1495,9 +1497,10 @@ public class StateLoader {
 							disId = "N/A";
 						}
 						s.setDISId(disId);
+						s.setStateFilePath(originalFilename);
 
 						cg.addSession(s);
-
+						
 						loadStateXML(sessionElement, s);
 					}
 				}

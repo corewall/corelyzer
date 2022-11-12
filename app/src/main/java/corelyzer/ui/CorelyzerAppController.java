@@ -1262,7 +1262,6 @@ public class CorelyzerAppController implements ActionListener, AboutHandler, Qui
 			JOptionPane.showMessageDialog(view.getMainFrame(), "The selected file does not exist");
 		}
 
-		view.setCurrentSessionFile(filename);
 		CRPreferences.setCurrentDir(openFile.getParent());
 	}
 	
@@ -1697,11 +1696,16 @@ public class CorelyzerAppController implements ActionListener, AboutHandler, Qui
 			// Java
 			cg.removeDatasets(s);
 			cg.removeSession(s);
-			
-			if (cg.getSessions().size() == 0) {
-				view.setCurrentSessionFile("");
-			}
 
+			// Clear selection to force the session list's ListSelectionListener
+			// to fire and properly update the current session file in the title bar.
+			// Otherwise, if the closed session isn't at the bottom of the list,
+			// lower sessions move up and the existing selection is retained and
+			// the listener will not be fired.
+			view.sessionList.clearSelection();
+
+			view.sessionList.setSelectedIndex(cg.getCurrentSessionIdx());
+			view.trackList.setSelectedIndex(cg.getCurrentTrackIdx());
 			// cleanup ties
 
 		}

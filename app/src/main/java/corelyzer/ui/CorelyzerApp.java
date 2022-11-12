@@ -1364,6 +1364,13 @@ public class CorelyzerApp extends WindowAdapter implements MouseListener, Startu
 		}
 	}
 
+	// force sync of selected session's session file name
+	public void updateCurrentSessionFile() {
+		final int idx = this.sessionList.getSelectedIndex();
+		this.sessionList.clearSelection();
+		this.sessionList.setSelectedIndex(idx);
+	}
+
 	public void setDisplayOffsets(final int column_offset, final int row_offset) {
 		preferences.column_offset = column_offset;
 		preferences.row_offset = row_offset;
@@ -2092,9 +2099,14 @@ public class CorelyzerApp extends WindowAdapter implements MouseListener, Startu
 		sessionList.addListSelectionListener(new ListSelectionListener() {
 			public void valueChanged(final ListSelectionEvent event) {
 				int idx = sessionList.getSelectedIndex();
+				// System.out.println("Session list valueChanged, selected idx = " + idx);
 				if (idx >= 0) {
 					CoreGraph cg = CoreGraph.getInstance();
 					cg.setCurrentSessionIdx(idx);
+					String sessionFilePath = cg.getCurrentSession().getStateFilePath();
+					setCurrentSessionFile(sessionFilePath.equals("") ? "" : new File(sessionFilePath).getName());
+				} else {
+					setCurrentSessionFile("");
 				}
 			}
 		});
