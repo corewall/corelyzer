@@ -148,11 +148,6 @@ public class CorelyzerAppController implements ActionListener, AboutHandler, Qui
 			remoteControlServer.setRunning(false);
 		}
 
-		// Save previous session file
-		String previousSession = view.preferences().config_Directory + sp + "previousSession.cml";
-		StateWriter sw = new StateWriter();
-		sw.writeState(previousSession);
-
 		view.preferences().save();
 		pluginManager.Shutdown();
 		SceneGraph.closeDown();
@@ -1252,10 +1247,7 @@ public class CorelyzerAppController implements ActionListener, AboutHandler, Qui
 				}
 			};
 			new Thread(loading).start();
-
-			if (!openFile.getName().equals("previousSession.cml")) {
-				addSessionToHistoryMenu(openFile.getAbsolutePath());
-			}
+			addSessionToHistoryMenu(openFile.getAbsolutePath());
 
 			// view.updateGLWindows();
 		} else {
@@ -1547,25 +1539,6 @@ public class CorelyzerAppController implements ActionListener, AboutHandler, Qui
 
 	public void refreshSessionHistoryMenu() {
 		view.recentSessionsMenu.removeAll();
-
-		// Show previous session if $(conf_dir)/previousSession.cml exists
-		final String previousSession = view.preferences().config_Directory + sp + "previousSession.cml";
-		final File prev = new File(previousSession);
-		if (prev.exists()) {
-			JMenuItem aItem = new JMenuItem("Previous Session");
-			aItem.setToolTipText("Previous session before closing Corelyzer");
-			aItem.addActionListener(new ActionListener() {
-				public void actionPerformed(final ActionEvent e) {
-					System.out.println("---> Loading previous session from " + previousSession);
-					if (prev.exists()) {
-						loadStateFile(previousSession);
-					}
-				}
-			});
-
-			view.recentSessionsMenu.add(aItem);
-			view.recentSessionsMenu.addSeparator();
-		}
 
 		// update history to view
 		Vector<String> hst = view.preferences().getSessionHistory();
