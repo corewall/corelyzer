@@ -1830,11 +1830,13 @@ public class CorelyzerAppController implements ActionListener, AboutHandler, Qui
 			return false;
 		}
 
+		// From session indices, build vector of Sessions to be saved
 		Vector<Session> selectedSessions = new Vector<Session>();
 		for (int i = 0; i < selectedSessionIndices.length; i++) {
 			if (selectedSessionIndices[i]) { selectedSessions.add(cg.getSession(i)); }
 		}
 
+		// If Sessions to be saved don't have a common state file, force Save As
 		if (selectedSessions.size() > 1 && !saveAs) {
 			HashSet<String> sessionStateFilePaths = new HashSet<String>();
 			for (Session curSession : selectedSessions) {
@@ -1844,6 +1846,28 @@ public class CorelyzerAppController implements ActionListener, AboutHandler, Qui
 				System.out.println("Mixed state files for selected sessions, user must choose.");
 				saveAs = true;
 			}				
+		}
+
+		// If Sessions to be saved excludes an open Session with a state file for which
+		// other Sessions *are* being saved, pop warning/confirmation dialog.
+		if (!saveAs) {
+			final String saveFile = selectedSessions.get(0).getStateFilePath();
+			Vector<String> unselectedSessionNames = new Vector<String>();
+			for (int idx = 0; idx < selectedSessionIndices.length; idx++) {
+				if (!selectedSessionIndices[idx] && cg.getSession(idx).getStateFilePath().equals(saveFile)) {
+					unselectedSessionNames.add(cg.getSession(idx).getName());
+				}
+			}
+			if (unselectedSessionNames.size() > 0) {
+				final String saveFileName = new File(saveFile).getName();
+				final String msg = "The session(s) [" +
+				String.join(",", unselectedSessionNames) +
+				"] were last saved in CML file " + saveFileName +
+				".\nContinue saving " + saveFileName + " without including those session(s)?";
+				if (JOptionPane.showConfirmDialog(view.getMainFrame(), msg) != JOptionPane.YES_OPTION) {
+					return false;	
+				}
+			}
 		}
 
 		String suggestedName = selectedSessions.get(0).getName();
