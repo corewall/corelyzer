@@ -71,6 +71,7 @@ import corelyzer.graphics.SceneGraph;
 import corelyzer.handlers.SubscribeHandler;
 import corelyzer.io.CRDISDepthValueDataLoader;
 import corelyzer.io.CRDepthValueDataLoader;
+import corelyzer.io.CoreArchiveExport;
 import corelyzer.io.DISLoader;
 import corelyzer.io.DISWriter;
 import corelyzer.io.StateLoader;
@@ -776,10 +777,8 @@ public class CorelyzerAppController implements ActionListener, AboutHandler, Qui
 	}
 
 	public void exportTheWholeScene() {
-		// Prompt and Save the Whole session along with images & data
-		CRExporterDialog dialog = new CRExporterDialog(view);
-		dialog.pack();
-		dialog.setVisible(true);
+		final String destFileStr = FileUtility.selectASingleFile(view.getMainFrame(), "Select core archive file", "car", FileUtility.SAVE);
+		CoreArchiveExport.export(destFileStr);
 	}
 
 	
