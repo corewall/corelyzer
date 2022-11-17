@@ -65,6 +65,7 @@ import corelyzer.data.UnitLength;
 import corelyzer.data.WellLogDataSet;
 import corelyzer.data.WellLogTable;
 import corelyzer.data.coregraph.CoreGraph;
+import corelyzer.data.coregraph.SessionMerger;
 import corelyzer.data.lists.CRDefaultListModel;
 import corelyzer.data.lists.CRListModels;
 import corelyzer.graphics.SceneGraph;
@@ -1701,6 +1702,15 @@ public class CorelyzerAppController implements ActionListener, AboutHandler, Qui
 			view.trackList.setSelectedIndex(cg.getCurrentTrackIdx());
 			// cleanup ties
 
+		}
+	}
+
+	public void mergeSessions() {
+		MergeSessionsDialog dlg = new MergeSessionsDialog(view.getMainFrame(), cg.getSessions());
+		dlg.setVisible(true);
+		if (dlg.confirmed) {
+			// confirmation/warning?
+			SessionMerger.mergeSessions(cg, dlg.getSessionsToMerge(), dlg.getDestinationSession());
 		}
 	}
 

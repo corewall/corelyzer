@@ -2022,6 +2022,14 @@ public class CorelyzerApp extends WindowAdapter implements MouseListener, Startu
 		});
 		sessionPopupMenu.add(removeSession);
 
+		JMenuItem mergeSessions = new JMenuItem("Merge Sessions...");
+		mergeSessions.addActionListener(new ActionListener() {
+			public void actionPerformed(final ActionEvent e) {
+				controller.mergeSessions();
+			}
+		});
+		sessionPopupMenu.add(mergeSessions);
+
 		// track popup
 		trackPopupMenu = new JPopupMenu("Tracks");
 
