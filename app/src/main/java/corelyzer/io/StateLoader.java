@@ -1619,7 +1619,7 @@ public class StateLoader {
 			}
 
 			// this would be the merge case
-			trackId = app.createTrack(name);
+			trackId = app.createTrack(name, session);
 		} else {
 			System.out.println("---> [WARN] Track has no name! Doing nothing");
 			return;

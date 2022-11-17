@@ -668,6 +668,10 @@ public class CorelyzerApp extends WindowAdapter implements MouseListener, Startu
 		return controller.createTrack(aName);
 	}
 
+	public int createTrack(final String aName, Session destinationSession) {
+		return controller.createTrack(aName, destinationSession);
+	}
+
 	public void deleteSection(final int trackId, final int sectionId) {
 		controller.deleteSection(trackId, sectionId);
 	}

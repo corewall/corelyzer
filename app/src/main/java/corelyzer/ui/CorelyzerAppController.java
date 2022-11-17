@@ -309,38 +309,43 @@ public class CorelyzerAppController implements ActionListener, AboutHandler, Qui
 			s = cg.getCurrentSession();
 		}
 
+		return createTrack(trackName, s);
+	}
+	
+	public int createTrack(String trackName, Session destinationSession) {
 		// check null, empty and duplication
 		if (trackName == null || trackName.equals("") || this.containsTrackName(trackName)) {
 			String name = getAValidInputString("", "Create a track", "Please input a track name", "Empty Input", "Please input non-empty string.",
 					"Duplicate Input", "Please input non-duplicated string.", CRListModels.TRACK);
-
+	
 			if (name == null) {
 				return -1;
 			} else {
 				trackName = name;
 			}
 		}
-
+	
 		int id;
-
+	
 		// determine if the track name is already there if so, don't make it
 		// again
-		if ((id = SceneGraph.getTrackIDByName(s.getName(), trackName)) > -1) {
+		if ((id = SceneGraph.getTrackIDByName(destinationSession.getName(), trackName)) > -1) {
 			return id;
 		}
-		if ((id = SceneGraph.addTrack(s.getName(), trackName)) < 0) {
+		if ((id = SceneGraph.addTrack(destinationSession.getName(), trackName)) < 0) {
 			return id;
 		}
-
+	
 		// create the node and add it to the listing of tracks
 		TrackSceneNode t = new TrackSceneNode(trackName, id);
-		cg.addTrack(s, t);
-
+		cg.addTrack(destinationSession, t);
+	
 		view.sessionList.setSelectedIndex(cg.getCurrentSessionIdx());
 		view.trackList.setSelectedIndex(cg.getCurrentTrackIdx());
-
+	
 		return id;
 	}
+
 
 	public void deiconifyAllPlugins() {
 		pluginManager.deiconifyAllPlugins();
