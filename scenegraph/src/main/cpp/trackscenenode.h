@@ -79,5 +79,6 @@ void detach_free_draw_from_track     (TrackSceneNode* t, int fdid);
 void push_section_to_end             (TrackSceneNode* t, int section);
 
 void  set_track_highlight_color(TrackSceneNode* t, float r, float g, float b);
+void set_track_session_name(TrackSceneNode *t, const char *sessionName);
 #endif
 

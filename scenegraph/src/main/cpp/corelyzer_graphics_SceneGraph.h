@@ -2025,6 +2025,14 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setTrackHighlightColor
 
 /*
  * Class:     corelyzer_graphics_SceneGraph
+ * Method:    setTrackSessionName
+ * Signature: (ILjava/lang/String;)V
+ */
+JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setTrackSessionName
+  (JNIEnv *, jclass, jint, jstring);
+
+/*
+ * Class:     corelyzer_graphics_SceneGraph
  * Method:    setTrackMovable
  * Signature: (IZ)V
  */

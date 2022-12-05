@@ -730,6 +730,25 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setTrackHighlightColor
 
 /*
 * Class:     corelyzer_helper_SceneGraph
+* Method:    setTrackSessionName
+* Signature: (ILjava/lang/String;)V
+*/
+JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setTrackSessionName(JNIEnv *jenv, jclass jclass, jint trackId, jstring jSessionName) {
+    TrackSceneNode *t = get_scene_track(default_track_scene, trackId);
+    if (!t)
+        return;
+
+    const int length = jenv->GetStringLength(jSessionName);
+    char *sessionName = new char[length + 1];
+    jenv->GetStringUTFRegion(jSessionName, 0, length, sessionName);        
+
+    set_track_session_name(t, sessionName);
+
+    delete[] sessionName;
+}
+
+/*
+* Class:     corelyzer_helper_SceneGraph
 * Method:    setTrackShow
 * Signature: (IZ)V
 */

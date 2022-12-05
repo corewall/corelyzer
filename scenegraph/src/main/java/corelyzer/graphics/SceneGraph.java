@@ -1790,6 +1790,8 @@ public class SceneGraph {
 
 	public native static void setTrackHighlightColor(int track, float r, float g, float b);
 
+	public native static void setTrackSessionName(int track, String sessionName);
+
 	public native static void setTrackMovable(int track, boolean flag);
 
 	public native static void setTrackShow(int track, boolean isShow);
