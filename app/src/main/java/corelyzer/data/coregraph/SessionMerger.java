@@ -10,7 +10,6 @@ public class SessionMerger {
     public static boolean mergeSessions(CoreGraph cg, Vector<Session> sessionsToMerge, Session destSession) {
         if (!canMergeSessions(sessionsToMerge)) { return false; }
 
-        // Session destSession = sessions.get(0);
         for (int i = 0; i < sessionsToMerge.size(); i++) {
             Session curSession = sessionsToMerge.get(i);
             for (TrackSceneNode track : curSession.getTrackSceneNodes()) {
