@@ -645,10 +645,18 @@ public class StateWriter {
 				// Ties
 				final int[] tieIds = SceneGraph.getSectionTieIds();
 				if (tieIds == null) continue;
-				// System.out.println("Writing ties for session " + s.getName());
 				for (int tidx = 0; tidx < tieIds.length; tidx++) {
-					final int tie = tieIds[tidx];
-					Element tieElt = createTieElement(doc, tie);
+					final int tie_id = tieIds[tidx];
+					final int tie_track_a = SceneGraph.getSectionTieATrack(tie_id);
+					final int tie_track_b = SceneGraph.getSectionTieBTrack(tie_id);
+					if (!CoreGraph.getInstance().getTrackSession(tie_track_a).equals(s) ||
+						!CoreGraph.getInstance().getTrackSession(tie_track_b).equals(s))
+					{
+						System.out.println("Tie " + tie_id + " is not part of Session " + s.getName() + ", not saving.");
+						continue;
+					}
+
+					Element tieElt = createTieElement(doc, tie_id);
 					sessionElement.appendChild(tieElt);
 				}
 			} // end of session loop
