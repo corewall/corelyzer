@@ -291,26 +291,19 @@ void free_track_section_model(int scene, int trackid, int sectionid) {
     if (!is_track(scene, trackid))
         return;
     free_model(trackscenevec[scene]->trackvec[trackid], sectionid);
-    free_associated_ties(scene, sectionid);
+    free_associated_ties(scene, trackid, sectionid);
 }
 
 //================================================================
 // Delete ties with at least one endpoint on this section
-void free_associated_ties(int scene, int sectionId) {
-    printf("Freeing ties!\n");
+void free_associated_ties(int scene, int trackId, int sectionId) {
     for (int tidx = 0; tidx < trackscenevec[scene]->tievec.size(); tidx++) {
         CoreSectionTie *tie = trackscenevec[scene]->tievec[tidx];
-        if (tie->a->section == sectionId || tie->b->section == sectionId) {
+        if (!tie) { continue; }
+        if (tie->isOnTrack(trackId) && tie->isOnSection(sectionId)) {
             remove_tie(scene, tidx);
         }
     }
-    int count = 0;
-    for (int foo = 0; foo < trackscenevec[scene]->tievec.size(); foo++) {
-        if (trackscenevec[scene]->tievec[foo] != NULL) {
-            count++;
-        }
-    }
-    printf("Remaining ties: %d\n", count);
 }
 
 //================================================================
@@ -325,7 +318,7 @@ void delete_section_ties_on_track(int scene, int trackId) {
         for (int tidx = 0; tidx < trackscenevec[scene]->tievec.size(); tidx++) {
             CoreSectionTie *tie = trackscenevec[scene]->tievec[tidx];
             if (!tie) continue;
-            if (tie->a->section == sidx) {
+            if (tie->isOnTrack(trackId)) {
                 ties_to_delete.push_back(tidx);
             }
         }
@@ -334,10 +327,6 @@ void delete_section_ties_on_track(int scene, int trackId) {
     for (int i = 0; i < ties_to_delete.size(); i++) {
         remove_tie(scene, ties_to_delete[i]);
     }
-
-    std::vector<int> v = std::vector<int>();
-    get_tie_ids(scene, v);
-    printf("Deleted ties on track %d, remaining tie count: %d\n", trackId, v.size());
 }
 
 //================================================================

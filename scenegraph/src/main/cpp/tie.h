@@ -79,7 +79,14 @@ struct CoreSectionTie {
     char *getBDescription();
     bool getShow();
     void setShow(bool _show);
+
     bool valid() { return a->valid() && b->valid(); }
+    bool isOnTrack(const int trackId) {
+        return a->track == trackId || b->track == trackId;
+    }
+    bool isOnSection(const int secId) {
+        return a->section == secId || b->section == secId;
+    }
 };
 
 SectionTiePoint *get_in_progress_tie();
