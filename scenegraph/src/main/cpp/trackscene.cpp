@@ -533,8 +533,7 @@ static void set_tie_color(SectionTieType type) {
 //================================================================
 void render_section_ties(TrackScene *ts, Canvas *c) {
     glDisable(GL_TEXTURE_2D); // enabled textures affect point/line color
-    glLineWidth(3);
-    glPointSize(5);
+    glLineWidth(1);
     glColor3f(0,1,0);
 
     // Maintain size of arrowhead when c->w/c->w0 < 1.0 or it becomes needlessly
