@@ -1578,12 +1578,15 @@ public class StateLoader {
 		CoreSectionTieType type = CoreSectionTieType.fromInt(Integer.parseInt(e.getAttribute("tieType")));
 		SectionTiePoint ptA = new SectionTiePoint(e.getAttribute("atrack"), e.getAttribute("asection"), Float.valueOf(e.getAttribute("ax")), Float.valueOf(e.getAttribute("ay")), e.getAttribute("adesc"));
 		SectionTiePoint ptB = new SectionTiePoint(e.getAttribute("btrack"), e.getAttribute("bsection"), Float.valueOf(e.getAttribute("bx")), Float.valueOf(e.getAttribute("by")), e.getAttribute("bdesc"));
-
-		int a_track_id, a_section_id, b_track_id, b_section_id;
-		a_track_id = SceneGraph.getTrackIDByName(session.getName(), ptA.track);
-		a_section_id = SceneGraph.getSectionIDByName(a_track_id, ptA.section);
-		b_track_id = SceneGraph.getTrackIDByName(session.getName(), ptB.track);
-		b_section_id = SceneGraph.getSectionIDByName(b_track_id, ptB.section);
+		
+		final int a_track_id = SceneGraph.getTrackIDByName(session.getName(), ptA.track);
+		final int a_section_id = SceneGraph.getSectionIDByName(a_track_id, ptA.section);
+		final int b_track_id = SceneGraph.getTrackIDByName(session.getName(), ptB.track);
+		final int b_section_id = SceneGraph.getSectionIDByName(b_track_id, ptB.section);
+		if (a_track_id == -1 || a_section_id == -1 || b_track_id == -1 || b_section_id == -1) {
+			System.out.println("Couldn't find track or section for tie, skipping.");
+			return;
+		}
 
 		final float ax = ((ptA.x * 100.0f) / 2.54f) * SceneGraph.getCanvasDPIX(0);
 		final float ay = ((ptA.y * 100.0f) / 2.54f) * SceneGraph.getCanvasDPIY(0);
