@@ -1525,6 +1525,7 @@ public class StateLoader {
 		totallength = recursiveTreeSize(xmlRoot);
 		nodecount = 0;
 		NodeList list = xmlRoot.getChildNodes();
+		Vector<Element> tieElements = new Vector<Element>();
 
 		pdlg.setMaximum(totallength);
 		pdlg.setValue(0);
@@ -1555,7 +1556,7 @@ public class StateLoader {
 					} else if (type.equals("track")) {
 						loadTrackXML(e, session);
 					} else if (type.equals("tie")) {
-						loadTieXML(e, session);
+						tieElements.add(e); // defer tie loading
 					}
 				} else {
 					System.err.println("---> [IGNORE] Some tagname I don't know: " + tagname);
@@ -1563,6 +1564,11 @@ public class StateLoader {
 			} else {
 				// Maybe do some cleanup, rollbacks
 			}
+		}
+
+		// all tracks have been loaded, can safely load ties
+		for (Element tieElt : tieElements) {
+			loadTieXML(tieElt, session);
 		}
 
 		pdlg.setValue(totallength);
