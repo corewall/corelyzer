@@ -75,6 +75,7 @@ import corelyzer.data.TrackSceneNode;
 import corelyzer.data.WellLogDataSet;
 import corelyzer.data.coregraph.CoreGraph;
 import corelyzer.data.lists.CRDefaultListModel;
+import corelyzer.data.tie.SectionTieErrors;
 import corelyzer.graphics.SceneGraph;
 import corelyzer.plugin.CorelyzerPluginEvent;
 import corelyzer.remoteControl.server.controller.actions.FineTuneDialog;
@@ -1230,7 +1231,9 @@ public class CorelyzerGLCanvas implements GLEventListener, MouseListener, MouseW
 				} else if (canvasMode == CorelyzerApp.APP_TIE_MODE) {
 					if (selectedTrack != -1 && selectedTrackSection != -1) {
 						int tieId = SceneGraph.finishSectionTie(scenePos[0], scenePos[1], selectedTrack, selectedTrackSection);
-						if (tieId != -1) {
+						if (tieId == SectionTieErrors.INTER_SESSION_TIE_ERROR) {
+							JOptionPane.showMessageDialog(canvas, "Cannot create inter-session ties.");
+						} else if (tieId != -1) {
 							SectionTieDialog tieDlg = new SectionTieDialog(CorelyzerApp.getApp().getToolFrame(), tieId);
 							tieDlg.setLocation(new Point(prePos.x + 10, prePos.y + 10));
 							tieDlg.setModal(true);

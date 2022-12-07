@@ -5025,9 +5025,17 @@ JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_finishSectionTie(JNIEn
         return false;
     }
     TrackSceneNode *track = get_scene_track(trackId);
-    if (!track) return false;
+    if (!track) return -1;
+
+    // prevent inter-session ties
+    const int INTER_SESSION_TIE_ERROR = -2;
+    SectionTiePoint *inProgTie = get_in_progress_tie();
+    TrackSceneNode *tieTrackA = get_scene_track(inProgTie->track);
+    if (!tieTrackA) return -1;
+    if (strcmp(track->sessionName, tieTrackA->sessionName)) return INTER_SESSION_TIE_ERROR;
+
     CoreSection *sec = get_track_section(track, sectionId);
-    if (!sec) return false;
+    if (!sec) return -1;
 
     int tieId = -1;
     // scene-space to section-space
