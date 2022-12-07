@@ -1120,6 +1120,10 @@ public class CorelyzerGLCanvas implements GLEventListener, MouseListener, MouseW
 			else if ( key == 'R' )
 				keyId = 4; // scissoring
 			SceneGraph.debugKey( keyId );
+		} else if (key == KeyEvent.VK_ESCAPE) {
+			if (canvasMode == CorelyzerApp.APP_TIE_MODE) {
+				SceneGraph.clearInProgressSectionTie();
+			}
 		} else { // pan
 			float movX = 0.0f;
 			float movY = 0.0f;

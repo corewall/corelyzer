@@ -93,5 +93,6 @@ SectionTiePoint *get_in_progress_tie();
 SectionTieType get_in_progress_tie_type();
 bool start_section_tie(SectionTieType type, int trackId, int sectionId, float x, float y);
 CoreSectionTie *finish_section_tie(int trackid, int sectionId, float x, float y);
+void clear_in_progress_tie();
 
 #endif // #ifndef CORELYZER_TIE_H

@@ -16,6 +16,14 @@ SectionTieType get_in_progress_tie_type() {
     return inProgressType;
 }
 
+void clear_in_progress_tie() {
+    if (inProgressTie) {
+        delete inProgressTie;
+        inProgressTie = NULL;
+        inProgressType = NONE;
+    }
+}
+
 bool start_section_tie(SectionTieType type, int trackId, int sectionId, float x, float y) {
     if (inProgressTie) {
         printf("A tie is already in progress, can't start a new one.\n");
@@ -33,9 +41,7 @@ CoreSectionTie *finish_section_tie(int trackId, int sectionId, float x, float y)
     }
     SectionTiePoint ptB(trackId, sectionId, x, y);
     CoreSectionTie *tie = new CoreSectionTie(inProgressType, *inProgressTie, ptB);
-    delete inProgressTie;
-    inProgressTie = NULL;
-    inProgressType = NONE;
+    clear_in_progress_tie();
     return tie;
 }
 

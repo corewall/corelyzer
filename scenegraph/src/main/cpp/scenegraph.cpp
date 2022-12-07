@@ -5054,6 +5054,15 @@ JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_finishSectionTie(JNIEn
 }
 
 /*
+ * Class:     corelyzer_graphics_SceneGraph
+ * Method:    clearInProgressSectionTie
+ * Signature: ()V
+ */
+JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_clearInProgressSectionTie(JNIEnv *jen, jclass jcls) {
+    clear_in_progress_tie();
+}
+
+/*
  * Class:     corelyzer_helper_SceneGraph
  * Method:    setSectionTieADescription
  * Signature: (ILjava/lang/String;)V

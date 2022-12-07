@@ -225,6 +225,14 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_startSectionTie
 
 /*
  * Class:     corelyzer_graphics_SceneGraph
+ * Method:    clearInProgressSectionTie
+ * Signature: ()V
+ */
+JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_clearInProgressSectionTie
+  (JNIEnv *, jclass);
+
+/*
+ * Class:     corelyzer_graphics_SceneGraph
  * Method:    finishSectionTie
  * Signature: (FFII)I
  */
