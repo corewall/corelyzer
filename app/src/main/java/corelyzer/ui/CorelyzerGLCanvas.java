@@ -1250,9 +1250,8 @@ public class CorelyzerGLCanvas implements GLEventListener, MouseListener, MouseW
 							tieDlg.setLocation(new Point(prePos.x + 10, prePos.y + 10));
 							tieDlg.setModal(true);
 							tieDlg.setVisible(true);
+							CorelyzerApp.getApp().setMode(CorelyzerApp.APP_NORMAL_MODE);
 							if (tieDlg.confirmed) {
-								CorelyzerApp.getApp().setMode(CorelyzerApp.APP_NORMAL_MODE);
-								System.out.println("Finished tie! Returning to APP_NORMAL_MODE");
 								SceneGraph.setSectionTieADescription(tieId, tieDlg.getADesc());
 								SceneGraph.setSectionTieBDescription(tieId, tieDlg.getBDesc());
 							} // todo: otherwise delete in-progress tie?
