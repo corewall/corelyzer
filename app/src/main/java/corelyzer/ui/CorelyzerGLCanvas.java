@@ -674,8 +674,15 @@ public class CorelyzerGLCanvas implements GLEventListener, MouseListener, MouseW
 	
 	private void doCreateTie(CoreSectionTieType type)
 	{
+		// Ties should begin where the context menu-opening right-click occured.
+		// But if users mouse off of the context menu before selecting a Create Tie item,
+		// this.scenePos will be updated, causing ties to unexpectedly start from that
+		// new location. Use this.rightClickPos instead of this.scenePos to prevent this.
+		float[] tieStartPos = new float[2];
+		convertMousePointToSceneSpace(rightClickPos, tieStartPos);
+		
 		CorelyzerApp.getApp().setMode(CorelyzerApp.APP_TIE_MODE);
-		SceneGraph.startSectionTie(type.intValue(), scenePos[0], scenePos[1], selectedTrack, selectedTrackSection);
+		SceneGraph.startSectionTie(type.intValue(), tieStartPos[0], tieStartPos[1], selectedTrack, selectedTrackSection);
 		CorelyzerApp.getApp().updateGLWindows();
 	}
 
