@@ -363,12 +363,25 @@ public class CorelyzerGLCanvas implements GLEventListener, MouseListener, MouseW
 		pos[1] = mp.y * s + y;
 	}
 
+	Point convertScenePointToMousePoint(final float spx, final float spy) {
+		float x, y, w, s;
+
+		x = SceneGraph.getCanvasPositionX(canvasId);
+		y = SceneGraph.getCanvasPositionY(canvasId);
+		w = SceneGraph.getCanvasWidth(canvasId);
+		s = w / canvas.getWidth();
+
+		Point cpt = canvas.getLocationOnScreen();
+		final int mpx = Math.round((spx-x) / s) + cpt.x;
+		final int mpy = Math.round((spy-y) / s) + cpt.y;
+		return new Point(mpx, mpy);
+	}
+
 	void convertScenePointToAbsolute(final float pos[], final float result[]) {
 		float dpi;
 		dpi = SceneGraph.getCanvasDPIX(canvasId);
 		result[0] = pos[0] / dpi * 2.54f;
 		result[1] = pos[1] / dpi * 2.54f;
-
 	}
 
 	void createPopupMenuUI() {
@@ -1247,7 +1260,8 @@ public class CorelyzerGLCanvas implements GLEventListener, MouseListener, MouseW
 							JOptionPane.showMessageDialog(canvas, "Cannot create inter-session ties.");
 						} else if (tieId != -1) {
 							SectionTieDialog tieDlg = new SectionTieDialog(CorelyzerApp.getApp().getToolFrame(), tieId);
-							tieDlg.setLocation(new Point(prePos.x + 10, prePos.y + 10));
+							Point pt = this.convertScenePointToMousePoint(scenePos[0], scenePos[1]);
+							tieDlg.setLocation(pt);
 							tieDlg.setModal(true);
 							tieDlg.setVisible(true);
 							CorelyzerApp.getApp().setMode(CorelyzerApp.APP_NORMAL_MODE);
@@ -1270,7 +1284,8 @@ public class CorelyzerGLCanvas implements GLEventListener, MouseListener, MouseW
 
 				if (selectedTie >= 0) {
 					SectionTieDialog tieDlg = new SectionTieDialog(CorelyzerApp.getApp().getToolFrame(), selectedTie);
-					tieDlg.setLocation(new Point(prePos.x + 10, prePos.y + 10));
+					Point pt = this.convertScenePointToMousePoint(scenePos[0], scenePos[1]);
+					tieDlg.setLocation(pt);
 					tieDlg.setModal(true);
 					tieDlg.setVisible(true);
 					if (tieDlg.confirmed) {
