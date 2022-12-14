@@ -1712,10 +1712,16 @@ public class CorelyzerAppController implements ActionListener, AboutHandler, Qui
 
 	public void mergeSessions() {
 		MergeSessionsDialog dlg = new MergeSessionsDialog(view.getMainFrame(), cg.getSessions());
+		dlg.setLocationRelativeTo(view.getMainFrame());
 		dlg.setVisible(true);
 		if (dlg.confirmed) {
-			// confirmation/warning?
-			SessionMerger.mergeSessions(cg, dlg.getSessionsToMerge(), dlg.getDestinationSession());
+			final String msg = "Merging sessions cannot be undone. Continue?";
+			final String title = "Confirm Merge Sessions";
+			if (JOptionPane.showConfirmDialog(view.getMainFrame(), msg, title,
+					JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE) == JOptionPane.OK_OPTION)
+			{
+				SessionMerger.mergeSessions(cg, dlg.getSessionsToMerge(), dlg.getDestinationSession());
+			}
 		}
 	}
 
