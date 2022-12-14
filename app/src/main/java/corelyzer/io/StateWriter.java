@@ -649,10 +649,11 @@ public class StateWriter {
 					final int tie_id = tieIds[tidx];
 					final int tie_track_a = SceneGraph.getSectionTieATrack(tie_id);
 					final int tie_track_b = SceneGraph.getSectionTieBTrack(tie_id);
+
+					// only save tie in associated tracks' session
 					if (!CoreGraph.getInstance().getTrackSession(tie_track_a).equals(s) ||
 						!CoreGraph.getInstance().getTrackSession(tie_track_b).equals(s))
 					{
-						System.out.println("Tie " + tie_id + " is not part of Session " + s.getName() + ", not saving.");
 						continue;
 					}
 
