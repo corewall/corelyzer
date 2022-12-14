@@ -1257,7 +1257,7 @@ public class CorelyzerGLCanvas implements GLEventListener, MouseListener, MouseW
 					if (selectedTrack != -1 && selectedTrackSection != -1) {
 						int tieId = SceneGraph.finishSectionTie(scenePos[0], scenePos[1], selectedTrack, selectedTrackSection);
 						if (tieId == SectionTieErrors.INTER_SESSION_TIE_ERROR) {
-							JOptionPane.showMessageDialog(canvas, "Cannot create inter-session ties.");
+							JOptionPane.showMessageDialog(canvas, "A tie cannot be created on cores in different sessions.");
 						} else if (tieId != -1) {
 							SectionTieDialog tieDlg = new SectionTieDialog(CorelyzerApp.getApp().getToolFrame(), tieId);
 							Point pt = this.convertScenePointToMousePoint(scenePos[0], scenePos[1]);
