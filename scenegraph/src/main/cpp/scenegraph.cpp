@@ -4383,38 +4383,6 @@ bool click_in_core_section_image(CoreSection *core, const float tx, const float 
 }
 
 //=======================================================================
-// Get distance from point (px,py) to nearest point on line segment (x0,y0) -> (x1,y1).
-// From https://stackoverflow.com/questions/849211/shortest-distance-between-a-point-and-a-line-segment
-float pt_to_line_dist(float px, float py, float x0, float y0, float x1, float y1) {
-    const float a = px - x0;
-    const float b = py - y0;
-    const float c = x1 - x0;
-    const float d = y1 - y0;
-
-    const float dot = a * c + b * d;
-    const float len_sq = c * c + d * d;
-    float param = -1;
-    if (len_sq != 0) {
-        param = dot / len_sq;
-    }
-    float xx, yy;
-    if (param < 0) { // (x0,y0) closest
-        xx = x0;
-        yy = y0;
-    } else if (param > 1) { // (x1,y1) closest
-        xx = x1;
-        yy = y1;
-    } else { // point (xx,yy) on segment (x0,y0) -> (x1,y1) closest
-        xx = x0 + param * c;
-        yy = y0 + param * d;
-    }
-
-    const float dx = px - xx;
-    const float dy = py - yy;
-    return sqrt(dx * dx + dy * dy);
-}
-
-//=======================================================================
 // Mouse was clicked at (_x, _y). Determine selected scene components
 // and set corresponding Picked[Track|Section|Graph|Marker|FreeDraw|Tie] vars
 // accordingly.
@@ -4507,23 +4475,6 @@ void perform_pick(int canvas, float _x, float _y) {
         if (PickedSection != -1) {
             PickedTrack = track_order[track_idx];
             break;
-        }
-    }
-
-    // check for click on a tie line
-    if (PickedMarker == -1) {
-        TrackScene *ts = get_scene(default_track_scene);
-        for (int tie_idx = 0; tie_idx < ts->tievec.size(); tie_idx++) {
-            CoreSectionTie *tie = ts->tievec[tie_idx];
-            if (!tie || !tie->show || !tie->valid()) continue;
-            float ax, ay, bx, by;
-            tie->a->toSceneSpace(ax, ay);
-            tie->b->toSceneSpace(bx, by);
-            const float dist = pt_to_line_dist(x, y, ax, ay, bx, by);
-            if (dist < 30.0f) {
-                PickedTie = tie_idx;
-                break;
-            }
         }
     }
 
@@ -4651,6 +4602,12 @@ printf("Picked Graph %d\n", PickedGraph);
             }
         } // end TrackSceneNode loop
     } // if (PickedSection == -1 && PickedTie == -1) after core image search
+
+    // check for click on a tie line
+    if (PickedMarker == -1 && PickedGraph == -1 && PickedFreeDraw == -1) {
+        PickedTie = get_mouseover_tie();
+    }
+
     free(track_order);
 }
 

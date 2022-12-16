@@ -10,6 +10,8 @@ enum SectionTieType {
     SPLICE
 };
 
+const int TIE_SELECT_DIST_PIX = 5;
+
 // Section-space point on a core section image.
 struct SectionTiePoint {
     int track, section;
@@ -50,7 +52,6 @@ struct CoreSectionTie {
     char *aDesc; // description of point A (Z in UI)
     char *bDesc; // description of point B (Z' in UI)
 
-    bool selected; // highlight tie on selection
     bool show; // draw tie line?
 
     CoreSectionTie(SectionTieType type, SectionTiePoint &a, SectionTiePoint &b) {
@@ -59,7 +60,6 @@ struct CoreSectionTie {
         this->b = new SectionTiePoint(b);
         aDesc = NULL;
         bDesc = NULL;
-        selected = false;
         show = true;        
     }
 

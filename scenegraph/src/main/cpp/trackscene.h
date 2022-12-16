@@ -109,12 +109,14 @@ int add_tie(int scene, CoreSectionTie *tie);
 CoreSectionTie *get_tie(int scene, int tieId);
 void remove_tie(int scene, int tieId);
 void render_section_ties(TrackScene *ts, Canvas *c);
-void render_in_progress_tie(Canvas *c, const float arrowSize);
+void render_in_progress_tie(Canvas *c);
 
 void set_selected_tie(int tieId);
+int get_mouseover_tie();
 void free_associated_ties(int scene, int trackId, int sectionId);
 void update_section_ties();
 void delete_section_ties_on_track(int scene, int trackId);
 
+float pt_to_line_dist(float px, float py, float x0, float y0, float x1, float y1);
 #endif
 

@@ -48,6 +48,7 @@ static float defaultTrackPositionY = 0.0f;
 static bool is_remote_controlled = false;
 
 static int selectedTie = -1; // ID of selected tie, -1 if no selection
+static int mouseoverTie = -1;
 
 //================================================================
 std::vector<TrackScene *> trackscenevec;
@@ -157,6 +158,11 @@ CoreSectionTie *get_tie(int scene, int tieId) {
 //================================================================
 void set_selected_tie(int tieId) {
     selectedTie = tieId;
+}
+
+//================================================================
+int get_mouseover_tie() {
+    return mouseoverTie;
 }
 
 //================================================================
@@ -520,42 +526,66 @@ static void set_tie_color(SectionTieType type) {
 }
 
 //================================================================
+// Of the ties within 5 pixels of the mouse cursor, set mouseoverTie
+// to the ID of the tie closest to the cursor.
+void update_mouseover_tie(TrackScene *ts, Canvas *c) {
+    int minDistTie = -1;
+    float minDist = 1000.0f;
+    for (int tidx = 0; tidx < ts->tievec.size(); tidx++) {
+        CoreSectionTie *tie = ts->tievec[tidx];
+        if (!tie || !tie->show || !tie->valid()) continue;
+
+        float ax, ay, bx, by;
+        tie->a->toSceneSpace(ax, ay);
+        tie->b->toSceneSpace(bx, by);
+        const float ssDist = pt_to_line_dist(c->mouseX, c->mouseY, ax, ay, bx, by);
+        const float pixDist = ssDist / (get_canvas_width(0) / get_canvas_orig_width(0));
+        if (pixDist <= TIE_SELECT_DIST_PIX) {
+            if (pixDist < minDist) {
+                minDist = pixDist;
+                minDistTie = tidx;
+            }
+        }
+    }
+    mouseoverTie = minDistTie;
+}
+
+//================================================================
 void render_section_ties(TrackScene *ts, Canvas *c) {
     glDisable(GL_TEXTURE_2D); // enabled textures affect point/line color
-    glLineWidth(1);
-    glColor3f(0,1,0);
 
-    // Maintain size of arrowhead when c->w/c->w0 < 1.0 or it becomes needlessly
-    // large at high zoom levels, obscuring imagery.
-    float arrowSize = 50.0f * c->w/c->w0;
-    if (arrowSize > 50.0f) { arrowSize = 50.0f; }
+    update_mouseover_tie(ts, c);
 
     for (int tidx = 0; tidx < ts->tievec.size(); tidx++) {
         CoreSectionTie *tie = ts->tievec[tidx];
         if (!tie || !tie->show || !tie->valid()) continue;
 
+        float ax, ay, bx, by;
+        tie->a->toSceneSpace(ax, ay);
+        tie->b->toSceneSpace(bx, by);
+        if (tidx == mouseoverTie || tidx == selectedTie) {
+            glLineWidth(5);
+        } else {
+            glLineWidth(1);
+        }
         if (tidx == selectedTie) {
             glColor3f(1,1,0);
         } else {
             set_tie_color(tie->getType());
         }
-        float ax, ay, bx, by;
-        tie->a->toSceneSpace(ax, ay);
-        tie->b->toSceneSpace(bx, by);
         glBegin(GL_LINES);
         {
             glVertex2f(ax, ay);
             glVertex2f(bx, by);
         }
         glEnd();
-        // render_arrowhead(ax, ay, bx, by, arrowSize);
     }
-    render_in_progress_tie(c, arrowSize);
+    render_in_progress_tie(c);
     glEnable(GL_TEXTURE_2D);
 }
 
 //================================================================
-void render_in_progress_tie(Canvas *c, const float arrowSize) {
+void render_in_progress_tie(Canvas *c) {
     SectionTiePoint *tp = get_in_progress_tie();
     if (tp) {
         float ax, ay;
@@ -567,7 +597,6 @@ void render_in_progress_tie(Canvas *c, const float arrowSize) {
             glVertex3f(c->mouseX, c->mouseY, 0.0f);
         }
         glEnd();
-        // render_arrowhead(ax, ay, c->mouseX, c->mouseY, arrowSize);
     }
 }
 
@@ -1149,4 +1178,36 @@ void stack_sections(const int trackid, const int sectionid) {
         // adjust depth or sections can be mistakenly culled from drawing
         cs2->depth = cs2->px * CM_PER_INCH / dpix;
     }
+}
+
+//=======================================================================
+// Get distance from point (px,py) to nearest point on line segment (x0,y0) -> (x1,y1).
+// From https://stackoverflow.com/questions/849211/shortest-distance-between-a-point-and-a-line-segment
+float pt_to_line_dist(float px, float py, float x0, float y0, float x1, float y1) {
+    const float a = px - x0;
+    const float b = py - y0;
+    const float c = x1 - x0;
+    const float d = y1 - y0;
+
+    const float dot = a * c + b * d;
+    const float len_sq = c * c + d * d;
+    float param = -1;
+    if (len_sq != 0) {
+        param = dot / len_sq;
+    }
+    float xx, yy;
+    if (param < 0) { // (x0,y0) closest
+        xx = x0;
+        yy = y0;
+    } else if (param > 1) { // (x1,y1) closest
+        xx = x1;
+        yy = y1;
+    } else { // point (xx,yy) on segment (x0,y0) -> (x1,y1) closest
+        xx = x0 + param * c;
+        yy = y0 + param * d;
+    }
+
+    const float dx = px - xx;
+    const float dy = py - yy;
+    return sqrt(dx * dx + dy * dy);
 }
