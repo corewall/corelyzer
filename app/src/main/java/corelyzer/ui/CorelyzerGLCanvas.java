@@ -1259,7 +1259,7 @@ public class CorelyzerGLCanvas implements GLEventListener, MouseListener, MouseW
 						if (tieId == SectionTieErrors.INTER_SESSION_TIE_ERROR) {
 							JOptionPane.showMessageDialog(canvas, "A tie cannot be created on cores in different sessions.");
 						} else if (tieId != -1) {
-							SectionTieDialog tieDlg = new SectionTieDialog(CorelyzerApp.getApp().getToolFrame(), tieId);
+							SectionTieDialog tieDlg = new SectionTieDialog(CorelyzerApp.getApp().getToolFrame(), tieId, true);
 							Point pt = this.convertScenePointToMousePoint(scenePos[0], scenePos[1]);
 							tieDlg.setLocation(pt);
 							tieDlg.setModal(true);
@@ -1268,7 +1268,9 @@ public class CorelyzerGLCanvas implements GLEventListener, MouseListener, MouseW
 							if (tieDlg.confirmed) {
 								SceneGraph.setSectionTieADescription(tieId, tieDlg.getADesc());
 								SceneGraph.setSectionTieBDescription(tieId, tieDlg.getBDesc());
-							} // todo: otherwise delete in-progress tie?
+							} else {
+								SceneGraph.deleteSectionTie(tieId);	
+							}
 						}
 					}
 				}
@@ -1283,7 +1285,7 @@ public class CorelyzerGLCanvas implements GLEventListener, MouseListener, MouseW
 				}
 
 				if (selectedTie >= 0) {
-					SectionTieDialog tieDlg = new SectionTieDialog(CorelyzerApp.getApp().getToolFrame(), selectedTie);
+					SectionTieDialog tieDlg = new SectionTieDialog(CorelyzerApp.getApp().getToolFrame(), selectedTie, false);
 					Point pt = this.convertScenePointToMousePoint(scenePos[0], scenePos[1]);
 					tieDlg.setLocation(pt);
 					tieDlg.setModal(true);

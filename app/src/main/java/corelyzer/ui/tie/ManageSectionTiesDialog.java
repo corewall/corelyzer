@@ -112,7 +112,7 @@ public class ManageSectionTiesDialog extends JFrame {
 
     private void doEditTie() {
         TieData tie = ties.get(tieTable.getSelectedRow());
-        SectionTieDialog tieDlg = new SectionTieDialog(CorelyzerApp.getApp().getMainFrame(), tie.id);
+        SectionTieDialog tieDlg = new SectionTieDialog(CorelyzerApp.getApp().getMainFrame(), tie.id, false);
         tieDlg.setModal(true);
         tieDlg.setLocationRelativeTo(this);
         tieDlg.setVisible(true);

@@ -14,21 +14,23 @@ public class SectionTieDialog extends JDialog {
     private JPanel contentPane;
     private JRadioButton visualType, dataType, spliceType;
     private JLabel aLabel, bLabel;
-    private JButton buttonOK;
+    private JButton buttonConfirm;
     private JButton buttonCancel;
     private JTextArea aDesc, bDesc;
     public boolean confirmed = false;
 
     public static void main(final String[] args) {
-		SectionTieDialog dialog = new SectionTieDialog(null, -1);
+		SectionTieDialog dialog = new SectionTieDialog(null, -1, false);
 		dialog.pack();
 		dialog.setVisible(true);
         dialog.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 	}
 
-    public SectionTieDialog(JFrame parent, int tieId) {
+    // create: if true, dialog is for just-created tie with buttons "Delete"/"Create",
+    // otherwise for editing tie with buttons "Close"/"Save".
+    public SectionTieDialog(JFrame parent, int tieId, boolean create) {
         super(parent);
-        setupUI();
+        setupUI(create);
         setupLabels(tieId);
         setTieType(CoreSectionTieType.fromInt(SceneGraph.getSectionTieType(tieId)));
     }
@@ -71,12 +73,13 @@ public class SectionTieDialog extends JDialog {
     public String getADesc() { return aDesc.getText(); }
     public String getBDesc() { return bDesc.getText(); }
 
-    private void setupUI() {
-        setTitle("Edit Section Tie");
+    private void setupUI(boolean create) {
+        final String titleStr = create ? "Create Section Tie" : "Edit Section Tie";
+        setTitle(titleStr);
         contentPane = new JPanel();
         setContentPane(contentPane);
 
-        contentPane.setLayout(new MigLayout("wrap", "[grow]", "[]10[][grow][][grow][]"));
+        contentPane.setLayout(new MigLayout("wrap, insets 10", "[grow]", "[]10[][grow][][grow][]"));
 
         JPanel tieTypePanel = new JPanel();
         tieTypePanel.setLayout(new MigLayout("insets 0", "[]10[][][]", ""));
@@ -111,21 +114,23 @@ public class SectionTieDialog extends JDialog {
         bScrollPane.setViewportView(bDesc);
         contentPane.add(bScrollPane, "grow, hmin 80, wmin 300");
 
-        buttonOK = new JButton("OK");
-        buttonOK.addActionListener(new ActionListener() {
+        final String confirmText = create ? "Create" : "Save";
+        buttonConfirm = new JButton(confirmText);
+        buttonConfirm.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 onOK();
             }
         });
-        buttonCancel = new JButton("Cancel");
+        final String cancelText = create ? "Delete" : "Close";
+        buttonCancel = new JButton(cancelText);
         buttonCancel.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 onCancel();
             }
         });
-        contentPane.add(buttonCancel, "split 2, gapy 10");
-        contentPane.add(buttonOK);
-        getRootPane().setDefaultButton(buttonOK);
+        contentPane.add(buttonCancel, "split 2, gapy 10, align right");
+        contentPane.add(buttonConfirm);
+        getRootPane().setDefaultButton(buttonConfirm);
 
         // close dialog on Escape key, thx StackOverflow
         // https://stackoverflow.com/questions/642925/swing-how-do-i-close-a-dialog-when-the-esc-key-is-pressed
