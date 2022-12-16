@@ -231,7 +231,11 @@ public class CorelyzerAppController implements ActionListener, AboutHandler, Qui
 	}
 
 	// Returns true if a track name in the track list model exists.
-	public boolean containsTrackName(final String name) { // FIXME consider
+	// Note: this only considers the tracks for the currently-selected Session
+	// in the main Corelyzer window. Not a reliable way to check for duplicate
+	// track names in anything but the selected Session. Use containsTrackName()
+	// instead.
+	public boolean currentSessionContainsTrackName(final String name) { // FIXME consider
 															// session?
 		CRDefaultListModel listModel = listModels.getListModel(CRListModels.TRACK);
 
@@ -244,6 +248,16 @@ public class CorelyzerAppController implements ActionListener, AboutHandler, Qui
 			}
 		}
 
+		return false;
+	}
+
+	// Return true if any track (across all sessions) has the specified name
+	public boolean containsTrackName(final String name) {
+		for (TrackSceneNode track : CoreGraph.getInstance().getAllTracks()) {
+			if (name.equals(track.getName())) {
+				return true;
+			}
+		}
 		return false;
 	}
 

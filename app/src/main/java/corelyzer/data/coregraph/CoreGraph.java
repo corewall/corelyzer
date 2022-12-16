@@ -238,6 +238,14 @@ public class CoreGraph {
 		return s.getTrackSceneNodeWithTrackId(trackId);
 	}
 
+	public Vector<TrackSceneNode> getAllTracks() {
+		Vector<TrackSceneNode> tracks = new Vector<TrackSceneNode>();
+		for (Session s : this.sessionVec) {
+			tracks.addAll(s.getTrackSceneNodes());
+		}
+		return tracks;
+	}
+
 	public Session getTrackSession(final int trackId) {
 		Session result = null;
 		for (Session s : sessionVec) {

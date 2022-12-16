@@ -1490,6 +1490,13 @@ public class StateLoader {
 						}
 
 						String sessionName = sessionElement.getAttribute("name");
+						if (app.containsSessionName(sessionName)) {
+							sessionName = handleDuplicateSessionName(sessionName);
+							if (sessionName == null) {
+								continue;
+							}
+						}
+
 						Session s = new Session(sessionName);
 
 						String disId = sessionElement.getAttribute("DISId");
@@ -1517,6 +1524,30 @@ public class StateLoader {
 		pdlg.setValue(0);
 
 		return true;
+	}
+
+	String handleDuplicateSessionName(String sessionName) {
+		Object[] options = { "Rename", "Skip" };
+		String msg = "Session '" + sessionName + "' already exists.\n" +
+			"Rename, or skip loading this session?";
+		final String title = "Duplicate Session Name";
+		int retval = JOptionPane.showOptionDialog(
+			app.getMainFrame(), msg, title, JOptionPane.YES_NO_OPTION,
+			JOptionPane.QUESTION_MESSAGE, null, options, options[1]);
+
+		if (retval == JOptionPane.YES_OPTION) {
+			String newName = "";
+			while (true) {
+				msg = "Type a new session name for '" + sessionName + "'";
+				newName = JOptionPane.showInputDialog(app.getMainFrame(), msg, "Rename Session",
+					JOptionPane.PLAIN_MESSAGE);
+				if (!sessionName.equals(newName)) { break; }
+			}
+			if (newName != null) {
+				return newName;
+			}
+		}
+		return null;
 	}
 
 	// Load session state with incoming XML state root element

@@ -508,6 +508,10 @@ public class CorelyzerApp extends WindowAdapter implements MouseListener, Startu
 		return controller.containsTrackName(aName);
 	}
 
+	public boolean containsSessionName(final String name) {
+		return controller.containsSessionName(name);
+	}
+
 	/**
 	 * Called by the DisplayConfiguration dialog class to begin the creation of
 	 * the OpenGL windows given previously set parameters of rows and columns of
