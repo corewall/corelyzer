@@ -71,7 +71,6 @@ typedef struct CoreSection_s {
 	bool graphMovable;	// if true, section graphs can be moved along depth axis
 
     std::vector< CoreAnnotation* > annovec;
-    std::vector<CoreSectionTie *> tievec;
     std::vector< int > graphvec;
     std::vector< int > freedrawvec;
 
