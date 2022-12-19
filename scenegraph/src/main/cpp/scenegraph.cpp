@@ -4955,7 +4955,7 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_createSectionTie(JNIEn
  * Method:    startSectionTie
  * Signature: (FFII)V
  */
-JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_startSectionTie(JNIEnv *jenv, jclass jcls, jint type, jfloat x, jfloat y, jint trackId, jint sectionId) {
+JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_startSectionTie(JNIEnv *jenv, jclass jcls, jint type, jfloat _x, jfloat _y, jint trackId, jint sectionId) {
     if (get_in_progress_tie() != NULL) {
         printf("There is already an active tie, can't start a new one!\n");
         return;
@@ -4965,10 +4965,14 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_startSectionTie(JNIEnv
     CoreSection *sec = get_track_section(track, sectionId);
     if (!sec) return;
 
+    // adjust mouse coords for vertical depth mode if needed
+    const float x = get_horizontal_depth() ? _x : _y;
+    const float y = get_horizontal_depth() ? _y : -_x;
     // scene-space to section-space
-    const float tx = x - (track->px + sec->px);
-    const float ty = y - (track->py + sec->py);
-    start_section_tie((SectionTieType)type, trackId, sectionId, tx, ty);
+    const float _tx = x - (track->px + sec->px);
+    const float _ty = y - (track->py + sec->py);
+
+    start_section_tie((SectionTieType)type, trackId, sectionId, _tx, _ty);
 }
 
 /*
@@ -4976,7 +4980,7 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_startSectionTie(JNIEnv
  * Method:    finishSectionTie
  * Signature: (FFII)V
  */
-JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_finishSectionTie(JNIEnv *jenv, jclass jcls, jfloat x, jfloat y, jint trackId, jint sectionId) {
+JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_finishSectionTie(JNIEnv *jenv, jclass jcls, jfloat _x, jfloat _y, jint trackId, jint sectionId) {
     if (!get_in_progress_tie()) {
         printf("There is no active tie to finish!\n");
         return false;
@@ -4994,10 +4998,14 @@ JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_finishSectionTie(JNIEn
     CoreSection *sec = get_track_section(track, sectionId);
     if (!sec) return -1;
 
-    int tieId = -1;
+    // adjust mouse coords for vertical depth mode if needed
+    const float x = get_horizontal_depth() ? _x : _y;
+    const float y = get_horizontal_depth() ? _y : -_x;
     // scene-space to section-space
     const float tx = x - (track->px + sec->px);
     const float ty = y - (track->py + sec->py);
+
+    int tieId = -1;
     CoreSectionTie *tie = finish_section_tie(trackId, sectionId, tx, ty);
     if (tie) {
         TrackScene *ts = get_scene(default_track_scene);

@@ -538,7 +538,7 @@ void update_mouseover_tie(TrackScene *ts, Canvas *c) {
         float ax, ay, bx, by;
         tie->a->toSceneSpace(ax, ay);
         tie->b->toSceneSpace(bx, by);
-        const float ssDist = pt_to_line_dist(c->mouseX, c->mouseY, ax, ay, bx, by);
+        const float ssDist = get_horizontal_depth() ? pt_to_line_dist(c->mouseX, c->mouseY, ax, ay, bx, by) : pt_to_line_dist(c->mouseY, -c->mouseX, ax, ay, bx, by);
         const float pixDist = ssDist / (get_canvas_width(0) / get_canvas_orig_width(0));
         if (pixDist <= TIE_SELECT_DIST_PIX) {
             if (pixDist < minDist) {
@@ -594,7 +594,9 @@ void render_in_progress_tie(Canvas *c) {
         glBegin(GL_LINES);
         {
             glVertex3f(ax, ay, 0.0f);
-            glVertex3f(c->mouseX, c->mouseY, 0.0f);
+            const float mx = get_horizontal_depth() ? c->mouseX : c->mouseY;
+            const float my = get_horizontal_depth() ? c->mouseY : -c->mouseX;
+            glVertex3f(mx, my, 0.0f);
         }
         glEnd();
     }
