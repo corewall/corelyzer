@@ -1533,18 +1533,16 @@ public class CorelyzerGLCanvas implements GLEventListener, MouseListener, MouseW
 	}
 
 	public void mouseMoved(final MouseEvent e) {
-		if (SceneGraph.hasCrossHair()) {
-			this.convertMousePointToSceneSpace(e.getPoint(), scenePos);
+		this.convertMousePointToSceneSpace(e.getPoint(), scenePos);
 
-			String msg = "";
-			msg = msg + scenePos[0] / SceneGraph.getCanvasDPIX(canvasId) + "\t" + scenePos[1] / SceneGraph.getCanvasDPIY(canvasId);
+		String msg = "";
+		msg = msg + scenePos[0] / SceneGraph.getCanvasDPIX(canvasId) + "\t" + scenePos[1] / SceneGraph.getCanvasDPIY(canvasId);
 
-			CorelyzerApp.getApp().getPluginManager().broadcastEventToPlugins(CorelyzerPluginEvent.MOUSE_MOTION, msg);
+		CorelyzerApp.getApp().getPluginManager().broadcastEventToPlugins(CorelyzerPluginEvent.MOUSE_MOTION, msg);
 
-			// set mouse position to draw cross hair
-			SceneGraph.positionMouse(scenePos[0], scenePos[1]);
-			CorelyzerApp.getApp().updateGLWindows();
-		}
+		// set mouse position to draw cross hair
+		SceneGraph.positionMouse(scenePos[0], scenePos[1]);
+		CorelyzerApp.getApp().updateGLWindows();
 	}
 
 	public void mousePressed(final MouseEvent e) {
