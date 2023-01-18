@@ -108,7 +108,8 @@ void get_tie_ids(int scene, std::vector<int> &idvec);
 int add_tie(int scene, CoreSectionTie *tie);
 CoreSectionTie *get_tie(int scene, int tieId);
 void remove_tie(int scene, int tieId);
-void render_section_ties(TrackScene *ts, Canvas *c);
+void render_section_ties(TrackScene *ts);
+void render_section_tie_oncore_segments(TrackScene *ts, Canvas *c);
 void render_in_progress_tie(Canvas *c);
 
 void set_selected_tie(int tieId);

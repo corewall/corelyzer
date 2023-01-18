@@ -35,7 +35,6 @@
 #include <stdlib.h>
 #include "model.h"
 #include "annotationmarker.h"
-#include "tie.h"
 
 #include <vector>
 

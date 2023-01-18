@@ -50,6 +50,13 @@ static bool is_remote_controlled = false;
 static int selectedTie = -1; // ID of selected tie, -1 if no selection
 static int mouseoverTie = -1;
 
+static void draw_clipped_section_tie(
+    Canvas *c, SectionTiePoint *pt, const float ax,
+    const float ay, const float bx, const float by);
+
+static void get_scenespace_tie_points(CoreSectionTie *tie, float &ax, float &ay, float &bx, float &by);
+static void prep_tie_appearance(CoreSectionTie *tie, const int tie_id);
+
 //================================================================
 std::vector<TrackScene *> trackscenevec;
 static int renderMode = -1;
@@ -457,6 +464,8 @@ void render_track_scene(int id, Canvas *c) {
     if (!ts)
         return;
 
+    render_section_ties(ts);
+
 #ifdef DEBUG
     printf("Going to go through zorder of size %d\n", ts->zorder.size());
 #endif
@@ -479,7 +488,7 @@ void render_track_scene(int id, Canvas *c) {
         }
     }
 
-    render_section_ties(ts, c);
+    render_section_tie_oncore_segments(ts, c);
 
     // draw plugin free draw rectangles, scale so x,y,w,h are in meters
     glPushMatrix();
@@ -551,7 +560,8 @@ void update_mouseover_tie(TrackScene *ts, Canvas *c) {
 }
 
 //================================================================
-void render_section_ties(TrackScene *ts, Canvas *c) {
+// for each tie, draw segments on top of the tied cores
+void render_section_tie_oncore_segments(TrackScene *ts, Canvas *c) {
     glDisable(GL_TEXTURE_2D); // enabled textures affect point/line color
 
     update_mouseover_tie(ts, c);
@@ -561,18 +571,49 @@ void render_section_ties(TrackScene *ts, Canvas *c) {
         if (!tie || !tie->show || !tie->valid()) continue;
 
         float ax, ay, bx, by;
-        tie->a->toSceneSpace(ax, ay);
-        tie->b->toSceneSpace(bx, by);
-        if (tidx == mouseoverTie || tidx == selectedTie) {
-            glLineWidth(5);
-        } else {
-            glLineWidth(1);
+        get_scenespace_tie_points(tie, ax, ay, bx, by);
+        prep_tie_appearance(tie, tidx);
+        
+        if (tie->a->track != tie->b->track || tie->a->section != tie->b->section) {
+            glEnable(GL_CLIP_PLANE0);
+            glEnable(GL_CLIP_PLANE1);
+            glEnable(GL_CLIP_PLANE2);
+            glEnable(GL_CLIP_PLANE3);
+            draw_clipped_section_tie(c, tie->a, ax, ay, bx, by);
+            draw_clipped_section_tie(c, tie->b, ax, ay, bx, by);
+            glDisable(GL_CLIP_PLANE0);
+            glDisable(GL_CLIP_PLANE1);
+            glDisable(GL_CLIP_PLANE2);
+            glDisable(GL_CLIP_PLANE3);
+        } else { // both tiepoints are on the same section, no need to clip
+            glBegin(GL_LINES);
+            {
+                glVertex2f(ax, ay);
+                glVertex2f(bx, by);
+            }
+            glEnd();
         }
-        if (tidx == selectedTie) {
-            glColor3f(1,1,0);
-        } else {
-            set_tie_color(tie->getType());
-        }
+    }
+    render_in_progress_tie(c);
+    glEnable(GL_TEXTURE_2D);
+}
+
+//================================================================
+// Draw all tie lines in their entirety. Intended to be called before
+// core images are drawn so tie lines do not obscure unrelated core images.
+// Tie line segments are drawn over related core images with
+// render_section_tie_oncore_segments().
+void render_section_ties(TrackScene *ts) {
+    glDisable(GL_TEXTURE_2D); // enabled textures affect point/line color
+
+    for (int tidx = 0; tidx < ts->tievec.size(); tidx++) {
+        CoreSectionTie *tie = ts->tievec[tidx];
+        if (!tie || !tie->show || !tie->valid()) continue;
+
+        float ax, ay, bx, by;
+        get_scenespace_tie_points(tie, ax, ay, bx, by);
+        prep_tie_appearance(tie, tidx);
+
         glBegin(GL_LINES);
         {
             glVertex2f(ax, ay);
@@ -580,8 +621,57 @@ void render_section_ties(TrackScene *ts, Canvas *c) {
         }
         glEnd();
     }
-    render_in_progress_tie(c);
+
     glEnable(GL_TEXTURE_2D);
+}
+
+//================================================================
+static void get_scenespace_tie_points(CoreSectionTie *tie, float &ax, float &ay, float &bx, float &by) {
+    tie->a->toSceneSpace(ax, ay);
+    tie->b->toSceneSpace(bx, by);
+}
+
+//================================================================
+// set tie line width and color based on its type and selected/mouseover status
+static void prep_tie_appearance(CoreSectionTie *tie, const int tie_id) {
+    if (tie_id == mouseoverTie || tie_id == selectedTie) {
+        glLineWidth(5);
+    } else {
+        glLineWidth(1);
+    }
+    if (tie_id == selectedTie) {
+        glColor3f(1,1,0);
+    } else {
+        set_tie_color(tie->getType());
+    }
+}
+
+//================================================================
+static void draw_clipped_section_tie(
+    Canvas *c, SectionTiePoint *pt, const float ax,
+    const float ay, const float bx, const float by)
+{
+    TrackSceneNode *t = get_scene_track(pt->track);
+    CoreSection *cs = get_track_section(t, pt->section);
+    // printf("Track y: %f, section height = %f\n", t->py, cs->height);
+
+    // Horizontal Depth Mode
+    GLdouble topPlane[4] = { 0.0, 1.0, 0.0, -t->py };
+    GLdouble botPlane[4] = { 0.0, -1.0, 0.0, t->py + (cs->height * INCH_PER_CM * c->dpi_x) };
+    GLdouble leftPlane[4] = { 1.0, 0.0, 0.0, -cs->px + (-cs->intervalTop * (INCH_PER_CM * c->dpi_x)) };
+    GLdouble rightPlane[4] = { -1.0, 0.0, 0.0, cs->px + (cs->intervalBottom * INCH_PER_CM * c->dpi_x) };
+
+    glClipPlane(GL_CLIP_PLANE0, topPlane);
+    glClipPlane(GL_CLIP_PLANE1, botPlane);
+    glClipPlane(GL_CLIP_PLANE2, leftPlane);
+    glClipPlane(GL_CLIP_PLANE3, rightPlane);
+    
+    glBegin(GL_LINES);
+    {
+        glVertex2f(ax, ay);
+        glVertex2f(bx, by);
+    }
+    glEnd();
 }
 
 //================================================================
