@@ -60,8 +60,8 @@ void CoreSectionTie::setShow(bool _show) { show = _show; }
 
 // Convert our section-space coord (this->x, this->y) to scene-space.
 void SectionTiePoint::toSceneSpace(float &scenex, float &sceney) {
-    TrackSceneNode *t = get_scene_track(track);
-    CoreSection *s = get_track_section(t, section);
+    TrackSceneNode *t = get_scene_track(trackId);
+    CoreSection *s = get_track_section(t, sectionId);
     scenex = x + t->px + s->px;
     sceney = y + t->py + s->py;
 }
@@ -69,9 +69,9 @@ void SectionTiePoint::toSceneSpace(float &scenex, float &sceney) {
 // Do the parent track and section of this SectionTiePoint exist?
 bool SectionTiePoint::valid() {
     bool valid = false;
-    TrackSceneNode *t = get_scene_track(track);
+    TrackSceneNode *t = get_scene_track(trackId);
     if (t) {
-        CoreSection *s = get_track_section(t, section);
+        CoreSection *s = get_track_section(t, sectionId);
         valid = (s != NULL);
     }
     return valid;

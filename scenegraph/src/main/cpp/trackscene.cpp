@@ -573,8 +573,7 @@ void render_section_tie_oncore_segments(TrackScene *ts, Canvas *c) {
         float ax, ay, bx, by;
         get_scenespace_tie_points(tie, ax, ay, bx, by);
         prep_tie_appearance(tie, tidx);
-        
-        if (tie->a->track != tie->b->track || tie->a->section != tie->b->section) {
+        if (tie->a->trackId != tie->b->trackId || tie->a->sectionId != tie->b->sectionId) {
             glEnable(GL_CLIP_PLANE0);
             glEnable(GL_CLIP_PLANE1);
             glEnable(GL_CLIP_PLANE2);
@@ -651,8 +650,8 @@ static void draw_clipped_section_tie(
     Canvas *c, SectionTiePoint *pt, const float ax,
     const float ay, const float bx, const float by)
 {
-    TrackSceneNode *t = get_scene_track(pt->track);
-    CoreSection *cs = get_track_section(t, pt->section);
+    TrackSceneNode *t = get_scene_track(pt->trackId);
+    CoreSection *cs = get_track_section(t, pt->sectionId);
     // printf("Track y: %f, section height = %f\n", t->py, cs->height);
 
     // Horizontal Depth Mode

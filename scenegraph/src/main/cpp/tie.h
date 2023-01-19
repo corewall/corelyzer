@@ -14,26 +14,26 @@ const int TIE_SELECT_DIST_PIX = 5;
 
 // Section-space point on a core section image.
 struct SectionTiePoint {
-    int track, section;
+    int trackId, sectionId;
     float x, y;
     
     SectionTiePoint() {
-        track = -1;
-        section = -1;
+        trackId = -1;
+        sectionId = -1;
         x = 0.0f;
         y = 0.0f;
     }
 
-    SectionTiePoint(int track, int section, float x, float y) {
-        this->track = track;
-        this->section = section;
+    SectionTiePoint(int trackId, int sectionId, float x, float y) {
+        this->trackId = trackId;
+        this->sectionId = sectionId;
         this->x = x;
         this->y = y;
     }
 
     SectionTiePoint(SectionTiePoint &tp) {
-        track = tp.track;
-        section = tp.section;
+        trackId = tp.trackId;
+        sectionId = tp.sectionId;
         x = tp.x;
         y = tp.y;
     }
@@ -74,7 +74,7 @@ struct CoreSectionTie {
     SectionTieType getType() { return type; }
     void setType(SectionTieType type) { this->type = type; }
     void setADescription(char *desc);
-    void setBDescription(char *dest);
+    void setBDescription(char *desc);
     char *getADescription();
     char *getBDescription();
     bool getShow();
@@ -82,17 +82,17 @@ struct CoreSectionTie {
 
     bool valid() { return a->valid() && b->valid(); }
     bool isOnTrack(const int trackId) {
-        return a->track == trackId || b->track == trackId;
+        return a->trackId == trackId || b->trackId == trackId;
     }
     bool isOnSection(const int secId) {
-        return a->section == secId || b->section == secId;
+        return a->sectionId == secId || b->sectionId == secId;
     }
 };
 
 SectionTiePoint *get_in_progress_tie();
 SectionTieType get_in_progress_tie_type();
 bool start_section_tie(SectionTieType type, int trackId, int sectionId, float x, float y);
-CoreSectionTie *finish_section_tie(int trackid, int sectionId, float x, float y);
+CoreSectionTie *finish_section_tie(int trackId, int sectionId, float x, float y);
 void clear_in_progress_tie();
 
 #endif // #ifndef CORELYZER_TIE_H
