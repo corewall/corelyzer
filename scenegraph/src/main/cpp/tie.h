@@ -54,13 +54,16 @@ struct CoreSectionTie {
 
     bool show; // draw tie line?
 
+    float *segments; // array of (x,y) scenespace coordinates for segments of tie line
+
     CoreSectionTie(SectionTieType type, SectionTiePoint &a, SectionTiePoint &b) {
         this->type = type;
         this->a = new SectionTiePoint(a);
         this->b = new SectionTiePoint(b);
         aDesc = NULL;
         bDesc = NULL;
-        show = true;        
+        show = true;
+        segments = NULL;        
     }
 
     ~CoreSectionTie() {
@@ -68,6 +71,7 @@ struct CoreSectionTie {
         if (b) delete b;
         if (aDesc) delete[] aDesc;
         if (bDesc) delete[] bDesc;
+        if (segments) delete[] segments;
     }
 
     // getter/setter
@@ -86,6 +90,9 @@ struct CoreSectionTie {
     }
     bool isOnSection(const int secId) {
         return a->sectionId == secId || b->sectionId == secId;
+    }
+    bool isSingleSection() { // are both tie points on the same section?
+        return a->trackId == b->trackId && a->sectionId == b->sectionId;
     }
 };
 

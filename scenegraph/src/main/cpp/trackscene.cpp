@@ -50,12 +50,12 @@ static bool is_remote_controlled = false;
 static int selectedTie = -1; // ID of selected tie, -1 if no selection
 static int mouseoverTie = -1;
 
-static void draw_clipped_section_tie(
-    Canvas *c, SectionTiePoint *pt, const float ax,
-    const float ay, const float bx, const float by);
 
 static void get_scenespace_tie_points(CoreSectionTie *tie, float &ax, float &ay, float &bx, float &by);
 static void prep_tie_appearance(CoreSectionTie *tie, const int tie_id);
+void create_section_tie_segments(TrackScene *ts, Canvas *c);
+void render_section_tie_offcore_segments(TrackScene *ts);
+void update_mouseover_tie(TrackScene *ts, Canvas *c);
 
 //================================================================
 std::vector<TrackScene *> trackscenevec;
@@ -464,7 +464,9 @@ void render_track_scene(int id, Canvas *c) {
     if (!ts)
         return;
 
-    render_section_ties(ts);
+    update_mouseover_tie(ts, c);
+    create_section_tie_segments(ts, c);
+    render_section_tie_offcore_segments(ts);
 
 #ifdef DEBUG
     printf("Going to go through zorder of size %d\n", ts->zorder.size());
@@ -489,6 +491,7 @@ void render_track_scene(int id, Canvas *c) {
     }
 
     render_section_tie_oncore_segments(ts, c);
+    render_in_progress_tie(c);
 
     // draw plugin free draw rectangles, scale so x,y,w,h are in meters
     glPushMatrix();
@@ -534,6 +537,140 @@ static void set_tie_color(SectionTieType type) {
     }
 }
 
+// client is responsible for handling vertical line i.e. undefined slope
+float get_slope(float ax, float ay, float bx, float by) {
+    return (by - ay) / (bx - ax);
+}
+
+void calc_core_edge_intersection(
+    Canvas *c, const int trackId, const int sectionId,
+    float ax, float ay, float bx, float by,
+    float m, // slope
+    float b, // y-intercept
+    float &outX, float &outY) {
+    TrackSceneNode *t = get_scene_track(trackId);
+    CoreSection *cs = get_track_section(t, sectionId);
+
+    const float topLine = t->py; // TODO: upEdge?
+    const float botLine = t->py + (cs->height * INCH_PER_CM * c->dpi_x);
+    const float leftLine = cs->px + (cs->intervalTop * (INCH_PER_CM * c->dpi_x));
+    const float rightLine = cs->px + (cs->intervalBottom * INCH_PER_CM * c->dpi_x);
+
+    float topBotX, topBotY;
+    if (ay > by) {
+        topBotX = (topLine - b)/m;
+        topBotY = topLine;
+    } else {
+        topBotX = (botLine - b)/m;
+        topBotY = botLine;
+    }
+
+    float leftRightX, leftRightY;
+    if (ax > bx) {
+        leftRightX = leftLine;
+        leftRightY = m * leftLine + b;
+    } else {
+        leftRightX = rightLine;
+        leftRightY = m * rightLine + b;
+    }
+
+    // of the top/bot and left/right candidate points, only one should
+    // fall within the core section's rectangle
+    if (topBotX >= leftLine && topBotX <= rightLine) {
+        outX = topBotX;
+        outY = topBotY;
+    } else {
+        outX = leftRightX;
+        outY = leftRightY;
+    }
+}
+
+//================================================================
+void render_section_tie_offcore_segments(TrackScene *ts) {
+    glDisable(GL_TEXTURE_2D);
+    glEnable(GL_BLEND);
+    for (int tidx = 0; tidx < ts->tievec.size(); tidx++) {
+        CoreSectionTie *tie = ts->tievec[tidx];
+        if (!tie || !tie->show || !tie->valid()) continue;
+
+        if (!tie->isSingleSection()) {
+            prep_tie_appearance(tie, tidx);
+            glBegin(GL_LINES);
+            glVertex2f(tie->segments[4], tie->segments[5]);
+            glVertex2f(tie->segments[6], tie->segments[7]);
+            glEnd();
+        }
+    }
+    glDisable(GL_BLEND);
+    glEnable(GL_TEXTURE_2D);
+}
+
+//================================================================
+void create_section_tie_segments(TrackScene *ts, Canvas *c) {
+    for (int tidx = 0; tidx < ts->tievec.size(); tidx++) {
+        CoreSectionTie *tie = ts->tievec[tidx];
+        if (!tie || !tie->show || !tie->valid()) continue;
+
+        // create three segments:
+        // A -> edge of tied section (A')
+        // B -> edge of tied section (B')
+        // A' -> B'
+        float ax, ay, bx, by;
+        get_scenespace_tie_points(tie, ax, ay, bx, by);
+
+        if (!tie->segments) {
+            tie->segments = new float[8];
+        }
+
+        if (tie->isSingleSection()) {
+            tie->segments[0] = ax;
+            tie->segments[1] = ay;
+            tie->segments[2] = bx;
+            tie->segments[3] = by;
+            continue;
+        }
+
+        if (ax == bx) {
+            printf("Vertical line! Equation: x = %f\n", ax);
+            TrackSceneNode *aTrack = get_scene_track(tie->a->trackId);
+            CoreSection *aCore = get_track_section(aTrack, tie->a->sectionId);
+            TrackSceneNode *bTrack = get_scene_track(tie->b->trackId);
+            CoreSection *bCore = get_track_section(bTrack, tie->b->sectionId);
+            float aEdge, bEdge;
+            if (ay < by) {
+                aEdge = aTrack->py + (aCore->height * INCH_PER_CM * c->dpi_x);
+                bEdge = bTrack->py;
+            } else {
+                aEdge = aTrack->py;
+                bEdge = bTrack->py + (bCore->height * INCH_PER_CM * c->dpi_x);
+            }
+            tie->segments[0] = ax;
+            tie->segments[1] = ay;
+            tie->segments[2] = bx;
+            tie->segments[3] = by;
+            tie->segments[4] = ax;
+            tie->segments[5] = aEdge;
+            tie->segments[6] = bx;
+            tie->segments[7] = bEdge;
+        } else {
+            const float m = get_slope(ax, ay, bx, by);
+            const float b = ay - (m * ax);
+
+            float a_intX, a_intY, b_intX, b_intY;
+            calc_core_edge_intersection(c, tie->a->trackId, tie->a->sectionId, ax, ay, bx, by, m, b, a_intX, a_intY);
+            calc_core_edge_intersection(c, tie->b->trackId, tie->b->sectionId, bx, by, ax, ay, m, b, b_intX, b_intY);
+            tie->segments[0] = ax;
+            tie->segments[1] = ay;
+            tie->segments[2] = bx;
+            tie->segments[3] = by;
+            tie->segments[4] = a_intX;
+            tie->segments[5] = a_intY;
+            tie->segments[6] = b_intX;
+            tie->segments[7] = b_intY;
+        }
+    }
+}
+
 //================================================================
 // Of the ties within 5 pixels of the mouse cursor, set mouseoverTie
 // to the ID of the tie closest to the cursor.
@@ -564,61 +701,24 @@ void update_mouseover_tie(TrackScene *ts, Canvas *c) {
 void render_section_tie_oncore_segments(TrackScene *ts, Canvas *c) {
     glDisable(GL_TEXTURE_2D); // enabled textures affect point/line color
 
-    update_mouseover_tie(ts, c);
-
     for (int tidx = 0; tidx < ts->tievec.size(); tidx++) {
         CoreSectionTie *tie = ts->tievec[tidx];
         if (!tie || !tie->show || !tie->valid()) continue;
 
-        float ax, ay, bx, by;
-        get_scenespace_tie_points(tie, ax, ay, bx, by);
         prep_tie_appearance(tie, tidx);
-        if (tie->a->trackId != tie->b->trackId || tie->a->sectionId != tie->b->sectionId) {
-            glEnable(GL_CLIP_PLANE0);
-            glEnable(GL_CLIP_PLANE1);
-            glEnable(GL_CLIP_PLANE2);
-            glEnable(GL_CLIP_PLANE3);
-            draw_clipped_section_tie(c, tie->a, ax, ay, bx, by);
-            draw_clipped_section_tie(c, tie->b, ax, ay, bx, by);
-            glDisable(GL_CLIP_PLANE0);
-            glDisable(GL_CLIP_PLANE1);
-            glDisable(GL_CLIP_PLANE2);
-            glDisable(GL_CLIP_PLANE3);
-        } else { // both tiepoints are on the same section, no need to clip
+        if (tie->isSingleSection()) {
             glBegin(GL_LINES);
-            {
-                glVertex2f(ax, ay);
-                glVertex2f(bx, by);
-            }
+            glVertex2f(tie->segments[0], tie->segments[1]);
+            glVertex2f(tie->segments[2], tie->segments[3]);
+            glEnd();
+        } else {
+            glBegin(GL_LINES);
+            glVertex2f(tie->segments[0], tie->segments[1]);
+            glVertex2f(tie->segments[4], tie->segments[5]);
+            glVertex2f(tie->segments[2], tie->segments[3]);
+            glVertex2f(tie->segments[6], tie->segments[7]);
             glEnd();
         }
-    }
-    render_in_progress_tie(c);
-    glEnable(GL_TEXTURE_2D);
-}
-
-//================================================================
-// Draw all tie lines in their entirety. Intended to be called before
-// core images are drawn so tie lines do not obscure unrelated core images.
-// Tie line segments are drawn over related core images with
-// render_section_tie_oncore_segments().
-void render_section_ties(TrackScene *ts) {
-    glDisable(GL_TEXTURE_2D); // enabled textures affect point/line color
-
-    for (int tidx = 0; tidx < ts->tievec.size(); tidx++) {
-        CoreSectionTie *tie = ts->tievec[tidx];
-        if (!tie || !tie->show || !tie->valid()) continue;
-
-        float ax, ay, bx, by;
-        get_scenespace_tie_points(tie, ax, ay, bx, by);
-        prep_tie_appearance(tie, tidx);
-
-        glBegin(GL_LINES);
-        {
-            glVertex2f(ax, ay);
-            glVertex2f(bx, by);
-        }
-        glEnd();
     }
 
     glEnable(GL_TEXTURE_2D);
@@ -643,34 +743,6 @@ static void prep_tie_appearance(CoreSectionTie *tie, const int tie_id) {
     } else {
         set_tie_color(tie->getType());
     }
-}
-
-//================================================================
-static void draw_clipped_section_tie(
-    Canvas *c, SectionTiePoint *pt, const float ax,
-    const float ay, const float bx, const float by)
-{
-    TrackSceneNode *t = get_scene_track(pt->trackId);
-    CoreSection *cs = get_track_section(t, pt->sectionId);
-    // printf("Track y: %f, section height = %f\n", t->py, cs->height);
-
-    // Horizontal Depth Mode
-    GLdouble topPlane[4] = { 0.0, 1.0, 0.0, -t->py };
-    GLdouble botPlane[4] = { 0.0, -1.0, 0.0, t->py + (cs->height * INCH_PER_CM * c->dpi_x) };
-    GLdouble leftPlane[4] = { 1.0, 0.0, 0.0, -cs->px + (-cs->intervalTop * (INCH_PER_CM * c->dpi_x)) };
-    GLdouble rightPlane[4] = { -1.0, 0.0, 0.0, cs->px + (cs->intervalBottom * INCH_PER_CM * c->dpi_x) };
-
-    glClipPlane(GL_CLIP_PLANE0, topPlane);
-    glClipPlane(GL_CLIP_PLANE1, botPlane);
-    glClipPlane(GL_CLIP_PLANE2, leftPlane);
-    glClipPlane(GL_CLIP_PLANE3, rightPlane);
-    
-    glBegin(GL_LINES);
-    {
-        glVertex2f(ax, ay);
-        glVertex2f(bx, by);
-    }
-    glEnd();
 }
 
 //================================================================
