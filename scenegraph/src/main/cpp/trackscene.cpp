@@ -537,11 +537,16 @@ static void set_tie_color(SectionTieType type) {
     }
 }
 
+//================================================================
 // client is responsible for handling vertical line i.e. undefined slope
 float get_slope(float ax, float ay, float bx, float by) {
     return (by - ay) / (bx - ax);
 }
 
+//================================================================
+// Find point where (ax,ay)->(bx,by) intersects the edges of the core
+// section sectionId in track trackId. Return intersection point in
+// (outX, outY) parameters.
 void calc_core_edge_intersection(
     Canvas *c, const int trackId, const int sectionId,
     float ax, float ay, float bx, float by,
@@ -551,32 +556,36 @@ void calc_core_edge_intersection(
     TrackSceneNode *t = get_scene_track(trackId);
     CoreSection *cs = get_track_section(t, sectionId);
 
-    const float topLine = t->py; // TODO: upEdge?
-    const float botLine = t->py + (cs->height * INCH_PER_CM * c->dpi_x);
-    const float leftLine = cs->px + (cs->intervalTop * (INCH_PER_CM * c->dpi_x));
-    const float rightLine = cs->px + (cs->intervalBottom * INCH_PER_CM * c->dpi_x);
+    // Edge names based on section appearance in horizontal depth orientation.
+    // leftEdge is the top of the physical core, rightEdge is the bottom.
+    const float topEdge = t->py;
+    const float botEdge = t->py + (cs->height * INCH_PER_CM * c->dpi_x);
+    const float leftEdge = cs->px + (cs->intervalTop * (INCH_PER_CM * c->dpi_x));
+    const float rightEdge = cs->px + (cs->intervalBottom * INCH_PER_CM * c->dpi_x);
 
+    // does (ax,ay)->(bx,by) intersect top or bottom edge?
     float topBotX, topBotY;
     if (ay > by) {
-        topBotX = (topLine - b)/m;
-        topBotY = topLine;
+        topBotX = (topEdge - b)/m;
+        topBotY = topEdge;
     } else {
-        topBotX = (botLine - b)/m;
-        topBotY = botLine;
+        topBotX = (botEdge - b)/m;
+        topBotY = botEdge;
     }
 
+    // left or right edge?
     float leftRightX, leftRightY;
     if (ax > bx) {
-        leftRightX = leftLine;
-        leftRightY = m * leftLine + b;
+        leftRightX = leftEdge;
+        leftRightY = m * leftEdge + b;
     } else {
-        leftRightX = rightLine;
-        leftRightY = m * rightLine + b;
+        leftRightX = rightEdge;
+        leftRightY = m * rightEdge + b;
     }
 
     // of the top/bot and left/right candidate points, only one should
     // fall within the core section's rectangle
-    if (topBotX >= leftLine && topBotX <= rightLine) {
+    if (topBotX >= leftEdge && topBotX <= rightEdge) {
         outX = topBotX;
         outY = topBotY;
     } else {
@@ -630,19 +639,17 @@ void create_section_tie_segments(TrackScene *ts, Canvas *c) {
             continue;
         }
 
-        if (ax == bx) {
-            printf("Vertical line! Equation: x = %f\n", ax);
+        if (ax == bx) { // handle vertical line (undefined slope)
             TrackSceneNode *aTrack = get_scene_track(tie->a->trackId);
             CoreSection *aCore = get_track_section(aTrack, tie->a->sectionId);
             TrackSceneNode *bTrack = get_scene_track(tie->b->trackId);
             CoreSection *bCore = get_track_section(bTrack, tie->b->sectionId);
-            float aEdge, bEdge;
+            float aEdge = aTrack->py;
+            float bEdge = bTrack->py;
             if (ay < by) {
-                aEdge = aTrack->py + (aCore->height * INCH_PER_CM * c->dpi_x);
-                bEdge = bTrack->py;
+                aEdge += aCore->height * INCH_PER_CM * c->dpi_x;
             } else {
-                aEdge = aTrack->py;
-                bEdge = bTrack->py + (bCore->height * INCH_PER_CM * c->dpi_x);
+                bEdge += bCore->height * INCH_PER_CM * c->dpi_x;
             }
             tie->segments[0] = ax;
             tie->segments[1] = ay;
@@ -654,7 +661,7 @@ void create_section_tie_segments(TrackScene *ts, Canvas *c) {
             tie->segments[7] = bEdge;
         } else {
             const float m = get_slope(ax, ay, bx, by);
-            const float b = ay - (m * ax);
+            const float b = ay - (m * ax); // y-intercept
 
             float a_intX, a_intY, b_intX, b_intY;
             calc_core_edge_intersection(c, tie->a->trackId, tie->a->sectionId, ax, ay, bx, by, m, b, a_intX, a_intY);
