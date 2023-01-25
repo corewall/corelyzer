@@ -111,7 +111,7 @@ public class AboutDialog extends JDialog implements ActionListener {
 		if (ae.getSource().equals(this.moreinfoBtn)) {
 			String url = null;
 			try {
-				url = "http://csdco.umn.edu/resources/software/corelyzer";
+				url = "https://cse.umn.edu/csd/corelyzer";
 				URI uri = new URI(url);
 				java.awt.Desktop.getDesktop().browse(uri);
 			} catch (IOException ex) {

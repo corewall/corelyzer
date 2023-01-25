@@ -24,7 +24,7 @@
 	<key>CFBundleExecutable</key>
 	<string>Corelyzer</string>
 	<key>CFBundleGetInfoString</key>
-	<string>:version, CSDCO (http://csdco.umn.edu)</string>
+	<string>:version, CSD Facility (https://cse.umn.edu/csd)</string>
 	<key>CFBundleIconFile</key>
 	<string>corelyzer.icns</string>
 	<key>CFBundleInfoDictionaryVersion</key>
