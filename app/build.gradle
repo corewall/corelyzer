@@ -43,6 +43,14 @@ dependencies {
 	compile 'ch.qos.logback:logback-core:1.0.6'
 	compile 'ch.qos.logback:logback-classic:1.0.6'
 
+	// brg 3/31/2022
+	// There is a newer release of JOGL 2.4 that might be worth trying with regard to Windows
+	// z-order bugs (popup, dialogs drawing behind canvas) in addition to other bugfixes:
+	// https://jogamp.org/deployment/v2.4.0-rc-20210111/
+	// Unclear if/when they'll ever do an official release of 2.4, so will need to use
+	// approach described below (download and place in app/deps) until they do.
+
+
 	// brg 6/24/2020
 	// JOGL version 2.4 release candidates are required to resolve launch-time crash in macOS/OSX:
 	// "Terminating app due to uncaught exception 'NSInternalInconsistencyException', reason:
