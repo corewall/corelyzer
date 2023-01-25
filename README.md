@@ -73,8 +73,3 @@ To run Corelyzer:
 Adjust `java.library.path` to reflect your configuration if needed.
 
 Corelyzer should launch. Have fun!
-
-
-
-
-Copyright (c) 2020, CSDF (http://csdco.umn.edu)
