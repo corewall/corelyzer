@@ -42,6 +42,59 @@ struct SectionTiePoint {
     bool valid();
 };
 
+// Scenespace coordinates of the single line segment to be drawn for
+// a single-section CoreSectionTie, or the three line segments to be
+// drawn for a two-section CoreSectionTie. Three segments are needed to draw
+// tie lines on top of the two tied sections, and beneath unrelated core
+// sections to avoid visual clutter.
+struct CoreSectionTieDrawData {
+    float ax, ay, bx, by; // CoreSectionTie points A and B
+
+    // Unused for single-section tie.
+    // For a two-section tie, (aix,aiy) is intersection of tie line and edge of section A,
+    // (bix,biy) is intersection of tie line and edge of section B.
+    float aix, aiy, bix, biy;
+
+    void setPointA(const float ax, const float ay) {
+        this->ax = ax;
+        this->ay = ay;
+    }
+
+    void getPointA(float &ax, float &ay) {
+        ax = this->ax;
+        ay = this->ay;
+    }
+
+    void setPointB(const float bx, const float by) {
+        this->bx = bx;
+        this->by = by;
+    }
+
+    void getPointB(float &bx, float &by) {
+        bx = this->bx;
+        by = this->by;
+    }
+
+    void setPointAEdge(const float aix, const float aiy) {
+        this->aix = aix;
+        this->aiy = aiy;
+    }
+
+    void getPointAEdge(float &aix, float &aiy) {
+        aix = this->aix;
+        aiy = this->aiy;
+    }
+
+    void setPointBEdge(const float bix, const float biy) {
+        this->bix = bix;
+        this->biy = biy;
+    }
+
+    void getPointBEdge(float &bix, float &biy) {
+        bix = this->bix;
+        biy = this->biy;
+    }
+};
 
 // A tie between two features of interest, points A and B, on section core images.
 // Points A and B may be on the same core image.
@@ -54,7 +107,7 @@ struct CoreSectionTie {
 
     bool show; // draw tie line?
 
-    float *segments; // array of (x,y) scenespace coordinates for segments of tie line
+    CoreSectionTieDrawData *drawData;
 
     CoreSectionTie(SectionTieType type, SectionTiePoint &a, SectionTiePoint &b) {
         this->type = type;
@@ -63,7 +116,7 @@ struct CoreSectionTie {
         aDesc = NULL;
         bDesc = NULL;
         show = true;
-        segments = NULL;        
+        drawData = new CoreSectionTieDrawData();
     }
 
     ~CoreSectionTie() {
@@ -71,7 +124,7 @@ struct CoreSectionTie {
         if (b) delete b;
         if (aDesc) delete[] aDesc;
         if (bDesc) delete[] bDesc;
-        if (segments) delete[] segments;
+        if (drawData) delete drawData;
     }
 
     // getter/setter

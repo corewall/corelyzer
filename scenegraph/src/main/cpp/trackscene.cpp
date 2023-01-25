@@ -595,50 +595,26 @@ void calc_core_edge_intersection(
 }
 
 //================================================================
-void render_section_tie_offcore_segments(TrackScene *ts) {
-    glDisable(GL_TEXTURE_2D);
-    glEnable(GL_BLEND);
-    for (int tidx = 0; tidx < ts->tievec.size(); tidx++) {
-        CoreSectionTie *tie = ts->tievec[tidx];
-        if (!tie || !tie->show || !tie->valid()) continue;
-
-        if (!tie->isSingleSection()) {
-            prep_tie_appearance(tie, tidx);
-            glBegin(GL_LINES);
-            glVertex2f(tie->segments[4], tie->segments[5]);
-            glVertex2f(tie->segments[6], tie->segments[7]);
-            glEnd();
-        }
-    }
-    glDisable(GL_BLEND);
-    glEnable(GL_TEXTURE_2D);
-}
-
-//================================================================
+// Prepare scenespace points for drawing tie line segments.
 void create_section_tie_segments(TrackScene *ts, Canvas *c) {
     for (int tidx = 0; tidx < ts->tievec.size(); tidx++) {
         CoreSectionTie *tie = ts->tievec[tidx];
         if (!tie || !tie->show || !tie->valid()) continue;
 
-        // create three segments:
-        // A -> edge of tied section (A')
-        // B -> edge of tied section (B')
-        // A' -> B'
         float ax, ay, bx, by;
         get_scenespace_tie_points(tie, ax, ay, bx, by);
 
-        if (!tie->segments) {
-            tie->segments = new float[8];
-        }
-
+        // Single-section tie. A single line segment is required.
         if (tie->isSingleSection()) {
-            tie->segments[0] = ax;
-            tie->segments[1] = ay;
-            tie->segments[2] = bx;
-            tie->segments[3] = by;
+            tie->drawData->setPointA(ax, ay);
+            tie->drawData->setPointB(bx, by);
             continue;
         }
 
+        // Two-section tie. Create points defining three line segments:
+        // A -> edge of tied section (A')
+        // B -> edge of tied section (B')
+        // A' -> B'
         if (ax == bx) { // handle vertical line (undefined slope)
             TrackSceneNode *aTrack = get_scene_track(tie->a->trackId);
             CoreSection *aCore = get_track_section(aTrack, tie->a->sectionId);
@@ -651,14 +627,10 @@ void create_section_tie_segments(TrackScene *ts, Canvas *c) {
             } else {
                 bEdge += bCore->height * INCH_PER_CM * c->dpi_x;
             }
-            tie->segments[0] = ax;
-            tie->segments[1] = ay;
-            tie->segments[2] = bx;
-            tie->segments[3] = by;
-            tie->segments[4] = ax;
-            tie->segments[5] = aEdge;
-            tie->segments[6] = bx;
-            tie->segments[7] = bEdge;
+            tie->drawData->setPointA(ax, ay);
+            tie->drawData->setPointB(bx, by);
+            tie->drawData->setPointAEdge(ax, aEdge);
+            tie->drawData->setPointBEdge(bx, bEdge);
         } else {
             const float m = get_slope(ax, ay, bx, by);
             const float b = ay - (m * ax); // y-intercept
@@ -666,14 +638,10 @@ void create_section_tie_segments(TrackScene *ts, Canvas *c) {
             float a_intX, a_intY, b_intX, b_intY;
             calc_core_edge_intersection(c, tie->a->trackId, tie->a->sectionId, ax, ay, bx, by, m, b, a_intX, a_intY);
             calc_core_edge_intersection(c, tie->b->trackId, tie->b->sectionId, bx, by, ax, ay, m, b, b_intX, b_intY);
-            tie->segments[0] = ax;
-            tie->segments[1] = ay;
-            tie->segments[2] = bx;
-            tie->segments[3] = by;
-            tie->segments[4] = a_intX;
-            tie->segments[5] = a_intY;
-            tie->segments[6] = b_intX;
-            tie->segments[7] = b_intY;
+            tie->drawData->setPointA(ax, ay);
+            tie->drawData->setPointB(bx, by);
+            tie->drawData->setPointAEdge(a_intX, a_intY);
+            tie->drawData->setPointBEdge(b_intX, b_intY);
         }
     }
 }
@@ -704,7 +672,7 @@ void update_mouseover_tie(TrackScene *ts, Canvas *c) {
 }
 
 //================================================================
-// for each tie, draw segments on top of the tied cores
+// For each tie, draw the line segments within the tied cores.
 void render_section_tie_oncore_segments(TrackScene *ts, Canvas *c) {
     glDisable(GL_TEXTURE_2D); // enabled textures affect point/line color
 
@@ -713,23 +681,54 @@ void render_section_tie_oncore_segments(TrackScene *ts, Canvas *c) {
         if (!tie || !tie->show || !tie->valid()) continue;
 
         prep_tie_appearance(tie, tidx);
+        float ax, ay, bx, by;
+        tie->drawData->getPointA(ax, ay);
+        tie->drawData->getPointB(bx, by);
         if (tie->isSingleSection()) {
             glBegin(GL_LINES);
-            glVertex2f(tie->segments[0], tie->segments[1]);
-            glVertex2f(tie->segments[2], tie->segments[3]);
+            glVertex2f(ax, ay);
+            glVertex2f(bx, by);
             glEnd();
         } else {
+            float aix, aiy, bix, biy;
+            tie->drawData->getPointAEdge(aix, aiy);
+            tie->drawData->getPointBEdge(bix, biy);
             glBegin(GL_LINES);
-            glVertex2f(tie->segments[0], tie->segments[1]);
-            glVertex2f(tie->segments[4], tie->segments[5]);
-            glVertex2f(tie->segments[2], tie->segments[3]);
-            glVertex2f(tie->segments[6], tie->segments[7]);
+            glVertex2f(ax, ay);
+            glVertex2f(aix, aiy);
+            glVertex2f(bx, by);
+            glVertex2f(bix, biy);
             glEnd();
         }
     }
 
     glEnable(GL_TEXTURE_2D);
 }
+
+//================================================================
+// For each tie, draw the line segment between edges of the tied cores.
+void render_section_tie_offcore_segments(TrackScene *ts) {
+    glDisable(GL_TEXTURE_2D);
+    glEnable(GL_BLEND);
+    for (int tidx = 0; tidx < ts->tievec.size(); tidx++) {
+        CoreSectionTie *tie = ts->tievec[tidx];
+        if (!tie || !tie->show || !tie->valid()) continue;
+
+        if (!tie->isSingleSection()) {
+            prep_tie_appearance(tie, tidx);
+            glBegin(GL_LINES);
+            float aix, aiy, bix, biy;
+            tie->drawData->getPointAEdge(aix, aiy);
+            tie->drawData->getPointBEdge(bix, biy);
+            glVertex2f(aix, aiy);
+            glVertex2f(bix, biy);
+            glEnd();
+        }
+    }
+    glDisable(GL_BLEND);
+    glEnable(GL_TEXTURE_2D);
+}
+
 
 //================================================================
 static void get_scenespace_tie_points(CoreSectionTie *tie, float &ax, float &ay, float &bx, float &by) {
