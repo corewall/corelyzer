@@ -714,7 +714,7 @@ void render_section_model(CoreSection *ptr, Canvas *c) {
     // Section Marker, scaling using marker images' DPI
     // instead of core section image's DPI
     // Put inside render_marker() method
-    render_section_markers(ptr, c);
+    render_section_markers(ptr, c); // annotation markers
     render_section_free_draw_rects(ptr, c);
 
     // Draw source section arrow if it's in another track

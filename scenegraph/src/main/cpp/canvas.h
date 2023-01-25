@@ -82,6 +82,7 @@
 #define CANVAS_MARKER       2
 #define CANVAS_CLAST        3
 #define CANVAS_CUT          4
+#define CANVAS_TIE          5
 
 struct sgPoint {
     float x;

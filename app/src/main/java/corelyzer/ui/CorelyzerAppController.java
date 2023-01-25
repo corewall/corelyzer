@@ -43,6 +43,7 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.Hashtable;
 import java.util.Vector;
+import java.util.HashSet;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -64,12 +65,14 @@ import corelyzer.data.UnitLength;
 import corelyzer.data.WellLogDataSet;
 import corelyzer.data.WellLogTable;
 import corelyzer.data.coregraph.CoreGraph;
+import corelyzer.data.coregraph.SessionMerger;
 import corelyzer.data.lists.CRDefaultListModel;
 import corelyzer.data.lists.CRListModels;
 import corelyzer.graphics.SceneGraph;
 import corelyzer.handlers.SubscribeHandler;
 import corelyzer.io.CRDISDepthValueDataLoader;
 import corelyzer.io.CRDepthValueDataLoader;
+import corelyzer.io.CoreArchiveExport;
 import corelyzer.io.DISLoader;
 import corelyzer.io.DISWriter;
 import corelyzer.io.StateLoader;
@@ -146,11 +149,6 @@ public class CorelyzerAppController implements ActionListener, AboutHandler, Qui
 		if (remoteControlServer != null) {
 			remoteControlServer.setRunning(false);
 		}
-
-		// Save previous session file
-		String previousSession = view.preferences().config_Directory + sp + "previousSession.cml";
-		StateWriter sw = new StateWriter();
-		sw.writeState(previousSession);
 
 		view.preferences().save();
 		pluginManager.Shutdown();
@@ -233,7 +231,11 @@ public class CorelyzerAppController implements ActionListener, AboutHandler, Qui
 	}
 
 	// Returns true if a track name in the track list model exists.
-	public boolean containsTrackName(final String name) { // FIXME consider
+	// Note: this only considers the tracks for the currently-selected Session
+	// in the main Corelyzer window. Not a reliable way to check for duplicate
+	// track names in anything but the selected Session. Use containsTrackName()
+	// instead.
+	public boolean currentSessionContainsTrackName(final String name) { // FIXME consider
 															// session?
 		CRDefaultListModel listModel = listModels.getListModel(CRListModels.TRACK);
 
@@ -246,6 +248,16 @@ public class CorelyzerAppController implements ActionListener, AboutHandler, Qui
 			}
 		}
 
+		return false;
+	}
+
+	// Return true if any track (across all sessions) has the specified name
+	public boolean containsTrackName(final String name) {
+		for (TrackSceneNode track : CoreGraph.getInstance().getAllTracks()) {
+			if (name.equals(track.getName())) {
+				return true;
+			}
+		}
 		return false;
 	}
 
@@ -311,38 +323,43 @@ public class CorelyzerAppController implements ActionListener, AboutHandler, Qui
 			s = cg.getCurrentSession();
 		}
 
+		return createTrack(trackName, s);
+	}
+	
+	public int createTrack(String trackName, Session destinationSession) {
 		// check null, empty and duplication
 		if (trackName == null || trackName.equals("") || this.containsTrackName(trackName)) {
 			String name = getAValidInputString("", "Create a track", "Please input a track name", "Empty Input", "Please input non-empty string.",
 					"Duplicate Input", "Please input non-duplicated string.", CRListModels.TRACK);
-
+	
 			if (name == null) {
 				return -1;
 			} else {
 				trackName = name;
 			}
 		}
-
+	
 		int id;
-
+	
 		// determine if the track name is already there if so, don't make it
 		// again
-		if ((id = SceneGraph.getTrackIDByName(s.getName(), trackName)) > -1) {
+		if ((id = SceneGraph.getTrackIDByName(destinationSession.getName(), trackName)) > -1) {
 			return id;
 		}
-		if ((id = SceneGraph.addTrack(s.getName(), trackName)) < 0) {
+		if ((id = SceneGraph.addTrack(destinationSession.getName(), trackName)) < 0) {
 			return id;
 		}
-
+	
 		// create the node and add it to the listing of tracks
 		TrackSceneNode t = new TrackSceneNode(trackName, id);
-		cg.addTrack(s, t);
-
+		cg.addTrack(destinationSession, t);
+	
 		view.sessionList.setSelectedIndex(cg.getCurrentSessionIdx());
 		view.trackList.setSelectedIndex(cg.getCurrentTrackIdx());
-
+	
 		return id;
 	}
+
 
 	public void deiconifyAllPlugins() {
 		pluginManager.deiconifyAllPlugins();
@@ -474,6 +491,7 @@ public class CorelyzerAppController implements ActionListener, AboutHandler, Qui
 		deleteTrack(currentTrack);
 	}
 
+	// close session calls this flavor of deleteTrack()
 	public void deleteTrack(final Session s, final TrackSceneNode t) {
 		// System.out.println("---> [INFO] Closing track: " + t.getName());
 
@@ -487,6 +505,7 @@ public class CorelyzerAppController implements ActionListener, AboutHandler, Qui
 		{
 			idx = t.getId();
 			t.removeAllCoreSection();
+			SceneGraph.deleteSectionTiesOnTrack(t.getId());
 			SceneGraph.deleteTrack(t.getId());
 			// cg.removeTrack(s, t);
 		}
@@ -525,6 +544,7 @@ public class CorelyzerAppController implements ActionListener, AboutHandler, Qui
 						{
 							idx = t.getId();
 							t.removeAllCoreSection();
+							SceneGraph.deleteSectionTiesOnTrack(t.getId());
 							SceneGraph.deleteTrack(t.getId());
 							cg.removeTrack(s, t);
 						}
@@ -777,10 +797,8 @@ public class CorelyzerAppController implements ActionListener, AboutHandler, Qui
 	}
 
 	public void exportTheWholeScene() {
-		// Prompt and Save the Whole session along with images & data
-		CRExporterDialog dialog = new CRExporterDialog(view);
-		dialog.pack();
-		dialog.setVisible(true);
+		final String destFileStr = FileUtility.selectASingleFile(view.getMainFrame(), "Select core archive file", "car", FileUtility.SAVE);
+		CoreArchiveExport.export(destFileStr);
 	}
 
 	
@@ -1248,17 +1266,13 @@ public class CorelyzerAppController implements ActionListener, AboutHandler, Qui
 				}
 			};
 			new Thread(loading).start();
-
-			if (!openFile.getName().equals("previousSession.cml")) {
-				addSessionToHistoryMenu(openFile.getAbsolutePath());
-			}
+			addSessionToHistoryMenu(openFile.getAbsolutePath());
 
 			// view.updateGLWindows();
 		} else {
 			JOptionPane.showMessageDialog(view.getMainFrame(), "The selected file does not exist");
 		}
 
-		view.setCurrentSessionFile(filename);
 		CRPreferences.setCurrentDir(openFile.getParent());
 	}
 	
@@ -1266,7 +1280,10 @@ public class CorelyzerAppController implements ActionListener, AboutHandler, Qui
 		Vector<String> hst = view.preferences().getSessionHistory();
 		String forwardSlashPath = sessionPath.replace('\\', '/');
 		if (!hst.contains(forwardSlashPath)) {
-			view.preferences().getSessionHistory().add(forwardSlashPath);
+			hst.add(forwardSlashPath);
+		} else { // if file is already in recent sessions menu, move to top
+			hst.remove(forwardSlashPath);
+			hst.add(forwardSlashPath); // last file in vector is first added to recent sessions menu
 		}
 		refreshSessionHistoryMenu();
 	}
@@ -1466,7 +1483,7 @@ public class CorelyzerAppController implements ActionListener, AboutHandler, Qui
 
 		switch (sel) {
 			case 0: // save to session file and quit
-				if (saveStateToFile()) {
+				if (saveSessionAs()) {
 					cleanThingsUp();
 					System.exit(0);
 				}
@@ -1498,7 +1515,7 @@ public class CorelyzerAppController implements ActionListener, AboutHandler, Qui
 
 		switch (sel) {
 			case 0: // save to session file and quit
-				if (saveStateToFile()) {
+				if (saveSessionAs()) {
 					cleanThingsUp();
 					// System.exit(0);
 					qr.performQuit();
@@ -1523,33 +1540,31 @@ public class CorelyzerAppController implements ActionListener, AboutHandler, Qui
 		}
 	}
 
+	private Vector<String> getDuplicateSessionFileNames() {
+		Vector<String> hst = view.preferences().getSessionHistory();
+		Vector<String> duplicates = new Vector<String>();
+		Vector<String> filenames = new Vector<String>();
+		int count = 0;
+		for (int i = hst.size() - 1; i >= 0 && count < CRPreferences.maxHistoryEntries; i--, count++) {
+			String f = new File(hst.get(i)).getName();
+			if (filenames.contains(f)) {
+				duplicates.add(f);
+			} else {
+				filenames.add(f);
+			}
+		}
+		return duplicates;
+	}
+
 	public void refreshSessionHistoryMenu() {
 		view.recentSessionsMenu.removeAll();
-
-		// Show previous session if $(conf_dir)/previousSession.cml exists
-		final String previousSession = view.preferences().config_Directory + sp + "previousSession.cml";
-		final File prev = new File(previousSession);
-		if (prev.exists()) {
-			JMenuItem aItem = new JMenuItem("Previous Session");
-			aItem.setToolTipText("Previous session before closing Corelyzer");
-			aItem.addActionListener(new ActionListener() {
-				public void actionPerformed(final ActionEvent e) {
-					System.out.println("---> Loading previous session from " + previousSession);
-					if (prev.exists()) {
-						loadStateFile(previousSession);
-					}
-				}
-			});
-
-			view.recentSessionsMenu.add(aItem);
-			view.recentSessionsMenu.addSeparator();
-		}
 
 		// update history to view
 		Vector<String> hst = view.preferences().getSessionHistory();
 		Vector<String> listedPaths = new Vector<String>();
 		int count = 0;
 
+		Vector<String> duplicates = getDuplicateSessionFileNames();
 		for (int i = hst.size() - 1; i >= 0 && count < CRPreferences.maxHistoryEntries; i--, count++) {
 			final String path = view.preferences().getSessionHistory().get(i);
 			final String name = new File(path).getName();
@@ -1559,7 +1574,8 @@ public class CorelyzerAppController implements ActionListener, AboutHandler, Qui
 			}
 			listedPaths.add(path);
 
-			JMenuItem aItem = new JMenuItem(name);
+			String menuText = duplicates.contains(name) ? path : name;
+			JMenuItem aItem = new JMenuItem(menuText);
 			aItem.setToolTipText(path);
 			aItem.addActionListener(new ActionListener() {
 				public void actionPerformed(final ActionEvent e) {
@@ -1693,9 +1709,32 @@ public class CorelyzerAppController implements ActionListener, AboutHandler, Qui
 			// Java
 			cg.removeDatasets(s);
 			cg.removeSession(s);
-			
-			if (cg.getSessions().size() == 0) {
-				view.setCurrentSessionFile("");
+
+			// Clear selection to force the session list's ListSelectionListener
+			// to fire and properly update the current session file in the title bar.
+			// Otherwise, if the closed session isn't at the bottom of the list,
+			// lower sessions move up and the existing selection is retained and
+			// the listener will not be fired.
+			view.sessionList.clearSelection();
+
+			view.sessionList.setSelectedIndex(cg.getCurrentSessionIdx());
+			view.trackList.setSelectedIndex(cg.getCurrentTrackIdx());
+			// cleanup ties
+
+		}
+	}
+
+	public void mergeSessions() {
+		MergeSessionsDialog dlg = new MergeSessionsDialog(view.getMainFrame(), cg.getSessions());
+		dlg.setLocationRelativeTo(view.getMainFrame());
+		dlg.setVisible(true);
+		if (dlg.confirmed) {
+			final String msg = "Merging sessions cannot be undone. Continue?";
+			final String title = "Confirm Merge Sessions";
+			if (JOptionPane.showConfirmDialog(view.getMainFrame(), msg, title,
+					JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE) == JOptionPane.OK_OPTION)
+			{
+				SessionMerger.mergeSessions(cg, dlg.getSessionsToMerge(), dlg.getDestinationSession());
 			}
 		}
 	}
@@ -1734,10 +1773,6 @@ public class CorelyzerAppController implements ActionListener, AboutHandler, Qui
 		}
 	}
 
-	public boolean saveCurrentSession() {
-		return saveStateToFile(view.getCurrentSessionFile());
-	}
-
 	// --------------------------------------------------------------
 	public boolean saveOutputToFile() {
 		// check if there exists section at this point
@@ -1770,62 +1805,107 @@ public class CorelyzerAppController implements ActionListener, AboutHandler, Qui
 		return true;
 	}
 
-	public boolean saveStateToFile() {
-		return saveStateToFile(null);
-	}
-
-	private boolean saveStateToFile(final String filePath) {
-		CoreGraph cg = CoreGraph.getInstance();
-		boolean[] isSelected = null;
-		String suggestedName = null;
-		if (cg.getNumberOfSessions() > 1) {
-			// only save selected sessions
+	private boolean[] getSessionsToSave(CoreGraph cg) {
+		boolean[] selectedSessionIndices = null;
+		if (cg.getNumberOfSessions() > 1) { // select sessions to save
 			SessionsSelectDialog s = new SessionsSelectDialog(view.getMainFrame());
 			s.pack();
 			s.setLocationRelativeTo(view.getMainFrame());
 			s.setVisible(true);
-
-			isSelected = s.getSelectedIndex();
-			suggestedName = s.getSelectedIndexName();
 			s.dispose();
-		} else {
-			isSelected = new boolean[1];
-			isSelected[0] = true;
-			suggestedName = CoreGraph.getInstance().getCurrentSession().getName();
-		}
 
-		if (isSelected == null) {
+			selectedSessionIndices = s.getSelectedIndices();
+		} else {
+			selectedSessionIndices = new boolean[1];
+			selectedSessionIndices[0] = true;
+		}
+		return selectedSessionIndices;
+	}
+
+	public boolean saveSession() {
+		return saveStateToFile(false);
+	}
+
+	public boolean saveSessionAs() {
+		return saveStateToFile(true);
+	}
+
+	private boolean saveStateToFile(boolean saveAs) {
+		CoreGraph cg = CoreGraph.getInstance();
+		boolean[] selectedSessionIndices = getSessionsToSave(cg);
+		if (selectedSessionIndices == null || selectedSessionIndices.length == 0) {
 			return false;
 		}
 
-		String selected;
-		if (filePath == null || filePath.equals("")) {
-			String title = "Save a Session file";
-			selected = FileUtility.selectASingleFile(view.getMainFrame(), title, "cml", FileUtility.SAVE, suggestedName);
-		} else {
-			selected = filePath;
+		// From session indices, build vector of Sessions to be saved
+		Vector<Session> selectedSessions = new Vector<Session>();
+		for (int i = 0; i < selectedSessionIndices.length; i++) {
+			if (selectedSessionIndices[i]) { selectedSessions.add(cg.getSession(i)); }
 		}
 
-		if (selected != null) {
-			// make sure it has .xml at the end
-			String path = selected.replace('\\', '/');
+		// If Sessions to be saved don't have a common state file, force Save As
+		if (selectedSessions.size() > 1 && !saveAs) {
+			HashSet<String> sessionStateFilePaths = new HashSet<String>();
+			for (Session curSession : selectedSessions) {
+				sessionStateFilePaths.add(curSession.getStateFilePath());
+			}
+			if (sessionStateFilePaths.size() > 1) {
+				System.out.println("Mixed state files for selected sessions, user must choose.");
+				saveAs = true;
+			}				
+		}
+
+		// If Sessions to be saved excludes an open Session with a state file for which
+		// other Sessions *are* being saved, pop warning/confirmation dialog.
+		if (!saveAs) {
+			final String saveFile = selectedSessions.get(0).getStateFilePath();
+			Vector<String> unselectedSessionNames = new Vector<String>();
+			for (int idx = 0; idx < selectedSessionIndices.length; idx++) {
+				if (!selectedSessionIndices[idx] && cg.getSession(idx).getStateFilePath().equals(saveFile)) {
+					unselectedSessionNames.add(cg.getSession(idx).getName());
+				}
+			}
+			if (unselectedSessionNames.size() > 0) {
+				final String saveFileName = new File(saveFile).getName();
+				final String msg = "The session(s) [" +
+				String.join(",", unselectedSessionNames) +
+				"] were last saved in CML file " + saveFileName +
+				".\nContinue saving " + saveFileName + " without including those session(s)?";
+				if (JOptionPane.showConfirmDialog(view.getMainFrame(), msg) != JOptionPane.YES_OPTION) {
+					return false;	
+				}
+			}
+		}
+
+		String suggestedName = selectedSessions.get(0).getName();
+
+		String destFile = selectedSessions.get(0).getStateFilePath();
+		if (saveAs || destFile.equals("")) {
+			String title = "Save a Session file";
+			destFile = FileUtility.selectASingleFile(view.getMainFrame(), title, "cml", FileUtility.SAVE, suggestedName);
+		}
+
+		if (destFile != null) {
+			// make sure it has .cml at the end
+			String path = destFile.replace('\\', '/');
 			String[] toks = path.split("/");
 			if (!toks[toks.length - 1].contains(".cml")) {
 				path = path + ".cml";
 			}
 
-			StateWriter sw = new StateWriter(isSelected);
+			StateWriter sw = new StateWriter(selectedSessionIndices);
 			boolean writeResult = sw.writeState(path);
 
 			if (!writeResult) {
-				JOptionPane.showMessageDialog(view.getMainFrame(), "Failed");
+				JOptionPane.showMessageDialog(view.getMainFrame(), "Save Failed");
+				return false;
 			}
 
 			addSessionToHistoryMenu(path);
-
-			if (writeResult) {
-				view.setCurrentSessionFile(path);
+			for (Session s : selectedSessions) {
+				s.setStateFilePath(path);
 			}
+			view.updateCurrentSessionFile();
 
 			return writeResult;
 		}
@@ -2047,7 +2127,7 @@ public class CorelyzerAppController implements ActionListener, AboutHandler, Qui
 
 			public void run() {
 				while (true) {
-					// Auto-save session every 60 secons
+					// Auto-save session every 60 seconds
 					try {
 						if (!autoSavePath.contains(view.preferences().config_Directory)) {
 							File autoSaveDir = new File(view.preferences().config_Directory + sp + "autoSaves");

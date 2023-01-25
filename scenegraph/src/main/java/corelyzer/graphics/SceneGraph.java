@@ -89,6 +89,11 @@ public class SceneGraph {
 	 */
 	public native static int accessPickedTrack();
 
+	/**
+	 * @return id of tie found on last performPick()
+	 */
+	public native static int accessPickedTie();
+
 	public native static void addClastPoint1(float x, float y);
 
 	public native static void addClastPoint2(float x, float y);
@@ -227,6 +232,32 @@ public class SceneGraph {
 	 *            Vertical span, unit in meters
 	 */
 	public native static int createFreeDrawRectangleForTrack(int pluginid, int track, float x, float y, float w, float h);
+
+	// section tie f'ns
+	public native static int[] getSectionTieIds();
+	public native static void deleteSectionTie(int tieId);
+	public native static void createSectionTie(int type, float ax, float ay, String aDesc, int aTrackId, int aSectionId, float bx, float by, String bDesc, int bTrackId, int bSectionId, boolean show);
+	public native static void startSectionTie(int type, float x, float y, int trackId, int sectionId);
+	public native static void clearInProgressSectionTie();
+	public native static int finishSectionTie(float x, float y, int trackId, int sectionId);
+	public native static int getSectionTieType(int tieId);
+	public native static void setSectionTieType(int tieId, int type);
+	public native static void setSectionTieADescription(int tieId, String desc);
+	public native static String getSectionTieADescription(int tieId);
+	public native static void setSectionTieBDescription(int tieId, String desc);
+	public native static String getSectionTieBDescription(int tieId);
+	public native static boolean getSectionTieShow(int tieId);
+	public native static void setSectionTieShow(int tieId, boolean show);
+	public native static void setSelectedTie(int tieId);
+	public native static String getSectionTieASectionName(int tieId);
+	public native static String getSectionTieBSectionName(int tieId);
+	public native static float[] getSectionTieAPosition(int tieId);
+	public native static float[] getSectionTieBPosition(int tieId);
+	public native static int getSectionTieATrack(int tieId);
+	public native static int getSectionTieBTrack(int tieId);
+	public native static void updateSectionTies();
+	public native static void deleteSectionTiesOnTrack(int trackId);
+
 
 	// ----- Canvas methods
 
@@ -1759,6 +1790,8 @@ public class SceneGraph {
 	public native static void setTrackHighlight(int track, boolean isOn);
 
 	public native static void setTrackHighlightColor(int track, float r, float g, float b);
+
+	public native static void setTrackSessionName(int track, String sessionName);
 
 	public native static void setTrackMovable(int track, boolean flag);
 

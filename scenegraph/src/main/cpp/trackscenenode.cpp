@@ -444,6 +444,7 @@ void push_section_to_end(TrackSceneNode *t, int section) {
 #endif
 }
 
+//================================================================
 void set_track_highlight_color(TrackSceneNode *t, float r, float g, float b) {
     if (!t)
         return;
@@ -451,4 +452,11 @@ void set_track_highlight_color(TrackSceneNode *t, float r, float g, float b) {
     t->highlight_color[0] = r;
     t->highlight_color[1] = g;
     t->highlight_color[2] = b;
+}
+
+//================================================================
+void set_track_session_name(TrackSceneNode *t, const char *sessionName) {
+    if (t->sessionName) { delete[] t->sessionName; }
+    t->sessionName = new char[strlen(sessionName) + 1];
+    strcpy(t->sessionName, sessionName);
 }

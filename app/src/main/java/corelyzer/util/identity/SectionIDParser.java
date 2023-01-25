@@ -38,9 +38,9 @@ class LacCoreSectionParser extends SectionIDParser {
         final String HOLE = "[A-Z]+";
         final String SITEHOLE = SITE + HOLE;
         final String CORE = "[0-9]+";
-        final String TOOL = "([A-Z]|BX|HS|MC|MK|RP){1}";
+        final String TOOL = "([A-Z]|BX|HS|MC|MK|RP)";
         final String CORETOOL = CORE + TOOL;
-        final String SECTION = "([0-9]{1,2}|CC){1}";
+        final String SECTION = "([0-9]{1,2}|CC)";
         final String HALF = "(-[AW]|-WR)?"; // optional
         final String SUFFIX = "(_.+)?"; // optional
 
@@ -59,7 +59,7 @@ class IODPSectionParser extends SectionIDParser {
         final String HOLE = "([A-Z]+|\\*)";
         final String CORE = "[0-9]+";
         final String TOOL = "[A-Z]+";
-        final String SECTION = "([0-9]+|CC){1}";
+        final String SECTION = "([0-9]+|CC)";
         final String HALF = "(-[AW]|-WR)?"; // optional
         final String SUFFIX = "(_.+)?"; // optional
         
@@ -75,7 +75,7 @@ class ICDPSectionParser extends SectionIDParser {
         name = "ICDP";
         final String EXP = "[0-9]+";
         final String SITE = "[0-9]+";
-        final String HOLE = "[A-Z]{1}";
+        final String HOLE = "[A-Z]";
         final String CORE = "[0-9]+";
         final String SECTION = "[0-9]+";
         final String HALF = "(_[AW]|_WR)?"; // optional

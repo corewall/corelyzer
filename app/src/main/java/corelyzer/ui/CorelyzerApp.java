@@ -343,6 +343,7 @@ public class CorelyzerApp extends WindowAdapter implements MouseListener, Startu
 	static final int APP_MARKER_MODE = 2;
 	static final int APP_CLAST_MODE = 3;
 	static final int APP_CUT_MODE = 4;
+	static final int APP_TIE_MODE = 5;
 
 	// Returns the single instance of the CorelyzerApp class
 	public static CorelyzerApp getApp() {
@@ -507,6 +508,10 @@ public class CorelyzerApp extends WindowAdapter implements MouseListener, Startu
 		return controller.containsTrackName(aName);
 	}
 
+	public boolean containsSessionName(final String name) {
+		return controller.containsSessionName(name);
+	}
+
 	/**
 	 * Called by the DisplayConfiguration dialog class to begin the creation of
 	 * the OpenGL windows given previously set parameters of rows and columns of
@@ -665,6 +670,10 @@ public class CorelyzerApp extends WindowAdapter implements MouseListener, Startu
 
 	public int createTrack(final String aName) {
 		return controller.createTrack(aName);
+	}
+
+	public int createTrack(final String aName, Session destinationSession) {
+		return controller.createTrack(aName, destinationSession);
 	}
 
 	public void deleteSection(final int trackId, final int sectionId) {
@@ -923,10 +932,10 @@ public class CorelyzerApp extends WindowAdapter implements MouseListener, Startu
 
 	public String getCorelyzerVersion()
 	{
-		String defaultVersion = "2.1.3";
+		String defaultVersion = "2.1.3_b4_8Dec2022";
 		String implVersion = this.getClass().getPackage().getImplementationVersion();
-		return (implVersion == null ? defaultVersion : implVersion);
-		// return defaultVersion;
+		//return (implVersion == null ? defaultVersion : implVersion);
+		return defaultVersion;
 	}
 
 	public void GLWindowsToBack() {
@@ -1363,6 +1372,13 @@ public class CorelyzerApp extends WindowAdapter implements MouseListener, Startu
 		}
 	}
 
+	// force sync of selected session's session file name
+	public void updateCurrentSessionFile() {
+		final int idx = this.sessionList.getSelectedIndex();
+		this.sessionList.clearSelection();
+		this.sessionList.setSelectedIndex(idx);
+	}
+
 	public void setDisplayOffsets(final int column_offset, final int row_offset) {
 		preferences.column_offset = column_offset;
 		preferences.row_offset = row_offset;
@@ -1546,7 +1562,7 @@ public class CorelyzerApp extends WindowAdapter implements MouseListener, Startu
 		saveMenuItem.setAccelerator( KeyStroke.getKeyStroke(KeyEvent.VK_S, MENU_MASK));
 		saveMenuItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent event) {
-				controller.saveCurrentSession();
+				controller.saveSession();
 			}
 		});
 		fileMenu.add(saveMenuItem);
@@ -1555,7 +1571,7 @@ public class CorelyzerApp extends WindowAdapter implements MouseListener, Startu
 		saveStateToFileMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_A, MENU_MASK));
 		saveStateToFileMenuItem.addActionListener(new ActionListener() {
 			public void actionPerformed(final ActionEvent event) {
-				controller.saveStateToFile();
+				controller.saveSessionAs();
 			}
 		});
 		fileMenu.add(saveStateToFileMenuItem);
@@ -2014,6 +2030,14 @@ public class CorelyzerApp extends WindowAdapter implements MouseListener, Startu
 		});
 		sessionPopupMenu.add(removeSession);
 
+		JMenuItem mergeSessions = new JMenuItem("Merge Sessions...");
+		mergeSessions.addActionListener(new ActionListener() {
+			public void actionPerformed(final ActionEvent e) {
+				controller.mergeSessions();
+			}
+		});
+		sessionPopupMenu.add(mergeSessions);
+
 		// track popup
 		trackPopupMenu = new JPopupMenu("Tracks");
 
@@ -2091,9 +2115,14 @@ public class CorelyzerApp extends WindowAdapter implements MouseListener, Startu
 		sessionList.addListSelectionListener(new ListSelectionListener() {
 			public void valueChanged(final ListSelectionEvent event) {
 				int idx = sessionList.getSelectedIndex();
+				// System.out.println("Session list valueChanged, selected idx = " + idx);
 				if (idx >= 0) {
 					CoreGraph cg = CoreGraph.getInstance();
 					cg.setCurrentSessionIdx(idx);
+					String sessionFilePath = cg.getCurrentSession().getStateFilePath();
+					setCurrentSessionFile(sessionFilePath.equals("") ? "" : new File(sessionFilePath).getName());
+				} else {
+					setCurrentSessionFile("");
 				}
 			}
 		});

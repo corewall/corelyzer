@@ -69,11 +69,13 @@ import javax.swing.JTextField;
 import corelyzer.controller.CRExperimentController;
 import corelyzer.data.CoreSection;
 import corelyzer.data.CoreSectionImage;
+import corelyzer.data.CoreSectionTieType;
 import corelyzer.data.Session;
 import corelyzer.data.TrackSceneNode;
 import corelyzer.data.WellLogDataSet;
 import corelyzer.data.coregraph.CoreGraph;
 import corelyzer.data.lists.CRDefaultListModel;
+import corelyzer.data.tie.SectionTieErrors;
 import corelyzer.graphics.SceneGraph;
 import corelyzer.plugin.CorelyzerPluginEvent;
 import corelyzer.remoteControl.server.controller.actions.FineTuneDialog;
@@ -82,6 +84,8 @@ import corelyzer.ui.annotation.AnnotationType;
 import corelyzer.ui.annotation.AnnotationTypeDirectory;
 import corelyzer.ui.annotation.AnnotationUtils;
 import corelyzer.ui.annotation.freeform.CRAnnotationWindow;
+import corelyzer.ui.tie.ManageSectionTiesDialog;
+import corelyzer.ui.tie.SectionTieDialog;
 import corelyzer.util.CRUtility;
 import corelyzer.util.PropertyListUtility;
 
@@ -119,6 +123,7 @@ public class CorelyzerGLCanvas implements GLEventListener, MouseListener, MouseW
 	private static int selectedTrackIndex = -1;
 	private static int selectedTrackSectionIndex = -1;
 	private static int selectedMarker = -1;
+	private static int selectedTie = -1;
 
 	private static int selectedGraph = -1;
 
@@ -146,6 +151,7 @@ public class CorelyzerGLCanvas implements GLEventListener, MouseListener, MouseW
 
 	JMenuItem propertyMenuItem;
 	JMenuItem splitMenuItem;
+	JMenuItem staggerSectionsItem;
 
 	// 8/2/2012 brg: TODO Index-based approach isn't ideal when inserting (rather than appending)
 	// menu items - keep references to JMenuItems instead?
@@ -357,12 +363,25 @@ public class CorelyzerGLCanvas implements GLEventListener, MouseListener, MouseW
 		pos[1] = mp.y * s + y;
 	}
 
+	Point convertScenePointToMousePoint(final float spx, final float spy) {
+		float x, y, w, s;
+
+		x = SceneGraph.getCanvasPositionX(canvasId);
+		y = SceneGraph.getCanvasPositionY(canvasId);
+		w = SceneGraph.getCanvasWidth(canvasId);
+		s = w / canvas.getWidth();
+
+		Point cpt = canvas.getLocationOnScreen();
+		final int mpx = Math.round((spx-x) / s) + cpt.x;
+		final int mpy = Math.round((spy-y) / s) + cpt.y;
+		return new Point(mpx, mpy);
+	}
+
 	void convertScenePointToAbsolute(final float pos[], final float result[]) {
 		float dpi;
 		dpi = SceneGraph.getCanvasDPIX(canvasId);
 		result[0] = pos[0] / dpi * 2.54f;
 		result[1] = pos[1] / dpi * 2.54f;
-
 	}
 
 	void createPopupMenuUI() {
@@ -378,6 +397,8 @@ public class CorelyzerGLCanvas implements GLEventListener, MouseListener, MouseW
 		this.scenePopupMenu.add(sectionName);
 
 		this.scenePopupMenu.addSeparator();
+
+		// this.scenePopupMenu.addSeparator();
 
 		// Mode menu
 		JMenu modeMenu = new JMenu("Mode");
@@ -474,17 +495,45 @@ public class CorelyzerGLCanvas implements GLEventListener, MouseListener, MouseW
 			}
 		});
 
+		JMenuItem createVisualTie = new JMenuItem("Create Visual Tie");
+		createVisualTie.addActionListener(new ActionListener() {
+			public void actionPerformed(final ActionEvent event) {
+				doCreateTie(CoreSectionTieType.VISUAL);
+			}
+		});
+
+		JMenuItem createDataTie = new JMenuItem("Create Data Tie");
+		createDataTie.addActionListener(new ActionListener() {
+			public void actionPerformed(final ActionEvent event) {
+				doCreateTie(CoreSectionTieType.DATA);
+			}
+		});
+
+		JMenuItem createSpliceTie = new JMenuItem("Create Splice Tie");
+		createSpliceTie.addActionListener(new ActionListener() {
+			public void actionPerformed(final ActionEvent event) {
+				doCreateTie(CoreSectionTieType.SPLICE);
+			}
+		});
+
+		JMenuItem manageTies = new JMenuItem("Manage Ties...");
+		manageTies.addActionListener(new ActionListener() {
+			public void actionPerformed(final ActionEvent event) {
+				doManageTies();
+			}
+		});
+
 		JMenuItem graphMenuItem = new JMenuItem("Graph...");
 		graphMenuItem.addActionListener(new ActionListener() {
-
+			
 			public void actionPerformed(final ActionEvent event) {
 				doGraphDialog();
 			}
 		});
-
+		
 		this.propertyMenuItem = new JMenuItem("Properties...");
 		this.propertyMenuItem.addActionListener(new ActionListener() {
-
+			
 			public void actionPerformed(final ActionEvent event) {
 				SectionImagePropertyDialog dialog = new SectionImagePropertyDialog(canvas);
 				dialog.setProperties(selectedTrack, selectedTrackSection);
@@ -494,10 +543,10 @@ public class CorelyzerGLCanvas implements GLEventListener, MouseListener, MouseW
 				dialog.dispose();
 			}
 		});
-
+		
 		splitMenuItem = new JMenuItem("Split...");
 		splitMenuItem.addActionListener(new ActionListener() {
-
+			
 			public void actionPerformed(final ActionEvent e) {
 				CorelyzerApp app = CorelyzerApp.getApp();
 				if (app != null) {
@@ -505,7 +554,7 @@ public class CorelyzerGLCanvas implements GLEventListener, MouseListener, MouseW
 				}
 			}
 		});
-
+		
 		JMenuItem deleteItem = new JMenuItem("Delete...");
 		deleteItem.addActionListener(new ActionListener() {
 
@@ -514,7 +563,7 @@ public class CorelyzerGLCanvas implements GLEventListener, MouseListener, MouseW
 			}
 		});
 		
-		JMenuItem staggerSectionsItem = new JCheckBoxMenuItem("Stagger Sections", false);
+		staggerSectionsItem = new JCheckBoxMenuItem("Stagger Sections", false);
 		staggerSectionsItem.addActionListener(new ActionListener() {
 			public void actionPerformed(final ActionEvent e) {
 				AbstractButton b = (AbstractButton)e.getSource();
@@ -539,6 +588,11 @@ public class CorelyzerGLCanvas implements GLEventListener, MouseListener, MouseW
 		this.scenePopupMenu.addSeparator();
 		this.scenePopupMenu.add(lockSectionMenuItem);
 		this.scenePopupMenu.add(lockSectionGraphMenuItem);
+		this.scenePopupMenu.addSeparator();
+		this.scenePopupMenu.add(createVisualTie);
+		this.scenePopupMenu.add(createDataTie);
+		this.scenePopupMenu.add(createSpliceTie);
+		this.scenePopupMenu.add(manageTies);
 		this.scenePopupMenu.addSeparator();
 		this.scenePopupMenu.add(graphMenuItem);
 		this.scenePopupMenu.add(splitMenuItem);
@@ -570,7 +624,7 @@ public class CorelyzerGLCanvas implements GLEventListener, MouseListener, MouseW
 		selectedMarker = SceneGraph.accessPickedMarker();
 		selectedGraph = SceneGraph.accessPickedGraph();
 		selectedFreeDraw = SceneGraph.accessPickedFreeDraw();
-
+		selectedTie = SceneGraph.accessPickedTie();
 		if (track > -1) {
 			SceneGraph.bringTrackToFront(selectedTrack);
 			if (section > -1) {
@@ -631,6 +685,33 @@ public class CorelyzerGLCanvas implements GLEventListener, MouseListener, MouseW
 		}
 	}
 	
+	private void doCreateTie(CoreSectionTieType type)
+	{
+		// Ties should begin where the context menu-opening right-click occured.
+		// But if users mouse off of the context menu before selecting a Create Tie item,
+		// this.scenePos will be updated, causing ties to unexpectedly start from that
+		// new location. Use this.rightClickPos instead of this.scenePos to prevent this.
+		float[] tieStartPos = new float[2];
+		convertMousePointToSceneSpace(rightClickPos, tieStartPos);
+		
+		CorelyzerApp.getApp().setMode(CorelyzerApp.APP_TIE_MODE);
+		SceneGraph.startSectionTie(type.intValue(), tieStartPos[0], tieStartPos[1], selectedTrack, selectedTrackSection);
+		CorelyzerApp.getApp().updateGLWindows();
+	}
+
+	private void doManageTies() {
+		int[] tieIds = SceneGraph.getSectionTieIds();
+		if (tieIds == null) {
+			System.out.println("There are no ties to manage!");
+			return;
+		}
+		
+		ManageSectionTiesDialog dlg = new ManageSectionTiesDialog(tieIds);
+		dlg.setLocationRelativeTo(canvas);
+		dlg.setAlwaysOnTop(true);
+		dlg.setVisible(true);
+	}
+
 	private void doStaggerSections(final boolean stagger)
 	{
 		SceneGraph.staggerTrackSections(selectedTrack, stagger);
@@ -1059,6 +1140,11 @@ public class CorelyzerGLCanvas implements GLEventListener, MouseListener, MouseW
 			else if ( key == 'R' )
 				keyId = 4; // scissoring
 			SceneGraph.debugKey( keyId );
+		} else if (key == KeyEvent.VK_ESCAPE) {
+			if (canvasMode == CorelyzerApp.APP_TIE_MODE) {
+				SceneGraph.clearInProgressSectionTie();
+				canvasMode = CorelyzerApp.APP_NORMAL_MODE;
+			}
 		} else { // pan
 			float movX = 0.0f;
 			float movY = 0.0f;
@@ -1167,6 +1253,26 @@ public class CorelyzerGLCanvas implements GLEventListener, MouseListener, MouseW
 
 					PAN_MODE = 0;
 					return;
+				} else if (canvasMode == CorelyzerApp.APP_TIE_MODE) {
+					if (selectedTrack != -1 && selectedTrackSection != -1) {
+						int tieId = SceneGraph.finishSectionTie(scenePos[0], scenePos[1], selectedTrack, selectedTrackSection);
+						if (tieId == SectionTieErrors.INTER_SESSION_TIE_ERROR) {
+							JOptionPane.showMessageDialog(canvas, "A tie cannot be created on cores in different sessions.");
+						} else if (tieId != -1) {
+							SectionTieDialog tieDlg = new SectionTieDialog(CorelyzerApp.getApp().getToolFrame(), tieId, true);
+							Point pt = this.convertScenePointToMousePoint(scenePos[0], scenePos[1]);
+							tieDlg.setLocation(pt);
+							tieDlg.setModal(true);
+							tieDlg.setVisible(true);
+							CorelyzerApp.getApp().setMode(CorelyzerApp.APP_NORMAL_MODE);
+							if (tieDlg.confirmed) {
+								SceneGraph.setSectionTieADescription(tieId, tieDlg.getADesc());
+								SceneGraph.setSectionTieBDescription(tieId, tieDlg.getBDesc());
+							} else {
+								SceneGraph.deleteSectionTie(tieId);	
+							}
+						}
+					}
 				}
 				
 				if (selectedFreeDraw > -1) {
@@ -1178,8 +1284,21 @@ public class CorelyzerGLCanvas implements GLEventListener, MouseListener, MouseW
 					return;
 				}
 
-				selectedMarker = SceneGraph.accessPickedMarker();
+				if (selectedTie >= 0) {
+					SectionTieDialog tieDlg = new SectionTieDialog(CorelyzerApp.getApp().getToolFrame(), selectedTie, false);
+					Point pt = this.convertScenePointToMousePoint(scenePos[0], scenePos[1]);
+					tieDlg.setLocation(pt);
+					tieDlg.setModal(true);
+					tieDlg.setVisible(true);
+					if (tieDlg.confirmed) {
+						SceneGraph.setSectionTieType(selectedTie, tieDlg.getTieType().intValue());
+						SceneGraph.setSectionTieADescription(selectedTie, tieDlg.getADesc());
+						SceneGraph.setSectionTieBDescription(selectedTie, tieDlg.getBDesc());
+						CorelyzerApp.getApp().updateGLWindows();
+					}					
+				}
 
+				selectedMarker = SceneGraph.accessPickedMarker();
 				if (selectedMarker < 0) {
 					if (canvasMode == CorelyzerApp.APP_MARKER_MODE) {
 						SceneGraph.setCoreSectionMarkerFocus(false);
@@ -1414,18 +1533,16 @@ public class CorelyzerGLCanvas implements GLEventListener, MouseListener, MouseW
 	}
 
 	public void mouseMoved(final MouseEvent e) {
-		if (SceneGraph.hasCrossHair()) {
-			this.convertMousePointToSceneSpace(e.getPoint(), scenePos);
+		this.convertMousePointToSceneSpace(e.getPoint(), scenePos);
 
-			String msg = "";
-			msg = msg + scenePos[0] / SceneGraph.getCanvasDPIX(canvasId) + "\t" + scenePos[1] / SceneGraph.getCanvasDPIY(canvasId);
+		String msg = "";
+		msg = msg + scenePos[0] / SceneGraph.getCanvasDPIX(canvasId) + "\t" + scenePos[1] / SceneGraph.getCanvasDPIY(canvasId);
 
-			CorelyzerApp.getApp().getPluginManager().broadcastEventToPlugins(CorelyzerPluginEvent.MOUSE_MOTION, msg);
+		CorelyzerApp.getApp().getPluginManager().broadcastEventToPlugins(CorelyzerPluginEvent.MOUSE_MOTION, msg);
 
-			// set mouse position to draw cross hair
-			SceneGraph.positionMouse(scenePos[0], scenePos[1]);
-			CorelyzerApp.getApp().updateGLWindows();
-		}
+		// set mouse position to draw cross hair
+		SceneGraph.positionMouse(scenePos[0], scenePos[1]);
+		CorelyzerApp.getApp().updateGLWindows();
 	}
 
 	public void mousePressed(final MouseEvent e) {
@@ -1752,7 +1869,8 @@ public class CorelyzerGLCanvas implements GLEventListener, MouseListener, MouseW
 			
 			// 2/5/2012 brg: check Stagger Sections menu item if necessary
 			final boolean trackIsStaggered = SceneGraph.trackIsStaggered(selectedTrack);
-			AbstractButton ab = (AbstractButton)this.scenePopupMenu.getComponent(14);
+			final int staggerItemIdx = this.scenePopupMenu.getComponentIndex(staggerSectionsItem);
+			AbstractButton ab = (AbstractButton)this.scenePopupMenu.getComponent(staggerItemIdx);
 			ab.getModel().setSelected(trackIsStaggered);
 			
 			// check section and graph lock menu items

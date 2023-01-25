@@ -44,6 +44,11 @@
 #include "fontsys.h"
 #include "util.h"
 
+// Stifle deprecation warnings on macOS for GLU f'ns e.g. gluOrtho2D,
+// suggesting use of GLKMatrix4MakeOrtho(), which is 1) macOS-specific
+// and 2) a non-trivial change.
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+
 //======================================================================
 std::vector<Graph *> graphvec;
 static bool isCollapse = false;

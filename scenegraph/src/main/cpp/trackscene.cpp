@@ -47,6 +47,16 @@ static float defaultTrackPositionY = 0.0f;
 
 static bool is_remote_controlled = false;
 
+static int selectedTie = -1; // ID of selected tie, -1 if no selection
+static int mouseoverTie = -1;
+
+
+static void get_scenespace_tie_points(CoreSectionTie *tie, float &ax, float &ay, float &bx, float &by);
+static void prep_tie_appearance(CoreSectionTie *tie, const int tie_id);
+void create_section_tie_segments(TrackScene *ts, Canvas *c);
+void render_section_tie_offcore_segments(TrackScene *ts);
+void update_mouseover_tie(TrackScene *ts, Canvas *c);
+
 //================================================================
 std::vector<TrackScene *> trackscenevec;
 static int renderMode = -1;
@@ -97,6 +107,76 @@ bool is_track(int scene, int trackid) {
     if (trackid > trackVecSize)
         return false;
     return (trackscenevec[scene]->trackvec[trackid] != NULL);
+}
+
+//================================================================
+// Copy section tie IDs into idvec
+void get_tie_ids(int scene, std::vector<int> &idvec) {
+    TrackScene *ts = get_scene(scene);
+    if (!ts) return;
+    int count = 0;
+    for (int i = 0; i < ts->tievec.size(); i++) {
+        if (ts->tievec[i] != NULL) {
+            idvec.push_back(i);
+        }
+    }
+}
+
+//================================================================
+int add_tie(int scene, CoreSectionTie *tie) { // todo: associate tie with session by name as in track logic
+    if (!is_track_scene(scene))
+        return -1;
+
+    TrackScene *ts = trackscenevec[scene];
+    int tieId = -1;
+    for (int i = 0; i < ts->tievec.size(); i++) { // use empty slot if possible
+        if (ts->tievec[i] == NULL) {
+            ts->tievec[i] = tie;
+            tieId = i;
+            break;
+        }
+    }
+    if (tieId == -1) {
+        ts->tievec.push_back(tie);
+        tieId = ts->tievec.size() - 1;
+    }
+    return tieId;
+}
+
+//================================================================
+// todo? associate tie with session by name as in track logic
+// delete_tie() better name?
+void remove_tie(int scene, int tieId) {
+    if (tieId < 0) return;
+    TrackScene *ts = get_scene(scene);
+    CoreSectionTie *tie = ts->tievec[tieId];
+    delete tie;
+    ts->tievec[tieId] = NULL;
+}
+
+//================================================================
+CoreSectionTie *get_tie(int scene, int tieId) {
+    TrackScene *ts = trackscenevec[scene];
+    if (!ts || tieId == -1) return NULL;
+    CoreSectionTie *tie = ts->tievec[tieId];
+    return tie;
+}
+
+//================================================================
+void set_selected_tie(int tieId) {
+    selectedTie = tieId;
+}
+
+//================================================================
+int get_mouseover_tie() {
+    return mouseoverTie;
+}
+
+//================================================================
+// Called after a session is loaded or closed to reconcile ties.
+// If neither section of a tie can be found, delete.
+void update_section_ties() {
+
 }
 
 //================================================================
@@ -224,6 +304,42 @@ void free_track_section_model(int scene, int trackid, int sectionid) {
     if (!is_track(scene, trackid))
         return;
     free_model(trackscenevec[scene]->trackvec[trackid], sectionid);
+    free_associated_ties(scene, trackid, sectionid);
+}
+
+//================================================================
+// Delete ties with at least one endpoint on this section
+void free_associated_ties(int scene, int trackId, int sectionId) {
+    for (int tidx = 0; tidx < trackscenevec[scene]->tievec.size(); tidx++) {
+        CoreSectionTie *tie = trackscenevec[scene]->tievec[tidx];
+        if (!tie) { continue; }
+        if (tie->isOnTrack(trackId) && tie->isOnSection(sectionId)) {
+            remove_tie(scene, tidx);
+        }
+    }
+}
+
+//================================================================
+// Delete all ties that originate from track being deleted
+void delete_section_ties_on_track(int scene, int trackId) {
+    TrackSceneNode *track = get_scene_track(trackId);
+    if (!track) return;
+    std::vector<int> ties_to_delete = std::vector<int>();
+    for (int sidx = 0; sidx < track->modelvec.size(); sidx++) {
+        CoreSection *sec = track->modelvec[sidx];
+        if (!sec) continue;
+        for (int tidx = 0; tidx < trackscenevec[scene]->tievec.size(); tidx++) {
+            CoreSectionTie *tie = trackscenevec[scene]->tievec[tidx];
+            if (!tie) continue;
+            if (tie->isOnTrack(trackId)) {
+                ties_to_delete.push_back(tidx);
+            }
+        }
+    }
+
+    for (int i = 0; i < ties_to_delete.size(); i++) {
+        remove_tie(scene, ties_to_delete[i]);
+    }
 }
 
 //================================================================
@@ -348,6 +464,10 @@ void render_track_scene(int id, Canvas *c) {
     if (!ts)
         return;
 
+    update_mouseover_tie(ts, c);
+    create_section_tie_segments(ts, c);
+    render_section_tie_offcore_segments(ts);
+
 #ifdef DEBUG
     printf("Going to go through zorder of size %d\n", ts->zorder.size());
 #endif
@@ -370,6 +490,9 @@ void render_track_scene(int id, Canvas *c) {
         }
     }
 
+    render_section_tie_oncore_segments(ts, c);
+    render_in_progress_tie(c);
+
     // draw plugin free draw rectangles, scale so x,y,w,h are in meters
     glPushMatrix();
     {
@@ -381,6 +504,269 @@ void render_track_scene(int id, Canvas *c) {
         }
     }
     glPopMatrix();
+}
+
+//================================================================
+void render_arrowhead(float fromX, float fromY, float toX, float toY, float size) {
+    const float pi = 3.14159f;
+    float theta = atan2(toY - fromY, toX - fromX);
+    float x0 = toX - size * cos(theta - pi/6);
+    float y0 = toY - size * sin(theta - pi/6);
+    float x1 = toX - size * cos(theta + pi/6);
+    float y1 = toY - size * sin(theta + pi/6);
+    glBegin(GL_POLYGON);
+    {
+        glVertex2f(toX, toY);
+        glVertex2f(x0, y0);
+        glVertex2f(x1, y1);
+    }
+    glEnd();
+}
+
+//================================================================
+// Set tie color based on tie type
+static void set_tie_color(SectionTieType type) {
+    if (type == VISUAL) {
+        glColor3f(0, 1, 0);
+    } else if (type == DATA) {
+        glColor3f(0, 0, 1);
+    } else if (type == SPLICE) {
+        glColor3f(1, 0, 0);
+    } else {
+        printf("Unexpected tie type %d\n", type);
+    }
+}
+
+//================================================================
+// client is responsible for handling vertical line i.e. undefined slope
+float get_slope(float ax, float ay, float bx, float by) {
+    return (by - ay) / (bx - ax);
+}
+
+//================================================================
+// Find point where (ax,ay)->(bx,by) intersects the edges of the core
+// section sectionId in track trackId. Return intersection point in
+// (outX, outY) parameters.
+void calc_core_edge_intersection(
+    Canvas *c, const int trackId, const int sectionId,
+    float ax, float ay, float bx, float by,
+    float m, // slope
+    float b, // y-intercept
+    float &outX, float &outY) {
+    TrackSceneNode *t = get_scene_track(trackId);
+    CoreSection *cs = get_track_section(t, sectionId);
+
+    // Edge names based on section appearance in horizontal depth orientation.
+    // leftEdge is the top of the physical core, rightEdge is the bottom.
+    const float topEdge = t->py;
+    const float botEdge = t->py + (cs->height * INCH_PER_CM * c->dpi_x);
+    const float leftEdge = cs->px + (cs->intervalTop * (INCH_PER_CM * c->dpi_x));
+    const float rightEdge = cs->px + (cs->intervalBottom * INCH_PER_CM * c->dpi_x);
+
+    // does (ax,ay)->(bx,by) intersect top or bottom edge?
+    float topBotX, topBotY;
+    if (ay > by) {
+        topBotX = (topEdge - b)/m;
+        topBotY = topEdge;
+    } else {
+        topBotX = (botEdge - b)/m;
+        topBotY = botEdge;
+    }
+
+    // left or right edge?
+    float leftRightX, leftRightY;
+    if (ax > bx) {
+        leftRightX = leftEdge;
+        leftRightY = m * leftEdge + b;
+    } else {
+        leftRightX = rightEdge;
+        leftRightY = m * rightEdge + b;
+    }
+
+    // of the top/bot and left/right candidate points, only one should
+    // fall within the core section's rectangle
+    if (topBotX >= leftEdge && topBotX <= rightEdge) {
+        outX = topBotX;
+        outY = topBotY;
+    } else {
+        outX = leftRightX;
+        outY = leftRightY;
+    }
+}
+
+//================================================================
+// Prepare scenespace points for drawing tie line segments.
+void create_section_tie_segments(TrackScene *ts, Canvas *c) {
+    for (int tidx = 0; tidx < ts->tievec.size(); tidx++) {
+        CoreSectionTie *tie = ts->tievec[tidx];
+        if (!tie || !tie->show || !tie->valid()) continue;
+
+        float ax, ay, bx, by;
+        get_scenespace_tie_points(tie, ax, ay, bx, by);
+
+        // Single-section tie. A single line segment is required.
+        if (tie->isSingleSection()) {
+            tie->drawData->setPointA(ax, ay);
+            tie->drawData->setPointB(bx, by);
+            continue;
+        }
+
+        // Two-section tie. Create points defining three line segments:
+        // A -> edge of tied section (A')
+        // B -> edge of tied section (B')
+        // A' -> B'
+        if (ax == bx) { // handle vertical line (undefined slope)
+            TrackSceneNode *aTrack = get_scene_track(tie->a->trackId);
+            CoreSection *aCore = get_track_section(aTrack, tie->a->sectionId);
+            TrackSceneNode *bTrack = get_scene_track(tie->b->trackId);
+            CoreSection *bCore = get_track_section(bTrack, tie->b->sectionId);
+            float aEdge = aTrack->py;
+            float bEdge = bTrack->py;
+            if (ay < by) {
+                aEdge += aCore->height * INCH_PER_CM * c->dpi_x;
+            } else {
+                bEdge += bCore->height * INCH_PER_CM * c->dpi_x;
+            }
+            tie->drawData->setPointA(ax, ay);
+            tie->drawData->setPointB(bx, by);
+            tie->drawData->setPointAEdge(ax, aEdge);
+            tie->drawData->setPointBEdge(bx, bEdge);
+        } else {
+            const float m = get_slope(ax, ay, bx, by);
+            const float b = ay - (m * ax); // y-intercept
+
+            float a_intX, a_intY, b_intX, b_intY;
+            calc_core_edge_intersection(c, tie->a->trackId, tie->a->sectionId, ax, ay, bx, by, m, b, a_intX, a_intY);
+            calc_core_edge_intersection(c, tie->b->trackId, tie->b->sectionId, bx, by, ax, ay, m, b, b_intX, b_intY);
+            tie->drawData->setPointA(ax, ay);
+            tie->drawData->setPointB(bx, by);
+            tie->drawData->setPointAEdge(a_intX, a_intY);
+            tie->drawData->setPointBEdge(b_intX, b_intY);
+        }
+    }
+}
+
+//================================================================
+// Of the ties within 5 pixels of the mouse cursor, set mouseoverTie
+// to the ID of the tie closest to the cursor.
+void update_mouseover_tie(TrackScene *ts, Canvas *c) {
+    int minDistTie = -1;
+    float minDist = 1000.0f;
+    for (int tidx = 0; tidx < ts->tievec.size(); tidx++) {
+        CoreSectionTie *tie = ts->tievec[tidx];
+        if (!tie || !tie->show || !tie->valid()) continue;
+
+        float ax, ay, bx, by;
+        tie->a->toSceneSpace(ax, ay);
+        tie->b->toSceneSpace(bx, by);
+        const float ssDist = get_horizontal_depth() ? pt_to_line_dist(c->mouseX, c->mouseY, ax, ay, bx, by) : pt_to_line_dist(c->mouseY, -c->mouseX, ax, ay, bx, by);
+        const float pixDist = ssDist / (get_canvas_width(0) / get_canvas_orig_width(0));
+        if (pixDist <= TIE_SELECT_DIST_PIX) {
+            if (pixDist < minDist) {
+                minDist = pixDist;
+                minDistTie = tidx;
+            }
+        }
+    }
+    mouseoverTie = minDistTie;
+}
+
+//================================================================
+// For each tie, draw the line segments within the tied cores.
+void render_section_tie_oncore_segments(TrackScene *ts, Canvas *c) {
+    glDisable(GL_TEXTURE_2D); // enabled textures affect point/line color
+
+    for (int tidx = 0; tidx < ts->tievec.size(); tidx++) {
+        CoreSectionTie *tie = ts->tievec[tidx];
+        if (!tie || !tie->show || !tie->valid()) continue;
+
+        prep_tie_appearance(tie, tidx);
+        float ax, ay, bx, by;
+        tie->drawData->getPointA(ax, ay);
+        tie->drawData->getPointB(bx, by);
+        if (tie->isSingleSection()) {
+            glBegin(GL_LINES);
+            glVertex2f(ax, ay);
+            glVertex2f(bx, by);
+            glEnd();
+        } else {
+            float aix, aiy, bix, biy;
+            tie->drawData->getPointAEdge(aix, aiy);
+            tie->drawData->getPointBEdge(bix, biy);
+            glBegin(GL_LINES);
+            glVertex2f(ax, ay);
+            glVertex2f(aix, aiy);
+            glVertex2f(bx, by);
+            glVertex2f(bix, biy);
+            glEnd();
+        }
+    }
+
+    glEnable(GL_TEXTURE_2D);
+}
+
+//================================================================
+// For each tie, draw the line segment between edges of the tied cores.
+void render_section_tie_offcore_segments(TrackScene *ts) {
+    glDisable(GL_TEXTURE_2D);
+    glEnable(GL_BLEND);
+    for (int tidx = 0; tidx < ts->tievec.size(); tidx++) {
+        CoreSectionTie *tie = ts->tievec[tidx];
+        if (!tie || !tie->show || !tie->valid()) continue;
+
+        if (!tie->isSingleSection()) {
+            prep_tie_appearance(tie, tidx);
+            glBegin(GL_LINES);
+            float aix, aiy, bix, biy;
+            tie->drawData->getPointAEdge(aix, aiy);
+            tie->drawData->getPointBEdge(bix, biy);
+            glVertex2f(aix, aiy);
+            glVertex2f(bix, biy);
+            glEnd();
+        }
+    }
+    glDisable(GL_BLEND);
+    glEnable(GL_TEXTURE_2D);
+}
+
+
+//================================================================
+static void get_scenespace_tie_points(CoreSectionTie *tie, float &ax, float &ay, float &bx, float &by) {
+    tie->a->toSceneSpace(ax, ay);
+    tie->b->toSceneSpace(bx, by);
+}
+
+//================================================================
+// set tie line width and color based on its type and selected/mouseover status
+static void prep_tie_appearance(CoreSectionTie *tie, const int tie_id) {
+    if (tie_id == mouseoverTie || tie_id == selectedTie) {
+        glLineWidth(5);
+    } else {
+        glLineWidth(1);
+    }
+    if (tie_id == selectedTie) {
+        glColor3f(1,1,0);
+    } else {
+        set_tie_color(tie->getType());
+    }
+}
+
+//================================================================
+void render_in_progress_tie(Canvas *c) {
+    SectionTiePoint *tp = get_in_progress_tie();
+    if (tp) {
+        float ax, ay;
+        tp->toSceneSpace(ax, ay);
+        set_tie_color(get_in_progress_tie_type());
+        glBegin(GL_LINES);
+        {
+            glVertex3f(ax, ay, 0.0f);
+            const float mx = get_horizontal_depth() ? c->mouseX : c->mouseY;
+            const float my = get_horizontal_depth() ? c->mouseY : -c->mouseX;
+            glVertex3f(mx, my, 0.0f);
+        }
+        glEnd();
+    }
 }
 
 //================================================================
@@ -961,4 +1347,36 @@ void stack_sections(const int trackid, const int sectionid) {
         // adjust depth or sections can be mistakenly culled from drawing
         cs2->depth = cs2->px * CM_PER_INCH / dpix;
     }
+}
+
+//=======================================================================
+// Get distance from point (px,py) to nearest point on line segment (x0,y0) -> (x1,y1).
+// From https://stackoverflow.com/questions/849211/shortest-distance-between-a-point-and-a-line-segment
+float pt_to_line_dist(float px, float py, float x0, float y0, float x1, float y1) {
+    const float a = px - x0;
+    const float b = py - y0;
+    const float c = x1 - x0;
+    const float d = y1 - y0;
+
+    const float dot = a * c + b * d;
+    const float len_sq = c * c + d * d;
+    float param = -1;
+    if (len_sq != 0) {
+        param = dot / len_sq;
+    }
+    float xx, yy;
+    if (param < 0) { // (x0,y0) closest
+        xx = x0;
+        yy = y0;
+    } else if (param > 1) { // (x1,y1) closest
+        xx = x1;
+        yy = y1;
+    } else { // point (xx,yy) on segment (x0,y0) -> (x1,y1) closest
+        xx = x0 + param * c;
+        yy = y0 + param * d;
+    }
+
+    const float dx = px - xx;
+    const float dy = py - yy;
+    return sqrt(dx * dx + dy * dy);
 }

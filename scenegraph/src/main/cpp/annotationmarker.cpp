@@ -464,8 +464,7 @@ void render_marker(Canvas *c, AnnotationMarker *m) {
         glPopMatrix();
     }
 
-    // if focused,
-    if (m->focused) {
+    if (m->focused) { // annotation is selected for modification
         // draw annotation outline in red
         glLineWidth(1);
         glEnable(GL_BLEND);
@@ -570,7 +569,6 @@ void render_marker(Canvas *c, AnnotationMarker *m) {
         }
         glTranslatef(m->px, m->py, 0);
     } else {
-        // draw annotation outline in red
         glLineWidth(1);
 
         // draw marker guide

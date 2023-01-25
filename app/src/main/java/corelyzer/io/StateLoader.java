@@ -46,7 +46,9 @@ import org.w3c.dom.Attr;
 import corelyzer.data.ChatGroup;
 import corelyzer.data.CoreSection;
 import corelyzer.data.CoreSectionGraph;
+import corelyzer.data.CoreSectionTieType;
 import corelyzer.data.MarkerType;
+import corelyzer.data.SectionTiePoint;
 import corelyzer.data.Session;
 import corelyzer.data.TrackSceneNode;
 import corelyzer.data.WellLogDataSet;
@@ -1385,6 +1387,7 @@ public class StateLoader {
 	}
 
 	public boolean loadState(String filename, final String prefix) {
+		final String originalFilename = filename;
 		// Do a XML check before really loading
 		try {
 			DOMParser parser = new DOMParser();
@@ -1466,6 +1469,7 @@ public class StateLoader {
 					}
 
 					Session s = new Session(sessionName);
+					s.setStateFilePath(originalFilename);
 					cg.addSession(s);
 
 					loadStateXML(e, s);
@@ -1486,6 +1490,13 @@ public class StateLoader {
 						}
 
 						String sessionName = sessionElement.getAttribute("name");
+						if (app.containsSessionName(sessionName)) {
+							sessionName = handleDuplicateSessionName(sessionName);
+							if (sessionName == null) {
+								continue;
+							}
+						}
+
 						Session s = new Session(sessionName);
 
 						String disId = sessionElement.getAttribute("DISId");
@@ -1493,9 +1504,10 @@ public class StateLoader {
 							disId = "N/A";
 						}
 						s.setDISId(disId);
+						s.setStateFilePath(originalFilename);
 
 						cg.addSession(s);
-
+						
 						loadStateXML(sessionElement, s);
 					}
 				}
@@ -1514,12 +1526,37 @@ public class StateLoader {
 		return true;
 	}
 
+	String handleDuplicateSessionName(String sessionName) {
+		Object[] options = { "Rename", "Skip" };
+		String msg = "Session '" + sessionName + "' already exists.\n" +
+			"Rename, or skip loading this session?";
+		final String title = "Duplicate Session Name";
+		int retval = JOptionPane.showOptionDialog(
+			app.getMainFrame(), msg, title, JOptionPane.YES_NO_OPTION,
+			JOptionPane.QUESTION_MESSAGE, null, options, options[1]);
+
+		if (retval == JOptionPane.YES_OPTION) {
+			String newName = "";
+			while (true) {
+				msg = "Type a new session name for '" + sessionName + "'";
+				newName = JOptionPane.showInputDialog(app.getMainFrame(), msg, "Rename Session",
+					JOptionPane.PLAIN_MESSAGE);
+				if (!sessionName.equals(newName)) { break; }
+			}
+			if (newName != null) {
+				return newName;
+			}
+		}
+		return null;
+	}
+
 	// Load session state with incoming XML state root element
 	void loadStateXML(final Element xmlRoot, final Session session) { // xmlRoot -> scene(1.0) or
 												// session(1.5)
 		totallength = recursiveTreeSize(xmlRoot);
 		nodecount = 0;
 		NodeList list = xmlRoot.getChildNodes();
+		Vector<Element> tieElements = new Vector<Element>();
 
 		pdlg.setMaximum(totallength);
 		pdlg.setValue(0);
@@ -1549,6 +1586,8 @@ public class StateLoader {
 						loadAnnotationXML(e, -1, -1);
 					} else if (type.equals("track")) {
 						loadTrackXML(e, session);
+					} else if (type.equals("tie")) {
+						tieElements.add(e); // defer tie loading
 					}
 				} else {
 					System.err.println("---> [IGNORE] Some tagname I don't know: " + tagname);
@@ -1558,7 +1597,35 @@ public class StateLoader {
 			}
 		}
 
+		// all tracks have been loaded, can safely load ties
+		for (Element tieElt : tieElements) {
+			loadTieXML(tieElt, session);
+		}
+
 		pdlg.setValue(totallength);
+	}
+
+	void loadTieXML(final Element e, final Session session) {
+		CoreSectionTieType type = CoreSectionTieType.fromInt(Integer.parseInt(e.getAttribute("tieType")));
+		SectionTiePoint ptA = new SectionTiePoint(e.getAttribute("atrack"), e.getAttribute("asection"), Float.valueOf(e.getAttribute("ax")), Float.valueOf(e.getAttribute("ay")), e.getAttribute("adesc"));
+		SectionTiePoint ptB = new SectionTiePoint(e.getAttribute("btrack"), e.getAttribute("bsection"), Float.valueOf(e.getAttribute("bx")), Float.valueOf(e.getAttribute("by")), e.getAttribute("bdesc"));
+		
+		final int a_track_id = SceneGraph.getTrackIDByName(session.getName(), ptA.track);
+		final int a_section_id = SceneGraph.getSectionIDByName(a_track_id, ptA.section);
+		final int b_track_id = SceneGraph.getTrackIDByName(session.getName(), ptB.track);
+		final int b_section_id = SceneGraph.getSectionIDByName(b_track_id, ptB.section);
+		if (a_track_id == -1 || a_section_id == -1 || b_track_id == -1 || b_section_id == -1) {
+			System.out.println("Couldn't find track or section for tie, skipping.");
+			return;
+		}
+
+		final float ax = ((ptA.x * 100.0f) / 2.54f) * SceneGraph.getCanvasDPIX(0);
+		final float ay = ((ptA.y * 100.0f) / 2.54f) * SceneGraph.getCanvasDPIY(0);
+		final float bx = ((ptB.x * 100.0f) / 2.54f) * SceneGraph.getCanvasDPIX(0);
+		final float by = ((ptB.y * 100.0f) / 2.54f) * SceneGraph.getCanvasDPIY(0);
+		final boolean show = Boolean.valueOf(e.getAttribute("show"));
+
+		SceneGraph.createSectionTie(type.intValue(), ax, ay, e.getAttribute("adesc"), a_track_id, a_section_id, bx, by, e.getAttribute("bdesc"), b_track_id, b_section_id, show);
 	}
 
 	// Load track information with XML root element
@@ -1592,7 +1659,7 @@ public class StateLoader {
 			}
 
 			// this would be the merge case
-			trackId = app.createTrack(name);
+			trackId = app.createTrack(name, session);
 		} else {
 			System.out.println("---> [WARN] Track has no name! Doing nothing");
 			return;
