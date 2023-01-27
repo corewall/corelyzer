@@ -119,8 +119,16 @@ public class CoreArchiveExport {
 		// not ending in a path separator regardless of whether app.preferences.tmp_Directory
 		// does or not. A tmpDirPath ending in a path separator will result in bogus names
 		// when writing to Zip
-		File tmpDirFile = new File(app.preferences().tmp_Directory);
-		String tmpDirPath = new File(tmpDirFile, proj_name).getAbsolutePath();
+		File corelyzerTmpDir = new File(app.preferences().tmp_Directory);
+
+		// Ensure Corelyzer's tmp dir (default is Documents/Corelyzer/Caches/tmp) exists.
+		// If it doesn't, the below tmpDir.mkdir() call to create the proj_name subdir of the tmp dir
+		// will fail because File.mkdir() cannot create that File's parent dir (tmp).
+		if (!corelyzerTmpDir.exists()) {
+			corelyzerTmpDir.mkdir();
+		}
+
+		String tmpDirPath = new File(corelyzerTmpDir, proj_name).getAbsolutePath();
         
 		final String sp = System.getProperty("file.separator");
 		String imgDirPath = tmpDirPath + sp + "images";
