@@ -59,9 +59,8 @@ public class CRPreferences {
 
 	public boolean isInited = false;
 
-	// Keep track of directory open previously
-	static String currentDir = System.getProperty("user.home") + System.getProperty("file.separator") + 
-		"Documents" + System.getProperty("file.separator") + "Corelyzer";
+	// Track last-visited directory in file choosers
+	static String currentDir = System.getProperty("user.home");
 
 	// Directories
 	public String config_Directory;
