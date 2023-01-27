@@ -43,6 +43,7 @@ import org.w3c.dom.NodeList;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Attr;
 
+import corelyzer.data.CRPreferences;
 import corelyzer.data.ChatGroup;
 import corelyzer.data.CoreSection;
 import corelyzer.data.CoreSectionGraph;
@@ -388,12 +389,12 @@ public class StateLoader {
 							int result = JOptionPane.showOptionDialog(app.getMainFrame(), message, title, JOptionPane.YES_NO_OPTION,
 									JOptionPane.QUESTION_MESSAGE, null, options, options[2]);
 
-							if (result == 2) { // select...
-								// show file browser
-								File sessionFileParent = new File(stateFilename).getParentFile();
-								final int retval = SwingSafeDirectoryChooser.chooseFile(sessionFileParent, app.getMainFrame(), "Select directory for image files");
+							if (result == 2) { // select location of image files
+								File initialDir = new File(CRPreferences.getCurrentDir());
+								final int retval = SwingSafeDirectoryChooser.chooseFile(initialDir, app.getMainFrame(), "Select directory for image files");
 								if (retval == JFileChooser.APPROVE_OPTION) {
-									File f = SwingSafeDirectoryChooser.selectedDir;										
+									File f = SwingSafeDirectoryChooser.selectedDir;
+									CRPreferences.setCurrentDir(f.getAbsolutePath());
 									datadirectory = f.getAbsolutePath();
 									local = datadirectory + sp + fptr.getName();
 									fptr = new File(local);
@@ -755,12 +756,12 @@ public class StateLoader {
 					int result = JOptionPane.showOptionDialog(app.getMainFrame(), message, title, JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE,
 							null, options, options[2]);
 
-					if (result == 2) { // TODO more about returns
-						// show file browser
-						final File sessionFileParent = new File(stateFilename).getParentFile();
-						final int retval = SwingSafeDirectoryChooser.chooseFile(sessionFileParent, app.getMainFrame(), "Select directory for data files");
+					if (result == 2) { // select location of data files
+						File initialDir = new File(CRPreferences.getCurrentDir());
+						final int retval = SwingSafeDirectoryChooser.chooseFile(initialDir, app.getMainFrame(), "Select directory for data files");
 						if (retval == JFileChooser.APPROVE_OPTION) {
-							File f = SwingSafeDirectoryChooser.selectedDir;			
+							File f = SwingSafeDirectoryChooser.selectedDir;
+							CRPreferences.setCurrentDir(f.getAbsolutePath());
 							datadirectory = f.getAbsolutePath();
 							filename = datadirectory + sp + fptr.getName();
 							fptr = new File(filename);

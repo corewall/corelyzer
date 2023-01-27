@@ -54,6 +54,7 @@ import com.intellij.uiDesigner.core.Spacer;
 
 import net.miginfocom.swing.MigLayout;
 
+import corelyzer.data.CRPreferences;
 import corelyzer.data.ImagePropertyTable;
 import corelyzer.data.ImagePropertyTableModel;
 import corelyzer.data.Session;
@@ -497,11 +498,13 @@ public class CRLoadImageListingDialog extends JDialog {
 		JOptionPane.showMessageDialog(this, "Save Image Listing File\n\n" + "only supports Comma Delimited Files (.csv)\n"
 				+ "File will inlcude below values in each line.\n" + "filename, orientation, length, dpix, dpiy, depth");
 
-		JFileChooser chooser = new JFileChooser();
+		JFileChooser chooser = new JFileChooser(new File(CRPreferences.getCurrentDir()));
 		chooser.setFileFilter(new FileNameExtensionFilter("Comma Separated Values (.csv)", "csv"));
 		File selectedFile = null;
-		if (chooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION)
+		if (chooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
 			selectedFile = chooser.getSelectedFile();
+			CRPreferences.setCurrentDir(chooser.getCurrentDirectory().getAbsolutePath());
+		}
 
 		if (selectedFile == null) return;
 
@@ -565,7 +568,6 @@ public class CRLoadImageListingDialog extends JDialog {
 	// load user processed csv file
 	// each line inlcudes five tuples
 	// filename, orientation, length, dpix, dpiy, depth
-	static private File lastUsedDir = new File(".");
 	private void selectAndLoadCSVFileToList(final String delimiter) {
 		// show up general info message
 		JOptionPane.showMessageDialog(this, "Image Listing Files must be in Comma Separated Values (.csv) format.\n\n"
@@ -575,12 +577,12 @@ public class CRLoadImageListingDialog extends JDialog {
 				+ "- Orientation must be 'Horizontal' or 'Vertical' (excluding quotes).\n"
 				+ "- Headers and comment lines, if included, must start with # to avoid errors.");
 
-		JFileChooser chooser = new JFileChooser(lastUsedDir);
+		JFileChooser chooser = new JFileChooser(new File(CRPreferences.getCurrentDir()));
 		chooser.setFileFilter(new FileNameExtensionFilter("Comma Separated Values (.csv)", "csv"));
 		File selectedFile = null;
 		if (chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
 			selectedFile = chooser.getSelectedFile();
-			lastUsedDir = chooser.getCurrentDirectory();
+			CRPreferences.setCurrentDir(chooser.getCurrentDirectory().getAbsolutePath());
 		}
 
 		if (selectedFile == null) return;
