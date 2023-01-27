@@ -125,23 +125,6 @@ public class CorelyzerApp extends WindowAdapter implements MouseListener, Startu
 			}
 		}
 	}
-
-	private static void doStartupChecks()
-	{
-		String javaVersion = System.getProperty("java.version");
-		StringTokenizer st = new StringTokenizer( javaVersion, "." );
-		if ( st.countTokens() >= 2 )
-		{
-			final int majorVersion = Integer.parseInt( st.nextToken() );
-			final int minorVersion = Integer.parseInt( st.nextToken() );
-			
-			if (majorVersion <= 1 && (minorVersion != 8))
-			{
-				JOptionPane.showMessageDialog(null, "Detected Java version " + javaVersion + ":\n" +
-						"Java 8 is recommended for use with this version of Corelyzer.");
-			}
-		}
-	}
 	
 	// ====================================================================
 	private static CRPreferences handlePreferences() {
@@ -359,8 +342,6 @@ public class CorelyzerApp extends WindowAdapter implements MouseListener, Startu
 	 *			  Plugin names and input session file, if there's any
 	 */
 	public static void main(final String[] args) {
-		doStartupChecks();
-		
 		CRPreferences prefs = handlePreferences();
 
 		// If somehow the user click on 'Cancel' in their first run, just quit.
