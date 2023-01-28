@@ -4916,7 +4916,7 @@ JNIEXPORT jintArray JNICALL Java_corelyzer_graphics_SceneGraph_getSectionTieIds(
     if (tieIds.size() == 0) return NULL;
     jintArray retArray = jenv->NewIntArray(tieIds.size());
     for (int i = 0; i < tieIds.size(); i++) {
-        jenv->SetIntArrayRegion(retArray, i, 1, &tieIds[i]);
+        jenv->SetIntArrayRegion(retArray, i, 1, (jint *)&tieIds[i]);
     }
     return retArray;
 }
