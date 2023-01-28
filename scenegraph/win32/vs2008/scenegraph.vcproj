@@ -421,6 +421,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\main\cpp\tie.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\main\cpp\trackscene.cpp"
 				>
 			</File>
@@ -516,6 +520,10 @@
 			</File>
 			<File
 				RelativePath="..\..\src\main\cpp\textureresource_ex.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\main\cpp\tie.h"
 				>
 			</File>
 			<File
