@@ -115,9 +115,10 @@ void render_in_progress_tie(Canvas *c);
 void set_selected_tie(int tieId);
 int get_mouseover_tie();
 void free_associated_ties(int scene, int trackId, int sectionId);
-void update_section_ties();
 void delete_section_ties_on_track(int scene, int trackId);
+bool edit_section_tie_point(int scene, float mouseX, float mouseY);
 
 float pt_to_line_dist(float px, float py, float x0, float y0, float x1, float y1);
+float pt_to_pt_dist(float ax, float ay, float bx, float by);
 #endif
 

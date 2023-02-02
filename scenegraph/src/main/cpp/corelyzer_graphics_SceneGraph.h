@@ -241,6 +241,14 @@ JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_finishSectionTie
 
 /*
  * Class:     corelyzer_graphics_SceneGraph
+ * Method:    editSectionTiePoint
+ * Signature: (FF)Z
+ */
+JNIEXPORT jboolean JNICALL Java_corelyzer_graphics_SceneGraph_editSectionTiePoint
+  (JNIEnv *, jclass, jfloat, jfloat);
+
+/*
+ * Class:     corelyzer_graphics_SceneGraph
  * Method:    getSectionTieType
  * Signature: (I)I
  */
@@ -358,14 +366,6 @@ JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_getSectionTieATrack
  */
 JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_getSectionTieBTrack
   (JNIEnv *, jclass, jint);
-
-/*
- * Class:     corelyzer_graphics_SceneGraph
- * Method:    updateSectionTies
- * Signature: ()V
- */
-JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_updateSectionTies
-  (JNIEnv *, jclass);
 
 /*
  * Class:     corelyzer_graphics_SceneGraph

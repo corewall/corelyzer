@@ -1129,17 +1129,14 @@ public class CorelyzerGLCanvas implements GLEventListener, MouseListener, MouseW
 									// scenegraph
 			boolean b = SceneGraph.getDebug();
 			SceneGraph.setDebug(!b);
-		} else if ( key == 'Q' || key == 'W' || key == 'E' || key == 'R') {
-			int keyId = 0;
-			if ( key == 'Q' )
-				keyId = 1; // scaling
-			if ( key == 'W' )
-				keyId = 2; // labels
-			if ( key == 'E' )
-				keyId = 3; // border
-			else if ( key == 'R' )
-				keyId = 4; // scissoring
-			SceneGraph.debugKey( keyId );
+		} else if (key == 'E') {
+			Point mousePos = canvas.getMousePosition();
+			float[] mouseScenePos = { 0.0f, 0.0f };
+			this.convertMousePointToSceneSpace(mousePos, mouseScenePos);
+			boolean startEdit = SceneGraph.editSectionTiePoint(mouseScenePos[0], mouseScenePos[1]);
+			if (startEdit) {
+				CorelyzerApp.getApp().setMode(CorelyzerApp.APP_TIE_MODE);
+			}
 		} else if (key == KeyEvent.VK_ESCAPE) {
 			if (canvasMode == CorelyzerApp.APP_TIE_MODE) {
 				SceneGraph.clearInProgressSectionTie();
@@ -1258,21 +1255,24 @@ public class CorelyzerGLCanvas implements GLEventListener, MouseListener, MouseW
 						int tieId = SceneGraph.finishSectionTie(scenePos[0], scenePos[1], selectedTrack, selectedTrackSection);
 						if (tieId == SectionTieErrors.INTER_SESSION_TIE_ERROR) {
 							JOptionPane.showMessageDialog(canvas, "A tie cannot be created on cores in different sessions.");
-						} else if (tieId != -1) {
-							SectionTieDialog tieDlg = new SectionTieDialog(CorelyzerApp.getApp().getToolFrame(), tieId, true);
-							Point pt = this.convertScenePointToMousePoint(scenePos[0], scenePos[1]);
-							tieDlg.setLocation(pt);
-							tieDlg.setModal(true);
-							tieDlg.setVisible(true);
-							CorelyzerApp.getApp().setMode(CorelyzerApp.APP_NORMAL_MODE);
-							if (tieDlg.confirmed) {
-								SceneGraph.setSectionTieADescription(tieId, tieDlg.getADesc());
-								SceneGraph.setSectionTieBDescription(tieId, tieDlg.getBDesc());
-							} else {
-								SceneGraph.deleteSectionTie(tieId);	
+						} else {
+							if (tieId != -1) { // newly-created tie
+								SectionTieDialog tieDlg = new SectionTieDialog(CorelyzerApp.getApp().getToolFrame(), tieId, true);
+								Point pt = this.convertScenePointToMousePoint(scenePos[0], scenePos[1]);
+								tieDlg.setLocation(pt);
+								tieDlg.setModal(true);
+								tieDlg.setVisible(true);
+								if (tieDlg.confirmed) {
+									SceneGraph.setSectionTieADescription(tieId, tieDlg.getADesc());
+									SceneGraph.setSectionTieBDescription(tieId, tieDlg.getBDesc());
+								} else {
+									SceneGraph.deleteSectionTie(tieId);	
+								}
 							}
+							CorelyzerApp.getApp().setMode(CorelyzerApp.APP_NORMAL_MODE);
 						}
 					}
+					return;
 				}
 				
 				if (selectedFreeDraw > -1) {
@@ -1284,7 +1284,7 @@ public class CorelyzerGLCanvas implements GLEventListener, MouseListener, MouseW
 					return;
 				}
 
-				if (selectedTie >= 0) {
+				if (selectedTie >= 0 && canvasMode == CorelyzerApp.APP_NORMAL_MODE) {
 					SectionTieDialog tieDlg = new SectionTieDialog(CorelyzerApp.getApp().getToolFrame(), selectedTie, false);
 					Point pt = this.convertScenePointToMousePoint(scenePos[0], scenePos[1]);
 					tieDlg.setLocation(pt);
@@ -1295,7 +1295,8 @@ public class CorelyzerGLCanvas implements GLEventListener, MouseListener, MouseW
 						SceneGraph.setSectionTieADescription(selectedTie, tieDlg.getADesc());
 						SceneGraph.setSectionTieBDescription(selectedTie, tieDlg.getBDesc());
 						CorelyzerApp.getApp().updateGLWindows();
-					}					
+					}
+					return;
 				}
 
 				selectedMarker = SceneGraph.accessPickedMarker();

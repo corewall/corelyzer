@@ -152,6 +152,7 @@ struct CoreSectionTie {
 SectionTiePoint *get_in_progress_tie();
 SectionTieType get_in_progress_tie_type();
 bool start_section_tie(SectionTieType type, int trackId, int sectionId, float x, float y);
+bool start_section_tie(int tieId, bool fixedPointIsA);
 CoreSectionTie *finish_section_tie(int trackId, int sectionId, float x, float y);
 void clear_in_progress_tie();
 

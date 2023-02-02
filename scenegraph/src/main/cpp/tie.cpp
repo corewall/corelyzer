@@ -5,44 +5,109 @@
 #include "trackscenenode.h"
 #include "tie.h"
 
-static SectionTiePoint *inProgressTie = NULL;
-static SectionTieType inProgressType = NONE;
+extern int default_track_scene;
+
+struct EditTieData {
+    int id; // ID of existing tie being edited, -1 if new tie
+    SectionTieType type;
+    SectionTiePoint *fixedPoint;
+
+    static const int NEW_TIE = -1;
+
+    EditTieData() {
+        id = NEW_TIE;
+        type = NONE;
+        fixedPoint = NULL;
+    }
+
+    void clear() {
+        type = NONE;
+        if (id == NEW_TIE) { delete fixedPoint; }
+        fixedPoint = NULL;
+        id = NEW_TIE;
+    }
+
+    void beginEdit(int trackId, int sectionId, SectionTieType type, float fixedX, float fixedY) {
+        this->id = NEW_TIE;
+        this->type = type;
+        this->fixedPoint = new SectionTiePoint(trackId, sectionId, fixedX, fixedY);
+    }
+
+    void beginEdit(int tieId, bool fixedPointIsA) {
+        this->id = tieId;
+        CoreSectionTie *tie = get_tie(default_track_scene, tieId);
+        this->type = tie->type;
+        fixedPoint = fixedPointIsA ? tie->a : tie->b;
+    }
+
+    CoreSectionTie *endEdit(int trackId, int sectionId, float x, float y) {
+        CoreSectionTie *newTie = NULL;
+        if (this->id == NEW_TIE) { // create new tie
+            SectionTiePoint ptB(trackId, sectionId, x, y);
+            newTie = new CoreSectionTie(this->type, *(this->fixedPoint), ptB);
+        } else { // update point of existing tie
+            CoreSectionTie *tie = get_tie(default_track_scene, this->id);
+            SectionTiePoint *editedPoint = (tie->a == this->fixedPoint) ? tie->b : tie->a;
+            editedPoint->trackId = trackId;
+            editedPoint->sectionId = sectionId;
+            editedPoint->x = x;
+            editedPoint->y = y;
+        }
+        return newTie;
+    }
+
+    bool valid() { return this->type != NONE; }
+};
+
+static EditTieData editTieInstance;
+static EditTieData *editTie = &editTieInstance;
+
 
 SectionTiePoint *get_in_progress_tie() {
-    return inProgressTie;
+    if (editTie->valid()) {
+        return editTie->fixedPoint;
+    }
+    return NULL;
 }
 
 SectionTieType get_in_progress_tie_type() {
-    return inProgressType;
+    return editTie->type;
 }
 
 void clear_in_progress_tie() {
-    if (inProgressTie) {
-        delete inProgressTie;
-        inProgressTie = NULL;
-        inProgressType = NONE;
+    if (editTie->valid()) {
+        editTie->clear();
     }
 }
 
 bool start_section_tie(SectionTieType type, int trackId, int sectionId, float x, float y) {
-    if (inProgressTie) {
+    if (editTie->valid()) {
         printf("A tie is already in progress, can't start a new one.\n");
         return false;
     }
-    inProgressTie = new SectionTiePoint(trackId, sectionId, x, y);
-    inProgressType = type;
+
+    editTie->beginEdit(trackId, sectionId, type, x, y);
+    return true;
+}
+
+bool start_section_tie(int tieId, bool fixedPointIsA) {
+    if (editTie->valid()) {
+        printf("A tie is already in progress, can't start a new one.\n");
+        return false;
+    }
+
+    editTie->beginEdit(tieId, fixedPointIsA);
     return true;
 }
 
 CoreSectionTie *finish_section_tie(int trackId, int sectionId, float x, float y) {
-    if (!inProgressTie) {
+    if (!editTie->valid()) {
         printf("No tie is in progress, use start_section_tie().\n");
         return NULL;
     }
-    SectionTiePoint ptB(trackId, sectionId, x, y);
-    CoreSectionTie *tie = new CoreSectionTie(inProgressType, *inProgressTie, ptB);
+    CoreSectionTie *newTie = editTie->endEdit(trackId, sectionId, x, y);
     clear_in_progress_tie();
-    return tie;
+    return newTie;
 }
 
 void CoreSectionTie::setADescription(char *desc) {

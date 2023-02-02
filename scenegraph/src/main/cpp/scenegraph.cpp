@@ -5028,6 +5028,17 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_clearInProgressSection
 }
 
 /*
+ * Class:     corelyzer_graphics_SceneGraph
+ * Method:    editSectionTiePoint
+ * Signature: (I)Z
+ */
+JNIEXPORT jboolean JNICALL Java_corelyzer_graphics_SceneGraph_editSectionTiePoint(JNIEnv *jen, jclass jcls, jfloat mouseX, float mouseY) {
+    const float x = get_horizontal_depth() ? mouseX : mouseY;
+    const float y = get_horizontal_depth() ? mouseY : -mouseX;
+    return edit_section_tie_point(default_track_scene, x, y);
+}
+
+/*
  * Class:     corelyzer_helper_SceneGraph
  * Method:    setSectionTieADescription
  * Signature: (ILjava/lang/String;)V
@@ -5205,15 +5216,6 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setSectionTieType(JNIE
     CoreSectionTie *tie = get_tie(default_track_scene, tieId);
     if (!tie) return;
     return tie->setType((SectionTieType)type);
-}
-
-/*
- * Class:     corelyzer_graphics_SceneGraph
- * Method:    updateSectionTies
- * Signature: ()V
- */
-JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_updateSectionTies(JNIEnv *jenv, jclass jcls) {
-    update_section_ties();
 }
 
 /*

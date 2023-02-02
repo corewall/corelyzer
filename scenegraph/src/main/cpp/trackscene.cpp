@@ -174,10 +174,24 @@ int get_mouseover_tie() {
 }
 
 //================================================================
-// Called after a session is loaded or closed to reconcile ties.
-// If neither section of a tie can be found, delete.
-void update_section_ties() {
+bool edit_section_tie_point(int scene, float mouseX, float mouseY) {
+    if (mouseoverTie != -1) {
+        float ax, ay, bx, by;
+        CoreSectionTie *tie = get_tie(scene, mouseoverTie);
+        get_scenespace_tie_points(tie, ax, ay, bx, by);
+        SectionTiePoint *fixedPoint = NULL;
 
+        if (pt_to_pt_dist(mouseX, mouseY, ax, ay) < pt_to_pt_dist(mouseX, mouseY, bx, by)) {
+            fixedPoint = tie->b;
+        } else {
+            fixedPoint = tie->a;
+        }
+        const bool canEdit = start_section_tie(mouseoverTie, fixedPoint == tie->a);
+        if (!canEdit) { return false; }
+
+        return true;
+    }
+    return false;
 }
 
 //================================================================
@@ -1379,5 +1393,12 @@ float pt_to_line_dist(float px, float py, float x0, float y0, float x1, float y1
 
     const float dx = px - xx;
     const float dy = py - yy;
+    return sqrt(dx * dx + dy * dy);
+}
+
+// return distance between (ax,ay) and (bx,by)
+float pt_to_pt_dist(float ax, float ay, float bx, float by) {
+    const float dx = bx - ax;
+    const float dy = by - ay;
     return sqrt(dx * dx + dy * dy);
 }

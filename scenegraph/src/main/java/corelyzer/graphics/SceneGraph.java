@@ -240,6 +240,7 @@ public class SceneGraph {
 	public native static void startSectionTie(int type, float x, float y, int trackId, int sectionId);
 	public native static void clearInProgressSectionTie();
 	public native static int finishSectionTie(float x, float y, int trackId, int sectionId);
+	public native static boolean editSectionTiePoint(float mouseX, float mouseY);
 	public native static int getSectionTieType(int tieId);
 	public native static void setSectionTieType(int tieId, int type);
 	public native static void setSectionTieADescription(int tieId, String desc);
@@ -255,7 +256,6 @@ public class SceneGraph {
 	public native static float[] getSectionTieBPosition(int tieId);
 	public native static int getSectionTieATrack(int tieId);
 	public native static int getSectionTieBTrack(int tieId);
-	public native static void updateSectionTies();
 	public native static void deleteSectionTiesOnTrack(int trackId);
 
 
