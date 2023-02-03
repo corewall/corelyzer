@@ -4956,8 +4956,8 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_createSectionTie(JNIEn
  * Signature: (FFII)V
  */
 JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_startSectionTie(JNIEnv *jenv, jclass jcls, jint type, jfloat _x, jfloat _y, jint trackId, jint sectionId) {
-    if (get_in_progress_tie() != NULL) {
-        printf("There is already an active tie, can't start a new one!\n");
+    if (is_editing_tie()) {
+        printf("Another tie is already being edited.\n");
         return;
     }
     TrackSceneNode *track = get_scene_track(trackId);
@@ -4972,17 +4972,17 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_startSectionTie(JNIEnv
     const float _tx = x - (track->px + sec->px);
     const float _ty = y - (track->py + sec->py);
 
-    start_section_tie((SectionTieType)type, trackId, sectionId, _tx, _ty);
+    start_edit_new_tie((SectionTieType)type, trackId, sectionId, _tx, _ty);
 }
 
 /*
  * Class:     corelyzer_helper_SceneGraph
- * Method:    finishSectionTie
+ * Method:    commitSectionTie
  * Signature: (FFII)V
  */
-JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_finishSectionTie(JNIEnv *jenv, jclass jcls, jfloat _x, jfloat _y, jint trackId, jint sectionId) {
-    if (!get_in_progress_tie()) {
-        printf("There is no active tie to finish!\n");
+JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_commitSectionTie(JNIEnv *jenv, jclass jcls, jfloat _x, jfloat _y, jint trackId, jint sectionId) {
+    if (!is_editing_tie()) {
+        printf("There is no active tie to commit!\n");
         return false;
     }
     TrackSceneNode *track = get_scene_track(trackId);
@@ -4990,8 +4990,8 @@ JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_finishSectionTie(JNIEn
 
     // prevent inter-session ties
     const int INTER_SESSION_TIE_ERROR = -2;
-    SectionTiePoint *inProgTie = get_in_progress_tie();
-    TrackSceneNode *tieTrackA = get_scene_track(inProgTie->trackId);
+    SectionTiePoint *fixedPoint = get_edit_tie_fixed_point();
+    TrackSceneNode *tieTrackA = get_scene_track(fixedPoint->trackId);
     if (!tieTrackA) return -1;
     if (strcmp(track->sessionName, tieTrackA->sessionName)) return INTER_SESSION_TIE_ERROR;
 
@@ -5006,7 +5006,7 @@ JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_finishSectionTie(JNIEn
     const float ty = y - (track->py + sec->py);
 
     int tieId = -1;
-    CoreSectionTie *tie = finish_section_tie(trackId, sectionId, tx, ty);
+    CoreSectionTie *tie = commit_edit_tie(trackId, sectionId, tx, ty);
     if (tie) {
         TrackScene *ts = get_scene(default_track_scene);
         if (!ts) {
@@ -5020,11 +5020,11 @@ JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_finishSectionTie(JNIEn
 
 /*
  * Class:     corelyzer_graphics_SceneGraph
- * Method:    clearInProgressSectionTie
+ * Method:    clearEditSectionTie
  * Signature: ()V
  */
-JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_clearInProgressSectionTie(JNIEnv *jen, jclass jcls) {
-    clear_in_progress_tie();
+JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_clearEditSectionTie(JNIEnv *jen, jclass jcls) {
+    cleanup_edit_tie();
 }
 
 /*

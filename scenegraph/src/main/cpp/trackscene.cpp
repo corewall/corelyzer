@@ -186,7 +186,7 @@ bool edit_section_tie_point(int scene, float mouseX, float mouseY) {
         } else {
             fixedPoint = tie->a;
         }
-        const bool canEdit = start_section_tie(mouseoverTie, fixedPoint == tie->a);
+        const bool canEdit = start_edit_existing_tie(mouseoverTie, fixedPoint == tie->a);
         if (!canEdit) { return false; }
 
         return true;
@@ -768,11 +768,11 @@ static void prep_tie_appearance(CoreSectionTie *tie, const int tie_id) {
 
 //================================================================
 void render_in_progress_tie(Canvas *c) {
-    SectionTiePoint *tp = get_in_progress_tie();
+    SectionTiePoint *tp = get_edit_tie_fixed_point();
     if (tp) {
         float ax, ay;
         tp->toSceneSpace(ax, ay);
-        set_tie_color(get_in_progress_tie_type());
+        set_tie_color(get_edit_tie_type());
         glBegin(GL_LINES);
         {
             glVertex3f(ax, ay, 0.0f);

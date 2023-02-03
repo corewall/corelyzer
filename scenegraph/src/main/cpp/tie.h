@@ -149,11 +149,12 @@ struct CoreSectionTie {
     }
 };
 
-SectionTiePoint *get_in_progress_tie();
-SectionTieType get_in_progress_tie_type();
-bool start_section_tie(SectionTieType type, int trackId, int sectionId, float x, float y);
-bool start_section_tie(int tieId, bool fixedPointIsA);
-CoreSectionTie *finish_section_tie(int trackId, int sectionId, float x, float y);
-void clear_in_progress_tie();
+bool is_editing_tie();
+SectionTiePoint *get_edit_tie_fixed_point();
+SectionTieType get_edit_tie_type();
+bool start_edit_new_tie(SectionTieType type, int trackId, int sectionId, float x, float y);
+bool start_edit_existing_tie(int tieId, bool fixedPointIsA);
+CoreSectionTie *commit_edit_tie(int trackId, int sectionId, float x, float y);
+void cleanup_edit_tie();
 
 #endif // #ifndef CORELYZER_TIE_H

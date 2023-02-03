@@ -1139,7 +1139,7 @@ public class CorelyzerGLCanvas implements GLEventListener, MouseListener, MouseW
 			}
 		} else if (key == KeyEvent.VK_ESCAPE) {
 			if (canvasMode == CorelyzerApp.APP_TIE_MODE) {
-				SceneGraph.clearInProgressSectionTie();
+				SceneGraph.clearEditSectionTie();
 				canvasMode = CorelyzerApp.APP_NORMAL_MODE;
 			}
 		} else { // pan
@@ -1252,7 +1252,7 @@ public class CorelyzerGLCanvas implements GLEventListener, MouseListener, MouseW
 					return;
 				} else if (canvasMode == CorelyzerApp.APP_TIE_MODE) {
 					if (selectedTrack != -1 && selectedTrackSection != -1) {
-						int tieId = SceneGraph.finishSectionTie(scenePos[0], scenePos[1], selectedTrack, selectedTrackSection);
+						int tieId = SceneGraph.commitSectionTie(scenePos[0], scenePos[1], selectedTrack, selectedTrackSection);
 						if (tieId == SectionTieErrors.INTER_SESSION_TIE_ERROR) {
 							JOptionPane.showMessageDialog(canvas, "A tie cannot be created on cores in different sessions.");
 						} else {
