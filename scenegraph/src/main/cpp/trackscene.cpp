@@ -54,9 +54,11 @@ static int mouseoverTie = -1;
 
 static void get_scenespace_tie_points(CoreSectionTie *tie, float &ax, float &ay, float &bx, float &by);
 static void prep_tie_appearance(CoreSectionTie *tie, const int tie_id);
-void create_section_tie_segments(TrackScene *ts, Canvas *c);
-void render_section_tie_offcore_segments(TrackScene *ts);
-void update_mouseover_tie(TrackScene *ts, Canvas *c);
+static void create_section_tie_segments(TrackScene *ts, Canvas *c);
+static void render_section_tie_offcore_segments(TrackScene *ts);
+static void update_mouseover_tie(TrackScene *ts, Canvas *c);
+static bool is_tie_valid(CoreSectionTie *tie);
+static bool is_tie_visible(CoreSectionTie *tie);
 
 //================================================================
 std::vector<TrackScene *> trackscenevec;
@@ -611,10 +613,12 @@ void calc_core_edge_intersection(
 
 //================================================================
 // Prepare scenespace points for drawing tie line segments.
-void create_section_tie_segments(TrackScene *ts, Canvas *c) {
+static void create_section_tie_segments(TrackScene *ts, Canvas *c) {
     for (int tidx = 0; tidx < ts->tievec.size(); tidx++) {
         CoreSectionTie *tie = ts->tievec[tidx];
-        if (!tie || !tie->show || !tie->valid()) continue;
+        if (!is_tie_valid(tie) || !is_tie_visible(tie)) {
+            continue;
+        }
 
         float ax, ay, bx, by;
         get_scenespace_tie_points(tie, ax, ay, bx, by);
@@ -664,12 +668,14 @@ void create_section_tie_segments(TrackScene *ts, Canvas *c) {
 //================================================================
 // Of the ties within 5 pixels of the mouse cursor, set mouseoverTie
 // to the ID of the tie closest to the cursor.
-void update_mouseover_tie(TrackScene *ts, Canvas *c) {
+static void update_mouseover_tie(TrackScene *ts, Canvas *c) {
     int minDistTie = -1;
     float minDist = 1000.0f;
     for (int tidx = 0; tidx < ts->tievec.size(); tidx++) {
         CoreSectionTie *tie = ts->tievec[tidx];
-        if (!tie || !tie->show || !tie->valid()) continue;
+        if (!is_tie_valid(tie) || !is_tie_visible(tie)) {
+            continue;
+        }
 
         float ax, ay, bx, by;
         tie->a->toSceneSpace(ax, ay);
@@ -687,13 +693,30 @@ void update_mouseover_tie(TrackScene *ts, Canvas *c) {
 }
 
 //================================================================
+static bool is_tie_visible(CoreSectionTie *tie) {
+    TrackSceneNode *trackA = get_scene_track(tie->a->trackId);
+    TrackSceneNode *trackB = get_scene_track(tie->b->trackId);
+    if (!trackA || !trackB) {
+        return false;
+    }
+    return tie->show && trackA->show && trackB->show;
+}
+
+//================================================================
+static bool is_tie_valid(CoreSectionTie *tie) {
+    return tie && tie->valid();
+}
+
+//================================================================
 // For each tie, draw the line segments within the tied cores.
 void render_section_tie_oncore_segments(TrackScene *ts, Canvas *c) {
     glDisable(GL_TEXTURE_2D); // enabled textures affect point/line color
 
     for (int tidx = 0; tidx < ts->tievec.size(); tidx++) {
         CoreSectionTie *tie = ts->tievec[tidx];
-        if (!tie || !tie->show || !tie->valid()) continue;
+        if (!is_tie_valid(tie) || !is_tie_visible(tie)) {
+            continue;
+        }
 
         prep_tie_appearance(tie, tidx);
         float ax, ay, bx, by;
@@ -722,12 +745,14 @@ void render_section_tie_oncore_segments(TrackScene *ts, Canvas *c) {
 
 //================================================================
 // For each tie, draw the line segment between edges of the tied cores.
-void render_section_tie_offcore_segments(TrackScene *ts) {
+static void render_section_tie_offcore_segments(TrackScene *ts) {
     glDisable(GL_TEXTURE_2D);
     glEnable(GL_BLEND);
     for (int tidx = 0; tidx < ts->tievec.size(); tidx++) {
         CoreSectionTie *tie = ts->tievec[tidx];
-        if (!tie || !tie->show || !tie->valid()) continue;
+        if (!is_tie_valid(tie) || !is_tie_visible(tie)) {
+            continue;
+        }     
 
         if (!tie->isSingleSection()) {
             prep_tie_appearance(tie, tidx);
