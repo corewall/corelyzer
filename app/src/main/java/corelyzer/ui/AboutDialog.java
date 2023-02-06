@@ -73,7 +73,7 @@ public class AboutDialog extends JDialog implements ActionListener {
 		add(new JLabel(new ImageIcon("resources/corelyzer_icon.jpg")));
 		String version = CorelyzerApp.getApp().getCorelyzerVersion();
 		add(new JLabel("Version " + version));
-		add(new JLabel("CSDCO/LacCore - University of Minnesota"));
+		add(new JLabel("CSD Facility - University of Minnesota"));
 		
 		swUpdateBtn = new JButton("Check for Updates");
 		swUpdateBtn.addActionListener(this);
