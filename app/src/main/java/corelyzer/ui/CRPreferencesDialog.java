@@ -767,10 +767,10 @@ public class CRPreferencesDialog extends JDialog implements ChangeListener, Wind
 			app.getToolFrame().setVisible(true);
 		} else {
 			if (glchanged) {
-				Object[] options = { "Cancel", "Restart" };
+				Object[] options = { "I'll Do It Later", "Quit Corelyzer" };
 
-				String mesg = "You might need to restart Corelyzer to make " + "display configuration take effect.";
-				int n = JOptionPane.showOptionDialog(this, mesg, "Restart Corelyzer?", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, options,
+				String mesg = "To apply display configuration changes, Corelyzer must be restarted.";
+				int n = JOptionPane.showOptionDialog(this, mesg, "Quit Corelyzer?", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, options,
 						options[1]);
 
 				if (n == 1) {
