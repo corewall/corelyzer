@@ -368,9 +368,13 @@ public class DataImportWizard extends JDialog implements ActionListener, ChangeL
 
 	private void loadInputFile(final File f, final boolean detectSeparator) {
 		if (f.exists()) {
+			if (checkForExcelFile(f, this)) {
+				return;
+			}
+			
 			try {
+				final String ext = FileUtility.getExtension(f).toLowerCase();
 				if (detectSeparator) {
-					final String ext = FileUtility.getExtension(f).toLowerCase();
 					if (ext.equals("tsv")) {
 						setFieldSeparatorChar('\t');
 					} else if (ext.equals("txt")) {
@@ -391,8 +395,10 @@ public class DataImportWizard extends JDialog implements ActionListener, ChangeL
 				this.pack(); // resize window to fit updated filename JLabel
 			} catch (IOException e) {
 				System.out.println("IOException: " + e.getMessage());
+				JOptionPane.showMessageDialog(this, "Could not load tabular data file.\nError: " + e.getMessage());
 			} catch (CsvException e) {
 				System.out.println("CSVException: " + e.getMessage());
+				JOptionPane.showMessageDialog(this, "Could not load tabular data file.\nError: " + e.getMessage());
 			}
 		}
 	}
@@ -656,6 +662,17 @@ public class DataImportWizard extends JDialog implements ActionListener, ChangeL
 				this.nextBtn.setText("Next");
 			}
 		}
+	}
+
+	public static boolean checkForExcelFile(File f, Component parent) {
+		boolean isExcelFile = false;
+		final String ext = FileUtility.getExtension(f).toLowerCase();
+		if (ext.equals("xls") || ext.equals("xlsx")) {
+			final String msg = "Excel (.xls, .xlsx) files cannot be imported directly.\nThey must be saved in the CSV (comma-separated values) format.";
+			JOptionPane.showMessageDialog(parent, msg, "Cannot import Excel file", JOptionPane.ERROR_MESSAGE);
+			isExcelFile = true;
+		}
+		return isExcelFile;
 	}
 
 	private boolean isValidPositiveInteger(String str) {

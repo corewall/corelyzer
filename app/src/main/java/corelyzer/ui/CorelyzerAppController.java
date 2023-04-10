@@ -886,7 +886,7 @@ public class CorelyzerAppController implements ActionListener, AboutHandler, Qui
 		String selected = FileUtility.selectASingleFile(view.getMainFrame(), "Select tabular data to import", null, FileUtility.LOAD);
 		if (selected != null) {
 			File selectedFile = new File(selected);
-			if (selectedFile.exists()) {
+			if (selectedFile.exists() && !DataImportWizard.checkForExcelFile(selectedFile, view.getMainFrame())) {
 				DataImportWizard wiz = new DataImportWizard(view.getMainFrame());
 				wiz.setModal(true);
 				wiz.setInputFile(selectedFile);
