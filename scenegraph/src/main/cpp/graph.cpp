@@ -1095,19 +1095,13 @@ static Box *calc_graph_box(CoreSection *cs, const int gid) {
         cs->orientation = LANDSCAPE;
     }
 
-    float width;
-    if (cs->orientation == PORTRAIT) {
-        if (cs->src == -1) {
-            width = graphvec[gid]->w;
-        } else {
-            width = get_texset_src_height(cs->src) / cs->dpi_y;
-        }
-    } else {
-        if (cs->src == -1) {
-            width = graphvec[gid]->w;
-        } else {
-            width = get_texset_src_width(cs->src) / cs->dpi_x;
-        }
+    float core_section_width = graphvec[gid]->w;
+    float core_section_height = graphvec[gid]->h;
+    if (cs->src != -1) {
+        // core section has valid image data, use its width and height instead of default graph dimensions
+        const float isPortrait = (cs->orientation == PORTRAIT);
+        core_section_width = isPortrait ? get_texset_src_height(cs->src) / cs->dpi_y : get_texset_src_width(cs->src) / cs->dpi_x;
+        core_section_height = isPortrait ? get_texset_src_width(cs->src) / cs->dpi_x : get_texset_src_height(cs->src) / cs->dpi_y;
     }
 
     float y_box_adjust = 0;
@@ -1119,12 +1113,14 @@ static Box *calc_graph_box(CoreSection *cs, const int gid) {
         y_box_adjust += (float)GRAPH_FIELDS_GAP + get_graph_height(sgid);
     }
 
-    b->w = width;                  // inch
-    b->h = get_graph_height(gid);  // inch
+    b->w = core_section_width; // inches
+    b->h = get_graph_height(gid);  // inches
     b->x = 0;
 
     if (isCollapse) {
-        b->y = -((float)GRAPH_FIELDS_GAP + b->h);
+        // b->y = -((float)GRAPH_FIELDS_GAP + b->h) + core_section_height;
+        b->y = -(b->h) + core_section_height;
+        
     } else {
         b->y = -(y_box_adjust + (float)GRAPH_FIELDS_GAP + b->h);
     }
