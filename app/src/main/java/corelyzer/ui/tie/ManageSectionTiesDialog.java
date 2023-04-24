@@ -49,8 +49,10 @@ public class ManageSectionTiesDialog extends JFrame {
         tieTable.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
             public void valueChanged(ListSelectionEvent event) {
                 if (!event.getValueIsAdjusting()) {
-                    TieData tie = ties.get(tieTable.getSelectedRow());
-                    SceneGraph.setSelectedTie(tie.id);
+                    for (int rowIdx : tieTable.getSelectedRows()) {
+                        TieData tie = ties.get(rowIdx);
+                        SceneGraph.setSelectedTie(tie.id);
+                    }
                     updateButtons();
                     CorelyzerApp.getApp().updateGLWindows();
                 }
@@ -80,17 +82,33 @@ public class ManageSectionTiesDialog extends JFrame {
         deleteButton = new JButton("Delete");
         deleteButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent event) {
-                final int row = tieTable.getSelectedRow();
-                TieData tie = ties.get(row);
-                ties.removeElement(tie);
-                SceneGraph.deleteSectionTie(tie.id);
-                final int new_sel = ties.size() > 0 ? Math.min(ties.size()-1, row) : -1;
-                if (new_sel != -1) { // select another row if possible
+                final int[] rows = tieTable.getSelectedRows();
+                if (rows.length > 1) {
+                    final String msg = "Do you want to delete the selected ties?";
+                    final String title = "Delete Multiple Ties?";
+                    int result = JOptionPane.showConfirmDialog(tieTable.getParent(), msg, title, JOptionPane.YES_NO_OPTION);
+                    if (result == JOptionPane.NO_OPTION) {
+                        return;
+                    }
+                }
+
+                // delete ties
+                final Vector<TieData> tiesToDelete = new Vector<TieData>();
+                for (int rowIdx : rows) { tiesToDelete.add(ties.get(rowIdx)); }
+                for (TieData tie : tiesToDelete) {
+                    ties.removeElement(tie);
+                    SceneGraph.deleteSectionTie(tie.id);
+                }
+
+                // select another row if possible
+                final int new_sel = ties.size() > 0 ? Math.min(ties.size()-1, rows[0]) : -1;
+                if (new_sel != -1) {
                     tieTable.setRowSelectionInterval(new_sel, new_sel);
                     TieData selectTie = ties.get(tieTable.getSelectedRow());
                     SceneGraph.setSelectedTie(selectTie.id);
                 }
                 tieTable.updateUI();
+                updateButtons();
                 CorelyzerApp.getApp().updateGLWindows();
             }
         });
@@ -128,10 +146,10 @@ public class ManageSectionTiesDialog extends JFrame {
     }
 
     private void updateButtons() {
-        final boolean enable = tieTable.getSelectedRow() != -1;
-        editButton.setEnabled(enable);
-        deleteButton.setEnabled(enable);
-        if (!enable) return;
+        final boolean hasSelection = tieTable.getSelectedRow() != -1;
+        final boolean isMultiple = tieTable.getSelectedRows().length > 1;
+        editButton.setEnabled(hasSelection && !isMultiple);
+        deleteButton.setEnabled(hasSelection);
     }
     
     private void gatherTieData(int[] tieIds) {
