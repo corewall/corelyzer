@@ -25,6 +25,7 @@
 
 package corelyzer.ui;
 
+import java.awt.Dialog;
 import java.awt.Dimension;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
@@ -85,6 +86,15 @@ public class AttachmentURLDialog extends JDialog {
 	}
 
 	public AttachmentURLDialog() {
+		init();
+	}
+
+	public AttachmentURLDialog(Dialog parent) {
+		super(parent);
+		init();
+	}
+
+	private void init() {
 		setContentPane(contentPane);
 		setModal(true);
 		getRootPane().setDefaultButton(buttonBrowse);

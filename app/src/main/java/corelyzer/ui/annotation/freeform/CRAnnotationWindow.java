@@ -95,6 +95,7 @@ public class CRAnnotationWindow extends AbstractAnnotationDialog {
 		}
 
 		public void actionPerformed(final ActionEvent ae) {
+			preview.requestFocus(); // should prevent null getEditor() result
 			JEditorPane myeditor = getEditor(ae);
 			if (myeditor == null) {
 				// no editor in focus...just ignore this for now
@@ -104,7 +105,8 @@ public class CRAnnotationWindow extends AbstractAnnotationDialog {
 			HTMLEditorKit kit = (HTMLEditorKit) myeditor.getEditorKit();
 			HTMLDocument doc = (HTMLDocument) myeditor.getDocument();
 
-			AttachmentURLDialog dialog = new AttachmentURLDialog();
+			Object parentDialog = this.getValue("parent_dialog");
+			AttachmentURLDialog dialog = new AttachmentURLDialog((java.awt.Dialog)parentDialog);
 			dialog.setLocationRelativeTo(preview);
 			dialog.setIsImageLoader(false);
 			dialog.setPreferences(CorelyzerApp.getApp().preferences());
@@ -188,6 +190,7 @@ public class CRAnnotationWindow extends AbstractAnnotationDialog {
 		}
 
 		public void actionPerformed(final ActionEvent ae) {
+			preview.requestFocus(); // should prevent null getEditor() result
 			JEditorPane myeditor = getEditor(ae);
 			if (myeditor == null) {
 				// no editor in focus...just ignore this for now
@@ -197,7 +200,8 @@ public class CRAnnotationWindow extends AbstractAnnotationDialog {
 			HTMLEditorKit kit = (HTMLEditorKit) myeditor.getEditorKit();
 			HTMLDocument doc = (HTMLDocument) myeditor.getDocument();
 
-			AttachmentURLDialog dialog = new AttachmentURLDialog();
+			Object parentDialog = this.getValue("parent_dialog");
+			AttachmentURLDialog dialog = new AttachmentURLDialog((java.awt.Dialog)parentDialog);
 			dialog.setLocationRelativeTo(preview);
 			dialog.setIsImageLoader(true);
 			dialog.setPreferences(CorelyzerApp.getApp().preferences());
@@ -705,11 +709,13 @@ public class CRAnnotationWindow extends AbstractAnnotationDialog {
 		// image
 		a = new ImageAction();
 		a.putValue(Action.SMALL_ICON, new ImageIcon("resources/icons/picture.gif"));
+		a.putValue("parent_dialog", this);
 		preview.getActionMap().put("InsertIMG", a);
 		// a.putValue(Action.NAME, "Image");
 
 		// Attachments
 		a = new AttachmentAction();
+		a.putValue("parent_dialog", this);
 		a.putValue(Action.SMALL_ICON, new ImageIcon("resources/icons/open.gif"));
 		preview.getActionMap().put("Attachment", a);
 		// a.putValue(Action.NAME, "Image");
