@@ -129,6 +129,8 @@ char *CoreSectionTie::getADescription() { return aDesc; }
 char *CoreSectionTie::getBDescription() { return bDesc; }
 bool CoreSectionTie::getShow() { return show; }
 void CoreSectionTie::setShow(bool _show) { show = _show; }
+bool CoreSectionTie::getSelected() { return selected; }
+void CoreSectionTie::setSelected(bool _selected) { selected = _selected; }
 
 // Convert our section-space coord (this->x, this->y) to scene-space.
 void SectionTiePoint::toSceneSpace(float &scenex, float &sceney) {

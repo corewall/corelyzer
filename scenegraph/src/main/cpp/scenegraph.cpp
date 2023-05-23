@@ -5108,13 +5108,24 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setSectionTieShow(JNIE
 
 /*
  * Class:     corelyzer_graphics_SceneGraph
- * Method:    setSelectedTie
- * Signature: (I)V
+ * Method:    selectSectionTie
+ * Signature: (IZ)V
  */
-JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setSelectedTie
-(JNIEnv *jenv, jclass jcls, jint tieId) {
-    set_selected_tie(tieId);
+JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_selectSectionTie(JNIEnv *, jclass jcls, jint tieId, jboolean show) {
+    CoreSectionTie *tie = get_tie(default_track_scene, tieId);
+    tie->setSelected(show);
 }
+
+/*
+ * Class:     corelyzer_graphics_SceneGraph
+ * Method:    deselectAllSectionTies
+ * Signature: ()V
+ */
+JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_deselectAllSectionTies(JNIEnv *, jclass jcls) {
+    deselect_all_ties(default_track_scene);
+}
+
+
 
 /*
  * Class:     corelyzer_graphics_SceneGraph

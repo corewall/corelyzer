@@ -105,7 +105,8 @@ struct CoreSectionTie {
     char *aDesc; // description of point A (Z in UI)
     char *bDesc; // description of point B (Z' in UI)
 
-    bool show; // draw tie line?
+    bool show; // display tie line?
+    bool selected;
 
     CoreSectionTieDrawData *drawData;
 
@@ -116,6 +117,7 @@ struct CoreSectionTie {
         aDesc = NULL;
         bDesc = NULL;
         show = true;
+        selected = false;
         drawData = new CoreSectionTieDrawData();
     }
 
@@ -136,6 +138,8 @@ struct CoreSectionTie {
     char *getBDescription();
     bool getShow();
     void setShow(bool _show);
+    bool getSelected();
+    void setSelected(bool _selected);
 
     bool valid() { return a->valid() && b->valid(); }
     bool isOnTrack(const int trackId) {

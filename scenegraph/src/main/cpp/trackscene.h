@@ -111,6 +111,7 @@ void remove_tie(int scene, int tieId);
 void render_section_ties(TrackScene *ts);
 void render_section_tie_oncore_segments(TrackScene *ts, Canvas *c);
 void render_in_progress_tie(Canvas *c);
+void deselect_all_ties(int scene);
 
 void set_selected_tie(int tieId);
 int get_mouseover_tie();

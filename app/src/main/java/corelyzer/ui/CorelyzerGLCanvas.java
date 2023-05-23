@@ -152,6 +152,7 @@ public class CorelyzerGLCanvas implements GLEventListener, MouseListener, MouseW
 	JMenuItem propertyMenuItem;
 	JMenuItem splitMenuItem;
 	JMenuItem staggerSectionsItem;
+	JMenuItem manageTiesItem;
 
 	// 8/2/2012 brg: TODO Index-based approach isn't ideal when inserting (rather than appending)
 	// menu items - keep references to JMenuItems instead?
@@ -516,8 +517,8 @@ public class CorelyzerGLCanvas implements GLEventListener, MouseListener, MouseW
 			}
 		});
 
-		JMenuItem manageTies = new JMenuItem("Manage Ties...");
-		manageTies.addActionListener(new ActionListener() {
+		manageTiesItem = new JMenuItem("Manage Ties...");
+		manageTiesItem.addActionListener(new ActionListener() {
 			public void actionPerformed(final ActionEvent event) {
 				doManageTies();
 			}
@@ -592,7 +593,7 @@ public class CorelyzerGLCanvas implements GLEventListener, MouseListener, MouseW
 		this.scenePopupMenu.add(createVisualTie);
 		this.scenePopupMenu.add(createDataTie);
 		this.scenePopupMenu.add(createSpliceTie);
-		this.scenePopupMenu.add(manageTies);
+		this.scenePopupMenu.add(manageTiesItem);
 		this.scenePopupMenu.addSeparator();
 		this.scenePopupMenu.add(graphMenuItem);
 		this.scenePopupMenu.add(splitMenuItem);
@@ -1881,6 +1882,12 @@ public class CorelyzerGLCanvas implements GLEventListener, MouseListener, MouseW
 			final boolean sectionGraphIsLocked = !SceneGraph.isSectionGraphMovable(selectedTrack, selectedTrackSection);
 			ab = (AbstractButton)this.scenePopupMenu.getComponent(8);
 			ab.getModel().setSelected(sectionGraphIsLocked);
+
+			// enable Manage Ties... option if there are 1+ ties
+			final int manageTiesIdx = this.scenePopupMenu.getComponentIndex(manageTiesItem);
+			ab = (AbstractButton)this.scenePopupMenu.getComponent(manageTiesIdx);
+			boolean enableManageTies = (SceneGraph.getSectionTieIds() != null);
+			ab.setEnabled(enableManageTies);
 
 			CoreSectionImage csImg = cs.getCoreSectionImage();
 			if (csImg != null && csImg.getId() != -1) {

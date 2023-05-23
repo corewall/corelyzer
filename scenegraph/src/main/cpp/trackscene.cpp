@@ -171,6 +171,17 @@ void set_selected_tie(int tieId) {
 }
 
 //================================================================
+void deselect_all_ties(int scene) {
+    TrackScene *ts = trackscenevec[scene];
+    if (!ts) return;
+    for (int i = 0; i < ts->tievec.size(); i++) {
+        if (ts->tievec[i] != NULL) {
+            ts->tievec[i]->setSelected(false);
+        }
+    }    
+}
+
+//================================================================
 int get_mouseover_tie() {
     return mouseoverTie;
 }
@@ -779,12 +790,13 @@ static void get_scenespace_tie_points(CoreSectionTie *tie, float &ax, float &ay,
 //================================================================
 // set tie line width and color based on its type and selected/mouseover status
 static void prep_tie_appearance(CoreSectionTie *tie, const int tie_id) {
-    if (tie_id == mouseoverTie || tie_id == selectedTie) {
+    // if (tie_id == mouseoverTie || tie_id == selectedTie) {
+    if (tie_id == mouseoverTie || tie->getSelected()) {
         glLineWidth(5);
     } else {
         glLineWidth(1);
     }
-    if (tie_id == selectedTie) {
+    if (tie->getSelected()) {
         glColor3f(1,1,0);
     } else {
         set_tie_color(tie->getType());

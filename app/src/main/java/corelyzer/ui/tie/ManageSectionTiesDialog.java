@@ -42,16 +42,17 @@ public class ManageSectionTiesDialog extends JFrame {
         setTitle("Manage section ties");
         JPanel contentPane = new JPanel();
         setContentPane(contentPane);
-        contentPane.setLayout(new MigLayout("", "[grow]", "[grow][]"));
+        contentPane.setLayout(new MigLayout("insets 5", "[grow]", "[grow][]"));
         
         // tie table
         tieTable = new TieTable(new TieTableModel(ties));
         tieTable.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
             public void valueChanged(ListSelectionEvent event) {
                 if (!event.getValueIsAdjusting()) {
+                    SceneGraph.deselectAllSectionTies();
                     for (int rowIdx : tieTable.getSelectedRows()) {
                         TieData tie = ties.get(rowIdx);
-                        SceneGraph.setSelectedTie(tie.id);
+                        SceneGraph.selectSectionTie(tie.id, true);
                     }
                     updateButtons();
                     CorelyzerApp.getApp().updateGLWindows();
@@ -71,13 +72,16 @@ public class ManageSectionTiesDialog extends JFrame {
         JScrollPane tableScroll = new JScrollPane(tieTable);
         contentPane.add(tableScroll, "wmin 400, hmin 100, wrap, grow");
 
+        JPanel buttonPanel = new JPanel();
+        buttonPanel.setLayout(new MigLayout("insets 5", "[][][grow]", ""));
+
         editButton = new JButton("Edit");
         editButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 doEditTie();
             }
         });
-        contentPane.add(editButton, "split 3");
+        buttonPanel.add(editButton, "align left");
 
         deleteButton = new JButton("Delete");
         deleteButton.addActionListener(new ActionListener() {
@@ -104,25 +108,27 @@ public class ManageSectionTiesDialog extends JFrame {
                 final int new_sel = ties.size() > 0 ? Math.min(ties.size()-1, rows[0]) : -1;
                 if (new_sel != -1) {
                     tieTable.setRowSelectionInterval(new_sel, new_sel);
-                    TieData selectTie = ties.get(tieTable.getSelectedRow());
-                    SceneGraph.setSelectedTie(selectTie.id);
+                    TieData selectedTie = ties.get(tieTable.getSelectedRow());
+                    SceneGraph.selectSectionTie(selectedTie.id, true);
                 }
                 tieTable.updateUI();
                 updateButtons();
                 CorelyzerApp.getApp().updateGLWindows();
             }
         });
-        contentPane.add(deleteButton);
+        buttonPanel.add(deleteButton, "align left");
+
 
         closeButton = new JButton("Close");
         closeButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent event) {
-                SceneGraph.setSelectedTie(-1);
+                SceneGraph.deselectAllSectionTies();
                 CorelyzerApp.getApp().updateGLWindows();
                 setVisible(false);
             }
         });
-        contentPane.add(closeButton);
+        buttonPanel.add(closeButton, "align right");
+        contentPane.add(buttonPanel, "grow");
         
         pack();
         updateButtons();

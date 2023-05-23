@@ -249,7 +249,8 @@ public class SceneGraph {
 	public native static String getSectionTieBDescription(int tieId);
 	public native static boolean getSectionTieShow(int tieId);
 	public native static void setSectionTieShow(int tieId, boolean show);
-	public native static void setSelectedTie(int tieId);
+	public native static void selectSectionTie(int tieId, boolean select);
+	public native static void deselectAllSectionTies();
 	public native static String getSectionTieASectionName(int tieId);
 	public native static String getSectionTieBSectionName(int tieId);
 	public native static float[] getSectionTieAPosition(int tieId);
