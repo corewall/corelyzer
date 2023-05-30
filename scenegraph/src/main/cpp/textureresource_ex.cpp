@@ -1457,7 +1457,7 @@ MultiLevelTextureSetEX *create_texset_from_bmp(const char *filename, int nlevels
 
 // 5/16/2012 brg: Intended to grab image width/height data without actually loading
 // the pixel data as in genTextureBlocks(), which takes too much time to be practical.
-void read_tiff_dimensions(TIFF *const tiff, uint32 &width, uint32 &height) {
+void read_tiff_dimensions(TIFF *const tiff, uint32_t &width, uint32_t &height) {
     TIFFGetField(tiff, TIFFTAG_IMAGEWIDTH, &width);
     TIFFGetField(tiff, TIFFTAG_IMAGELENGTH, &height);
 }
@@ -1499,8 +1499,8 @@ MultiLevelTextureSetEX *create_texset_from_tiff(const char *filename, int nlevel
 
     // get attributes
 
-    uint32 *pixels = NULL;
-    uint32 w, h;
+    uint32_t *pixels = NULL;
+    uint32_t w, h;
 
     // image dimensions
     read_tiff_dimensions(tif, w, h);
@@ -1522,7 +1522,7 @@ MultiLevelTextureSetEX *create_texset_from_tiff(const char *filename, int nlevel
     if (!hasDir) {
         // get the pixels
 
-        pixels = (uint32 *)_TIFFmalloc(w * h * sizeof(uint32));
+        pixels = (uint32_t *)_TIFFmalloc(w * h * sizeof(uint32_t));
 
         if (!pixels) {
             delete texset;
@@ -1544,9 +1544,9 @@ MultiLevelTextureSetEX *create_texset_from_tiff(const char *filename, int nlevel
             unsigned int row;
             for (row = 0; row < h; ++row) {
                 // Make sure our channels are in the right order
-                uint32 i;
-                uint32 rowStart = row * w;
-                uint32 rowEnd = rowStart + w;
+                uint32_t i;
+                uint32_t rowStart = row * w;
+                uint32_t rowEnd = rowStart + w;
 
                 for (i = rowStart; i < rowEnd; i++) {
                     pixels[i] = swap_bytes(pixels[i]);
@@ -1564,7 +1564,7 @@ MultiLevelTextureSetEX *create_texset_from_tiff(const char *filename, int nlevel
         int i, k;
         for (i = 0; i < halfh; ++i) {
             for (k = 0; k < texset->src_w; ++k) {
-                uint32 t;
+                uint32_t t;
                 t = pixels[(i * texset->src_w) + k];
                 pixels[(i * texset->src_w) + k] =
                     pixels[((texset->src_h - i - 1) * texset->src_w) + k];
@@ -1600,9 +1600,9 @@ MultiLevelTextureSetEX *create_texset_from_tiff(const char *filename, int nlevel
 */
 
     // image resolution
-    //uint32 frac_comp[2];
+    //uint32_t frac_comp[2];
     float frac_comp;
-    uint16 units;
+    uint16_t units;
 
     TIFFGetField(tif, TIFFTAG_RESOLUTIONUNIT, &units);
 
@@ -2276,7 +2276,7 @@ int get_image_depth_pix(char *fileName, bool isVertical) {
         fptr = NULL;
 
         TIFF *tiff = TIFFOpen(fname.c_str(), "r");
-        uint32 tiffWidth = 0, tiffHeight = 0;
+        uint32_t tiffWidth = 0, tiffHeight = 0;
         read_tiff_dimensions(tiff, tiffWidth, tiffHeight);
         width = (int)tiffWidth;
         height = (int)tiffHeight;
