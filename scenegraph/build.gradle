@@ -194,62 +194,47 @@ task 'build-jni-linux'(dependsOn: 'copy-jni-files') {
 	}
 }
 
-// cross-compile Window with MINGW...has unresolved texture
-// generation issue at runtime, build with provided MSVC
-// project instead.
-task 'build-jni-win'(dependsOn: 'copy-jni-files') {
-	doLast {
-		def build = new File(project.buildDir, 'cpp')
-		def dist = file('dist')
-		def src = file('src/main/cpp')
-		def deps = file('deps/win32')
-		def includes = [
-			src.absolutePath,
-			dist.absolutePath,
-			build.absolutePath,
-			deps.absolutePath,
-			file('deps/win32/bootstrap/usr/i686-pc-mingw32/include/freetype2').absolutePath]
 
-		// expand our cross-compile tarball
-		def bootstrap = file('deps/win32/bootstrap')
-		if (!bootstrap.exists()) {
-			ant {
-				echo("Expanding cross-compile environment")
-				exec(executable: 'tar', dir: deps) {
-					arg(value: 'xzvf')
-					arg(value: 'bootstrap.tar.gz')
-				}
-			}
+// The tasks below cross-compile 64-bit Windows scenegraph DLL on Mac or Linux systems
+// with a prepared MXE cross-compile environment (https://mxe.cc/).
+//
+// See full instructions in scenegraph/README.md.
+
+task crossBuildJNIWin(dependsOn: 'copy-jni-files') {
+	doLast {
+		def build = new File(project.buildDir, 'cpp_cross_compile')
+		def src = file('src/main/cpp')
+		def include_dirs = [
+			src.absolutePath,
+			file('/opt/mxe/usr/x86_64-w64-mingw32.static/include').absolutePath,
+			file('/opt/mxe/usr/x86_64-w64-mingw32.static/include/freetype2').absolutePath,
+			file('/Library/Java/JavaVirtualMachines/adoptopenjdk-11.jdk/Contents/Home/include').absolutePath,
+			file('/Library/Java/JavaVirtualMachines/adoptopenjdk-11.jdk/Contents/Home/include/darwin').absolutePath,
+			file('/Users/lcdev/Downloads/libsquish-1.15').absolutePath
+		]
+
+		mkdir(build)
+		def toolchain_path = file('/opt/mxe/usr/bin/').absolutePath
+		src.eachFileMatch({ it.endsWith('.c') || it.endsWith('.cpp')} ) { file ->
+			crossCompileWin(file, include_dirs, build, toolchain_path)
 		}
 
-		// 4/2/2012 brg: Don't bother compiling, cross-compiled Win32 build has
-		// texture generation problems that I have yet to sort out.
-		// Use working MSVC-built scenegraph.dll in deps.
+		linkCrossCompiledWin(build, toolchain_path)
 
-		// compile
-		//mkdir(build)
-		//def path = file('deps/win32/bootstrap/usr/bin/').absolutePath
-		//src.eachFileMatch({ it.endsWith('.c') || it.endsWith('.cpp')} ) { file ->
-		//	compileWin(file, includes, build, path)
-		//}
-
-		// link
-		//linkWin(deps.listFiles().findAll { it.name.endsWith('.lib')}, build, path)
-
+		def dist = file('dist')
+		mkdir(dist)
 		copy {
 			into dist
-			from new File(deps, 'scenegraph.dll') // MSVC build
-			from new File(deps, 'OpenJPEG.dll')
-			from new File(deps, 'pthreadVC2.dll')
+			from new File(build, 'scenegraph.dll')
 		}
 	}
 }
 
-def compileWin(src, includes, dir, path) {
-	def out = src.name.substring(0, src.name.lastIndexOf('.') + 1) + "win32"
+def crossCompileWin(src, includes, dir, path) {
+	def out = src.name.substring(0, src.name.lastIndexOf('.') + 1) + "win64"
 	ant {
-		echo("Compiling ${src.name} for Win32")
-		exec(executable: path + '/i686-pc-mingw32-c++', dir: dir, failonerror: true) {
+		echo("Cross-compiling ${src.name} for Windows x86_64")
+		exec(executable: path + '/x86_64-w64-mingw32.static-g++', dir: dir, failonerror: true) {
 			arg(value: '-c')
 			arg(value: '-DUSE_FASTDXT')
 			arg(value: '-msse2')
@@ -262,15 +247,16 @@ def compileWin(src, includes, dir, path) {
 	}
 }
 
-def linkWin(libs, dir, path) {
+def linkCrossCompiledWin(dir, path) {
 	ant {
-		echo("Linking scenegraph.dll")
-		exec(executable: path + '/i686-pc-mingw32-c++', dir: dir, failonerror: true) {
+		echo("Linking scenegraph.dll...")
+		exec(executable: path + '/x86_64-w64-mingw32.static-g++', dir: dir, failonerror: true) {
 			arg(value: '-Wall')
 			arg(value: '-shared')
 			arg(value: '-o')
 			arg(value: 'scenegraph.dll')
-			dir.listFiles().findAll { it.name.endsWith('.win32') }.each { arg(path: it) }
+			dir.listFiles().findAll { it.name.endsWith('.win64') }.each { arg(path: it) }
+			arg(value: '-L/opt/mxe/usr/x86_64-w64-mingw32.static/lib')
 			arg(value: '-lpng')
 			arg(value: '-lstdc++')
 			arg(value: '-lpthread')
@@ -281,7 +267,11 @@ def linkWin(libs, dir, path) {
 			arg(value: '-lglu32')
 			arg(value: '-lfreetype')
 			arg(value: '-lws2_32')
-			libs.each { arg(path: it) }
+			arg(value: '-llzma')
+			arg(value: '-lwebp')
+			arg(value: '-lharfbuzz')
+			arg(value: '-lbz2')
+			arg(value: '-lsharpyuv') 
 			arg(value: '-mwindows')
 		}
 	}
