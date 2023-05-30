@@ -631,7 +631,7 @@ void build_tex_blocks(char *pixels, MultiLevelTextureSetEX *set, bool hasDir, in
                                 fwrite(tex_to_file, sizeof(char), dxt3_size, fptr);
                             }*/
 #ifdef USE_FASTDXT
-                            int outNBytes = CompressDXT((byte *)tex_rgba, (byte *)tex_to_file,
+                            int outNBytes = CompressDXT((DXT_BYTE *)tex_rgba, (DXT_BYTE *)tex_to_file,
                                                         set->blksize, set->blksize, FORMAT_DXT1, 2);
 
                             fwrite(&outNBytes, sizeof(int), 1, fptr);

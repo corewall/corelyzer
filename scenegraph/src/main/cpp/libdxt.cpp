@@ -35,7 +35,7 @@
 typedef struct _work_t {
     int width, height;
     int nbb;
-    byte *in, *out;
+    DXT_BYTE *in, *out;
 } work_t;
 
 void *slave1(void *arg) {
@@ -62,7 +62,7 @@ void *slave5ycocg(void *arg) {
     return NULL;
 }
 
-int CompressDXT(const byte *in, byte *out, int width, int height, int format, int numthreads) {
+int CompressDXT(const DXT_BYTE *in, DXT_BYTE *out, int width, int height, int format, int numthreads) {
     pthread_t *pid;
     work_t *job;
     int nbbytes;
@@ -79,7 +79,7 @@ int CompressDXT(const byte *in, byte *out, int width, int height, int format, in
         job[k].width = width;
         job[k].height = height / numthreads;
         job[k].nbb = 0;
-        job[k].in = (byte *)in + (k * width * 4 * height / numthreads);
+        job[k].in = (DXT_BYTE *)in + (k * width * 4 * height / numthreads);
         if (format == FORMAT_DXT1)
             job[k].out = out + (k * width * 4 * height / (numthreads * 8));
         else

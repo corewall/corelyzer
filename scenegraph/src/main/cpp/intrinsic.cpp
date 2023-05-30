@@ -41,9 +41,9 @@
 
 #include "dxt.h"
 
-void ExtractBlock_Intrinsics(const byte *inPtr, int width, byte *colorBlock) {
+void ExtractBlock_Intrinsics(const DXT_BYTE *inPtr, int width, DXT_BYTE *colorBlock) {
     __m128i t0, t1, t2, t3;
-    register int w = width << 2;  // width*4
+    int w = width << 2;  // width*4
 
     t0 = _mm_load_si128((__m128i *)inPtr);
     _mm_store_si128((__m128i *)&colorBlock[0], t0);  // copy first row, 16bytes
@@ -62,9 +62,9 @@ void ExtractBlock_Intrinsics(const byte *inPtr, int width, byte *colorBlock) {
 
 #define R_SHUFFLE_D(x, y, z, w) (((w)&3) << 6 | ((z)&3) << 4 | ((y)&3) << 2 | ((x)&3))
 
-ALIGN16(static byte SIMD_SSE2_byte_0[16]) = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+ALIGN16(static DXT_BYTE SIMD_SSE2_byte_0[16]) = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
 
-void GetMinMaxColors_Intrinsics(const byte *colorBlock, byte *minColor, byte *maxColor) {
+void GetMinMaxColors_Intrinsics(const DXT_BYTE *colorBlock, DXT_BYTE *minColor, DXT_BYTE *maxColor) {
     __m128i t0, t1, t3, t4, t6, t7;
 
     // get bounding box
@@ -140,14 +140,14 @@ ALIGN16(static word SIMD_SSE2_word_0[8]) = {0x0000, 0x0000, 0x0000, 0x0000, 0x00
 ALIGN16(static word SIMD_SSE2_word_1[8]) = {0x0001, 0x0001, 0x0001, 0x0001, 0x0001, 0x0001, 0x0001, 0x0001};
 ALIGN16(static word SIMD_SSE2_word_2[8]) = {0x0002, 0x0002, 0x0002, 0x0002, 0x0002, 0x0002, 0x0002, 0x0002};
 ALIGN16(static word SIMD_SSE2_word_div_by_3[8]) = {(1 << 16) / 3 + 1, (1 << 16) / 3 + 1, (1 << 16) / 3 + 1, (1 << 16) / 3 + 1, (1 << 16) / 3 + 1, (1 << 16) / 3 + 1, (1 << 16) / 3 + 1, (1 << 16) / 3 + 1};
-ALIGN16(static byte SIMD_SSE2_byte_colorMask[16]) = {C565_5_MASK, C565_6_MASK, C565_5_MASK, 0x00, 0x00, 0x00, 0x00, 0x00, C565_5_MASK, C565_6_MASK, C565_5_MASK, 0x00, 0x00, 0x00, 0x00, 0x00};
+ALIGN16(static DXT_BYTE SIMD_SSE2_byte_colorMask[16]) = {C565_5_MASK, C565_6_MASK, C565_5_MASK, 0x00, 0x00, 0x00, 0x00, 0x00, C565_5_MASK, C565_6_MASK, C565_5_MASK, 0x00, 0x00, 0x00, 0x00, 0x00};
 
-void EmitColorIndices_Intrinsics(const byte *colorBlock, const byte *minColor, const byte *maxColor, byte *&outData) {
-    ALIGN16(byte color0[16]);
-    ALIGN16(byte color1[16]);
-    ALIGN16(byte color2[16]);
-    ALIGN16(byte color3[16]);
-    ALIGN16(byte result[16]);
+void EmitColorIndices_Intrinsics(const DXT_BYTE *colorBlock, const DXT_BYTE *minColor, const DXT_BYTE *maxColor, DXT_BYTE *&outData) {
+    ALIGN16(DXT_BYTE color0[16]);
+    ALIGN16(DXT_BYTE color1[16]);
+    ALIGN16(DXT_BYTE color2[16]);
+    ALIGN16(DXT_BYTE color3[16]);
+    ALIGN16(DXT_BYTE result[16]);
 
     // mov esi, maxColor
     // mov edi, minColor
@@ -363,9 +363,9 @@ void EmitColorIndices_Intrinsics(const byte *colorBlock, const byte *minColor, c
     outData += 4;
 }
 
-ALIGN16(static byte SIMD_SSE2_byte_1[16]) = {0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01};
-ALIGN16(static byte SIMD_SSE2_byte_2[16]) = {0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02};
-ALIGN16(static byte SIMD_SSE2_byte_7[16]) = {0x07, 0x07, 0x07, 0x07, 0x07, 0x07, 0x07, 0x07, 0x07, 0x07, 0x07, 0x07, 0x07, 0x07, 0x07, 0x07};
+ALIGN16(static DXT_BYTE SIMD_SSE2_byte_1[16]) = {0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01};
+ALIGN16(static DXT_BYTE SIMD_SSE2_byte_2[16]) = {0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02};
+ALIGN16(static DXT_BYTE SIMD_SSE2_byte_7[16]) = {0x07, 0x07, 0x07, 0x07, 0x07, 0x07, 0x07, 0x07, 0x07, 0x07, 0x07, 0x07, 0x07, 0x07, 0x07, 0x07};
 ALIGN16(static word SIMD_SSE2_word_div_by_7[8]) = {(1 << 16) / 7 + 1, (1 << 16) / 7 + 1, (1 << 16) / 7 + 1, (1 << 16) / 7 + 1, (1 << 16) / 7 + 1, (1 << 16) / 7 + 1, (1 << 16) / 7 + 1, (1 << 16) / 7 + 1};
 ALIGN16(static word SIMD_SSE2_word_div_by_14[8]) = {(1 << 16) / 14 + 1, (1 << 16) / 14 + 1, (1 << 16) / 14 + 1, (1 << 16) / 14 + 1, (1 << 16) / 14 + 1, (1 << 16) / 14 + 1, (1 << 16) / 14 + 1, (1 << 16) / 14 + 1};
 ALIGN16(static word SIMD_SSE2_word_scale66554400[8]) = {6, 6, 5, 5, 4, 4, 0, 0};
@@ -379,7 +379,7 @@ ALIGN16(static dword SIMD_SSE2_dword_alpha_bit_mask5[4]) = {7 << 15, 0, 7 << 15,
 ALIGN16(static dword SIMD_SSE2_dword_alpha_bit_mask6[4]) = {7 << 18, 0, 7 << 18, 0};
 ALIGN16(static dword SIMD_SSE2_dword_alpha_bit_mask7[4]) = {7 << 21, 0, 7 << 21, 0};
 
-void EmitAlphaIndices_Intrinsics(const byte *colorBlock, const byte minAlpha, const byte maxAlpha, byte *&outData) {
+void EmitAlphaIndices_Intrinsics(const DXT_BYTE *colorBlock, const DXT_BYTE minAlpha, const DXT_BYTE maxAlpha, DXT_BYTE *&outData) {
     /*
   __asm {
     mov esi, colorBlock

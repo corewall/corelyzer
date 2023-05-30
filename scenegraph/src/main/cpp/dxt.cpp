@@ -9,38 +9,38 @@
 
 #define DXT_INTR 1
 
-void ExtractBlock(const byte *inPtr, int width, byte *colorBlock);
-void ExtractBlock_Intrinsics(const byte *inPtr, int width, byte *colorBlock);
+void ExtractBlock(const DXT_BYTE *inPtr, int width, DXT_BYTE *colorBlock);
+void ExtractBlock_Intrinsics(const DXT_BYTE *inPtr, int width, DXT_BYTE *colorBlock);
 
-void GetMinMaxColors(const byte *colorBlock, byte *minColor, byte *maxColor);
-void GetMinMaxColorsByLuminance(const byte *colorBlock, byte *minColor, byte *maxColor);
-void GetMinMaxColorsByBBox(const byte *colorBlock, byte *minColor, byte *maxColor);
-void GetMinMaxColors_Intrinsics(const byte *colorBlock, byte *minColor, byte *maxColor);
+void GetMinMaxColors(const DXT_BYTE *colorBlock, DXT_BYTE *minColor, DXT_BYTE *maxColor);
+void GetMinMaxColorsByLuminance(const DXT_BYTE *colorBlock, DXT_BYTE *minColor, DXT_BYTE *maxColor);
+void GetMinMaxColorsByBBox(const DXT_BYTE *colorBlock, DXT_BYTE *minColor, DXT_BYTE *maxColor);
+void GetMinMaxColors_Intrinsics(const DXT_BYTE *colorBlock, DXT_BYTE *minColor, DXT_BYTE *maxColor);
 
 // for DXT5
-void GetMinMaxColorsAlpha(byte *colorBlock, byte *minColor, byte *maxColor);
+void GetMinMaxColorsAlpha(DXT_BYTE *colorBlock, DXT_BYTE *minColor, DXT_BYTE *maxColor);
 
-word ColorTo565(const byte *color);
+word ColorTo565(const DXT_BYTE *color);
 
-void EmitByte(byte b, byte *&);
-void EmitWord(word s, byte *&);
-void EmitDoubleWord(dword i, byte *&);
+void EmitByte(DXT_BYTE b, DXT_BYTE *&);
+void EmitWord(word s, DXT_BYTE *&);
+void EmitDoubleWord(dword i, DXT_BYTE *&);
 
-void EmitColorIndices(const byte *colorBlock, const byte *minColor, const byte *maxColor, byte *&outData);
-void EmitColorIndicesFast(const byte *colorBlock, const byte *minColor, const byte *maxColor, byte *&outData);
-void EmitColorIndices_Intrinsics(const byte *colorBlock, const byte *minColor, const byte *maxColor, byte *&outData);
+void EmitColorIndices(const DXT_BYTE *colorBlock, const DXT_BYTE *minColor, const DXT_BYTE *maxColor, DXT_BYTE *&outData);
+void EmitColorIndicesFast(const DXT_BYTE *colorBlock, const DXT_BYTE *minColor, const DXT_BYTE *maxColor, DXT_BYTE *&outData);
+void EmitColorIndices_Intrinsics(const DXT_BYTE *colorBlock, const DXT_BYTE *minColor, const DXT_BYTE *maxColor, DXT_BYTE *&outData);
 
 // Emit indices for DXT5
-void EmitAlphaIndices(const byte *colorBlock, const byte minAlpha, const byte maxAlpha, byte *&outData);
-void EmitAlphaIndicesFast(const byte *colorBlock, const byte minAlpha, const byte maxAlpha, byte *&outData);
-void EmitAlphaIndices_Intrinsics(const byte *colorBlock, const byte minAlpha, const byte maxAlpha, byte *&outData);
+void EmitAlphaIndices(const DXT_BYTE *colorBlock, const DXT_BYTE minAlpha, const DXT_BYTE maxAlpha, DXT_BYTE *&outData);
+void EmitAlphaIndicesFast(const DXT_BYTE *colorBlock, const DXT_BYTE minAlpha, const DXT_BYTE maxAlpha, DXT_BYTE *&outData);
+void EmitAlphaIndices_Intrinsics(const DXT_BYTE *colorBlock, const DXT_BYTE minAlpha, const DXT_BYTE maxAlpha, DXT_BYTE *&outData);
 
-void CompressImageDXT1(const byte *inBuf, byte *outBuf,
+void CompressImageDXT1(const DXT_BYTE *inBuf, DXT_BYTE *outBuf,
                        int width, int height, int &outputBytes) {
-    ALIGN16(byte * outData);
-    ALIGN16(byte block[64]);
-    ALIGN16(byte minColor[4]);
-    ALIGN16(byte maxColor[4]);
+    ALIGN16(DXT_BYTE * outData);
+    ALIGN16(DXT_BYTE block[64]);
+    ALIGN16(DXT_BYTE minColor[4]);
+    ALIGN16(DXT_BYTE maxColor[4]);
 
     outData = outBuf;
     for (int j = 0; j < height; j += 4, inBuf += width * 4 * 4) {
@@ -70,12 +70,12 @@ void CompressImageDXT1(const byte *inBuf, byte *outBuf,
     outputBytes = (int)(outData - outBuf);
 }
 
-void RGBAtoYCoCg(const byte *inBuf, byte *outBuf, int width, int height) {
+void RGBAtoYCoCg(const DXT_BYTE *inBuf, DXT_BYTE *outBuf, int width, int height) {
     for (int j = 0; j < width * height; j++) {
-        byte R = inBuf[j * 4 + 0];
-        byte G = inBuf[j * 4 + 1];
-        byte B = inBuf[j * 4 + 2];
-        byte A = inBuf[j * 4 + 3];
+        DXT_BYTE R = inBuf[j * 4 + 0];
+        DXT_BYTE G = inBuf[j * 4 + 1];
+        DXT_BYTE B = inBuf[j * 4 + 2];
+        DXT_BYTE A = inBuf[j * 4 + 3];
         int Co = R - B;
         int t = B + (Co / 2);
         int Cg = G - t;
@@ -107,23 +107,23 @@ void RGBAtoYCoCg(const byte *inBuf, byte *outBuf, int width, int height) {
     }
 }
 
-void CompressImageDXT5YCoCg(const byte *inBuf, byte *outBuf, int width, int height,
+void CompressImageDXT5YCoCg(const DXT_BYTE *inBuf, DXT_BYTE *outBuf, int width, int height,
                             int &outputBytes) {
-    byte *tmpBuf;
-    tmpBuf = (byte *)memalign(16, width * height * 4);
+    DXT_BYTE *tmpBuf;
+    tmpBuf = (DXT_BYTE *)memalign(16, width * height * 4);
     memset(tmpBuf, 0, width * height * 4);
     RGBAtoYCoCg(inBuf, tmpBuf, width, height);
     CompressImageDXT5(tmpBuf, outBuf, width, height, outputBytes);
     memfree(tmpBuf);
 }
 
-void CompressImageDXT5(const byte *inBuf, byte *outBuf, int width, int height,
+void CompressImageDXT5(const DXT_BYTE *inBuf, DXT_BYTE *outBuf, int width, int height,
                        int &outputBytes) {
-    ALIGN16(byte * outData);
+    ALIGN16(DXT_BYTE * outData);
 
-    ALIGN16(byte block[64]);
-    ALIGN16(byte minColor[4]);
-    ALIGN16(byte maxColor[4]);
+    ALIGN16(DXT_BYTE block[64]);
+    ALIGN16(DXT_BYTE minColor[4]);
+    ALIGN16(DXT_BYTE maxColor[4]);
 
     outData = outBuf;
     for (int j = 0; j < height; j += 4, inBuf += width * 4 * 4) {
@@ -165,31 +165,31 @@ void CompressImageDXT5(const byte *inBuf, byte *outBuf, int width, int height,
     outputBytes = int(outData - outBuf);
 }
 
-void ExtractBlock(const byte *inPtr, int width, byte *colorBlock) {
+void ExtractBlock(const DXT_BYTE *inPtr, int width, DXT_BYTE *colorBlock) {
     for (int j = 0; j < 4; j++) {
         memcpy(&colorBlock[j * 4 * 4], inPtr, 4 * 4);
         inPtr += width * 4;
     }
 }
 
-word ColorTo565(const byte *color) {
+word ColorTo565(const DXT_BYTE *color) {
     return ((color[0] >> 3) << 11) |
            ((color[1] >> 2) << 5) |
            (color[2] >> 3);
 }
 
-void EmitByte(byte b, byte *&outData) {
+void EmitByte(DXT_BYTE b, DXT_BYTE *&outData) {
     outData[0] = b;
     outData += 1;
 }
 
-void EmitWord(word s, byte *&outData) {
+void EmitWord(word s, DXT_BYTE *&outData) {
     outData[0] = (s >> 0) & 255;
     outData[1] = (s >> 8) & 255;
     outData += 2;
 }
 
-void EmitDoubleWord(dword i, byte *&outData) {
+void EmitDoubleWord(dword i, DXT_BYTE *&outData) {
     outData[0] = (i >> 0) & 255;
     outData[1] = (i >> 8) & 255;
     outData[2] = (i >> 16) & 255;
@@ -197,20 +197,20 @@ void EmitDoubleWord(dword i, byte *&outData) {
     outData += 4;
 }
 
-int ColorDistance(const byte *c1, const byte *c2) {
+int ColorDistance(const DXT_BYTE *c1, const DXT_BYTE *c2) {
     return ((c1[0] - c2[0]) * (c1[0] - c2[0])) +
            ((c1[1] - c2[1]) * (c1[1] - c2[1])) +
            ((c1[2] - c2[2]) * (c1[2] - c2[2]));
 }
 
-void SwapColors(byte *c1, byte *c2) {
-    byte tm[3];
+void SwapColors(DXT_BYTE *c1, DXT_BYTE *c2) {
+    DXT_BYTE tm[3];
     memcpy(tm, c1, 3);
     memcpy(c1, c2, 3);
     memcpy(c2, tm, 3);
 }
 
-void GetMinMaxColors(const byte *colorBlock, byte *minColor, byte *maxColor) {
+void GetMinMaxColors(const DXT_BYTE *colorBlock, DXT_BYTE *minColor, DXT_BYTE *maxColor) {
     int maxDistance = -1;
     for (int i = 0; i < 64 - 4; i += 4) {
         for (int j = i + 4; j < 64; j += 4) {
@@ -227,11 +227,11 @@ void GetMinMaxColors(const byte *colorBlock, byte *minColor, byte *maxColor) {
     }
 }
 
-int ColorLuminance(const byte *color) {
+int ColorLuminance(const DXT_BYTE *color) {
     return (color[0] + color[1] * 2 + color[2]);
 }
 
-void GetMinMaxColorsByLuminance(const byte *colorBlock, byte *minColor, byte *maxColor) {
+void GetMinMaxColorsByLuminance(const DXT_BYTE *colorBlock, DXT_BYTE *minColor, DXT_BYTE *maxColor) {
     int maxLuminance = -1, minLuminance = MAX_INT;
     for (int i = 0; i < 16; i++) {
         int luminance = ColorLuminance(colorBlock + i * 4);
@@ -249,9 +249,9 @@ void GetMinMaxColorsByLuminance(const byte *colorBlock, byte *minColor, byte *ma
     }
 }
 
-void GetMinMaxColorsByBBox(const byte *colorBlock, byte *minColor, byte *maxColor) {
+void GetMinMaxColorsByBBox(const DXT_BYTE *colorBlock, DXT_BYTE *minColor, DXT_BYTE *maxColor) {
     int i;
-    byte inset[3];
+    DXT_BYTE inset[3];
     minColor[0] = minColor[1] = minColor[2] = 255;
     maxColor[0] = maxColor[1] = maxColor[2] = 0;
     for (i = 0; i < 16; i++) {
@@ -288,10 +288,10 @@ void GetMinMaxColorsByBBox(const byte *colorBlock, byte *minColor, byte *maxColo
 //
 // GetMinMaxColorsAlpha for DXT5
 //
-void GetMinMaxColorsAlpha(byte *colorBlock, byte *minColor, byte *maxColor) {
+void GetMinMaxColorsAlpha(DXT_BYTE *colorBlock, DXT_BYTE *minColor, DXT_BYTE *maxColor) {
     int i;
-    byte inset[4];
-    byte y, cg, co, r, g, b;
+    DXT_BYTE inset[4];
+    DXT_BYTE y, cg, co, r, g, b;
 
     minColor[0] = minColor[1] = minColor[2] = minColor[3] = 255;
     maxColor[0] = maxColor[1] = maxColor[2] = maxColor[3] = 0;
@@ -351,8 +351,8 @@ void GetMinMaxColorsAlpha(byte *colorBlock, byte *minColor, byte *maxColor) {
     maxColor[3] = (maxColor[3] >= inset[3]) ? maxColor[3] - inset[3] : 0;
 }
 
-void EmitColorIndices(const byte *colorBlock, const byte *minColor, const byte *maxColor, byte *&outData) {
-    byte colors[4][4];
+void EmitColorIndices(const DXT_BYTE *colorBlock, const DXT_BYTE *minColor, const DXT_BYTE *maxColor, DXT_BYTE *&outData) {
+    DXT_BYTE colors[4][4];
     unsigned int indices[16];
 
     colors[0][0] = (maxColor[0] & C565_5_MASK) | (maxColor[0] >> 5);
@@ -388,7 +388,7 @@ void EmitColorIndices(const byte *colorBlock, const byte *minColor, const byte *
     EmitDoubleWord(result, outData);
 }
 
-void EmitColorIndicesFast(const byte *colorBlock, const byte *minColor, const byte *maxColor, byte *&outData) {
+void EmitColorIndicesFast(const DXT_BYTE *colorBlock, const DXT_BYTE *minColor, const DXT_BYTE *maxColor, DXT_BYTE *&outData) {
     word colors[4][4];
     dword result = 0;
 
@@ -431,9 +431,9 @@ void EmitColorIndicesFast(const byte *colorBlock, const byte *minColor, const by
 //
 // Emit indices for DXT5
 //
-void EmitAlphaIndices(const byte *colorBlock, const byte minAlpha, const byte maxAlpha, byte *&outData) {
-    byte indices[16];
-    byte alphas[8];
+void EmitAlphaIndices(const DXT_BYTE *colorBlock, const DXT_BYTE minAlpha, const DXT_BYTE maxAlpha, DXT_BYTE *&outData) {
+    DXT_BYTE indices[16];
+    DXT_BYTE alphas[8];
 
     alphas[0] = maxAlpha;
     alphas[1] = minAlpha;
@@ -448,7 +448,7 @@ void EmitAlphaIndices(const byte *colorBlock, const byte minAlpha, const byte ma
 
     for (int i = 0; i < 16; i++) {
         int minDistance = MAX_INT;
-        byte a = colorBlock[i * 4];
+        DXT_BYTE a = colorBlock[i * 4];
         for (int j = 0; j < 8; j++) {
             int dist = abs(a - alphas[j]);
             if (dist < minDistance) {
@@ -466,23 +466,23 @@ void EmitAlphaIndices(const byte *colorBlock, const byte minAlpha, const byte ma
     EmitByte((indices[13] >> 1) | (indices[14] << 2) | (indices[15] << 5), outData);
 }
 
-void EmitAlphaIndicesFast(const byte *colorBlock, const byte minAlpha, const byte maxAlpha, byte *&outData) {
+void EmitAlphaIndicesFast(const DXT_BYTE *colorBlock, const DXT_BYTE minAlpha, const DXT_BYTE maxAlpha, DXT_BYTE *&outData) {
     //assert( maxAlpha > minAlpha );
 
-    byte indices[16];
-    byte mid = (maxAlpha - minAlpha) / (2 * 7);
-    byte ab1 = minAlpha + mid;
-    byte ab2 = (6 * maxAlpha + 1 * minAlpha) / 7 + mid;
-    byte ab3 = (5 * maxAlpha + 2 * minAlpha) / 7 + mid;
-    byte ab4 = (4 * maxAlpha + 3 * minAlpha) / 7 + mid;
-    byte ab5 = (3 * maxAlpha + 4 * minAlpha) / 7 + mid;
-    byte ab6 = (2 * maxAlpha + 5 * minAlpha) / 7 + mid;
-    byte ab7 = (1 * maxAlpha + 6 * minAlpha) / 7 + mid;
+    DXT_BYTE indices[16];
+    DXT_BYTE mid = (maxAlpha - minAlpha) / (2 * 7);
+    DXT_BYTE ab1 = minAlpha + mid;
+    DXT_BYTE ab2 = (6 * maxAlpha + 1 * minAlpha) / 7 + mid;
+    DXT_BYTE ab3 = (5 * maxAlpha + 2 * minAlpha) / 7 + mid;
+    DXT_BYTE ab4 = (4 * maxAlpha + 3 * minAlpha) / 7 + mid;
+    DXT_BYTE ab5 = (3 * maxAlpha + 4 * minAlpha) / 7 + mid;
+    DXT_BYTE ab6 = (2 * maxAlpha + 5 * minAlpha) / 7 + mid;
+    DXT_BYTE ab7 = (1 * maxAlpha + 6 * minAlpha) / 7 + mid;
 
     colorBlock += 3;
 
     for (int i = 0; i < 16; i++) {
-        byte a = colorBlock[i * 4];
+        DXT_BYTE a = colorBlock[i * 4];
 
         int b1 = (a <= ab1);
         int b2 = (a <= ab2);
@@ -505,7 +505,7 @@ void EmitAlphaIndicesFast(const byte *colorBlock, const byte minAlpha, const byt
     EmitByte((indices[13] >> 1) | (indices[14] << 2) | (indices[15] << 5), outData);
 }
 
-double ComputeError(const byte *original, const byte *dxt, int width, int height) {
+double ComputeError(const DXT_BYTE *original, const DXT_BYTE *dxt, int width, int height) {
     // Compute RMS error
     double error;
     int s, d;

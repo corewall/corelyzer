@@ -33,7 +33,7 @@
 #include <string.h>
 #include <math.h>
 
-typedef unsigned char byte;
+typedef unsigned char DXT_BYTE;
 typedef unsigned short word;
 typedef unsigned int dword;
 
@@ -56,13 +56,13 @@ typedef unsigned int dword;
 
 
 // Compress to DXT1 format
-void CompressImageDXT1( const byte *inBuf, byte *outBuf, int width, int height, int &outputBytes );
+void CompressImageDXT1( const DXT_BYTE *inBuf, DXT_BYTE *outBuf, int width, int height, int &outputBytes );
 
 // Compress to DXT5 format
-void CompressImageDXT5( const byte *inBuf, byte *outBuf, int width, int height, int &outputBytes );
+void CompressImageDXT5( const DXT_BYTE *inBuf, DXT_BYTE *outBuf, int width, int height, int &outputBytes );
 
 // Compress to DXT5 format, first convert to YCoCg color space
-void CompressImageDXT5YCoCg( const byte *inBuf, byte *outBuf, int width, int height, int &outputBytes );
+void CompressImageDXT5YCoCg( const DXT_BYTE *inBuf, DXT_BYTE *outBuf, int width, int height, int &outputBytes );
 
 // Compute error between two images
-double ComputeError( const byte *original, const byte *dxt, int width, int height);
+double ComputeError( const DXT_BYTE *original, const DXT_BYTE *dxt, int width, int height);
