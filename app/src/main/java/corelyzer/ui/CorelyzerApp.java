@@ -44,13 +44,10 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowFocusListener;
 import java.io.File;
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
-import java.util.StringTokenizer;
 import java.util.Vector;
-import java.util.prefs.Preferences;
 
 import javax.help.CSH;
 import javax.help.HelpBroker;
