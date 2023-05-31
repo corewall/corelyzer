@@ -1,8 +1,8 @@
-### Building Scenegraph
+## Building Scenegraph
 
-The Corelyzer Scenegraph Library requires some initial setup to build completely from source.  We provide pre-built versions of the library, so you only need to follow these instructions if you intend to modify Scenegraph.
+The Corelyzer Scenegraph Library requires some initial setup to build from source.  We provide pre-built versions of the library, so you only need to follow these instructions if you intend to modify Scenegraph.
 
-#### macOS/Mac OSX
+### macOS/Mac OSX
 
 Xcode and command-line developer tools must be installed.
 
@@ -17,17 +17,17 @@ Then, in the `scenegraph` dir, build Corelyzer with the included Gradle wrapper:
 The generated Scenegraph JAR file and native macOS binary (jnilib) will be found in `scenegraph/dist`.
 
 
-#### Windows
+### Windows
 
-The Windows Scenegraph DLL can be cross-built on non-Windows systems with MXE, or built natively on Windows with Visual Studio 2008.
+The Windows Scenegraph DLL can be cross-built with MXE, or built natively on Windows with Visual Studio 2008.
 
-##### Cross-build on macOS and Linux
+#### Cross-build on macOS, Linux, or Windows (via Windows Subsystem for Linux)
 
 This method is preferred as it 1) produces a statically-linked DLL and 2) doesn't require an ancient paid product (Visual Studio 2008).
 
-###### Prepare MXE Cross Environment
+##### Prepare MXE Cross Environment
 
-A scenegraph DLL can be built on macOS or Linux with the [MXE Cross Environment](https://mxe.cc). The following instructions are Mac-specific, but should translate to Linux easily.
+A Scenegraph DLL can be built on macOS, Linux, or Windows (through [WSL](https://learn.microsoft.com/en-us/windows/wsl/)) with the [MXE Cross Environment](https://mxe.cc). The following instructions are Mac-specific, but should be adaptable to Linux without too much difficulty.
 
 
 1. Follow [Step 1 of the Tutorial](https://mxe.cc/#tutorial) to download MXE.
@@ -49,7 +49,7 @@ Scenegraph build scripts assume MXE is installed in the suggested `/opt/mxe`.
 
 6. Now Scenegraph dependencies can be cross-built for Windows.
 
-###### Cross-build Scenegraph Dependencies
+##### Cross-build Scenegraph Dependencies
 
 Make sure `/opt/mxe/usr/bin` is at the beginning of your shell's `PATH` before proceeding.
 
@@ -72,7 +72,7 @@ Finally, build the `libsquish` dependency, which is not included in MXE.
 7. Cross-build with the prepared Makefile. In the `libsquish` root dir: `make`
 8. You should now see `libsquish.a` in the `libsquish` root dir.
 
-###### Cross-build Scenegraph DLL
+##### Cross-build Scenegraph DLL
 
 In `scenegraph/build.gradle`, examine the paths in the `crossBuildJNIWin`, `crossCompileWin`, and `linkCrossCompiledWin` tasks and adjust them to reflect your MXE and Java Development Kit install paths.
 
@@ -81,12 +81,12 @@ Then, in the `scenegraph` dir, cross-build the DLL with `../gradlew --info cross
 The generated `scenegraph.dll` will be placed in the `scenegraph/dist` directory.
 
 
-##### Native Build with Visual Studio 2008
+#### Native Build with Visual Studio 2008
 
 Required libraries and headers are included in `scenegraph/deps/win64`. Open `win32/vs2008/libscenegraph.vcproj` in Visual Studio 2008 and Rebuild Solution. If all goes well, scenegraph.dll will be found in the Debug or Release subdirectory.
 
 
-#### Linux
+### Linux
 
 The following steps result in a working build of Scenegraph on
 a on Ubuntu LTS 18.04.4 "Bionic Beaver" and 20.04.1 "Focal Fossa".
