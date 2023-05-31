@@ -5,18 +5,19 @@ study of geological cores. The strength of Corelyzer is the ability to display
 large sets of core imagery, with multi-sensor logs, annotations and plugin-supported
 visuals alongside core imagery.
 
-Corelyzer consists of two pieces: the SceneGraph library (C++) and the Corelyzer 
-application itself (Java).
+Corelyzer consists of two components:
+- The Scenegraph library (C++) renders the main canvas and processes images.
+- The Corelyzer application (Java) provides GUI components, file management, and most other functions.
 
-Prebuilt Corelyzer application packages for Windows and Mac can be downloaded [here](https://github.com/corewall/corelyzer/releases).
+Pre-built Corelyzer application packages for Windows and Mac can be [downloaded here](https://github.com/corewall/corelyzer/releases).
 
 
 ### Building Corelyzer
-The following is intended for Linux users and others interested in building Corelyzer and/or SceneGraph from scratch on supported platforms.
+The following is intended for Linux users and others interested in building Corelyzer and/or Scenegraph from source on supported platforms.
 
 #### Requirements
 - Java Development Kit (JDK) version 11. We recommend the [OpenJDK distribution](https://adoptopenjdk.net).
-- The SceneGraph native library. Prebuilt versions are provided for Mac (libscenegraph.jnilib) and Windows (scenegraph.dll) in scenegraph/dist. To build SceneGraph from scratch, follow the instructions in [scenegraph/README.md](https://github.com/corewall/corelyzer/tree/master/scenegraph).
+- The Scenegraph native library. Prebuilt versions are provided for Mac (libscenegraph.jnilib) and Windows (scenegraph.dll) in scenegraph/dist. To build Scenegraph from source, follow the instructions in [scenegraph/README.md](https://github.com/corewall/corelyzer/tree/master/scenegraph).
 
 #### Building on macOS/OSX
 
@@ -49,7 +50,7 @@ Use the provided Gradle wrapper:
 
     ./gradlew clean packageWin
 
-This will compile the Java components and create a directory containing the Corelyzer executable, required resources and DLLs. Like Mac, it uses prebuilt versions of the SceneGraph native library and associated SceneGraph JAR. The generated package will be placed in the `dist/win` directory.
+This will compile the Java components and create a directory containing the Corelyzer executable, required resources and DLLs. Like Mac, it uses prebuilt versions of the Scenegraph native library and associated SceneGraph JAR. The generated package will be placed in the `dist/win` directory.
 
 #### Building and Running on Linux
 
@@ -57,13 +58,13 @@ Corelyzer builds and runs on Ubuntu LTS 18.04.4 "Bionic Beaver" and 20.04.1 "Foc
 
 **NOTE**: Corelyzer is known to crash when launched on Ubuntu virtual machines with kernel version 5.4+. This can be resolved by disabling hardware acceleration in the VM.
 
-No pre-built SceneGraph library is provided on Linux. To build, follow the instructions in [scenegraph/README.md](https://github.com/corewall/corelyzer/tree/master/scenegraph).
+No pre-built Scenegraph library is provided on Linux. To build, follow the instructions in [scenegraph/README.md](https://github.com/corewall/corelyzer/tree/master/scenegraph).
 
-Once SceneGraph is built, build Corelyzer with:
+Once Scenegraph is built, build Corelyzer with:
     
     ./gradlew clean packageLinux
 
-This will build Java components and copy SceneGraph and other required resources to `working_dir`.
+This will build Java components and copy Scenegraph and other required resources to `working_dir`.
 
 To run Corelyzer:
 
