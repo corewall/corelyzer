@@ -71,7 +71,6 @@ dependencies {
 		exclude group:'com.bea.xml'
 	}
 	compile 'org.json:json:20140107'
-	compile('com.brsanthu:google-analytics-java:1.1.2')
 	compile 'com.opencsv:opencsv:5.0'
 }
 
