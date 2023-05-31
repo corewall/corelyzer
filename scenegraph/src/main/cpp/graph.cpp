@@ -1078,8 +1078,8 @@ int get_graph_from_section_slot(CoreSection *ptr, int slot) {
 }
 
 //======================================================================
-Box *get_graph_box(CoreSection *cs, int gid)  // return units in inch
-{
+// For graph with ID gid, return bounding box with width and height in inches.
+static Box *calc_graph_box(CoreSection *cs, const int gid) {
     if (!is_graph(gid))
         return NULL;
     if (!cs)
@@ -1095,19 +1095,13 @@ Box *get_graph_box(CoreSection *cs, int gid)  // return units in inch
         cs->orientation = LANDSCAPE;
     }
 
-    float width;
-    if (cs->orientation == PORTRAIT) {
-        if (cs->src == -1) {
-            width = graphvec[gid]->w;
-        } else {
-            width = get_texset_src_height(cs->src) / cs->dpi_y;
-        }
-    } else {
-        if (cs->src == -1) {
-            width = graphvec[gid]->w;
-        } else {
-            width = get_texset_src_width(cs->src) / cs->dpi_x;
-        }
+    float core_section_width = graphvec[gid]->w;
+    float core_section_height = graphvec[gid]->h;
+    if (cs->src != -1) {
+        // core section has valid image data, use its width and height instead of default graph dimensions
+        const float isPortrait = (cs->orientation == PORTRAIT);
+        core_section_width = isPortrait ? get_texset_src_height(cs->src) / cs->dpi_y : get_texset_src_width(cs->src) / cs->dpi_x;
+        core_section_height = isPortrait ? get_texset_src_width(cs->src) / cs->dpi_x : get_texset_src_height(cs->src) / cs->dpi_y;
     }
 
     float y_box_adjust = 0;
@@ -1119,72 +1113,35 @@ Box *get_graph_box(CoreSection *cs, int gid)  // return units in inch
         y_box_adjust += (float)GRAPH_FIELDS_GAP + get_graph_height(sgid);
     }
 
-    b->w = width;                  // inch
-    b->h = get_graph_height(gid);  // inch
+    b->w = core_section_width; // inches
+    b->h = get_graph_height(gid);  // inches
     b->x = 0;
 
     if (isCollapse) {
-        b->y = -((float)GRAPH_FIELDS_GAP + b->h);
+        // b->y = -((float)GRAPH_FIELDS_GAP + b->h) + core_section_height;
+        b->y = -(b->h) + core_section_height;
+        
     } else {
         b->y = -(y_box_adjust + (float)GRAPH_FIELDS_GAP + b->h);
     }
 
     return b;
 }
+
 //======================================================================
+// Get graph bounding box, *ignoring* graph_offset member of CoreSection cs.
+Box *get_graph_box(CoreSection *cs, int gid)  // return units in inch
+{
+    return calc_graph_box(cs, gid);
+}
+
+//======================================================================
+// Get graph bounding box with position adjusted for graph_offset member of CoreSection cs.
 Box *get_graph_box(Canvas *c, CoreSection *cs, int gid)  // return units in inch
 {
-    if (!is_graph(gid))
-        return NULL;
-    if (!cs)
-        return NULL;
-
-    Box *b = new Box();
-
-    // calculate graph width and height for scissor box
-
-    // this means it's 1x1 pixel image for missing purpose
-    // no need to rotate it no matter what
-    if ((cs->dpi_y == 0.25) && (cs->dpi_x < 1.0f)) {
-        cs->orientation = LANDSCAPE;
-    }
-
-    float width;
-    if (cs->orientation == PORTRAIT)  // true: portrait
-    {
-        if (cs->src == -1) {
-            width = graphvec[gid]->w;
-        } else {
-            width = get_texset_src_height(cs->src) / cs->dpi_y;
-        }
-    } else {
-        if (cs->src == -1) {
-            width = graphvec[gid]->w;
-        } else {
-            width = get_texset_src_width(cs->src) / cs->dpi_x;
-        }
-    }
-
-    float y_box_adjust = 0;
-    int slot = get_graph_slot(gid);
-
-    for (int i = 0; i < slot; i++) {
-        int sgid;
-        sgid = cs->graphvec[i];
-        y_box_adjust += (float)GRAPH_FIELDS_GAP + get_graph_height(sgid);
-    }
-
-    b->w = width;                  // inch
-    b->h = get_graph_height(gid);  // inch
-    b->x = cs->graph_offset / c->dpi_x;
-
-    if (isCollapse) {
-        b->y = -((float)GRAPH_FIELDS_GAP + b->h);
-    } else {
-        b->y = -(y_box_adjust + (float)GRAPH_FIELDS_GAP + b->h);
-    }
-
-    return b;
+    Box *box = calc_graph_box(cs, gid);
+    box->x = cs->graph_offset / c->dpi_x;
+    return box;
 }
 
 //======================================================================
