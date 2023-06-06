@@ -929,10 +929,8 @@ public class StateLoader {
 
 		// find field
 		String fieldName = e.getAttribute("field");
-		fieldName = fieldName.toLowerCase();
-
 		for (int i = 0; (field < 0) && (i < table.getNumColumns()); i++) {
-			if (fieldName.equals(table.getHeader(i).toLowerCase())) {
+			if (fieldName.toLowerCase().equals(table.getHeader(i).toLowerCase())) {
 				field = i;
 			}
 		}
@@ -1181,10 +1179,8 @@ public class StateLoader {
 
 		// find field
 		String fieldName = e.getAttribute("field");
-		fieldName = fieldName.toLowerCase();
-
 		for (int i = 0; (field < 0) && (i < table.getNumColumns()); i++) {
-			if (fieldName.equals(table.getHeader(i).toLowerCase())) {
+			if (fieldName.toLowerCase().equals(table.getHeader(i).toLowerCase())) {
 				field = i;
 			}
 		}
