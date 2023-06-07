@@ -1785,6 +1785,22 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setGraphsCollapse
 
 /*
  * Class:     corelyzer_graphics_SceneGraph
+ * Method:    getGraphsOverlay
+ * Signature: ()Z
+ */
+JNIEXPORT jboolean JNICALL Java_corelyzer_graphics_SceneGraph_getGraphsOverlay
+  (JNIEnv *, jclass);
+
+/*
+ * Class:     corelyzer_graphics_SceneGraph
+ * Method:    setGraphsOverlay
+ * Signature: (Z)V
+ */
+JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_setGraphsOverlay
+  (JNIEnv *, jclass, jboolean);
+
+/*
+ * Class:     corelyzer_graphics_SceneGraph
  * Method:    setImageURL
  * Signature: (ILjava/lang/String;)V
  */

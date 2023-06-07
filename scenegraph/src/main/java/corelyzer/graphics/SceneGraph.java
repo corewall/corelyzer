@@ -1581,6 +1581,9 @@ public class SceneGraph {
 
 	public native static void setGraphsCollapse(boolean isCollapse);
 
+	public native static boolean getGraphsOverlay();
+	public native static void setGraphsOverlay(boolean overlay);
+
 	/**
 	 * Access method. Set the URL of specified core section image.
 	 * 

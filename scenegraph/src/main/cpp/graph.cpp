@@ -52,6 +52,7 @@
 //======================================================================
 std::vector<Graph *> graphvec;
 static bool isCollapse = false;
+static bool isOverlay = false;
 
 static float graphScaleLimit = 1000.0f;
 static float graphScale = DEFAULT_GRAPH_SCALE;
@@ -279,6 +280,7 @@ int locate_graph(int track, int section, int dataset, int table, int field) {
 }
 
 //======================================================================
+// Unused as of 6/6/2023
 void render_minmax_labels(Canvas *c, CoreSection *cs, int gid) {
     Graph *g = graphvec[gid];
     if (!g)
@@ -1101,9 +1103,11 @@ static Box *calc_graph_box(CoreSection *cs, const int gid) {
     b->x = 0;
 
     if (isCollapse) {
-        // b->y = -((float)GRAPH_FIELDS_GAP + b->h) + core_section_height;
-        b->y = -(b->h) + core_section_height;
-        
+        if (isOverlay) {
+            b->y = -(b->h) + core_section_height;
+        } else {
+            b->y = -((float)GRAPH_FIELDS_GAP + b->h);
+        }
     } else {
         b->y = -(y_box_adjust + (float)GRAPH_FIELDS_GAP + b->h);
     }
@@ -1148,13 +1152,16 @@ int isOutside(float prevDepth, float depth, float startDepth, float endDepth) {
 }
 
 //======================================================================
-bool ifCollapse() {
-    return isCollapse;
+
+// Collapse: draw all graphs on same axis, above core image
+bool getCollapse() { return isCollapse; }
+void setCollapse(bool collapse) {
+    isCollapse = collapse;
 }
 
-void setCollapse(bool aBool) {
-    isCollapse = aBool;
-}
+// Overlay: (requires isCollapse == true) draw collapsed graphs directly on core image
+bool getOverlay() { return isOverlay; }
+void setOverlay(bool overlay) { isOverlay = overlay; }
 
 void setGraphScale(float s) {
     graphScale *= s;

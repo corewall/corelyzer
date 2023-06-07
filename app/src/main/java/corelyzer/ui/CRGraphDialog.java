@@ -39,6 +39,7 @@ import java.awt.event.WindowEvent;
 import java.util.Random;
 import java.util.Vector;
 
+import javax.swing.BorderFactory;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.DefaultListModel;
@@ -82,7 +83,7 @@ public class CRGraphDialog extends JFrame {
 	 * 
 	 */
 	private static final long serialVersionUID = -8879622939957228395L;
-	private static Dimension lastDimension = new Dimension(600, 500);
+	private static Dimension lastDimension = new Dimension(600, 700);
 	private static Point lastPosition = null;
 
 	public static void main(final String[] args) {
@@ -102,7 +103,8 @@ public class CRGraphDialog extends JFrame {
 	private JLabel datasetInfoLabel, unmatchedImageLabel;
 	private JList<GraphSectionListItem> sectionsList;
 	private JLabel sectionsListLabel;
-	private JCheckBox ifCollapseGraphs;
+	private JCheckBox collapseGraphs;
+	private JCheckBox overlayGraphs;
 	private JComboBox<String> typeList;
 	private JTextField scaleMinText, scaleMaxText;
 	private JTextField excludeMinText, excludeMaxText;
@@ -144,7 +146,7 @@ public class CRGraphDialog extends JFrame {
 		super();
 		this.setAlwaysOnTop(true);
 		this.setLocationRelativeTo(parent);
-		setTitle("Graph Dialog");
+		setTitle("Graph Settings");
 		
 		myInit();
 
@@ -215,7 +217,7 @@ public class CRGraphDialog extends JFrame {
 	// designer, but we now use the far friendlier MigLayout for the graph dialog.
 	private void setupUI()
 	{
-		contentPane = new JPanel(new MigLayout("", "[grow]", "[][][grow][]"));
+		contentPane = new JPanel(new MigLayout("insets 10 10 0 10", "[grow]", "[][grow][][][]"));
 		contentPane.add(new JLabel("Choose a dataset:"), "split 2");
 		
 		datasetList = new JComboBox<WellLogDataSet>();
@@ -276,11 +278,7 @@ public class CRGraphDialog extends JFrame {
 		graphTypeComboBoxModel.addElement("Cross point");
 		graphTypeComboBoxModel.addElement("Line & Points");
 		typeList.setModel( graphTypeComboBoxModel );
-		graphPropsPanel.add(typeList, "growx");
-		
-		ifCollapseGraphs = new JCheckBox("Collapse graphs");
-		ifCollapseGraphs.setToolTipText( "Draw all section graphs in the same coordinate plane" );
-		graphPropsPanel.add( ifCollapseGraphs, "span 2, wrap" );
+		graphPropsPanel.add(typeList, "growx, span 3");
 		
 		graphPropsPanel.add( new JLabel( "Scale min:" ));
 		scaleMinText = new JTextField();
@@ -305,13 +303,29 @@ public class CRGraphDialog extends JFrame {
 		leaveGapsBox = new JCheckBox("Leave gaps at excluded values", false );
 		leaveGapsBox.setToolTipText( "Don't draw a line between points that have excluded points between them" );
 		graphPropsPanel.add( leaveGapsBox, "span" );
-		
+
+		graphPropsPanel.setBorder(BorderFactory.createTitledBorder("Selected Graph Properties"));
+
+		JPanel buttonPanel = new JPanel(new MigLayout("fillx, insets 5"));
 		applyButton = new JButton("Apply");
-		graphPropsPanel.add( applyButton, "span 4, split 2, align right" );
+		buttonPanel.add(applyButton, "span 4, split 2, align right");
 		closeButton = new JButton("Close");
-		graphPropsPanel.add( closeButton, "align right" );
+		buttonPanel.add(closeButton, "align right");
 		
-		contentPane.add(graphPropsPanel, "growx");
+		collapseGraphs = new JCheckBox("Collapse all graphs");
+		collapseGraphs.setToolTipText( "Draw all graphs in the same coordinate plane" );
+		
+		overlayGraphs = new JCheckBox("Overlay on images");
+		overlayGraphs.setToolTipText("Overlay all graphs on section images");
+
+		JPanel globalPropsPanel = new JPanel(new MigLayout("fillx, insets 5"));
+		globalPropsPanel.setBorder(BorderFactory.createTitledBorder("Global Graph Properties"));
+		globalPropsPanel.add(collapseGraphs);
+		globalPropsPanel.add(overlayGraphs);
+
+		contentPane.add(graphPropsPanel, "growx, wrap");
+		contentPane.add(globalPropsPanel, "growx, wrap");
+		contentPane.add(buttonPanel, "growx");
 	}
 
 	private void applyGraphSelection( final int sectionIndex ) {
@@ -381,16 +395,28 @@ public class CRGraphDialog extends JFrame {
 		
 	// 	return getTableIndexByName( secname );
 	// }
+	private void enableOverlayCheckbox() {
+		overlayGraphs.setEnabled(collapseGraphs.isSelected());
+	}
 
-	private void ifCollapseAction() {
+	private void collapseChecked() {
+		// uncheck Overlay if Collapse is unchecked
+		if (!collapseGraphs.isSelected() && overlayGraphs.isSelected()) {
+			overlayGraphs.setSelected(false);
+			overlayChecked();
+		}
+		enableOverlayCheckbox();
 		SwingUtilities.invokeLater(new Runnable() {
-
 			public void run() {
-				SceneGraph.setGraphsCollapse(ifCollapseGraphs.isSelected());
-
+				SceneGraph.setGraphsCollapse(collapseGraphs.isSelected());
 				CorelyzerApp.getApp().updateGLWindows();
 			}
 		});
+	}
+
+	private void overlayChecked() {
+		SceneGraph.setGraphsOverlay(overlayGraphs.isSelected());
+		CorelyzerApp.getApp().updateGLWindows();
 	}
 	
 	private void leaveGapsAction() {
@@ -485,12 +511,21 @@ public class CRGraphDialog extends JFrame {
 			}
 		});
 
-		ifCollapseGraphs.setSelected(SceneGraph.getGraphsCollapse());
-		ifCollapseGraphs.addActionListener(new ActionListener() {
+		collapseGraphs.setSelected(SceneGraph.getGraphsCollapse());
+		collapseGraphs.addActionListener(new ActionListener() {
 			public void actionPerformed(final ActionEvent event) {
-				ifCollapseAction();
+				collapseChecked();
 			}
 		});
+
+		overlayGraphs.setSelected(SceneGraph.getGraphsOverlay());
+		overlayGraphs.addActionListener(new ActionListener() {
+			public void actionPerformed(final ActionEvent event) {
+				overlayChecked();
+			}
+		});
+
+		enableOverlayCheckbox(); // init overlay checkbox to proper state
 	}
 
 	private void onApply() {
@@ -578,7 +613,7 @@ public class CRGraphDialog extends JFrame {
 			if (!imageExists) { missingImageCount++; }
 			this.sectionsListModel.addElement(new GraphSectionListItem(name, imageExists));
 		}
-		String datasetInfoStr = "Contains " + this.sectionsListModel.getSize() + " sections.";
+		String datasetInfoStr = "Contains data for " + this.sectionsListModel.getSize() + " section(s).";
 		datasetInfoLabel.setText(datasetInfoStr);
 		if (missingImageCount > 0) {
 			unmatchedImageLabel.setText("No corresponding image found for " + missingImageCount + " section(s).");
