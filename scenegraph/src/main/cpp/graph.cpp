@@ -341,8 +341,16 @@ void render_label(Canvas *c, CoreSection *cs, int gid) {
     const float shiftv = b->h * c->dpi_y;
     const float shifth = (float)(label_len * 24 * get_graph_slot(gid));
 
-    const float scaleh = 1.5f;
-    const float scalev = 1.5f;
+    const float LABEL_SCALING = 1.5f;
+    const float CANVAS_SCALE_THRESHOLD = 2.0f;
+    const float canvasScale = c->w / c->w0;
+    float scaleh = LABEL_SCALING;
+    float scalev = LABEL_SCALING;
+    if (canvasScale < CANVAS_SCALE_THRESHOLD) {
+        // If canvas is zoomed in beyond threshold, stop enlarging graph labels.
+        scaleh *= (canvasScale / CANVAS_SCALE_THRESHOLD);
+        scalev *= (canvasScale / CANVAS_SCALE_THRESHOLD);
+    }
 
     glPushMatrix();
     {
