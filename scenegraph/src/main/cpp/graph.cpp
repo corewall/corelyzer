@@ -335,29 +335,12 @@ void render_label(Canvas *c, CoreSection *cs, int gid) {
         return;
 
     Box *b = get_graph_box(c, cs, gid);  // return values' in 'inch'
+    const int label_len = strlen(g->label);
+    const float shiftv = b->h * c->dpi_y;
+    const float shifth = (float)(label_len * 24 * get_graph_slot(gid));
 
-    // min/max values
-    // float min = g->min;
-    // float max = g->max;
-
-    // char * minLabel = new char[64];
-    // char * maxLabel = new char[64];
-    // sprintf(minLabel, "Min: %.2f", min);
-    // sprintf(maxLabel, "Max: %.2f", max);
-
-    char *label = new char[256];
-    sprintf(label, "%s (min: %.2f - max: %.2f)", g->label, g->min, g->max);
-
-    int len = strlen(label);
-    // int   len = (real_len <= 5) ? real_len : 5;
-
-    float shiftv = b->h * c->dpi_y;
-    float shifth = (float)(len * 24 * get_graph_slot(gid));
-
-    // float scaleh = 0.5f * getGraphScale();
-    // float scalev = 0.5f * getGraphScale();
-    float scaleh = 1.5f;
-    float scalev = 1.5f;
+    const float scaleh = 1.5f;
+    const float scalev = 1.5f;
 
     glPushMatrix();
     {
@@ -376,7 +359,7 @@ void render_label(Canvas *c, CoreSection *cs, int gid) {
         }
 
         glScalef(scaleh, scalev, 1.0f);
-        render_string(label, 0, len - 1);
+        render_string(g->label, 0, label_len - 1);
     }
     glPopMatrix();
 }
