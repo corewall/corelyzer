@@ -541,16 +541,7 @@ void render_canvas(int id) {
         }
 
         if (showOrigin) {
-            // The origin
-            char *label = (char *)malloc(sizeof(char) * 16);
-            {
-                // memset(label, 0, 16);
-                sprintf(label, "Canvas: %d", id);
-                glColor3f(1, 1, 1);
-                render_string(label, 0, strlen(label) - 1);
-            }
-            free(label);
-
+            // draw red/yellow crosshair at origin
             glBindTexture(GL_TEXTURE_2D, 0);
             glLineWidth(5);
             glBegin(GL_LINES);
@@ -565,6 +556,15 @@ void render_canvas(int id) {
             }
             glEnd();
             glLineWidth(1);
+
+            // draw canvas label and ID # in Debug mode only
+            if (getDebug()) {
+                char *label = new char[16];
+                sprintf(label, "Canvas: %d", id);
+                glColor3f(1, 1, 1);
+                render_string(label, 0, strlen(label) - 1);
+                delete[] label;
+            }
         }
 
         // draw tie depth line if enabled
