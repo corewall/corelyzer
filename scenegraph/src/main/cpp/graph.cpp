@@ -362,12 +362,6 @@ void render_label(Canvas *c, CoreSection *cs, int gid) {
             glTranslatef(0.0f, -shiftv, 0.0f);
         }
 
-        if (!get_horizontal_depth())  // if vertical depth
-        {
-            glTranslatef(50, 0, 0);
-            glRotatef(-90, 0, 0, 1);
-        }
-
         glScalef(scaleh, scalev, 1.0f);
         render_string(g->label, 0, label_len - 1);
     }
