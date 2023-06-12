@@ -1583,19 +1583,15 @@ JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_highlightSections(JNIE
     // first, clear all selected sections
     const int trackCount = num_tracks(default_track_scene);
     for (int tidx = 0; tidx < trackCount; tidx++) {
-        TrackSceneNode *track = get_scene_track(default_track_scene, tidx);
-        if (track) {
-            const int secCount = track->modelvec.size();
+        TrackSceneNode *curTrack = get_scene_track(default_track_scene, tidx);
+        if (curTrack) {
+            const int secCount = curTrack->modelvec.size();
             for (int sidx = 0; sidx < secCount; sidx++) {
-                CoreSection *sec = get_track_section(track, sidx);
+                CoreSection *sec = get_track_section(curTrack, sidx);
                 if (sec) {
                     sec->highlight = false;
-                } else {
-                    printf("sec %d not found, can't unhighlight!\n", sidx);
                 }
             }
-        } else {
-            printf("track %d not found!\n", tidx);
         }
     }
 
