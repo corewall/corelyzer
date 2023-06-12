@@ -533,35 +533,52 @@ public class CorelyzerAppController implements ActionListener, AboutHandler, Qui
 		String message = "Are you sure you want to delete track: " + name + " ?";
 
 		if (JOptionPane.showConfirmDialog(view.getMainFrame(), message) == JOptionPane.OK_OPTION) {
-
-			int idx = -1;
+			Session parentSession = null;
+			TrackSceneNode trackToDelete = null, nextTrackToSelect = null;
 			for (Session s : cg.getSessions()) {
-				for (TrackSceneNode t : s.getTrackSceneNodes()) {
-					String trackName = t.getName();
-
-					if (name.equals(trackName)) {
-						SceneGraph.lock();
-						{
-							idx = t.getId();
-							t.removeAllCoreSection();
-							SceneGraph.deleteSectionTiesOnTrack(t.getId());
-							SceneGraph.deleteTrack(t.getId());
-							cg.removeTrack(s, t);
+				Vector<TrackSceneNode> sessionTracks = s.getTrackSceneNodes();
+				for (int trackIdx = 0; trackIdx < sessionTracks.size(); trackIdx++) {
+					TrackSceneNode t = sessionTracks.get(trackIdx);
+					if (name.equals(t.getName())) {
+						trackToDelete = t;
+						parentSession = s;
+						if (sessionTracks.size() > 1) {
+							if (trackIdx < sessionTracks.size() - 1) { // select next track
+								nextTrackToSelect = sessionTracks.get(trackIdx + 1);
+							} else { // deleting last track, select previous track								
+								nextTrackToSelect = sessionTracks.get(trackIdx - 1);
+							}
 						}
-						SceneGraph.unlock();
 						break;
 					}
 				}
 			}
+			
+			final int deletedTrackIdx = trackToDelete.getId();
+			SceneGraph.lock();
+			{
+				trackToDelete.removeAllCoreSection();
+				SceneGraph.deleteSectionTiesOnTrack(trackToDelete.getId());
+				SceneGraph.deleteTrack(trackToDelete.getId());
+				cg.removeTrack(parentSession, trackToDelete);
+			}
+			SceneGraph.unlock();
 
+			// Clear selection and re-select to trigger Track list's ListSelectionListener,
+			// which updates section list and highlights selected section(s). Otherwise,
+			// listener won't trigger when a non-last track is deleted, because the list selection
+			// remains unchanged (deleted list item is removed, item directly below gains selection).
+			CorelyzerApp.getApp().getTrackList().clearSelection();
+			CorelyzerApp.getApp().getTrackList().setSelectedValue(nextTrackToSelect, false);
+
+			cg.setCurrentTrack(parentSession, nextTrackToSelect);
 			cg.notifyListeners();
+
 			view.updateGLWindows();
 
 			// broadcast to plugins
-			message = "";
-			message = message + idx;
-			if (idx > -1) {
-				pluginManager.broadcastEventToPlugins(CorelyzerPluginEvent.TRACK_REMOVED, message);
+			if (deletedTrackIdx > -1) {
+				pluginManager.broadcastEventToPlugins(CorelyzerPluginEvent.TRACK_REMOVED, Integer.toString(deletedTrackIdx));
 			}
 		}
 	}
