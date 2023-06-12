@@ -2088,6 +2088,7 @@ public class CorelyzerApp extends WindowAdapter implements MouseListener, Startu
 		trackList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		trackList.addListSelectionListener(new ListSelectionListener() {
 			public void valueChanged(final ListSelectionEvent event) {
+				if (event.getValueIsAdjusting()) return;
 				int idx = trackList.getSelectedIndex();
 				if (idx >= 0) {
 					CoreGraph cg = CoreGraph.getInstance();
