@@ -1108,10 +1108,10 @@ static Box *calc_graph_box(CoreSection *cs, const int gid) {
         if (isOverlay) {
             b->y = -(b->h) + core_section_height;
         } else {
-            b->y = -((float)GRAPH_FIELDS_GAP + b->h);
+            b->y = -b->h;
         }
     } else {
-        b->y = -(y_box_adjust + (float)GRAPH_FIELDS_GAP + b->h);
+        b->y = -(y_box_adjust + b->h);
     }
 
     return b;
