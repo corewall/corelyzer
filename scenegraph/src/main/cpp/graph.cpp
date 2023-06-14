@@ -337,9 +337,32 @@ void render_label(Canvas *c, CoreSection *cs, int gid) {
         return;
 
     Box *b = get_graph_box(c, cs, gid);  // return values' in 'inch'
-    const int label_len = strlen(g->label);
-    const float shiftv = b->h * c->dpi_y;
-    const float shifth = (float)(label_len * 24 * get_graph_slot(gid));
+    float shiftv = b->h * c->dpi_y;
+
+    if (isCollapse) {
+        // Find number of visible graphs on this CoreSection and evenly distribute labels
+        // in the available vertical space. Inefficient to count a core's visible graphs every
+        // time a label is rendered...consider caching or otherwise tracking total visible graphs
+        // if performance hits become evident.
+        int visibleGraphCount = 0;
+        for (int i = 0; i < cs->graphvec.size(); i++) {
+            const int graphIndex = cs->graphvec[i];
+            if (!graphvec[graphIndex]) {
+                printf("Unexpected error: No graph found in graph.cpp file-scope graphvec at index %d\n", graphIndex);
+                continue;
+            }
+            if (graphvec[cs->graphvec[i]]->show) {
+                visibleGraphCount++;
+            }
+        }
+        if (visibleGraphCount == 0) {
+            printf("No visible graphs for CoreSection %s\n", cs->name);
+            return;
+        }
+        const float vertSpacePerLabel = b->h / visibleGraphCount;
+
+        shiftv -= (vertSpacePerLabel * c->dpi_y * get_graph_slot(gid));
+    }
 
     const float LABEL_SCALING = 1.5f;
     const float CANVAS_SCALE_THRESHOLD = 2.0f;
@@ -356,14 +379,14 @@ void render_label(Canvas *c, CoreSection *cs, int gid) {
     {
         if (isCollapse) {
             glColor3f(g->r, g->g, g->b);
-            glTranslatef(shifth, -shiftv, 0.0f);
+            glTranslatef(0.0f, -shiftv, 0.0f);
         } else {
             glColor3f(1.0f, 1.0f, 0.0f);
             glTranslatef(0.0f, -shiftv, 0.0f);
         }
 
         glScalef(scaleh, scalev, 1.0f);
-        render_string(g->label, 0, label_len - 1);
+        render_string(g->label, 0, strlen(g->label) - 1);
     }
     glPopMatrix();
 }
