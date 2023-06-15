@@ -243,68 +243,6 @@ int *load_logo(const char *logoPath) {
     return texture_info;
 }
 
-void render_logo(int id) {
-    // make sure canvas and camera are valid
-    if (!is_canvas(id)) {
-        return;
-    }
-
-    // load image file if it's not ready yet
-    if (logo_texture_info == NULL) {
-        const char *logoPath = "./resources/core_logo.png";
-
-        logo_texture_info = load_logo(logoPath);
-        if (!logo_texture_info) {
-            printf("---> [WARN] Cannot load logo texture: %s\n", logoPath);
-            return;
-        }
-    }
-
-    Canvas *c = &(canvasvec[id]);
-
-    int logoTextureId = logo_texture_info[0];
-    float logo_w = (float)logo_texture_info[1];
-    float logo_h = (float)logo_texture_info[2];
-
-    glPushMatrix();
-    {
-        glMatrixMode(GL_PROJECTION);
-        glLoadIdentity();
-        gluOrtho2D(0, c->w0, c->h0, 0);
-
-        glPushMatrix();
-        {
-            glEnable(GL_BLEND);
-            glColor3f(1.0, 1.0, 1.0);
-
-            float scale = 0.7f;
-            float padding = 20.0f;
-
-            glBindTexture(GL_TEXTURE_2D, logoTextureId);
-            glTranslatef((c->w0 - logo_w * scale - padding),
-                         (c->h0 - logo_h * scale - padding),
-                         0.0);
-            glScalef(scale, scale, 0.0);
-            glBegin(GL_QUADS);
-            {
-                glTexCoord2f(0.0, 0.0);
-                glVertex3f(0.0, 0.0, 0.0);
-                glTexCoord2f(0.0, 1.0);
-                glVertex3f(0.0, logo_h, 0.0);
-                glTexCoord2f(1.0, 1.0);
-                glVertex3f(logo_w, logo_h, 0.0);
-                glTexCoord2f(1.0, 0.0);
-                glVertex3f(logo_w, 0.0, 0.0);
-            }
-            glEnd();
-            glDisable(GL_BLEND);
-        }
-        glPopMatrix();
-        glMatrixMode(GL_MODELVIEW);
-    }
-    glPopMatrix();
-}
-
 void render_remote_control_icon(int id) {
     if (!is_canvas(id)) {
         return;
@@ -435,15 +373,6 @@ void render_onscreen(Canvas *c, int id) {
         {
             glTranslatef(-x, -y, 0);
             render_crossHair(c);
-        }
-        glPopMatrix();
-    }
-
-    // Places to put onscreen billboards
-    if (id == (canvasvec.size() - 1)) {
-        glPushMatrix();
-        {
-            render_logo(id);
         }
         glPopMatrix();
     }
