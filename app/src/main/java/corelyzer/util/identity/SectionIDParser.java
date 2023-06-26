@@ -26,7 +26,12 @@ public class SectionIDParser {
     public String getName() { return name; }
 }
 
-
+// Unlike the other parsers, if the input section ID has a trailing suffix
+// starting with an underscore e.g. "_darker", "_lighter", "_f5.4", include
+// that suffix in the String returned from getFullHoleID().
+//
+// This allows sections with suffixes to be properly auto-placed in corresponding
+// tracks.
 class LacCoreSectionParser extends SectionIDParser {
     public LacCoreSectionParser() {
         super();
@@ -47,6 +52,18 @@ class LacCoreSectionParser extends SectionIDParser {
         // parentheses are capturing group for full hole/track ID
         final String laccorePattern = "(?<hole>" + EXP + "-" + LAKEYEAR + SITEHOLE + ")-" + CORETOOL + "-" + SECTION + HALF + SUFFIX;
         pattern = Pattern.compile(laccorePattern);
+    }
+
+    public String getFullHoleID(final String secid) {
+        Matcher m = pattern.matcher(secid);
+        if (!m.matches()) return null;
+
+        String suffix = "";
+        if (secid.lastIndexOf("_") != -1) {
+            suffix = secid.substring(secid.lastIndexOf("_"));
+        }
+
+        return m.group("hole") + suffix;
     }
 }
 
