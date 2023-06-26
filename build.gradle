@@ -1,7 +1,7 @@
 import org.gradle.internal.os.OperatingSystem;
 
 allprojects {
-	version = '2.2.0'
+	version = '2.2.1'
 	group = 'org.corewall'
 }
 
@@ -14,7 +14,7 @@ task clean  {
 	}
 }
 
-def javaRuntimeFile = null // replace with your Java 11 runtime
+def javaRuntimeFile = "jdk-11.0.8+10-jre" // replace with your Java 11 runtime
 
 /**
  * Packaging tasks.	 It may be good to just extend the gradle dist task instead of having a custom task.
