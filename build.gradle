@@ -199,7 +199,7 @@ task 'create-win-dist' {
 			// copy the skeleton
 			copy {
 				into winDist
-				from 'packages/win'
+				from file('packages/win').listFiles().find { it.name.equals('Corelyzer.exe') }
 			}
 		}
 	}
