@@ -233,15 +233,7 @@ int append_track(int scene, const char *sessionName, const char *trackName) {
 #endif
 
     TrackScene *ts = trackscenevec[scene];
-
-    // Tracks with the same 'HOLE' should have the same 't->py'
-    // Track name: <hole>_<core>
-    bool foundTheSameHole = false;
     float holePy = defaultTrackPositionY;
-
-    char *newTrackName = (char *)malloc(sizeof(char) * (strlen(trackName) + 1));
-    strcpy(newTrackName, trackName);
-    char *newHoleStr = strtok(newTrackName, "_");
 
     // try to reuse a track vec slot
     for (unsigned int i = 0; i < ts->trackvec.size(); ++i) {
@@ -270,32 +262,16 @@ int append_track(int scene, const char *sessionName, const char *trackName) {
                 bring_track_front(scene, i);
             }
 
-            // increament default track posY
+            // increment default track posY
             t->py = holePy;
-            defaultTrackPositionY = (foundTheSameHole) ? (defaultTrackPositionY) : (defaultTrackPositionY -= (TRACK_GAP * DEFAULT_DPI));
+            defaultTrackPositionY -= (TRACK_GAP * DEFAULT_DPI);
 
             return i;
-        } else  // try to find if track name with the same HOLE component exists
-        {
-            if (!foundTheSameHole) {
-                char *thisTrackName = (char *)malloc(sizeof(char) * (strlen(ts->trackvec[i]->name) + 1));
-                strcpy(thisTrackName, ts->trackvec[i]->name);
-                char *thisHoleStr = strtok(thisTrackName, "_");
-
-                // found it, with compare HOLE string
-                if (0 == strcmp(newHoleStr, thisHoleStr)) {
-                    holePy = ts->trackvec[i]->py;
-                    foundTheSameHole = true;
-                }
-
-                free(thisTrackName);
-            }
         }
     }
 
     t->py = holePy;
-    defaultTrackPositionY = (foundTheSameHole) ? (defaultTrackPositionY) : (defaultTrackPositionY -= (TRACK_GAP * DEFAULT_DPI));
-    free(newTrackName);
+    defaultTrackPositionY -= (TRACK_GAP * DEFAULT_DPI);
 
     // no empty slots
     ts->trackvec.push_back(t);
