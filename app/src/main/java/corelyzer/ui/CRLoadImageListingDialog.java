@@ -496,7 +496,7 @@ public class CRLoadImageListingDialog extends JDialog {
 
 		// show up general info message
 		JOptionPane.showMessageDialog(this, "Save Image Listing File\n\n" + "only supports Comma Delimited Files (.csv)\n"
-				+ "File will inlcude below values in each line.\n" + "filename, orientation, length, dpix, dpiy, depth");
+				+ "File will include below values in each line.\n" + "filename, orientation, length, dpix, dpiy, depth");
 
 		JFileChooser chooser = new JFileChooser(new File(CRPreferences.getCurrentDir()));
 		chooser.setFileFilter(new FileNameExtensionFilter("Comma Separated Values (.csv)", "csv"));
@@ -593,6 +593,8 @@ public class CRLoadImageListingDialog extends JDialog {
 		String filepath, orientation;
 		float length, dpix, dpiy, depth;
 
+		int missingImageFileCount = 0;
+
 		try {
 			FileReader fr = new FileReader(selectedFile);
 			BufferedReader reader = new BufferedReader(fr);
@@ -641,9 +643,7 @@ public class CRLoadImageListingDialog extends JDialog {
 					if (imageFile.exists()) {
 						filepath = imageFile.getAbsolutePath();
 					} else {
-						String errmsg = "Image file '" + toks[0] + "' doesn't exist";
-						if (showContinueAbortMessage(errmsg, "Error") == JOptionPane.NO_OPTION)
-							break;
+						missingImageFileCount++;
 						continue;
 					}
 				}
@@ -663,6 +663,11 @@ public class CRLoadImageListingDialog extends JDialog {
 			String mesg = "Image List File Parsing error";
 			JOptionPane.showMessageDialog(this, mesg);
 			System.err.println(mesg + ": " + e);
+		}
+
+		if (missingImageFileCount > 0) {
+			String msg = Integer.toString(missingImageFileCount)+ " image file(s) in the listing file could not be found.";
+			JOptionPane.showMessageDialog(this, msg, "Missing Image Files", JOptionPane.WARNING_MESSAGE);
 		}
 
 		imageTable.updateUI();
