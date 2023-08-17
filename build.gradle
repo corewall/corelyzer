@@ -14,7 +14,10 @@ task clean  {
 	}
 }
 
-def javaRuntimeFile = "jdk-11.0.8+10-jre" // replace with your Java 11 runtime
+/* Names of directories containing Java 11 runtimes for use in packaging.
+   These directories should be located in the packages/java_runtime dir. */
+def windows_javaRuntime = null
+def macOS_javaRuntime = null
 
 /**
  * Packaging tasks.	 It may be good to just extend the gradle dist task instead of having a custom task.
@@ -32,13 +35,27 @@ task 'package-check'(dependsOn: [':app:build'])  {
 			if (!javaRuntimeDir.exists()) {
 				throw new Error("Error: Missing packages/java_runtime directory")
 			}
-			if (javaRuntimeFile == null) {
-				throw new Error("Error: javaRuntimeFile var is null.\nTo resolve, update javaRuntimeFile var with your Java 11 runtime in build.gradle.")
-			}
-			if (javaRuntimeDir.listFiles().find { it.name.equals(javaRuntimeFile) } == null) {
-				throw new Error("Error: Missing Java runtime '${javaRuntimeFile}' in packages/java_runtime")
-			}
 		}
+	}
+}
+
+task 'java-runtime-check-mac'(dependsOn: 'package-check') {
+	def javaRuntimeDir = file("packages/java_runtime")
+	if (macOS_javaRuntime == null) {
+		throw new Error("Error: macOS_javaRuntime var is null.\nTo resolve, update macOS_javaRuntime var with your macOS Java 11 runtime in build.gradle.")
+	}
+	if (javaRuntimeDir.listFiles().find { it.name.equals(macOS_javaRuntime) } == null) {
+		throw new Error("Error: Missing macOS Java 11 runtime '${macOS_javaRuntime}' dir in packages/java_runtime")
+	}
+}
+
+task 'java-runtime-check-win'(dependsOn: 'package-check') {
+	def javaRuntimeDir = file("packages/java_runtime")
+	if (macOS_javaRuntime == null) {
+		throw new Error("Error: windows_javaRuntime var is null.\nTo resolve, update windows_javaRuntime var with your macOS Java 11 runtime in build.gradle.")
+	}
+	if (javaRuntimeDir.listFiles().find { it.name.equals(macOS_javaRuntime) } == null) {
+		throw new Error("Error: Missing Windows Java 11 runtime '${windows_javaRuntime}' dir in packages/java_runtime")
 	}
 }
 
@@ -59,7 +76,7 @@ task packageLinux(dependsOn: ['package-check', 'create-working-dir']) { }
 
 
 // Package things up as a macOS/OSX .app bundle
-task packageMac(dependsOn: 'package-check')  {
+task packageMac(dependsOn: 'java-runtime-check-mac')  {
 	doLast {
 		def app = file('dist/mac/Corelyzer.app')
 		if (app.exists()) {
@@ -107,7 +124,7 @@ task packageMac(dependsOn: 'package-check')  {
 			copy {
 				from 'packages/java_runtime'
 				into 'dist/mac/Corelyzer.app/Contents/Frameworks'
-				include "${javaRuntimeFile}/**"
+				include "${macOS_javaRuntime}/**"
 			}
 
 			// update our Info.plist
@@ -118,7 +135,7 @@ task packageMac(dependsOn: 'package-check')  {
 			def text = plist.text.toString()
 			text = text.replaceAll(':version', version) // add our version
 			text = text.replaceAll(':classpath', classpath.join('\n'))
-			text = text.replaceAll(':java_runtime', javaRuntimeFile)
+			text = text.replaceAll(':java_runtime', macOS_javaRuntime)
 			plist.write(text)
 
 			// make our app executable
@@ -150,7 +167,7 @@ task packageMac(dependsOn: 'package-check')  {
 // Windows packaging
 def winDist = file("dist/win/Corelyzer")
 def winLibs = file('dist/win/Corelyzer/lib')
-task packageWin(dependsOn: ['package-check', 'create-win-dist']) {
+task packageWin(dependsOn: ['java-runtime-check-win', 'create-win-dist']) {
 	doLast {
 		// copy the jars to Corelyzer/lib
 		copy {
@@ -183,10 +200,14 @@ task packageWin(dependsOn: ['package-check', 'create-win-dist']) {
 			from file('plugins').listFiles().findAll { it.name.endsWith('.jar') }
 		}
 
+		// copy Java runtime into bundle
+		copy {
+			from "packages/java_runtime/${windows_javaRuntime}"
+			into 'dist/win/Corelyzer/jre'
+		}		
+
 		// create our zip file
 		ant.zip(basedir: file("dist/win"), destfile: file("dist/win/Corelyzer-${version}.zip"), includes: "Corelyzer/**")
-
-		// TODO create installer
 	}
 }
 
