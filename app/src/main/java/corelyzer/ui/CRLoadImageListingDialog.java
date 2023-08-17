@@ -423,7 +423,7 @@ public class CRLoadImageListingDialog extends JDialog {
 					sectionName = str;
 					
 					url = f.toURI().toURL().toString();
-					nativeSectionId = app.loadImage(f, url, sectionName);
+					nativeSectionId = app.loadImage(f, url, sectionName, destTrack);
 				} catch (MalformedURLException e) {
 					nativeSectionId = -1;
 					e.printStackTrace();

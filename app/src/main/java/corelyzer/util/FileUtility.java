@@ -611,6 +611,7 @@ public class FileUtility {
 			SceneGraph.setSectionOrientation(trackId, nativeSectionId, isVertical);
 
 			if (cs == null) {
+				SceneGraph.unlock();
 				return;
 			}
 
