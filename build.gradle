@@ -5,14 +5,15 @@ allprojects {
 	group = 'org.corewall'
 }
 
-defaultTasks 'clean', 'package'
+defaultTasks 'clean', 'build'
 
-task clean  {
+tasks.register('clean')  {
 	doLast {
 		ant.delete(dir: file('dist'), failonerror: false)
 		ant.delete(dir: file('bin'), failonerror: false)
 	}
 }
+
 
 /* Names of directories containing Java 11 runtimes for use in packaging.
    These directories should be located in the packages/java_runtime dir. */
@@ -22,7 +23,8 @@ def macOS_javaRuntime = null
 /**
  * Packaging tasks.	 It may be good to just extend the gradle dist task instead of having a custom task.
  */
-task 'package-check'(dependsOn: [':app:build'])  {
+tasks.register('packageCheck') {
+	dependsOn ':app:build'
 	doLast {
 		def required = file("scenegraph/dist/scenegraph-${version}.jar")
 		if (!required.exists()) {
@@ -39,7 +41,9 @@ task 'package-check'(dependsOn: [':app:build'])  {
 	}
 }
 
-task 'java-runtime-check-mac'(dependsOn: 'package-check') {
+tasks.register('javaRuntimeCheckMac') {
+	dependsOn tasks.packageCheck
+
 	def javaRuntimeDir = file("packages/java_runtime")
 	if (macOS_javaRuntime == null) {
 		throw new Error("Error: macOS_javaRuntime var is null.\nTo resolve, update macOS_javaRuntime var with your macOS Java 11 runtime in build.gradle.")
@@ -49,17 +53,19 @@ task 'java-runtime-check-mac'(dependsOn: 'package-check') {
 	}
 }
 
-task 'java-runtime-check-win'(dependsOn: 'package-check') {
+tasks.register('javaRuntimeCheckWin') {
+	dependsOn tasks.packageCheck
+
 	def javaRuntimeDir = file("packages/java_runtime")
-	if (macOS_javaRuntime == null) {
-		throw new Error("Error: windows_javaRuntime var is null.\nTo resolve, update windows_javaRuntime var with your macOS Java 11 runtime in build.gradle.")
+	if (windows_javaRuntime == null) {
+		throw new Error("Error: windows_javaRuntime var is null.\nTo resolve, update windows_javaRuntime var with your Windows Java 11 runtime in build.gradle.")
 	}
-	if (javaRuntimeDir.listFiles().find { it.name.equals(macOS_javaRuntime) } == null) {
+	if (javaRuntimeDir.listFiles().find { it.name.equals(windows_javaRuntime) } == null) {
 		throw new Error("Error: Missing Windows Java 11 runtime '${windows_javaRuntime}' dir in packages/java_runtime")
 	}
 }
 
-task 'create-working-dir' {
+tasks.register('createWorkingDir') {
 	def wrk_dir = file('working_dir')
 	if (!wrk_dir.exists()) {
 		mkdir(wrk_dir)
@@ -72,17 +78,22 @@ task 'create-working-dir' {
 
 // 'package' is a misnomer, this task just builds components and creates
 // working_dir for command-line launch of Corelyzer.
-task packageLinux(dependsOn: ['package-check', 'create-working-dir']) { }
+tasks.register('packageLinux') {
+	dependsOn tasks.packageCheck
+	dependsOn tasks.createWorkingDir
+}
 
 
 // Package things up as a macOS/OSX .app bundle
-task packageMac(dependsOn: 'java-runtime-check-mac')  {
+tasks.register('packageMac') {
+	dependsOn tasks.javaRuntimeCheckMac
 	doLast {
 		def app = file('dist/mac/Corelyzer.app')
 		if (app.exists()) {
 			println "Found dist/mac/Corelyzer.app package, copying in latest app/dist, app/deps/mac, scenegraph/dist..."
 			// copy the jars and native libraries
 			copy {
+				duplicatesStrategy = DuplicatesStrategy.INCLUDE
 				into 'dist/mac/Corelyzer.app/Contents/Resources/Java'
 				from 'app/dist'
 				from 'app/deps/mac'
@@ -114,6 +125,7 @@ task packageMac(dependsOn: 'java-runtime-check-mac')  {
 
 			// copy the jars and native libraries
 			copy {
+				duplicatesStrategy = DuplicatesStrategy.INCLUDE
 				into 'dist/mac/Corelyzer.app/Contents/Resources/Java'
 				from 'app/dist'
 				from 'app/deps/mac'
@@ -167,10 +179,13 @@ task packageMac(dependsOn: 'java-runtime-check-mac')  {
 // Windows packaging
 def winDist = file("dist/win/Corelyzer")
 def winLibs = file('dist/win/Corelyzer/lib')
-task packageWin(dependsOn: ['java-runtime-check-win', 'create-win-dist']) {
+tasks.register('packageWin') {
+	dependsOn tasks.javaRuntimeCheckWin
+	dependsOn tasks.createWinDist
 	doLast {
 		// copy the jars to Corelyzer/lib
 		copy {
+			duplicatesStrategy = DuplicatesStrategy.INCLUDE
 			into winLibs
 			from 'app/dist'
 			from file('app/deps/win').listFiles().findAll { it.name.endsWith('.jar') }
@@ -211,7 +226,7 @@ task packageWin(dependsOn: ['java-runtime-check-win', 'create-win-dist']) {
 	}
 }
 
-task 'create-win-dist' {
+tasks.register('createWinDist') {
 	doLast {
 		if (!winDist.exists()) {
 			mkdir(winDist)
@@ -226,6 +241,7 @@ task 'create-win-dist' {
 	}
 }
 
-task 'package'(dependsOn: ['packageMac', 'packageWin']) {
-	doLast {}
+tasks.register('package') {
+	dependsOn tasks.packageMac
+	dependsOn tasks.packageWin
 }

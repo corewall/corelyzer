@@ -14,6 +14,10 @@ clean.doLast {
 	ant.delete(dir: file('bin'), failonerror: false)
 }
 
+build.doLast {
+	tasks.generateVSCodeBin
+}
+
 // Use javac -h flag to build JNI header for SceneGraph.java.
 // Separate javah call is no longer needed, and javah has been
 // removed from JDK version 11.
@@ -22,13 +26,18 @@ compileJava {
 	options.compilerArgs += ["-h", "${build}"]
 }
 
-task 'clean-dist' {
+tasks.register('cleanDist') {
+	group = "Custom"
+	description = "Removes dist directory"
 	doLast {
 		ant.delete(dir: file('dist'), failonerror: false)
 	}
 }
 
-task 'copy-jni-files'(dependsOn: 'build') {
+tasks.register('copyJNIFiles') {
+	dependsOn tasks.build
+	group = "Custom"
+	description = "Copies generated scenegraph.jar into dist directory"
 	doLast {
 		// copy scenegraph jar into dist
 		copy {
@@ -49,7 +58,10 @@ task 'copy-jni-files'(dependsOn: 'build') {
 // To build and debug, VSCode seems to depend on contents of scenegraph/build/classes/java
 // being copied into scenegraph/bin, but doesn't always do so on its own, unclear why.
 // Copy manually here. 
-task 'generate-vscode-bin'(dependsOn: 'build') {
+tasks.register('generateVSCodeBin') {
+	dependsOn tasks.build
+	group = "Custom"
+	description = "Copies generated classes into bin dir, used on launch/debug from VSCode"
 	mkdir('bin')
 	copy {
 		into file('bin')
@@ -57,7 +69,10 @@ task 'generate-vscode-bin'(dependsOn: 'build') {
 	}
 }
 
-task 'build-jni-mac'(dependsOn: 'copy-jni-files') {
+tasks.register('buildJNIMac') {
+	dependsOn tasks.copyJNIFiles
+	group = "Custom"
+	description = "Builds Java and macOS JNI binary for scenegraph"
 	doLast {
 		def build = new File(project.buildDir, 'cpp')
 		def dist = file('dist')
@@ -151,7 +166,10 @@ def compileMac(src, arch, includes, dir) {
 	}
 }
 
-task 'build-jni-linux'(dependsOn: 'copy-jni-files') {
+tasks.register('buildJNILinux') {
+	dependsOn tasks.copyJNIFiles
+	group = "Custom"
+	description = "Builds Java and Linux JNI binary for scenegraph"
 	doLast {
 		def build = new File(project.buildDir, 'cpp')
 		def dist = file('dist')
@@ -200,7 +218,10 @@ task 'build-jni-linux'(dependsOn: 'copy-jni-files') {
 //
 // See full instructions in scenegraph/README.md.
 
-task crossBuildJNIWin(dependsOn: 'copy-jni-files') {
+tasks.register('crossBuildJNIWin') {
+	dependsOn tasks.copyJNIFiles
+	group = "Custom"
+	description = "Cross-builds Java and Windows JNI binary for scenegraph"
 	doLast {
 		def build = new File(project.buildDir, 'cpp_cross_compile')
 		def src = file('src/main/cpp')
