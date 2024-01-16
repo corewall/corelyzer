@@ -25,7 +25,7 @@ The following is intended for Linux users and others interested in building Core
 
 Use the provided Gradle wrapper:
 
-    ./gradlew clean build create-working-dir
+    ./gradlew clean build createWorkingDir
 
 To launch Corelyzer:
 
@@ -35,8 +35,8 @@ To launch Corelyzer:
 ##### Generate macOS/OSX .app bundle
 
 To generate a complete .app bundle:
-- Place a Java 11 runtime in the `packages/java_runtime` dir (official builds use the [OpenJDK JRE](https://adoptopenjdk.net/archive.html).)
-- Update the `javaRuntimeFile` var on line 15 of `build.gradle` with your runtime's name
+- Place a Java 11 runtime in the `packages/java_runtime` dir (official builds use the [Temurin builds of the OpenJDK](https://adoptium.net/temurin/releases/?version=11).)
+- Update the `macOS_javaRuntime` var in `build.gradle` to point to your Java 11 runtime directory
 
 Then, run
 
@@ -46,7 +46,9 @@ to generate an .app bundle in the `dist/mac` directory.
 
 #### Building on Windows
 
-Use the provided Gradle wrapper:
+First, update the `windows_javaRuntime` var in `build.gradle` to point to your Java 11 runtime directory.
+
+Then use the provided Gradle wrapper:
 
     ./gradlew clean packageWin
 

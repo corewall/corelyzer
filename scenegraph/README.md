@@ -12,7 +12,7 @@ Modify JDK and system include paths in `scenegraph/build.gradle` to reflect your
 
 Then, in the `scenegraph` dir, build Corelyzer with the included Gradle wrapper:
 
-    ../gradlew clean build-jni-mac
+    ../gradlew clean buildJNIMac
 
 The generated Scenegraph JAR file and native macOS binary (jnilib) will be found in `scenegraph/dist`.
 
@@ -105,12 +105,12 @@ Clone the Corelyzer GitHub repo and move to the `scenegraph` dir:
     git clone https://github.com/corewall/corelyzer
     cd scenegraph
 
-In `scenegraph/build.gradle`, modify the Java include paths in the `build-jni-linux` task
+In `scenegraph/build.gradle`, modify the Java include paths in the `buildJNILinux` task
 to reflect your configuration.
 
 Use the provided Gradle wrapper to build:
 
-    ../gradlew build-jni-linux
+    ../gradlew buildJNILinux
 
 This will generate `libscenegraph.so` and `scenegraph-[version].jar` in `scenegraph/dist`.
 
