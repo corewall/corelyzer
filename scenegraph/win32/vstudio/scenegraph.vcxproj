@@ -1,0 +1,238 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{0C54D4FC-41D3-4950-9947-80B74B695DBD}</ProjectGuid>
+    <RootNamespace>libscenegraph</RootNamespace>
+    <Keyword>ManagedCProj</Keyword>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <PlatformToolset>v142</PlatformToolset>
+    <UseOfMfc>false</UseOfMfc>
+    <CharacterSet>MultiByte</CharacterSet>
+    <CLRSupport>false</CLRSupport>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <PlatformToolset>v142</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+    <CLRSupport>false</CLRSupport>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <PlatformToolset>v142</PlatformToolset>
+    <UseOfMfc>false</UseOfMfc>
+    <CharacterSet>MultiByte</CharacterSet>
+    <CLRSupport>false</CLRSupport>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <PlatformToolset>v142</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+    <CLRSupport>false</CLRSupport>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC71.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC71.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC71.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC71.props" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>16.0.30323.82</_ProjectFileVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <OutDir>..\..\deps\win32\</OutDir>
+    <IntDir>$(Configuration)\</IntDir>
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <OutDir>$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>$(Platform)\$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <OutDir>$(SolutionDir)$(Configuration)\</OutDir>
+    <IntDir>$(Configuration)\</IntDir>
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>$(Platform)\$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>$(ProjectDir)\..\..\deps\win32\include;C:\jdk1.6.0_29\include;C:\jdk1.6.0_29\include\win32;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_DEBUG;DEBUG;USE_FASTDXT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MinimalRebuild>false</MinimalRebuild>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>opengl32.lib;glu32.lib;libpng.lib;libtiff.lib;libjpeg.lib;jvm.lib;squish.lib;freetype221.lib;OpenJPEG.lib;pthreadVC2.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>$(OutDir)scenegraph.dll</OutputFile>
+      <AdditionalLibraryDirectories>$(ProjectDir)\..\..\deps\win32;C:\jdk1.6.0_29\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AssemblyDebug>true</AssemblyDebug>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <DataExecutionPrevention />
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Midl>
+      <TargetEnvironment>X64</TargetEnvironment>
+    </Midl>
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>$(ProjectDir)\..\..\deps\x64\include;C:\Users\xander\Desktop\OpenJDK11U-jdk_x64_winhotspot_11.0.22_7\jdk-11.0.22+7\include;C:\Users\xander\Desktop\OpenJDK11U-jdk_x64_winhotspot_11.0.22_7\jdk-11.0.22+7\include\win32;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_WIN32;_DEBUG;DEBUG;USE_FASTDXT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MinimalRebuild>false</MinimalRebuild>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>legacy_stdio_definitions.lib;opengl32.lib;glu32.lib;libpng16.lib;libtiff.lib;turbojpeg-static.lib;freetype.lib;pthreadVC2.lib;zlib.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(ProjectDir)\..\..\deps\x64;C:\Users\xander\Desktop\OpenJDK11U-jdk_x64_winhotspot_11.0.22_7\jdk-11.0.22+7\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <IgnoreSpecificDefaultLibraries>libcmt.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AssemblyDebug>true</AssemblyDebug>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <DataExecutionPrevention />
+      <TargetMachine>MachineX64</TargetMachine>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>$(ProjectDir)\..\..\deps\win32\include;C:\jdk1.6.0_29\include;C:\jdk1.6.0_29\include\win32;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WIN32;USE_FASTDXT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MinimalRebuild>false</MinimalRebuild>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>opengl32.lib;glu32.lib;libpng.lib;libtiff.lib;libjpeg.lib;jvm.lib;freetype221.lib;squish.lib;OpenJPEG.lib;pthreadVC2.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>C:\Users\bgrivna\Desktop\corewall\Corelyzer\CorelyzerWin-2.0.4_rc5\scenegraph.dll</OutputFile>
+      <AdditionalLibraryDirectories>$(ProjectDir)\..\..\deps\win32;C:\jdk1.6.0_29\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <NoEntryPoint>false</NoEntryPoint>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <DataExecutionPrevention />
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Midl>
+      <TargetEnvironment>X64</TargetEnvironment>
+    </Midl>
+    <ClCompile>
+      <Optimization>MaxSpeed</Optimization>
+      <AdditionalIncludeDirectories>$(ProjectDir)\..\..\deps\x64\include;C:\Users\xander\Desktop\OpenJDK11U-jdk_x64_winhotspot_11.0.22_7\jdk-11.0.22+7\include;C:\Users\xander\Desktop\OpenJDK11U-jdk_x64_winhotspot_11.0.22_7\jdk-11.0.22+7\include\win32;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_WIN32;NDEBUG;USE_FASTDXT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <BufferSecurityCheck>true</BufferSecurityCheck>
+      <WarningLevel>Level3</WarningLevel>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>opengl32.lib;glu32.lib;libpng16.lib;zlib.lib;libtiff.lib;turbojpeg-static.lib;freetype.lib;pthreadVC2.lib;legacy_stdio_definitions.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(ProjectDir)\..\..\deps\x64;C:\Users\xander\Desktop\OpenJDK11U-jdk_x64_winhotspot_11.0.22_7\jdk-11.0.22+7\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <IgnoreSpecificDefaultLibraries>libcmt.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AssemblyDebug>false</AssemblyDebug>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <DataExecutionPrevention />
+      <TargetMachine>MachineX64</TargetMachine>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\src\main\cpp\annotationmarker.cpp" />
+    <ClCompile Include="..\..\src\main\cpp\cache.cpp" />
+    <ClCompile Include="..\..\src\main\cpp\camera.cpp" />
+    <ClCompile Include="..\..\src\main\cpp\canvas.cpp" />
+    <ClCompile Include="..\..\src\main\cpp\common.cpp" />
+    <ClCompile Include="..\..\src\main\cpp\corelyzer_system.cpp" />
+    <ClCompile Include="..\..\src\main\cpp\coresection.cpp" />
+    <ClCompile Include="..\..\src\main\cpp\dataset.cpp" />
+    <ClCompile Include="..\..\src\main\cpp\dxt.cpp" />
+    <ClCompile Include="..\..\src\main\cpp\fontsys.cpp" />
+    <ClCompile Include="..\..\src\main\cpp\freedraw.cpp" />
+    <ClCompile Include="..\..\src\main\cpp\graph.cpp" />
+    <ClCompile Include="..\..\src\main\cpp\intrinsic.cpp" />
+    <ClCompile Include="..\..\src\main\cpp\libdxt.cpp" />
+    <ClCompile Include="..\..\src\main\cpp\matrix.cpp" />
+    <ClCompile Include="..\..\src\main\cpp\model.cpp" />
+    <ClCompile Include="..\..\src\main\cpp\png_read.cpp" />
+    <ClCompile Include="..\..\src\main\cpp\scenegraph.cpp" />
+    <ClCompile Include="..\..\src\main\cpp\textureresource_ex.cpp" />
+    <ClCompile Include="..\..\src\main\cpp\tie.cpp" />
+    <ClCompile Include="..\..\src\main\cpp\trackscene.cpp" />
+    <ClCompile Include="..\..\src\main\cpp\trackscenenode.cpp" />
+    <ClCompile Include="..\..\src\main\cpp\util.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\src\main\cpp\annotationmarker.h" />
+    <ClInclude Include="..\..\src\main\cpp\cache.h" />
+    <ClInclude Include="..\..\src\main\cpp\camera.h" />
+    <ClInclude Include="..\..\src\main\cpp\canvas.h" />
+    <ClInclude Include="..\..\src\main\cpp\common.h" />
+    <ClInclude Include="..\..\src\main\cpp\corelyzer_graphics_SceneGraph.h" />
+    <ClInclude Include="..\..\src\main\cpp\corelyzer_system.h" />
+    <ClInclude Include="..\..\src\main\cpp\coresection.h" />
+    <ClInclude Include="..\..\src\main\cpp\dataset.h" />
+    <ClInclude Include="..\..\src\main\cpp\dxt.h" />
+    <ClInclude Include="..\..\src\main\cpp\exceptions.h" />
+    <ClInclude Include="..\..\src\main\cpp\fontsys.h" />
+    <ClInclude Include="..\..\src\main\cpp\freedraw.h" />
+    <ClInclude Include="..\..\src\main\cpp\graph.h" />
+    <ClInclude Include="..\..\src\main\cpp\libdxt.h" />
+    <ClInclude Include="..\..\src\main\cpp\matrix.h" />
+    <ClInclude Include="..\..\src\main\cpp\model.h" />
+    <ClInclude Include="..\..\src\main\cpp\scenenode.h" />
+    <ClInclude Include="..\..\src\main\cpp\sha1.h" />
+    <ClInclude Include="..\..\src\main\cpp\textureresource_ex.h" />
+    <ClInclude Include="..\..\src\main\cpp\tie.h" />
+    <ClInclude Include="..\..\src\main\cpp\trackscene.h" />
+    <ClInclude Include="..\..\src\main\cpp\trackscenenode.h" />
+    <ClInclude Include="..\..\src\main\cpp\util.h" />
+    <ClInclude Include="..\..\src\main\cpp\utility.h" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
