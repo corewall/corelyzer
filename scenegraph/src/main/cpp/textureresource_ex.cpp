@@ -300,6 +300,20 @@ bool isDirectoryExists(const char *aPath) {
     }
 }
 
+bool fileExists(const char *aPath) {
+#ifdef WIN32
+    if (_access(aPath, 0) == 0)
+#else
+    if (access(aPath, 0) == 0)
+#endif
+    {
+        struct stat status;
+        stat(aPath, &status);
+        return (status.st_mode & S_IFMT);
+    }
+    return false;
+}
+
 // Check whether texture block files already exhist.
 // An integrity ticket file?
 bool isTextureBlocksExist(const char *filename, const char *blockDir) {
@@ -569,96 +583,98 @@ void build_tex_blocks(char *pixels, MultiLevelTextureSetEX *set, bool hasDir, in
                 blockfile_name += buf;
 
                 // make sure it isn't there already
-                FILE *fptr = fopen(blockfile_name.c_str(), "rb");
-                if (!fptr) {
-#ifdef DEBUG
-                    printf("Making blockfile %s\n", blockfile_name.c_str());
-#endif
+                if (!fileExists(blockfile_name.c_str())) {
+                    FILE *fptr = fopen(blockfile_name.c_str(), "rb");
+                    if (!fptr) {
+    #ifdef DEBUG
+                        printf("Making blockfile %s\n", blockfile_name.c_str());
+    #endif
 
-                    // get pixels scaled to right size
+                        // get pixels scaled to right size
 
-                    get_sub_image_scaled(pixels, tex_data, real_x, real_y,
-                                         set->blksize, set->blksize,
-                                         1.0f / set->scales[k], set);
+                        get_sub_image_scaled(pixels, tex_data, real_x, real_y,
+                                            set->blksize, set->blksize,
+                                            1.0f / set->scales[k], set);
 
-                    fptr = fopen(blockfile_name.c_str(), "wb");
-                    if (fptr) {
-                        // if S3TC DXT3 available compress, otherwise
-                        // store raw blocks
-                        if (!is_s3tc_available()) {
-#ifdef DEBUG
-                            printf("---> [INFO] S3TC DXT3 not available, using raw blocks\n");
-#endif
+                        fptr = fopen(blockfile_name.c_str(), "wb");
+                        if (fptr) {
+                            // if S3TC DXT3 available compress, otherwise
+                            // store raw blocks
+                            if (!is_s3tc_available()) {
+    #ifdef DEBUG
+                                printf("---> [INFO] S3TC DXT3 not available, using raw blocks\n");
+    #endif
 
-                            fwrite(tex_data, sizeof(char),
-                                   set->blksize * set->blksize * set->components,
-                                   fptr);
-                            fclose(fptr);
-                        } else {
-#ifdef DEBUG
-                            printf("---> [INFO] Compress with S3TC DXT3 with ((1. Squish, 2. FastDXT) %d.\n", library);
-                            // printf("DXT3 Compression block %d, %d of size: %d, %d\n",
-                            //    i, j,
-                            //    set->tex[k][id].texW, set->tex[k][id].texH);
-#endif
+                                fwrite(tex_data, sizeof(char),
+                                    set->blksize * set->blksize * set->components,
+                                    fptr);
+                                fclose(fptr);
+                            } else {
+    #ifdef DEBUG
+                                printf("---> [INFO] Compress with S3TC DXT3 with ((1. Squish, 2. FastDXT) %d.\n", library);
+                                // printf("DXT3 Compression block %d, %d of size: %d, %d\n",
+                                //    i, j,
+                                //    set->tex[k][id].texW, set->tex[k][id].texH);
+    #endif
 
-                            double time1 = aTime();
+                                double time1 = aTime();
 
-                            copy_pixels_to_rgba(tex_data, tex_rgba,
-                                                set->src_format,
-                                                set->blksize,
-                                                set->blksize);
+                                copy_pixels_to_rgba(tex_data, tex_rgba,
+                                                    set->src_format,
+                                                    set->blksize,
+                                                    set->blksize);
 
-                            // time-Copy:time-Compress(Squish):time-Fops = 1:9:2
-                            /*
-                            if(library == FASTDXT) // Use FastDXT library
-                            {
-                                int outNBytes = CompressDXT((byte *) tex_rgba, (byte *) tex_to_file,
-                                                            set->blksize, set->blksize, FORMAT_DXT5, 2);
+                                // time-Copy:time-Compress(Squish):time-Fops = 1:9:2
+                                /*
+                                if(library == FASTDXT) // Use FastDXT library
+                                {
+                                    int outNBytes = CompressDXT((byte *) tex_rgba, (byte *) tex_to_file,
+                                                                set->blksize, set->blksize, FORMAT_DXT5, 2);
+
+                                    fwrite(&outNBytes, sizeof(int), 1, fptr);
+                                    fwrite(tex_to_file, sizeof(char), outNBytes, fptr);
+                                }
+                                else // Use Squish library
+                                {
+                                    squish::CompressImage((squish::u8*)tex_rgba,
+                                                        set->blksize,
+                                                        set->blksize,tex_to_file,
+                                                        squish::kDxt3 |
+                                                        squish::kColourRangeFit);
+
+                                    fwrite(&dxt3_size,  sizeof(int),  1, fptr);
+                                    fwrite(tex_to_file, sizeof(char), dxt3_size, fptr);
+                                }*/
+    #ifdef USE_FASTDXT
+                                int outNBytes = CompressDXT((DXT_BYTE *)tex_rgba, (DXT_BYTE *)tex_to_file,
+                                                            set->blksize, set->blksize, FORMAT_DXT1, 2);
 
                                 fwrite(&outNBytes, sizeof(int), 1, fptr);
                                 fwrite(tex_to_file, sizeof(char), outNBytes, fptr);
-                            }
-                            else // Use Squish library
-                            {
-                                squish::CompressImage((squish::u8*)tex_rgba,
-                                                      set->blksize,
-                                                      set->blksize,tex_to_file,
-                                                      squish::kDxt3 |
-                                                      squish::kColourRangeFit);
+    #else
+                                squish::CompressImage((squish::u8 *)tex_rgba,
+                                                    set->blksize,
+                                                    set->blksize, tex_to_file,
+                                                    squish::kDxt3 |
+                                                        squish::kColourRangeFit);
 
-                                fwrite(&dxt3_size,  sizeof(int),  1, fptr);
+                                fwrite(&dxt3_size, sizeof(int), 1, fptr);
                                 fwrite(tex_to_file, sizeof(char), dxt3_size, fptr);
-                            }*/
-#ifdef USE_FASTDXT
-                            int outNBytes = CompressDXT((DXT_BYTE *)tex_rgba, (DXT_BYTE *)tex_to_file,
-                                                        set->blksize, set->blksize, FORMAT_DXT1, 2);
-
-                            fwrite(&outNBytes, sizeof(int), 1, fptr);
-                            fwrite(tex_to_file, sizeof(char), outNBytes, fptr);
-#else
-                            squish::CompressImage((squish::u8 *)tex_rgba,
-                                                  set->blksize,
-                                                  set->blksize, tex_to_file,
-                                                  squish::kDxt3 |
-                                                      squish::kColourRangeFit);
-
-                            fwrite(&dxt3_size, sizeof(int), 1, fptr);
-                            fwrite(tex_to_file, sizeof(char), dxt3_size, fptr);
-#endif
-                            fclose(fptr);
+    #endif
+                                fclose(fptr);
+                            }
+                        } else {
+                            printf("ERROR: Couldn't write to blockfile %s\n",
+                                blockfile_name.c_str());
                         }
                     } else {
-                        printf("ERROR: Couldn't write to blockfile %s\n",
-                               blockfile_name.c_str());
+                        fclose(fptr);
+    #ifdef DEBUG
+                        printf("Blockfile %s already exists, using that file\n",
+                            blockfile_name.c_str());
+    #endif
                     }
-                } else {
-                    fclose(fptr);
-#ifdef DEBUG
-                    printf("Blockfile %s already exists, using that file\n",
-                           blockfile_name.c_str());
-#endif
-                }
+                } // if (!fileExists())
 
                 set->tex[k][id].blockfile = new char[blockfile_name.size() + 1];
                 strcpy(set->tex[k][id].blockfile, blockfile_name.c_str());
