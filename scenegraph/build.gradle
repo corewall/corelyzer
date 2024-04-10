@@ -292,7 +292,9 @@ def linkCrossCompiledWin(dir, path) {
 			arg(value: '-lwebp')
 			arg(value: '-lharfbuzz')
 			arg(value: '-lbz2')
-			arg(value: '-lsharpyuv') 
+			arg(value: '-lsharpyuv')
+			arg(value: '-lbrotlidec')
+			arg(value: '-lbrotlicommon')
 			arg(value: '-mwindows')
 		}
 	}

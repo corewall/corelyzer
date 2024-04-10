@@ -53,10 +53,10 @@ Scenegraph build scripts assume MXE is installed in the suggested `/opt/mxe`.
 
 Make sure `/opt/mxe/usr/bin` is at the beginning of your shell's `PATH` before proceeding.
 
-Scenegraph depends on the following libraries: `libpng jpeg tiff pthreads freetype libsquish`
+Scenegraph depends on the following libraries: `libpng jpeg tiff pthreads freetype brotli libsquish`
 
 The first four are included with MXE, and can be built with no further effort. In the `mxe` root dir:
-`make libpng jpeg tiff pthreads`
+`make libpng jpeg tiff pthreads brotli`
 
 `freetype` is also included with MXE, but requires [Perl-Compatible Regular Expressions](https://www.pcre.org/) to be installed natively on Mac to cross-build. To install PCRE: `brew install pcre`
 
