@@ -26,6 +26,7 @@
 
 #include "cache.h"
 
+#define HAVE_STRUCT_TIMESPEC
 #include <pthread.h>
 #include <squish.h>
 

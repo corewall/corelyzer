@@ -30,6 +30,7 @@
 #include <malloc.h>
 #endif
 
+#define HAVE_STRUCT_TIMESPEC
 #include <pthread.h>
 
 typedef struct _work_t {
