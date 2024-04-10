@@ -127,7 +127,7 @@
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>legacy_stdio_definitions.lib;opengl32.lib;glu32.lib;libpng16.lib;libtiff.lib;turbojpeg-static.lib;freetype.lib;pthreadVC2.lib;zlib.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>legacy_stdio_definitions.lib;opengl32.lib;glu32.lib;libpng16d.lib;libtiff.lib;turbojpeg-static.lib;freetype.lib;pthreadVC2.lib;zlib.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(ProjectDir)\..\..\deps\x64;C:\Users\xander\Desktop\OpenJDK11U-jdk_x64_winhotspot_11.0.22_7\jdk-11.0.22+7\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <IgnoreSpecificDefaultLibraries>libcmt.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
       <GenerateDebugInformation>true</GenerateDebugInformation>
