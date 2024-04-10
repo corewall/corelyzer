@@ -33,7 +33,9 @@
 #define HAVE_STRUCT_TIMESPEC
 #include <pthread.h>
 
+#ifdef _MSC_VER // MS Visual Studio compiler
 extern "C" { FILE __iob_func[3] = { *stdin, *stdout, *stderr }; }
+#endif
 
 typedef struct _work_t {
     int width, height;
