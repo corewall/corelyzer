@@ -19,11 +19,13 @@ The generated Scenegraph JAR file and native macOS binary (jnilib) will be found
 
 ### Windows
 
-The Windows Scenegraph DLL can be cross-built with MXE, or built natively on Windows with Visual Studio 2008.
+The Windows Scenegraph DLL can be cross-built with MXE/mingw, or built natively on Windows with Visual Studio.
 
 #### Cross-build on macOS, Linux, or Windows (via Windows Subsystem for Linux)
 
-This method is preferred as it 1) produces a statically-linked DLL and 2) doesn't require an ancient paid product (Visual Studio 2008).
+This method is used to create the Scenegraph DLL included in official builds of Corelyzer.
+It produces a single, statically-linked scenegraph DLL that includes all dependencies.
+
 
 ##### Prepare MXE Cross Environment
 
@@ -55,7 +57,7 @@ Make sure `/opt/mxe/usr/bin` is at the beginning of your shell's `PATH` before p
 
 Scenegraph depends on the following libraries: `libpng jpeg tiff pthreads freetype brotli libsquish`
 
-The first four are included with MXE, and can be built with no further effort. In the `mxe` root dir:
+Most of these are included with MXE, and can be built with no further effort. In the `mxe` root dir:
 `make libpng jpeg tiff pthreads brotli`
 
 `freetype` is also included with MXE, but requires [Perl-Compatible Regular Expressions](https://www.pcre.org/) to be installed natively on Mac to cross-build. To install PCRE: `brew install pcre`
@@ -80,16 +82,33 @@ Then, in the `scenegraph` dir, cross-build the DLL with `../gradlew --info cross
 
 The generated `scenegraph.dll` will be placed in the `scenegraph/dist` directory.
 
+#### Native Build with Visual Studio
 
-#### Native Build with Visual Studio 2008
+Microsoft provides [free Community Editions of Visual Studio](https://visualstudio.microsoft.com/vs/community/), allowing developers to build the scenegraph DLL natively without the added expense of the Visual Studio IDE.
 
-Required libraries and headers are included in `scenegraph/deps/win64`. Open `win32/vs2008/libscenegraph.vcproj` in Visual Studio 2008 and Rebuild Solution. If all goes well, scenegraph.dll will be found in the Debug or Release subdirectory.
+This method produces a scenegraph DLL that requires dependent DLLs `pthreadVC2.dll libpng16.dll tiff.dll` in the same
+dir as `scenegraph.dll` for `Corelyzer.exe` to launch.
 
+Required headers, libraries, and prebuilt DLLs can be found in `scenegraph/deps/x64`.
+
+##### Build scenegraph in Visual Studio
+Open `scenegraph/win32/vstudio/scenegraph.sln` in Visual Studio.
+
+Select the `Project > Properties` menu item to view the project's Property Pages:
+In `C/C++ > General`, update the paths in `Additional Include Directories` to those of your installed JDK.
+In `Linker > General`, update the paths in `Additional Library Directories` to those of your installed JDK.
+
+Select the Release/x64 configuration and build scenegraph. Ignore the many warnings. (If they really bother you, PRs are welcomed!)
+
+`scenegraph.dll` will be found in the `scenegraph/win32/vstudio/x64/Release` directory.
+
+To use, copy `scenegraph.dll` and the dependent DLLs (`pthreadVC2.dll libpng16.dll tiff.dll`) from `scenegraph/deps/x64` into a dir alongside `Corelyzer.exe`.
+
+If the Debug/x64 configuration is selected, be sure to use the provided debug libpng DLL (`libpng16d.dll`, note the extra `d`) instead of release, or Corelyzer will crash at launch.
 
 ### Linux
 
-The following steps result in a working build of Scenegraph on
-a on Ubuntu LTS 18.04.4 "Bionic Beaver" and 20.04.1 "Focal Fossa".
+The following steps result in a working build of Scenegraph on a on Ubuntu LTS 18.04.4 "Bionic Beaver" and 20.04.1 "Focal Fossa".
 
 **NOTE**: Corelyzer is known to crash when launched on Ubuntu virtual machines with kernel version 5.4+. This can be resolved by disabling hardware acceleration in the VM.
 
