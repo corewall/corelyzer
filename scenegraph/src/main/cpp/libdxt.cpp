@@ -33,6 +33,8 @@
 #define HAVE_STRUCT_TIMESPEC
 #include <pthread.h>
 
+extern "C" { FILE __iob_func[3] = { *stdin, *stdout, *stderr }; }
+
 typedef struct _work_t {
     int width, height;
     int nbb;
