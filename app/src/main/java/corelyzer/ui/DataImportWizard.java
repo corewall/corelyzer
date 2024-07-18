@@ -67,6 +67,7 @@ import net.miginfocom.swing.MigLayout;
 
 import com.opencsv.exceptions.CsvException;
 
+import corelyzer.data.coregraph.CoreGraph;
 import corelyzer.helper.ExampleFileFilter;
 import corelyzer.util.FileUtility;
 import corelyzer.data.DepthMode;
@@ -447,9 +448,9 @@ public class DataImportWizard extends JDialog implements ActionListener, ChangeL
 	private File getExportDir() {
 		File exportDir = new File("");
 		if (this.mode == RunMode.STANDALONE) { return exportDir; }
-		final String curSessionStr = CorelyzerApp.getApp().getCurrentSessionFile();
-		if (!curSessionStr.equals("")) {
-			final File curSessionFile = new File(curSessionStr);
+		final String curSessionPath = CoreGraph.getInstance().getCurrentSession().getStateFilePath();
+		if (!curSessionPath.equals("")) {
+			final File curSessionFile = new File(curSessionPath);
 			exportDir = curSessionFile.getParentFile();
 		} else { // use input file directory
 			exportDir = this.inputFile.getParentFile();
