@@ -4,6 +4,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.Dimension;
 
+import java.io.FileWriter;
+import java.io.IOException;
+
 import java.text.DecimalFormat;
 
 import javax.swing.*;
@@ -19,6 +22,9 @@ import java.util.Vector;
 import corelyzer.data.CoreSectionTieType;
 import corelyzer.graphics.SceneGraph;
 import corelyzer.ui.CorelyzerApp;
+import corelyzer.util.FileUtility;
+
+import com.opencsv.CSVWriter;
 import net.miginfocom.swing.MigLayout;
 
 public class ManageSectionTiesDialog extends JFrame {
@@ -26,6 +32,7 @@ public class ManageSectionTiesDialog extends JFrame {
     private Vector<TieData> ties = new Vector<TieData>();
     private JButton editButton;
     private JButton deleteButton;
+    private JButton exportButton;
     private JButton closeButton;
 
     public ManageSectionTiesDialog() {
@@ -122,6 +129,13 @@ public class ManageSectionTiesDialog extends JFrame {
         });
         buttonPanel.add(deleteButton, "align left");
 
+        exportButton = new JButton("Export Ties...");
+        exportButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                doExport();
+            }
+        });
+        buttonPanel.add(exportButton, "align left");
 
         closeButton = new JButton("Close");
         closeButton.addActionListener(new ActionListener() {
@@ -160,6 +174,7 @@ public class ManageSectionTiesDialog extends JFrame {
         final boolean isMultiple = tieTable.getSelectedRows().length > 1;
         editButton.setEnabled(hasSelection && !isMultiple);
         deleteButton.setEnabled(hasSelection);
+        exportButton.setEnabled(tieTable.getRowCount() > 0);
     }
     
     private void gatherTieData(int[] tieIds) {
@@ -183,6 +198,26 @@ public class ManageSectionTiesDialog extends JFrame {
     private void addDummyTies() {
         for (int i = 0; i < 10; i++) {
             ties.add(i, new TieData(i+1, CoreSectionTieType.NONE, i % 2 == 0 ? true : false, "source desc", "dest desc", "Section A", "Section B", 10, 20));
+        }
+    }
+
+    private void doExport() {
+        String exportFile = FileUtility.selectASingleFile(this, "Export Tie Data", "csv", FileUtility.SAVE);
+        if (exportFile != null) {
+            try {
+                CSVWriter writer = new CSVWriter(new FileWriter(exportFile));
+                DecimalFormat df = new DecimalFormat("#.#");
+                String[] headers = { "Tie Type", "Z Section", "Z Section Depth (cm)", "Z Description", "Z' Section", "Z' Section Depth (cm)", "Z' Description" };
+                writer.writeNext(headers);
+                for (TieData td : ties) {
+                    // System.out.println("Writing TieData with ID = " + td.id);
+                    String[] row = { td.type.toString(), td.aSectionID, df.format(td.aSectionDepth), td.aDesc, td.bSectionID, df.format(td.bSectionDepth), td.bDesc };
+                    writer.writeNext(row);
+                }
+                writer.close();
+            } catch (IOException e) {
+                JOptionPane.showMessageDialog(this, "Tie data export failed: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            }
         }
     }
 
