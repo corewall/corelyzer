@@ -112,6 +112,8 @@ public class ManageSectionTiesDialog extends JFrame {
                     tieTable.setRowSelectionInterval(new_sel, new_sel);
                     TieData selectedTie = ties.get(tieTable.getSelectedRow());
                     SceneGraph.selectSectionTie(selectedTie.id, true);
+                } else {
+                    tieTable.clearSelection();
                 }
                 tieTable.updateUI();
                 updateButtons();
