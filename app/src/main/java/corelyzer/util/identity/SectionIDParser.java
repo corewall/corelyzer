@@ -11,9 +11,10 @@ import java.util.StringTokenizer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class SectionIDParser {
+public abstract class SectionIDParser {
     Pattern pattern = null;
     String name = null;
+    boolean includeSuffix = false;
     protected SectionIDParser() { }
 
     public boolean matches(final String secid) {
@@ -24,6 +25,8 @@ public class SectionIDParser {
         return m.matches() ? m.group("hole") : null;
     }
     public String getName() { return name; }
+    public boolean getIncludeSuffix() { return includeSuffix; }
+    public void setIncludeSuffix(boolean includeSuffix) { this.includeSuffix = includeSuffix; }
 }
 
 // Unlike the other parsers, if the input section ID has a trailing suffix
@@ -59,8 +62,10 @@ class LacCoreSectionParser extends SectionIDParser {
         if (!m.matches()) return null;
 
         String suffix = "";
-        if (secid.lastIndexOf("_") != -1) {
-            suffix = secid.substring(secid.lastIndexOf("_"));
+        if (includeSuffix) {
+            if (secid.lastIndexOf("_") != -1) {
+                suffix = secid.substring(secid.lastIndexOf("_"));
+            }
         }
 
         return m.group("hole") + suffix;

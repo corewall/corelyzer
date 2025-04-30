@@ -40,9 +40,10 @@ public class CRLoadImageWizard extends JDialog {
 
 	private JPanel contentPane, activePane;
 	private JButton nextButton, previousButton, finishButton, cancelButton;
+	private JCheckBox includeSuffixesCheckBox;
+	private JButton resortSectionsButton;
 	private SectionListPane sectionListPane;
 	private ImagePropertiesPane imagePropertiesPane;
-	private boolean firstOpenOfPropertiesPane = true;
 	private TrackSectionListModel trackSectionModel;
 	private Vector<File> newFiles;
 	
@@ -52,8 +53,8 @@ public class CRLoadImageWizard extends JDialog {
 		super(owner);
 		this.newFiles = newFiles;
 		
-		loadTrackData();
 		setupUI();
+		updateTrackSectionModel();
 		updateUI();
 	}
 
@@ -66,6 +67,8 @@ public class CRLoadImageWizard extends JDialog {
 		if ( activePane.equals( sectionListPane ))
 		{
 			setTitle("Arrange New Sections");
+			contentPane.add(includeSuffixesCheckBox, "align left");
+			contentPane.add(resortSectionsButton, "align left");
 			contentPane.add(nextButton, "split 2, align right, aligny bottom");
 			contentPane.add(cancelButton, "aligny bottom");
 			getRootPane().setDefaultButton( nextButton );
@@ -111,14 +114,9 @@ public class CRLoadImageWizard extends JDialog {
 		if ( !sectionListPane.validateDPIFields( this ))
 			return;
 		
-		if ( firstOpenOfPropertiesPane )
-		{
-			// User may modify values in properties pane, then return to previous pane -
-			// Make sure we don't overwrite potential edits by initializing again!
-			setNewSectionsDPIAndOrientation();
-			imagePropertiesPane.updateSectionProperties();
-			firstOpenOfPropertiesPane = false;
-		}
+
+		setNewSectionsDPIAndOrientation();
+		imagePropertiesPane.updateSectionProperties();
 		
 		sectionListPane.saveLasts();
 
@@ -145,6 +143,12 @@ public class CRLoadImageWizard extends JDialog {
 		
 		dispose();
 	}
+
+	private void updateTrackSectionModel() {
+		loadTrackData();
+		sectionListPane.updateListModel(trackSectionModel);
+		imagePropertiesPane.updateListModel(trackSectionModel);
+	}
 	
 	// create UI components, they'll be added to the content pane in updateUI()
 	private void setupUI()
@@ -153,7 +157,17 @@ public class CRLoadImageWizard extends JDialog {
 		imagePropertiesPane = new ImagePropertiesPane(trackSectionModel);
 
 		contentPane = new JPanel( new MigLayout( "filly, wrap 1", "[grow]15[]", "[c,grow 100,fill][c,grow 0,fill]"));
-		
+
+		includeSuffixesCheckBox = new JCheckBox("Include Suffixes in Auto-sorting");
+		includeSuffixesCheckBox.setSelected(false);
+
+		resortSectionsButton = new JButton("Resort Sections");
+		resortSectionsButton.addActionListener(new ActionListener() {
+			 public void actionPerformed(ActionEvent event) {
+				updateTrackSectionModel();
+			 }
+		});
+
 		cancelButton = new JButton("Cancel");
 		cancelButton.addActionListener( new ActionListener() {
 			public void actionPerformed(ActionEvent event) {
@@ -244,6 +258,7 @@ public class CRLoadImageWizard extends JDialog {
 					if ( firstSection ) {
 						if (idParser == null) {
 							idParser = SectionIDParserFactory.getMatchingParser(cs.getName());
+							idParser.setIncludeSuffix(includeSuffixesCheckBox.isSelected());
 						}
 						// make best guess of track name based on name of first section in each
 						// track: thus the Nth element of apparentTrack corresponds to the
@@ -295,6 +310,7 @@ public class CRLoadImageWizard extends JDialog {
 			TrackSectionListElement newSection = new TrackSectionListElement( strippedFilename, true, false, curFile );
 			if (idParser == null) {
 				idParser = SectionIDParserFactory.getMatchingParser(strippedFilename);
+				idParser.setIncludeSuffix(includeSuffixesCheckBox.isSelected());
 			}
 			
 			final String fullTrackID = idParser.getFullHoleID(strippedFilename);
@@ -531,14 +547,18 @@ class SectionListPane extends JPanel implements ListSelectionListener {
 	
 	public SectionListPane( TrackSectionListModel trackSectionModel )
 	{
-		super( new MigLayout( "wrap 2, fillx",  "[]10[]", "[][c, grow 0]15[][c, grow 0][c, grow 100]" ));
+		super( new MigLayout( "wrap 2, fillx, insets 0",  "[grow]10[]", "[][c, grow 0]15[][c, grow 0][c, grow 100]" ));
 		
 		this.trackSectionModel = trackSectionModel;
 		setupUI();
-		
-		trackSectionList.setModel( trackSectionModel );
 	}
-	
+
+	public void updateListModel(TrackSectionListModel model) {
+		this.trackSectionModel = model;
+		trackSectionList.setModel(model);
+		this.repaint();
+	}
+
 	void saveLasts() {
 		lastDpiX = dpiXField.getText();
 		lastDpiY = dpiYField.getText();
@@ -863,12 +883,16 @@ class ImagePropertiesPane extends JPanel implements TableModelListener {
 	
 	public ImagePropertiesPane( TrackSectionListModel trackSectionModel )
 	{
-		super( new MigLayout( "wrap 1, fillx" ));
+		super( new MigLayout( "wrap 1, fillx, insets 0" ));
 		setupUI();
 		
 		newSections = new Vector<TrackSectionListElement>();
-		this.trackSectionModel = trackSectionModel;
 	}
+
+	public void updateListModel(TrackSectionListModel model) {
+		this.trackSectionModel = model;
+		loadSectionProperties();
+	}	
 		
 	// load properties into table
 	private void loadSectionProperties()
