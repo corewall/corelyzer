@@ -101,7 +101,7 @@ class ICDPSectionParser extends SectionIDParser {
         final String CORE = "[0-9]+";
         final String SECTION = "[0-9]+";
         final String HALF = "(_[AW]|_WR)?"; // optional
-        final String SUFFIX = "(_.+)?"; // optional
+        final String SUFFIX = "([_\\.].+)?"; // optional
 
         // parentheses are capturing group for full hole/track ID
         final String icdpPattern = "(?<hole>" + EXP + "_" + SITE + "_" + HOLE + ")_" + CORE + "_" + SECTION + HALF + SUFFIX;

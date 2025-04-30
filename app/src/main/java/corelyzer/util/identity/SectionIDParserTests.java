@@ -117,7 +117,8 @@ class Tests {
         "5054_2_C_3_999_WR", // huge section
         "5054_2_C_3_7_suffix", // suffix, no half
         "5054_2_C_3_7_W_suffix", // half and suffix
-        "1_2_D_10_2_A_suffix_quite_long"
+        "1_2_D_10_2_A_suffix_quite_long",
+        "5054_1_A_1_001.F0943" // suffixes like this screw things up...easy to add support
     };
 
     String[] invalid_icdp_ids = {
