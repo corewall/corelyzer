@@ -4,6 +4,11 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.Dimension;
 
+import java.io.FileWriter;
+import java.io.IOException;
+
+import java.text.DecimalFormat;
+
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
@@ -17,6 +22,9 @@ import java.util.Vector;
 import corelyzer.data.CoreSectionTieType;
 import corelyzer.graphics.SceneGraph;
 import corelyzer.ui.CorelyzerApp;
+import corelyzer.util.FileUtility;
+
+import com.opencsv.CSVWriter;
 import net.miginfocom.swing.MigLayout;
 
 public class ManageSectionTiesDialog extends JFrame {
@@ -24,6 +32,7 @@ public class ManageSectionTiesDialog extends JFrame {
     private Vector<TieData> ties = new Vector<TieData>();
     private JButton editButton;
     private JButton deleteButton;
+    private JButton exportButton;
     private JButton closeButton;
 
     public ManageSectionTiesDialog() {
@@ -110,6 +119,8 @@ public class ManageSectionTiesDialog extends JFrame {
                     tieTable.setRowSelectionInterval(new_sel, new_sel);
                     TieData selectedTie = ties.get(tieTable.getSelectedRow());
                     SceneGraph.selectSectionTie(selectedTie.id, true);
+                } else {
+                    tieTable.clearSelection();
                 }
                 tieTable.updateUI();
                 updateButtons();
@@ -118,6 +129,13 @@ public class ManageSectionTiesDialog extends JFrame {
         });
         buttonPanel.add(deleteButton, "align left");
 
+        exportButton = new JButton("Export Ties...");
+        exportButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                doExport();
+            }
+        });
+        buttonPanel.add(exportButton, "align left");
 
         closeButton = new JButton("Close");
         closeButton.addActionListener(new ActionListener() {
@@ -156,6 +174,7 @@ public class ManageSectionTiesDialog extends JFrame {
         final boolean isMultiple = tieTable.getSelectedRows().length > 1;
         editButton.setEnabled(hasSelection && !isMultiple);
         deleteButton.setEnabled(hasSelection);
+        exportButton.setEnabled(tieTable.getRowCount() > 0);
     }
     
     private void gatherTieData(int[] tieIds) {
@@ -167,18 +186,38 @@ public class ManageSectionTiesDialog extends JFrame {
             final String bDesc = SceneGraph.getSectionTieBDescription(id);
             float[] aPos = SceneGraph.getSectionTieAPosition(id);
             float[] bPos = SceneGraph.getSectionTieBPosition(id);
-            final int ax = Math.round(aPos[0] / SceneGraph.getCanvasDPIX(0) * 2.54f);
-            final int bx = Math.round(bPos[0] / SceneGraph.getCanvasDPIX(0) * 2.54f);
+            final float ax = aPos[0] / SceneGraph.getCanvasDPIX(0) * 2.54f;
+            final float bx = bPos[0] / SceneGraph.getCanvasDPIX(0) * 2.54f;
             final String aSec = SceneGraph.getSectionTieASectionName(id);
             final String bSec = SceneGraph.getSectionTieBSectionName(id);
-            ties.add(i, new TieData(id, type, show, aDesc, bDesc, aSec + " " + ax + "cm", bSec + " " + bx + "cm"));
+            ties.add(i, new TieData(id, type, show, aDesc, bDesc, aSec, bSec, ax, bx));
         }
     }
 
     // dummy ties for testing
     private void addDummyTies() {
         for (int i = 0; i < 10; i++) {
-            ties.add(i, new TieData(i+1, CoreSectionTieType.NONE, i % 2 == 0 ? true : false, "source desc", "dest desc", "0@fake1", "0@fake2"));
+            ties.add(i, new TieData(i+1, CoreSectionTieType.NONE, i % 2 == 0 ? true : false, "source desc", "dest desc", "Section A", "Section B", 10, 20));
+        }
+    }
+
+    private void doExport() {
+        String exportFile = FileUtility.selectASingleFile(this, "Export Tie Data", "csv", FileUtility.SAVE);
+        if (exportFile != null) {
+            try {
+                CSVWriter writer = new CSVWriter(new FileWriter(exportFile));
+                DecimalFormat df = new DecimalFormat("#.#");
+                String[] headers = { "Tie Type", "Z Section", "Z Section Depth (cm)", "Z Description", "Z' Section", "Z' Section Depth (cm)", "Z' Description" };
+                writer.writeNext(headers);
+                for (TieData td : ties) {
+                    // System.out.println("Writing TieData with ID = " + td.id);
+                    String[] row = { td.type.toString(), td.aSectionID, df.format(td.aSectionDepth), td.aDesc, td.bSectionID, df.format(td.bSectionDepth), td.bDesc };
+                    writer.writeNext(row);
+                }
+                writer.close();
+            } catch (IOException e) {
+                JOptionPane.showMessageDialog(this, "Tie data export failed: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            }
         }
     }
 
@@ -194,19 +233,27 @@ class TieData {
     public CoreSectionTieType type;
     public boolean show;
     public String aDesc, bDesc;
-    public String aSectionDepth, bSectionDepth; // section name and section depth (cm)
-    public TieData(int id, CoreSectionTieType type, boolean show, String aDesc, String bDesc, String aSectionDepth, String bSectionDepth) {
+    public String aSectionID, bSectionID; // section name
+    public float aSectionDepth, bSectionDepth; // section depth (cm)
+    public TieData(int id, CoreSectionTieType type, boolean show, String aDesc, String bDesc, String aSectionID, String bSectionID, float aSectionDepth, float bSectionDepth) {
         this.id = id;
         this.type = type;
         this.show = show;
         this.aDesc = aDesc;
         this.bDesc = bDesc;
+        this.aSectionID = aSectionID;
+        this.bSectionID = bSectionID;
         this.aSectionDepth = aSectionDepth;
         this.bSectionDepth = bSectionDepth;
     }
 
     public String toString() {
         return "ID: " + id + " A: " + aDesc + " B: " + bDesc;
+    }
+
+    public static String makeDepthStr(final String sectionID, final float sectionDepth) {
+        DecimalFormat df = new DecimalFormat("#.#");
+        return sectionID + " " + df.format(sectionDepth) + "cm";
     }
 }
 
@@ -297,9 +344,9 @@ class TieTableModel extends AbstractTableModel {
         } else if (col == 1) {
             return t.type.toString();
         } else if (col == 2) {
-            return t.aSectionDepth;
+            return TieData.makeDepthStr(t.aSectionID, t.aSectionDepth);
         } else { // col == 3
-            return t.bSectionDepth;
+            return TieData.makeDepthStr(t.bSectionID, t.bSectionDepth);
         }
     }
 }
