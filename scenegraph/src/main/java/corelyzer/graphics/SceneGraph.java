@@ -255,6 +255,8 @@ public class SceneGraph {
 	public native static String getSectionTieBSectionName(int tieId);
 	public native static float[] getSectionTieAPosition(int tieId);
 	public native static float[] getSectionTieBPosition(int tieId);
+	public native static int getSectionTieASection(int tieId);
+	public native static int getSectionTieBSection(int tieId);
 	public native static int getSectionTieATrack(int tieId);
 	public native static int getSectionTieBTrack(int tieId);
 	public native static void deleteSectionTiesOnTrack(int trackId);

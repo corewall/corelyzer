@@ -17,7 +17,8 @@ import javax.swing.event.TableModelListener;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableModel;
 
-import java.util.Vector;
+import java.util.Comparator;
+import java.util.ArrayList;
 
 import corelyzer.data.CoreSectionTieType;
 import corelyzer.graphics.SceneGraph;
@@ -27,9 +28,9 @@ import corelyzer.util.FileUtility;
 import com.opencsv.CSVWriter;
 import net.miginfocom.swing.MigLayout;
 
-public class ManageSectionTiesDialog extends JFrame {
+public class ManageSectionTiesDialog extends JDialog {
     private JTable tieTable;
-    private Vector<TieData> ties = new Vector<TieData>();
+    private ArrayList<TieData> ties = new ArrayList<TieData>();
     private JButton editButton;
     private JButton deleteButton;
     private JButton exportButton;
@@ -106,10 +107,10 @@ public class ManageSectionTiesDialog extends JFrame {
                 }
 
                 // delete ties
-                final Vector<TieData> tiesToDelete = new Vector<TieData>();
+                final ArrayList<TieData> tiesToDelete = new ArrayList<TieData>();
                 for (int rowIdx : rows) { tiesToDelete.add(ties.get(rowIdx)); }
                 for (TieData tie : tiesToDelete) {
-                    ties.removeElement(tie);
+                    ties.remove(tie);
                     SceneGraph.deleteSectionTie(tie.id);
                 }
 
@@ -142,6 +143,8 @@ public class ManageSectionTiesDialog extends JFrame {
             public void actionPerformed(ActionEvent event) {
                 SceneGraph.deselectAllSectionTies();
                 CorelyzerApp.getApp().updateGLWindows();
+                TieTable.preferredWidth = tableScroll.getWidth();
+                TieTable.preferredHeight = tableScroll.getHeight();
                 setVisible(false);
             }
         });
@@ -190,14 +193,33 @@ public class ManageSectionTiesDialog extends JFrame {
             final float bx = bPos[0] / SceneGraph.getCanvasDPIX(0) * 2.54f;
             final String aSec = SceneGraph.getSectionTieASectionName(id);
             final String bSec = SceneGraph.getSectionTieBSectionName(id);
-            ties.add(i, new TieData(id, type, show, aDesc, bDesc, aSec, bSec, ax, bx));
+            final int aTrackId = SceneGraph.getSectionTieATrack(id);
+            final int aSectionId = SceneGraph.getSectionTieASection(id);
+            final int bTrackId = SceneGraph.getSectionTieBTrack(id);
+            final int bSectionId = SceneGraph.getSectionTieBSection(id);
+            final float aSectionDepth = SceneGraph.getSectionDepth(aTrackId, aSectionId);
+            final float bSectionDepth = SceneGraph.getSectionDepth(bTrackId, bSectionId);
+            final float aTotalDepth = (ax + aSectionDepth) / 100.0f;
+            final float bTotalDepth = (bx + bSectionDepth) / 100.0f;
+
+            ties.add(i, new TieData(id, type, show, aDesc, bDesc, aSec, bSec, ax, bx, aTotalDepth, bTotalDepth));
         }
+        // sort by total depth ascending
+        ties.sort(new Comparator<TieData>() {
+            public int compare(TieData td1, TieData td2) {
+                if (td1.aTotalDepth == td2.aTotalDepth) {
+                    return 0;
+                } else {
+                    return td1.aTotalDepth < td2.aTotalDepth ? -1 : 1;
+                }
+            }
+        });
     }
 
     // dummy ties for testing
     private void addDummyTies() {
         for (int i = 0; i < 10; i++) {
-            ties.add(i, new TieData(i+1, CoreSectionTieType.NONE, i % 2 == 0 ? true : false, "source desc", "dest desc", "Section A", "Section B", 10, 20));
+            ties.add(i, new TieData(i+1, CoreSectionTieType.NONE, i % 2 == 0 ? true : false, "source desc", "dest desc", "Section A", "Section B", 10, 20, 0, 0));
         }
     }
 
@@ -206,12 +228,10 @@ public class ManageSectionTiesDialog extends JFrame {
         if (exportFile != null) {
             try {
                 CSVWriter writer = new CSVWriter(new FileWriter(exportFile));
-                DecimalFormat df = new DecimalFormat("#.#");
-                String[] headers = { "Tie Type", "Z Section", "Z Section Depth (cm)", "Z Description", "Z' Section", "Z' Section Depth (cm)", "Z' Description" };
+                String[] headers = { "Tie Type", "Z Section", "Z Section Depth (cm)", "Z Description", "Z' Section", "Z' Section Depth (cm)", "Z' Description", "Z Total Depth (m)" };
                 writer.writeNext(headers);
                 for (TieData td : ties) {
-                    // System.out.println("Writing TieData with ID = " + td.id);
-                    String[] row = { td.type.toString(), td.aSectionID, df.format(td.aSectionDepth), td.aDesc, td.bSectionID, df.format(td.bSectionDepth), td.bDesc };
+                    String[] row = { td.type.toString(), td.aSectionID, DepthFormats.SECTION_DEPTH_FORMAT.format(td.aSectionDepth), td.aDesc, td.bSectionID, DepthFormats.SECTION_DEPTH_FORMAT.format(td.bSectionDepth), td.bDesc, DepthFormats.TOTAL_DEPTH_FORMAT.format(td.aTotalDepth) };
                     writer.writeNext(row);
                 }
                 writer.close();
@@ -228,6 +248,11 @@ public class ManageSectionTiesDialog extends JFrame {
     }
 }
 
+class DepthFormats {
+    public static final DecimalFormat SECTION_DEPTH_FORMAT = new DecimalFormat("#.#");
+    public static final DecimalFormat TOTAL_DEPTH_FORMAT = new DecimalFormat("#.##");
+}
+
 class TieData {
     public int id;
     public CoreSectionTieType type;
@@ -235,7 +260,8 @@ class TieData {
     public String aDesc, bDesc;
     public String aSectionID, bSectionID; // section name
     public float aSectionDepth, bSectionDepth; // section depth (cm)
-    public TieData(int id, CoreSectionTieType type, boolean show, String aDesc, String bDesc, String aSectionID, String bSectionID, float aSectionDepth, float bSectionDepth) {
+    public float aTotalDepth, bTotalDepth; // total depth (m)
+    public TieData(int id, CoreSectionTieType type, boolean show, String aDesc, String bDesc, String aSectionID, String bSectionID, float aSectionDepth, float bSectionDepth, float aTotalDepth, float bTotalDepth) {
         this.id = id;
         this.type = type;
         this.show = show;
@@ -245,15 +271,12 @@ class TieData {
         this.bSectionID = bSectionID;
         this.aSectionDepth = aSectionDepth;
         this.bSectionDepth = bSectionDepth;
+        this.aTotalDepth = aTotalDepth;
+        this.bTotalDepth = bTotalDepth;
     }
 
     public String toString() {
         return "ID: " + id + " A: " + aDesc + " B: " + bDesc;
-    }
-
-    public static String makeDepthStr(final String sectionID, final float sectionDepth) {
-        DecimalFormat df = new DecimalFormat("#.#");
-        return sectionID + " " + df.format(sectionDepth) + "cm";
     }
 }
 
@@ -264,8 +287,8 @@ class TieTable extends JTable {
         super(model);
     }
 
-    final int showWidth = 50;
-    final int typeWidth = 50;
+    public static int preferredWidth = 600;
+    public static int preferredHeight = 200;
 
 	@Override
 	public void setPreferredSize(final Dimension d) {
@@ -281,39 +304,33 @@ class TieTable extends JTable {
 
     @Override
     public Dimension getPreferredScrollableViewportSize() {
-        return new Dimension(500, 200);
+        return new Dimension(preferredWidth, preferredHeight);
     }
 
     private void setWidths(int width) {
-		getColumnModel().getColumn(0).setPreferredWidth(showWidth);
-        getColumnModel().getColumn(1).setPreferredWidth(typeWidth);
-        final int half = Math.round((width - (showWidth + typeWidth)) / 2.0f);
-		getColumnModel().getColumn(2).setPreferredWidth(half);
-		getColumnModel().getColumn(3).setPreferredWidth(half);
+		getColumnModel().getColumn(0).setPreferredWidth(40);
+        getColumnModel().getColumn(1).setPreferredWidth(50);
+        getColumnModel().getColumn(2).setPreferredWidth(150);
+        getColumnModel().getColumn(3).setPreferredWidth(50);
+        getColumnModel().getColumn(4).setPreferredWidth(150);
+        getColumnModel().getColumn(5).setPreferredWidth(50);
+        getColumnModel().getColumn(6).setPreferredWidth(50);
     }
 }
 
 
 // Display and handle checkboxes in "Show" column
 class TieTableModel extends AbstractTableModel {
-    Vector<TieData> ties;
-    TieTableModel(Vector<TieData> ties) {
+    ArrayList<TieData> ties;
+    TieTableModel(ArrayList<TieData> ties) {
         super();
         this.ties = ties;
     }
 
+    private final String[] columnNames = { "Show", "Type", "Z", "Z Section Depth (cm)", "Z'", "Z' Section Depth (cm)", "Z Total Depth (m)" };
+
     @Override
-    public String getColumnName(int columnIndex) {
-        if (columnIndex == 0) {
-            return "Show";
-        } else if (columnIndex == 1) {
-            return "Type";
-        } else if (columnIndex == 2) {
-            return "Z";
-        } else {
-            return "Z'";
-        }
-    }
+    public String getColumnName(int columnIndex) { return columnNames[columnIndex]; }
 
     @Override
     public Class<?> getColumnClass(int columnIndex) {
@@ -335,7 +352,7 @@ class TieTableModel extends AbstractTableModel {
 		}
 	}
 
-    @Override public int getColumnCount() { return 4; }
+    @Override public int getColumnCount() { return 7; }
     @Override public int getRowCount() { return ties.size(); }
     @Override public Object getValueAt(final int row, final int col) { 
         TieData t = ties.get(row);
@@ -344,9 +361,15 @@ class TieTableModel extends AbstractTableModel {
         } else if (col == 1) {
             return t.type.toString();
         } else if (col == 2) {
-            return TieData.makeDepthStr(t.aSectionID, t.aSectionDepth);
-        } else { // col == 3
-            return TieData.makeDepthStr(t.bSectionID, t.bSectionDepth);
+            return t.aSectionID;
+        } else if (col == 3) {
+            return DepthFormats.SECTION_DEPTH_FORMAT.format(t.aSectionDepth);
+        } else if (col == 4) {
+            return t.bSectionID;
+        } else if (col == 5) {
+            return DepthFormats.SECTION_DEPTH_FORMAT.format(t.bSectionDepth);
+        } else {
+            return DepthFormats.TOTAL_DEPTH_FORMAT.format(t.aTotalDepth);
         }
     }
 }

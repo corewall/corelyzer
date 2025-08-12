@@ -6,6 +6,8 @@ import java.awt.event.KeyEvent;
 
 import javax.swing.*;
 
+import java.text.DecimalFormat;
+
 import net.miginfocom.swing.MigLayout;
 import corelyzer.data.CoreSectionTieType;
 import corelyzer.graphics.SceneGraph;
@@ -41,11 +43,12 @@ public class SectionTieDialog extends JDialog {
             String bSecId = SceneGraph.getSectionTieBSectionName(tieId);
             float[] aPos = SceneGraph.getSectionTieAPosition(tieId);
             float[] bPos = SceneGraph.getSectionTieBPosition(tieId);
-            int ax = Math.round(aPos[0] / SceneGraph.getCanvasDPIX(0) * 2.54f);
-            int bx = Math.round(bPos[0] / SceneGraph.getCanvasDPIX(0) * 2.54f);
-            aLabel.setText("Z: " + aSecId + " " + ax + "cm");
+            DecimalFormat df = new DecimalFormat("#.#");
+            float ax = aPos[0] / SceneGraph.getCanvasDPIX(0) * 2.54f;
+            float bx = bPos[0] / SceneGraph.getCanvasDPIX(0) * 2.54f;
+            aLabel.setText("Z: " + aSecId + " " + df.format(ax) + "cm");
             aDesc.setText(SceneGraph.getSectionTieADescription(tieId));
-            bLabel.setText("Z': " + bSecId + " " + bx + "cm");
+            bLabel.setText("Z': " + bSecId + " " + df.format(bx) + "cm");
             bDesc.setText(SceneGraph.getSectionTieBDescription(tieId));
             pack();
         }

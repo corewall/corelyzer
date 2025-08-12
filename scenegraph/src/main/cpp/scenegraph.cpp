@@ -5202,6 +5202,28 @@ JNIEXPORT jfloatArray JNICALL Java_corelyzer_graphics_SceneGraph_getSectionTieBP
 
 /*
  * Class:     corelyzer_graphics_SceneGraph
+ * Method:    getSectionTieASection
+ * Signature: (I)I
+ */
+JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_getSectionTieASection(JNIEnv *jenv, jclass jcls, jint tieId) {
+    CoreSectionTie *tie = get_tie(default_track_scene, tieId);
+    if (!tie) return -1;
+    return tie->a->sectionId;
+}
+
+/*
+ * Class:     corelyzer_graphics_SceneGraph
+ * Method:    getSectionTieBSection
+ * Signature: (I)I
+ */
+JNIEXPORT jint JNICALL Java_corelyzer_graphics_SceneGraph_getSectionTieBSection(JNIEnv *jenv, jclass jcls, jint tieId) {
+    CoreSectionTie *tie = get_tie(default_track_scene, tieId);
+    if (!tie) return -1;
+    return tie->b->sectionId;
+}
+
+/*
+ * Class:     corelyzer_graphics_SceneGraph
  * Method:    getSectionTieATrack
  * Signature: (I)I
  */
