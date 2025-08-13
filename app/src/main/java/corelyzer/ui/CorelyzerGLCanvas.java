@@ -977,6 +977,7 @@ public class CorelyzerGLCanvas implements GLEventListener, MouseListener, MouseW
 
 			// todo: disable original track in selection
 			int newTrackId = CRUtility.getTargetTrackID(CorelyzerApp.getApp(), this.canvas);
+			if (newTrackId == -1) { return; } // no track was selected 
 			String newTrackName = SceneGraph.getTrackName(newTrackId);
 
 			/*

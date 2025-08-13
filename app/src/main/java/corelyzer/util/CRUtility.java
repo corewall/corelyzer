@@ -35,44 +35,35 @@ import corelyzer.ui.CorelyzerApp;
 public class CRUtility {
 
 	public static int getTargetTrackID(final CorelyzerApp app, final Component owner) {
-		int trackId;
-		CRDefaultListModel model = app.getTrackListModel();
 		CRTrackSelectionDialog dialog = new CRTrackSelectionDialog(owner);
-		dialog.setListModel(model);
-		dialog.pack();
-		dialog.setVisible(true);
-
-		String trackName = dialog.getSelectionTrackName();
-
-		// Get tracID with scenegraph
-		if (app.containsTrackName(trackName)) {
-			String currentSessionName = CoreGraph.getInstance().getCurrentSession().getName();
-			trackId = SceneGraph.getTrackIDByName(currentSessionName, trackName);
-		} else {
-			trackId = app.createTrack(trackName);
-		}
-
-		return trackId;
+		return get_target_track_id(app, dialog);
 	}
 
 	public static int getTargetTrackID(final CorelyzerApp app, final Frame whoIsAsking) {
-		int trackId;
-		CRDefaultListModel model = app.getTrackListModel();
 		CRTrackSelectionDialog dialog = new CRTrackSelectionDialog(whoIsAsking);
+		return get_target_track_id(app, dialog);
+	}
+
+	private static int get_target_track_id(final CorelyzerApp app, CRTrackSelectionDialog dialog) {
+		int trackId = -1;
+		CRDefaultListModel model = app.getTrackListModel();
+
 		dialog.setListModel(model);
 		dialog.pack();
+		dialog.setModal(true);
 		dialog.setVisible(true);
 
-		String trackName = dialog.getSelectionTrackName();
+		if (dialog.confirmed) {
+			String trackName = dialog.getSelectionTrackName();
 
-		// Get tracID with scenegraph
-		if (app.containsTrackName(trackName)) {
-			String currentSessionName = CoreGraph.getInstance().getCurrentSession().getName();
-			trackId = SceneGraph.getTrackIDByName(currentSessionName, trackName);
-		} else {
-			trackId = app.createTrack(trackName);
+			// Get trackID with scenegraph
+			if (app.containsTrackName(trackName)) {
+				String currentSessionName = CoreGraph.getInstance().getCurrentSession().getName();
+				trackId = SceneGraph.getTrackIDByName(currentSessionName, trackName);
+			} else {
+				trackId = app.createTrack(trackName);
+			}
 		}
-
 		return trackId;
 	}
 }

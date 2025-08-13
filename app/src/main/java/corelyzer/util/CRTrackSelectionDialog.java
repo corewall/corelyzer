@@ -51,6 +51,7 @@ public class CRTrackSelectionDialog extends JDialog {
 		System.exit(0);
 	}
 
+	public boolean confirmed = false; // true if user clicked OK
 	private JPanel contentPane;
 	private JButton buttonOK;
 	private JButton buttonCancel;
@@ -209,6 +210,7 @@ public class CRTrackSelectionDialog extends JDialog {
 	}
 
 	private void onOK() {
+		confirmed = true;
 		dispose();
 	}
 
