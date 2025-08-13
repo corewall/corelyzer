@@ -515,10 +515,10 @@ void render_track_scene(int id, Canvas *c) {
 void render_arrowhead(float fromX, float fromY, float toX, float toY, float size) {
     const float pi = 3.14159f;
     float theta = atan2(toY - fromY, toX - fromX);
-    float x0 = toX - size * cos(theta - pi/6);
-    float y0 = toY - size * sin(theta - pi/6);
-    float x1 = toX - size * cos(theta + pi/6);
-    float y1 = toY - size * sin(theta + pi/6);
+    float x0 = toX - size * cos(theta - pi/8);
+    float y0 = toY - size * sin(theta - pi/8);
+    float x1 = toX - size * cos(theta + pi/8);
+    float y1 = toY - size * sin(theta + pi/8);
     glBegin(GL_POLYGON);
     {
         glVertex2f(toX, toY);
