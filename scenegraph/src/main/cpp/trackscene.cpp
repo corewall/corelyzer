@@ -59,6 +59,7 @@ static void render_section_tie_offcore_segments(TrackScene *ts);
 static void update_mouseover_tie(TrackScene *ts, Canvas *c);
 static bool is_tie_valid(CoreSectionTie *tie);
 static bool is_tie_visible(CoreSectionTie *tie);
+static void render_tie_arrowhead(Canvas *c, float fromX, float fromY, float toX, float toY);
 
 //================================================================
 std::vector<TrackScene *> trackscenevec;
@@ -725,6 +726,10 @@ void render_section_tie_oncore_segments(TrackScene *ts, Canvas *c) {
             glVertex2f(bix, biy);
             glEnd();
         }
+
+        if (tie->getType() == SPLICE) {
+            render_tie_arrowhead(c, ax, ay, bx, by);
+        }        
     }
 
     glEnable(GL_TEXTURE_2D);
@@ -780,20 +785,40 @@ static void prep_tie_appearance(CoreSectionTie *tie, const int tie_id) {
 }
 
 //================================================================
+static void render_tie_arrowhead(Canvas *c, float fromX, float fromY, float toX, float toY) {
+    const float TIE_ARROWHEAD_SIZE = 50.0f;
+    
+    // limit arrowhead size at high zoom levels
+    float arrowSize = TIE_ARROWHEAD_SIZE * ((c->w / c->w0) > 1.0f ? 1.0f : (c->w / c->w0));
+
+    // reduce arrowhead size if it exceeds half the tie line's length
+    const float line_length = pt_to_pt_dist(fromX, fromY, toX, toY);
+    if (arrowSize > (line_length / 2.0f)) {
+        arrowSize *= ((line_length / 2.0f) / arrowSize);
+    }
+
+    render_arrowhead(fromX, fromY, toX, toY, arrowSize);
+}
+
+//================================================================
 void render_in_progress_tie(Canvas *c) {
     SectionTiePoint *tp = get_edit_tie_fixed_point();
     if (tp) {
         float ax, ay;
         tp->toSceneSpace(ax, ay);
+        const float mx = get_horizontal_depth() ? c->mouseX : c->mouseY;
+        const float my = get_horizontal_depth() ? c->mouseY : -c->mouseX;
         set_tie_color(get_edit_tie_type());
         glBegin(GL_LINES);
         {
             glVertex3f(ax, ay, 0.0f);
-            const float mx = get_horizontal_depth() ? c->mouseX : c->mouseY;
-            const float my = get_horizontal_depth() ? c->mouseY : -c->mouseX;
             glVertex3f(mx, my, 0.0f);
         }
         glEnd();
+
+        if (get_edit_tie_type() == SPLICE) {
+            render_tie_arrowhead(c, ax, ay, mx, my);
+        }
     }
 }
 
