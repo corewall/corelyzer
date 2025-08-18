@@ -196,6 +196,7 @@ public class ManageSectionTiesDialog extends JDialog {
             tie.type = tieDlg.getTieType();
             SceneGraph.setSectionTieType(tie.id, tie.type.intValue());
             tieTable.updateUI();
+            CorelyzerApp.getApp().updateGLWindows();
         }
     }
 
