@@ -3,6 +3,7 @@ package corelyzer.ui.tie;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
+import java.awt.KeyboardFocusManager;
 
 import javax.swing.*;
 
@@ -106,6 +107,8 @@ public class SectionTieDialog extends JDialog {
         aLabel = new JLabel("[A core ID]");
         contentPane.add(aLabel);
         aDesc = new JTextArea();
+        patchJTextAreaTabBehavior(aDesc);
+
         JScrollPane aScrollPane = new JScrollPane();
         aScrollPane.setViewportView(aDesc);
         contentPane.add(aScrollPane, "grow, hmin 80, wmin 300");
@@ -113,6 +116,8 @@ public class SectionTieDialog extends JDialog {
         bLabel = new JLabel("[B core ID]");
         contentPane.add(bLabel, "gapy 10");
         bDesc = new JTextArea();
+        patchJTextAreaTabBehavior(bDesc);
+
         JScrollPane bScrollPane = new JScrollPane();
         bScrollPane.setViewportView(bDesc);
         contentPane.add(bScrollPane, "grow, hmin 80, wmin 300");
@@ -150,4 +155,11 @@ public class SectionTieDialog extends JDialog {
     private void onCancel() {
 		dispose();
 	}
+
+    // On Tab key in text area, change focus instead of adding text-tab.
+    // https://stackoverflow.com/questions/525855/moving-focus-from-jtextarea-using-tab-key
+    private void patchJTextAreaTabBehavior(JTextArea textArea) {
+        textArea.setFocusTraversalKeys(KeyboardFocusManager.FORWARD_TRAVERSAL_KEYS, null);
+        textArea.setFocusTraversalKeys(KeyboardFocusManager.BACKWARD_TRAVERSAL_KEYS, null);
+    }
 }
