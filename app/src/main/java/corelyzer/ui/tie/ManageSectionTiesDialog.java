@@ -213,7 +213,7 @@ public class ManageSectionTiesDialog extends JDialog {
         final boolean hasSelection = tieTable.getSelectedRow() != -1;
         final boolean isMultiple = tieTable.getSelectedRows().length > 1;
         editButton.setEnabled(hasSelection && !isMultiple);
-        reverseButton.setEnabled(hasSelection && ties.get(tieTable.getSelectedRow()).type == CoreSectionTieType.SPLICE);
+        reverseButton.setEnabled(hasSelection && !isMultiple && ties.get(tieTable.getSelectedRow()).type == CoreSectionTieType.SPLICE);
         deleteButton.setEnabled(hasSelection);
         exportButton.setEnabled(tieTable.getRowCount() > 0);
     }
