@@ -32,6 +32,7 @@ public class ManageSectionTiesDialog extends JDialog {
     private JTable tieTable;
     private ArrayList<TieData> ties = new ArrayList<TieData>();
     private JButton editButton;
+    private JButton reverseButton;
     private JButton deleteButton;
     private JButton exportButton;
     private JButton closeButton;
@@ -52,7 +53,7 @@ public class ManageSectionTiesDialog extends JDialog {
         setTitle("Manage section ties");
         JPanel contentPane = new JPanel();
         setContentPane(contentPane);
-        contentPane.setLayout(new MigLayout("insets 5", "[grow]", "[grow][]"));
+        contentPane.setLayout(new MigLayout("insets 5", "[grow]", "[grow][][][]"));
         
         // tie table
         tieTable = new TieTable(new TieTableModel(ties));
@@ -83,15 +84,23 @@ public class ManageSectionTiesDialog extends JDialog {
         contentPane.add(tableScroll, "wmin 400, hmin 100, wrap, grow");
 
         JPanel buttonPanel = new JPanel();
-        buttonPanel.setLayout(new MigLayout("insets 5", "[][][grow]", ""));
+        buttonPanel.setLayout(new MigLayout("insets 5", "", ""));
 
-        editButton = new JButton("Edit");
+        editButton = new JButton("Edit...");
         editButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 doEditTie();
             }
         });
-        buttonPanel.add(editButton, "align left");
+        buttonPanel.add(editButton);
+
+        reverseButton = new JButton("Reverse Direction");
+        reverseButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                doReverseTie();   
+            }
+        });
+        buttonPanel.add(reverseButton);
 
         deleteButton = new JButton("Delete");
         deleteButton.addActionListener(new ActionListener() {
@@ -128,15 +137,18 @@ public class ManageSectionTiesDialog extends JDialog {
                 CorelyzerApp.getApp().updateGLWindows();
             }
         });
-        buttonPanel.add(deleteButton, "align left");
-
-        exportButton = new JButton("Export Ties...");
+        buttonPanel.add(deleteButton);
+        
+        exportButton = new JButton("Export Ties to CSV...");
         exportButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 doExport();
             }
         });
-        buttonPanel.add(exportButton, "align left");
+        buttonPanel.add(exportButton);
+        
+        contentPane.add(buttonPanel, "grow, wrap");
+        contentPane.add(new JSeparator(), "grow, wrap");
 
         closeButton = new JButton("Close");
         closeButton.addActionListener(new ActionListener() {
@@ -148,8 +160,7 @@ public class ManageSectionTiesDialog extends JDialog {
                 setVisible(false);
             }
         });
-        buttonPanel.add(closeButton, "align right");
-        contentPane.add(buttonPanel, "grow");
+        contentPane.add(closeButton, "align right");
         
         pack();
         updateButtons();
@@ -172,37 +183,51 @@ public class ManageSectionTiesDialog extends JDialog {
         }
     }
 
+    private void doReverseTie() {
+        TieData tie = ties.get(tieTable.getSelectedRow());
+        SceneGraph.reverseSectionTieDirection(tie.id);
+        TieData updatedTie = getTieData(tie.id);
+        ties.set(tieTable.getSelectedRow(), updatedTie);
+        tieTable.updateUI();
+        CorelyzerApp.getApp().updateGLWindows();
+    }
+
     private void updateButtons() {
         final boolean hasSelection = tieTable.getSelectedRow() != -1;
         final boolean isMultiple = tieTable.getSelectedRows().length > 1;
         editButton.setEnabled(hasSelection && !isMultiple);
+        reverseButton.setEnabled(hasSelection && ties.get(tieTable.getSelectedRow()).type == CoreSectionTieType.SPLICE);
         deleteButton.setEnabled(hasSelection);
         exportButton.setEnabled(tieTable.getRowCount() > 0);
+    }
+
+    private TieData getTieData(int tieId) {
+        final CoreSectionTieType type = CoreSectionTieType.fromInt(SceneGraph.getSectionTieType(tieId));
+        final boolean show = SceneGraph.getSectionTieShow(tieId);
+        final String aDesc = SceneGraph.getSectionTieADescription(tieId);
+        final String bDesc = SceneGraph.getSectionTieBDescription(tieId);
+        float[] aPos = SceneGraph.getSectionTieAPosition(tieId);
+        float[] bPos = SceneGraph.getSectionTieBPosition(tieId);
+        final float ax = aPos[0] / SceneGraph.getCanvasDPIX(0) * 2.54f;
+        final float bx = bPos[0] / SceneGraph.getCanvasDPIX(0) * 2.54f;
+        final String aSec = SceneGraph.getSectionTieASectionName(tieId);
+        final String bSec = SceneGraph.getSectionTieBSectionName(tieId);
+        final int aTrackId = SceneGraph.getSectionTieATrack(tieId);
+        final int aSectionId = SceneGraph.getSectionTieASection(tieId);
+        final int bTrackId = SceneGraph.getSectionTieBTrack(tieId);
+        final int bSectionId = SceneGraph.getSectionTieBSection(tieId);
+        final float aSectionDepth = SceneGraph.getSectionDepth(aTrackId, aSectionId);
+        final float bSectionDepth = SceneGraph.getSectionDepth(bTrackId, bSectionId);
+        final float aTotalDepth = (ax + aSectionDepth) / 100.0f;
+        final float bTotalDepth = (bx + bSectionDepth) / 100.0f;
+
+        return new TieData(tieId, type, show, aDesc, bDesc, aSec, bSec, ax, bx, aTotalDepth, bTotalDepth);
     }
     
     private void gatherTieData(int[] tieIds) {
         for (int i = 0; i < tieIds.length; i++) {
-            final int id = tieIds[i];
-            final CoreSectionTieType type = CoreSectionTieType.fromInt(SceneGraph.getSectionTieType(id));
-            final boolean show = SceneGraph.getSectionTieShow(id);
-            final String aDesc = SceneGraph.getSectionTieADescription(id);
-            final String bDesc = SceneGraph.getSectionTieBDescription(id);
-            float[] aPos = SceneGraph.getSectionTieAPosition(id);
-            float[] bPos = SceneGraph.getSectionTieBPosition(id);
-            final float ax = aPos[0] / SceneGraph.getCanvasDPIX(0) * 2.54f;
-            final float bx = bPos[0] / SceneGraph.getCanvasDPIX(0) * 2.54f;
-            final String aSec = SceneGraph.getSectionTieASectionName(id);
-            final String bSec = SceneGraph.getSectionTieBSectionName(id);
-            final int aTrackId = SceneGraph.getSectionTieATrack(id);
-            final int aSectionId = SceneGraph.getSectionTieASection(id);
-            final int bTrackId = SceneGraph.getSectionTieBTrack(id);
-            final int bSectionId = SceneGraph.getSectionTieBSection(id);
-            final float aSectionDepth = SceneGraph.getSectionDepth(aTrackId, aSectionId);
-            final float bSectionDepth = SceneGraph.getSectionDepth(bTrackId, bSectionId);
-            final float aTotalDepth = (ax + aSectionDepth) / 100.0f;
-            final float bTotalDepth = (bx + bSectionDepth) / 100.0f;
-
-            ties.add(i, new TieData(id, type, show, aDesc, bDesc, aSec, bSec, ax, bx, aTotalDepth, bTotalDepth));
+            TieData tieData = getTieData(tieIds[i]);
+            ties.add(i, tieData);
         }
         // sort by total depth ascending
         ties.sort(new Comparator<TieData>() {
@@ -243,7 +268,7 @@ public class ManageSectionTiesDialog extends JDialog {
 
     public static void main(String[] args) {
         ManageSectionTiesDialog dlg = new ManageSectionTiesDialog();
-        dlg.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        dlg.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         dlg.setVisible(true);
     }
 }

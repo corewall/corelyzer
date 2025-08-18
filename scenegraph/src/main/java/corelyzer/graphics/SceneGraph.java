@@ -260,6 +260,7 @@ public class SceneGraph {
 	public native static int getSectionTieATrack(int tieId);
 	public native static int getSectionTieBTrack(int tieId);
 	public native static void deleteSectionTiesOnTrack(int trackId);
+	public native static void reverseSectionTieDirection(int tieId);
 
 
 	// ----- Canvas methods

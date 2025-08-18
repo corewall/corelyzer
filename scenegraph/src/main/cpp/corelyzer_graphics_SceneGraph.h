@@ -401,6 +401,14 @@ JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_deleteSectionTiesOnTra
 
 /*
  * Class:     corelyzer_graphics_SceneGraph
+ * Method:    reverseSectionTieDirection
+ * Signature: (I)V
+ */
+JNIEXPORT void JNICALL Java_corelyzer_graphics_SceneGraph_reverseSectionTieDirection
+  (JNIEnv *, jclass, jint);
+
+/*
+ * Class:     corelyzer_graphics_SceneGraph
  * Method:    deleteDataset
  * Signature: (I)V
  */

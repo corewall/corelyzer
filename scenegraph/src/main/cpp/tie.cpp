@@ -132,6 +132,17 @@ void CoreSectionTie::setShow(bool _show) { show = _show; }
 bool CoreSectionTie::getSelected() { return selected; }
 void CoreSectionTie::setSelected(bool _selected) { selected = _selected; }
 
+void CoreSectionTie::reverseDirection() {
+    SectionTiePoint *tmp_tie_pt = this->a;
+    this->a = this->b;
+    this->b = tmp_tie_pt;
+    
+    // reverse descriptions to keep them with the core/material they describe
+    char *tmp_desc = this->aDesc;
+    this->aDesc = this->bDesc;
+    this->bDesc = tmp_desc;
+}
+
 // Convert our section-space coord (this->x, this->y) to scene-space.
 void SectionTiePoint::toSceneSpace(float &scenex, float &sceney) {
     TrackSceneNode *t = get_scene_track(trackId);

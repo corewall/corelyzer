@@ -140,6 +140,7 @@ struct CoreSectionTie {
     void setShow(bool _show);
     bool getSelected();
     void setSelected(bool _selected);
+    void reverseDirection();
 
     bool valid() { return a->valid() && b->valid(); }
     bool isOnTrack(const int trackId) {
