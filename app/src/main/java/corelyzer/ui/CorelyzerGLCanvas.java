@@ -1260,6 +1260,7 @@ public class CorelyzerGLCanvas implements GLEventListener, MouseListener, MouseW
 								if (tieDlg.confirmed) {
 									SceneGraph.setSectionTieADescription(tieId, tieDlg.getADesc());
 									SceneGraph.setSectionTieBDescription(tieId, tieDlg.getBDesc());
+									SceneGraph.setSectionTieType(tieId, tieDlg.getTieType().intValue());
 								} else {
 									SceneGraph.deleteSectionTie(tieId);	
 								}
