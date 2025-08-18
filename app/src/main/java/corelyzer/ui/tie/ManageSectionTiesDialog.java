@@ -37,16 +37,31 @@ public class ManageSectionTiesDialog extends JDialog {
     private JButton exportButton;
     private JButton closeButton;
 
-    public ManageSectionTiesDialog() {
-        super();
-        addDummyTies();
-        setupUI();
+    private static ManageSectionTiesDialog dialogSingleton = null;
+    public static ManageSectionTiesDialog getDialog() {
+        if (dialogSingleton == null) {
+            dialogSingleton = new ManageSectionTiesDialog();
+        } else {
+            dialogSingleton.updateTieData();
+        }
+        return dialogSingleton;
     }
 
-    public ManageSectionTiesDialog(int[] tieIds) {
+    private ManageSectionTiesDialog() {
         super();
-        gatherTieData(tieIds);
         setupUI();
+        updateTieData();
+        setAlwaysOnTop(true);
+    }
+
+    public void selectTie(int selectTieId) {
+        for (int tie_idx = 0; tie_idx < ties.size(); tie_idx++) {
+            if (ties.get(tie_idx).id == selectTieId) {
+                tieTable.setRowSelectionInterval(tie_idx, tie_idx);
+                tieTable.scrollRectToVisible(tieTable.getCellRect(tie_idx, 0, true));
+                break;
+            }
+        }
     }
 
     private void setupUI() {
@@ -155,6 +170,7 @@ public class ManageSectionTiesDialog extends JDialog {
             public void actionPerformed(ActionEvent event) {
                 SceneGraph.deselectAllSectionTies();
                 CorelyzerApp.getApp().updateGLWindows();
+                tieTable.clearSelection();
                 TieTable.preferredWidth = tableScroll.getWidth();
                 TieTable.preferredHeight = tableScroll.getHeight();
                 setVisible(false);
@@ -223,8 +239,10 @@ public class ManageSectionTiesDialog extends JDialog {
 
         return new TieData(tieId, type, show, aDesc, bDesc, aSec, bSec, ax, bx, aTotalDepth, bTotalDepth);
     }
-    
-    private void gatherTieData(int[] tieIds) {
+
+    public void updateTieData() {
+        int[] tieIds = SceneGraph.getSectionTieIds();
+        ties.clear();
         for (int i = 0; i < tieIds.length; i++) {
             TieData tieData = getTieData(tieIds[i]);
             ties.add(i, tieData);
@@ -239,13 +257,24 @@ public class ManageSectionTiesDialog extends JDialog {
                 }
             }
         });
-    }
+    }    
 
-    // dummy ties for testing
-    private void addDummyTies() {
-        for (int i = 0; i < 10; i++) {
-            ties.add(i, new TieData(i+1, CoreSectionTieType.NONE, i % 2 == 0 ? true : false, "source desc", "dest desc", "Section A", "Section B", 10, 20, 0, 0));
+    public void gatherTieData(int[] tieIds) {
+        ties.clear();
+        for (int i = 0; i < tieIds.length; i++) {
+            TieData tieData = getTieData(tieIds[i]);
+            ties.add(i, tieData);
         }
+        // sort by total depth ascending
+        ties.sort(new Comparator<TieData>() {
+            public int compare(TieData td1, TieData td2) {
+                if (td1.aTotalDepth == td2.aTotalDepth) {
+                    return 0;
+                } else {
+                    return td1.aTotalDepth < td2.aTotalDepth ? -1 : 1;
+                }
+            }
+        });
     }
 
     private void doExport() {
@@ -264,12 +293,6 @@ public class ManageSectionTiesDialog extends JDialog {
                 JOptionPane.showMessageDialog(this, "Tie data export failed: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             }
         }
-    }
-
-    public static void main(String[] args) {
-        ManageSectionTiesDialog dlg = new ManageSectionTiesDialog();
-        dlg.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        dlg.setVisible(true);
     }
 }
 

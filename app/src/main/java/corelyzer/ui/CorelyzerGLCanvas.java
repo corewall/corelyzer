@@ -701,15 +701,8 @@ public class CorelyzerGLCanvas implements GLEventListener, MouseListener, MouseW
 	}
 
 	private void doManageTies() {
-		int[] tieIds = SceneGraph.getSectionTieIds();
-		if (tieIds == null) {
-			System.out.println("There are no ties to manage!");
-			return;
-		}
-		
-		ManageSectionTiesDialog dlg = new ManageSectionTiesDialog(tieIds);
+		ManageSectionTiesDialog dlg = ManageSectionTiesDialog.getDialog();
 		dlg.setLocationRelativeTo(canvas);
-		dlg.setAlwaysOnTop(true);
 		dlg.setVisible(true);
 	}
 
@@ -1287,17 +1280,13 @@ public class CorelyzerGLCanvas implements GLEventListener, MouseListener, MouseW
 				}
 
 				if (selectedTie >= 0 && canvasMode == CorelyzerApp.APP_NORMAL_MODE) {
-					SectionTieDialog tieDlg = new SectionTieDialog(CorelyzerApp.getApp().getToolFrame(), selectedTie, false);
-					Point pt = this.convertScenePointToMousePoint(scenePos[0], scenePos[1]);
-					tieDlg.setLocation(pt);
-					tieDlg.setModal(true);
-					tieDlg.setVisible(true);
-					if (tieDlg.confirmed) {
-						SceneGraph.setSectionTieType(selectedTie, tieDlg.getTieType().intValue());
-						SceneGraph.setSectionTieADescription(selectedTie, tieDlg.getADesc());
-						SceneGraph.setSectionTieBDescription(selectedTie, tieDlg.getBDesc());
-						CorelyzerApp.getApp().updateGLWindows();
+					ManageSectionTiesDialog tieDlg = ManageSectionTiesDialog.getDialog();
+					if (!tieDlg.isVisible()) {
+						Point pt = this.convertScenePointToMousePoint(scenePos[0], scenePos[1]);
+						tieDlg.setLocation(pt);
+						tieDlg.setVisible(true);
 					}
+					tieDlg.selectTie(selectedTie);
 					return;
 				}
 
