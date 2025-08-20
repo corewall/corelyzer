@@ -2096,7 +2096,6 @@ public class CorelyzerAppController implements ActionListener, AboutHandler, Qui
 
 		if (datasets.size() <= 0) {
 			JOptionPane.showMessageDialog(view.getMainFrame(), "Please load at least a dataset first");
-
 			return;
 		}
 
@@ -2104,18 +2103,11 @@ public class CorelyzerAppController implements ActionListener, AboutHandler, Qui
 		CRDefaultListModel model = listModels.getListModel(CRListModels.TRACK);
 		if (model.isEmpty()) {
 			JOptionPane.showMessageDialog(view.getMainFrame(), "Please create at least a track first");
-
 			return;
 		}
 
-		// int t = view.getTrackList().getSelectedIndex();
-		int d = view.getDataFileList().getSelectedIndex();
+		CRGraphDialog graphDialog = new CRGraphDialog(this.view.getMainFrame(), datasets);
 
-		// GraphDialog graphDialog = new GraphDialog("Graph Dialog");
-		CRGraphDialog graphDialog = new CRGraphDialog(this.view.getMainFrame());
-		//graphDialog.setSelectedTrackListId(t);
-		graphDialog.setDatasetVec(datasets);
-		graphDialog.selectDataset(d);
 		graphDialog.setVisible(true);
 	}
 	

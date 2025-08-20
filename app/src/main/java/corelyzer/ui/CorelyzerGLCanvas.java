@@ -759,7 +759,6 @@ public class CorelyzerGLCanvas implements GLEventListener, MouseListener, MouseW
 
 		if (datasets.size() <= 0) {
 			JOptionPane.showMessageDialog(getPopupParent(), "At least one dataset must be loaded.");
-
 			return;
 		}
 
@@ -802,9 +801,7 @@ public class CorelyzerGLCanvas implements GLEventListener, MouseListener, MouseW
 		}
 
 		// Show graph dialog
-		CRGraphDialog graphDialog = new CRGraphDialog(this.canvas);
-		graphDialog.setDatasetVec(datasets);
-		graphDialog.setSelectedTrackAndSectionId(t, s);
+		CRGraphDialog graphDialog = new CRGraphDialog(this.canvas, datasets);
 		graphDialog.setVisible(true);
 	}
 
