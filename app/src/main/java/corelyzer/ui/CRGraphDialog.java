@@ -146,7 +146,7 @@ public class CRGraphDialog extends JFrame {
 		createListeners();
 	}
 
-	public CRGraphDialog(final Component parent, Vector<WellLogDataSet> datasets) {
+	public CRGraphDialog(final Component parent, Vector<WellLogDataSet> datasets, final int selectDatasetIdx) {
 		super();
 		this.setAlwaysOnTop(true);
 		this.setLocationRelativeTo(parent);
@@ -154,6 +154,10 @@ public class CRGraphDialog extends JFrame {
 
 		init(datasets);
 		setupUI();
+
+		if (selectDatasetIdx >= 0 && selectDatasetIdx <= datasets.size() - 1) {
+			datasetList.setSelectedIndex(selectDatasetIdx);
+		}
 		
 		onDatasetAction(); // prepare UI data for current dataset
 		createListeners();
@@ -864,11 +868,9 @@ public class CRGraphDialog extends JFrame {
 	}
 
 	public void selectDataset(final int index) {
-
 		if (index >= this.datasets.size() || index < 0) {
 			return;
 		}
-
 		this.datasetList.setSelectedIndex(index);
 	}
 

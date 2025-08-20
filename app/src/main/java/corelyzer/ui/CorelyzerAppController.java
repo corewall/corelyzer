@@ -2106,8 +2106,8 @@ public class CorelyzerAppController implements ActionListener, AboutHandler, Qui
 			return;
 		}
 
-		CRGraphDialog graphDialog = new CRGraphDialog(this.view.getMainFrame(), datasets);
-
+		final int selectDatasetIdx = CoreGraph.getInstance().getCurrentDatasetIdx();
+		CRGraphDialog graphDialog = new CRGraphDialog(this.view.getMainFrame(), datasets, selectDatasetIdx);
 		graphDialog.setVisible(true);
 	}
 	

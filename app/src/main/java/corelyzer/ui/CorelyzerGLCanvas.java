@@ -801,7 +801,7 @@ public class CorelyzerGLCanvas implements GLEventListener, MouseListener, MouseW
 		}
 
 		// Show graph dialog
-		CRGraphDialog graphDialog = new CRGraphDialog(this.canvas, datasets);
+		CRGraphDialog graphDialog = new CRGraphDialog(this.canvas, datasets, -1);
 		graphDialog.setVisible(true);
 	}
 
