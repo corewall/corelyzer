@@ -539,59 +539,35 @@ public class CRGraphDialog extends JFrame {
 	}
 
 	private void onDatasetAction() {
-		// DATASET COMBOBOX
-		/*
-		 * int idx = this.datasetList.getSelectedIndex();
-		 * 
-		 * if (idx < 0) return;
-		 * 
-		 * String dsName = (String) this.datasetList.getSelectedItem();
-		 * 
-		 * System.out.println("---- Selected Dataset " + dsName + " idx: " +
-		 * idx);
-		 * 
-		 * // set dataset index and update fields
-		 * CorelyzerApp.getApp().getDataFileList().setSelectedIndex(idx);
-		 * this.currentDatasetIndex = idx; this.repaint(); lastSelectedField =
-		 * 0;
-		 * 
-		 * // update section list for this dataset
-		 * this.sectionsListModel.removeAllElements(); WellLogDataSet ds =
-		 * this.datasets.elementAt(idx); for (int i = 0; i < ds.getNumTables();
-		 * i++) { String name = ds.getTable(i).getName();
-		 * this.sectionsListModel.addElement(name); }
-		 * //this.selectedSectionListId = this.sectionsList.getSelectedIndex();
-		 * this.selectedSectionListId = 0;
-		 * this.sectionsList.setSelectedIndex(0);
-		 * 
-		 * fieldsTable.tableChanged(new TableModelEvent(
-		 * fieldsTable.getModel()));
-		 */
 		WellLogDataSet ds = (WellLogDataSet) this.datasetList.getSelectedItem();
 		if (ds == null) {
 			return;
 		}
 
+		// brg 8/20/2025: Unclear why we'd keep the main window's selected dataset
+		// in sync with the Graph dialog's selected dataset, and it disrupts opening
+		// the Graph dialog to the selected dataset on right-click > Graph... from
+		// the main window! Commenting out.
 		// System.out.println("[Bremen] Selected dataset: " + ds.toString() +
 		// ", id: " + ds.getId());
 
-		CoreGraph cg = CoreGraph.getInstance();
-		Session s = cg.getCurrentSession();
-		if (s != null) {
-			for (int i = 0; i < s.getDatasets().size(); i++) {
-				WellLogDataSet d = s.getDatasets().elementAt(i);
+		// CoreGraph cg = CoreGraph.getInstance();
+		// Session s = cg.getCurrentSession();
+		// if (s != null) {
+		// 	for (int i = 0; i < s.getDatasets().size(); i++) {
+		// 		WellLogDataSet d = s.getDatasets().elementAt(i);
 
-				if (d.getId() == ds.getId()) {
-					// System.out.println("[Bremen] Found dataset index in session: "
-					// + s.getName() + ", index: " + i
-					// + ", id: " + ds.getId());
+		// 		if (d.getId() == ds.getId()) {
+		// 			// System.out.println("[Bremen] Found dataset index in session: "
+		// 			// + s.getName() + ", index: " + i
+		// 			// + ", id: " + ds.getId());
 
-					cg.setCurrentDatasetIdx(i);
-					this.repaint();
-					break;
-				}
-			}
-		}
+		// 			cg.setCurrentDatasetIdx(i);
+		// 			this.repaint();
+		// 			break;
+		// 		}
+		// 	}
+		// }
 
 		int missingImageCount = 0;
 		this.sectionsListModel.removeAllElements();
