@@ -463,7 +463,11 @@ public class CRGraphDialog extends JFrame {
 		});
 
 		sectionsList.addListSelectionListener(new ListSelectionListener() {
-			public void valueChanged(final ListSelectionEvent event) { onSectionsListChanged();	}
+			public void valueChanged(final ListSelectionEvent event) {
+				if (!event.getValueIsAdjusting()) {
+					onSectionsListChanged();
+				}
+			}
 		});
 		
 		fieldsTable.getModel().addTableModelListener( new TableModelListener() {
@@ -572,8 +576,10 @@ public class CRGraphDialog extends JFrame {
 		// 		}
 		// 	}
 		// }
-
 		int missingImageCount = 0;
+
+		this.sectionsList.getSelectionModel().setValueIsAdjusting(true);
+
 		this.sectionsListModel.removeAllElements();
 		for (int i = 0; i < ds.getNumTables(); i++) {
 			final String name = ds.getTable(i).getName();
@@ -581,6 +587,10 @@ public class CRGraphDialog extends JFrame {
 			if (!imageExists) { missingImageCount++; }
 			this.sectionsListModel.addElement(new GraphSectionListItem(name, imageExists));
 		}
+
+		this.sectionsList.getSelectionModel().setValueIsAdjusting(false);
+		onSectionsListChanged();
+
 		String datasetInfoStr = "Contains data for " + this.sectionsListModel.getSize() + " section(s).";
 		datasetInfoLabel.setText(datasetInfoStr);
 		if (missingImageCount > 0) {
