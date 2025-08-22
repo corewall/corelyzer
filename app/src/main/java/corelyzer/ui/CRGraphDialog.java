@@ -49,16 +49,18 @@ import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
+import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
+import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
-import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
+import javax.swing.SwingWorker;
 import javax.swing.UIManager;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
@@ -1052,6 +1054,33 @@ public class CRGraphDialog extends JFrame {
 		}
 	}
 
+	private void aggregateFieldsDataWithWorker(final WellLogDataSet ds) {
+		JDialog dialog = new JDialog(this, "Loading...", true);
+		JProgressBar progressBar = new JProgressBar();
+		progressBar.setIndeterminate(true);
+		dialog.setLayout(new MigLayout("insets 5"));
+		dialog.add(new JLabel("Aggregating data..."), "wrap");
+		dialog.add(progressBar);
+		dialog.pack();
+		dialog.setLocationRelativeTo(this);
+
+		class AggregateFieldsDataWorker extends SwingWorker<Void, Integer> {
+			WellLogDataSet ds;
+			AggregateFieldsDataWorker(WellLogDataSet ds) { this.ds = ds; }
+	
+			@Override
+			protected Void doInBackground() throws Exception {
+				aggregateFieldsData(ds);
+				return null;
+			}
+	
+			@Override protected void done() { dialog.dispose(); }
+		}		
+		AggregateFieldsDataWorker worker = new AggregateFieldsDataWorker(ds);
+		worker.execute();
+		dialog.setVisible(true);		
+	}
+
 	private void updateFields(final WellLogDataSet ds) {
 		if (ds == null) {
 			return;
@@ -1075,7 +1104,13 @@ public class CRGraphDialog extends JFrame {
 		
 		showGraphVals.clear();
 
-		this.aggregateFieldsData( ds );
+		// Show progress bar when (fudge factor) 50+ sections are selected, as aggregation can be slow.
+		final int SELECTED_SECTION_PROGRESS_THRESHOLD = 50;
+		if (this.sectionsList.getSelectedIndices().length >= SELECTED_SECTION_PROGRESS_THRESHOLD) {
+			this.aggregateFieldsDataWithWorker(ds);
+		} else {
+			this.aggregateFieldsData(ds);
+		}
 		
 		Vector<Color> colors = CRGraphDialog.colorsManager.getColorVector( ds );
 		
