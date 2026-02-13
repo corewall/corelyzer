@@ -19,11 +19,16 @@ import javax.swing.table.TableModel;
 
 import java.util.Comparator;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Vector;
 
 import corelyzer.data.CoreSectionTieType;
 import corelyzer.graphics.SceneGraph;
 import corelyzer.ui.CorelyzerApp;
 import corelyzer.util.FileUtility;
+
+import corelyzer.util.identity.LacCoreSectionParser;
 
 import com.opencsv.CSVWriter;
 import net.miginfocom.swing.MigLayout;
@@ -35,6 +40,7 @@ public class ManageSectionTiesDialog extends JDialog {
     private JButton reverseButton;
     private JButton deleteButton;
     private JButton exportButton;
+    private JButton exportSparseSpliceButton;
     private JButton closeButton;
 
     private static ManageSectionTiesDialog dialogSingleton = null;
@@ -161,6 +167,14 @@ public class ManageSectionTiesDialog extends JDialog {
             }
         });
         buttonPanel.add(exportButton);
+
+        exportSparseSpliceButton = new JButton("Export Sparse Splice CSV...");
+        exportSparseSpliceButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                doSparseSpliceExport();
+            }
+        });
+        buttonPanel.add(exportSparseSpliceButton);
         
         contentPane.add(buttonPanel, "grow, wrap");
         contentPane.add(new JSeparator(), "grow, wrap");
@@ -260,23 +274,23 @@ public class ManageSectionTiesDialog extends JDialog {
         });
     }    
 
-    public void gatherTieData(int[] tieIds) {
-        ties.clear();
-        for (int i = 0; i < tieIds.length; i++) {
-            TieData tieData = getTieData(tieIds[i]);
-            ties.add(i, tieData);
-        }
-        // sort by total depth ascending
-        ties.sort(new Comparator<TieData>() {
-            public int compare(TieData td1, TieData td2) {
-                if (td1.aTotalDepth == td2.aTotalDepth) {
-                    return 0;
-                } else {
-                    return td1.aTotalDepth < td2.aTotalDepth ? -1 : 1;
-                }
-            }
-        });
-    }
+    // public void gatherTieData(int[] tieIds) {
+    //     ties.clear();
+    //     for (int i = 0; i < tieIds.length; i++) {
+    //         TieData tieData = getTieData(tieIds[i]);
+    //         ties.add(i, tieData);
+    //     }
+    //     // sort by total depth ascending
+    //     ties.sort(new Comparator<TieData>() {
+    //         public int compare(TieData td1, TieData td2) {
+    //             if (td1.aTotalDepth == td2.aTotalDepth) {
+    //                 return 0;
+    //             } else {
+    //                 return td1.aTotalDepth < td2.aTotalDepth ? -1 : 1;
+    //             }
+    //         }
+    //     });
+    // }
 
     private void doExport() {
         String exportFile = FileUtility.selectASingleFile(this, "Export Tie Data", "csv", FileUtility.SAVE);
@@ -295,7 +309,106 @@ public class ManageSectionTiesDialog extends JDialog {
             }
         }
     }
+
+    // Session could contain multiple splices...for now just try to find one.
+    private Vector<TieData> createSparseSplice() {
+        // find all sections with 1+ ties in either direction
+        HashSet<String> tieSectionIDs = new HashSet<String>();
+        for (TieData td : ties) {
+            tieSectionIDs.add(td.aSectionID);
+            tieSectionIDs.add(td.bSectionID);
+        }
+
+        // separate into outgoing and incoming ties keyed on section ID
+        HashMap<String, Vector<TieData>> outgoings = new HashMap<String, Vector<TieData>>();
+        HashMap<String, Vector<TieData>> incomings = new HashMap<String, Vector<TieData>>();
+        for (String sec_id : tieSectionIDs) {
+            Vector<TieData> ogs = new Vector<TieData>();
+            Vector<TieData> ics = new Vector<TieData>();
+            for (TieData td : ties) {
+                if (td.aSectionID.equals(sec_id)) { ogs.add(td); }
+                if (td.bSectionID.equals(sec_id)) { ics.add(td); }
+            }
+            outgoings.put(sec_id, ogs);
+            incomings.put(sec_id, ics);
+        }
+
+        // find start core, which should have exactly 1 outgoing and 0 incoming ties
+        Vector<TieData> spliceTies = new Vector<TieData>();
+        for (String sec_id : tieSectionIDs) {
+            if (outgoings.get(sec_id).size() == 1 && incomings.get(sec_id).size() == 0) {
+                spliceTies.add(outgoings.get(sec_id).get(0));
+            }
+        }
+
+        // follow tie sequence from startTie
+        boolean done = false;
+        while (!done) {
+            TieData cur = spliceTies.lastElement();
+            Vector<TieData> v = outgoings.get(cur.bSectionID);
+            if (v.size() == 0) {
+                done = true;
+            } else if (v.size() == 1) {
+                spliceTies.add(v.get(0));
+            } else if (v.size() > 1) {
+                System.out.println("ERROR: More than one outgoing tie in " + cur.bSectionID);
+            }
+        }
+
+        System.out.println("Inferred splice tie sequence");
+        for (TieData td : spliceTies) {
+            System.out.println(td);
+        }
+
+        return spliceTies;
+    }
+
+    private void doSparseSpliceExport() {
+        try {
+            Vector<TieData> spliceTies = createSparseSplice();
+            LacCoreSectionParser parser = new LacCoreSectionParser();
+            Vector<String[]> dataRows = new Vector<String[]>();
+            for (int i = 0; i < spliceTies.size(); i++) {
+                TieData td = spliceTies.get(i);
+                if (i == 0) {
+                    String sec = td.aSectionID;
+                    String[] row = { parser.site(sec), parser.hole(sec), parser.core(sec), parser.tool(sec), parser.section(sec),
+                        "0", parser.section(sec), DepthFormats.SECTION_DEPTH_FORMAT.format(td.aSectionDepth), "TIE" };
+                    dataRows.add(row);
+                }
+
+                if (i < spliceTies.size() - 1) {
+                    String bsec = td.bSectionID;
+                    TieData next_td = spliceTies.get(i+1);
+                    String[] row = { parser.site(bsec), parser.hole(bsec), parser.core(bsec), parser.tool(bsec), parser.section(bsec), 
+                        DepthFormats.SECTION_DEPTH_FORMAT.format(td.bSectionDepth), parser.section(bsec), DepthFormats.SECTION_DEPTH_FORMAT.format(next_td.aSectionDepth), "TIE" };
+                    dataRows.add(row);
+                } else { // last tie
+                    String bsec = td.bSectionID;
+                    String[] row = { parser.site(bsec), parser.hole(bsec), parser.core(bsec), parser.tool(bsec), parser.section(bsec), 
+                        DepthFormats.SECTION_DEPTH_FORMAT.format(td.bSectionDepth), parser.section(bsec), DepthFormats.SECTION_DEPTH_FORMAT.format(td.bSectionDepth + 99999.9), "TIE" };
+                    dataRows.add(row);
+                }
+            }
+
+            String exportFile = FileUtility.selectASingleFile(this, "Export Sparse Splice", "csv", FileUtility.SAVE);
+            if (exportFile != null) {
+                try {
+                    CSVWriter writer = new CSVWriter(new FileWriter(exportFile));
+                    String[] headers = { "Site", "Hole", "Core", "Tool", "Top Section", "Top Offset", "Bottom Section", "Bottom Offset", "Splice Type" };
+                    writer.writeNext(headers);
+                    for (String[] row : dataRows) { writer.writeNext(row); }
+                    writer.close();
+                } catch (IOException e) {
+                    JOptionPane.showMessageDialog(this, "Sparse Splice export failed: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "FAILFAILFAIL: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
 }
+
 
 class DepthFormats {
     public static final DecimalFormat SECTION_DEPTH_FORMAT = new DecimalFormat("#.#");
@@ -325,7 +438,8 @@ class TieData {
     }
 
     public String toString() {
-        return "ID: " + id + " A: " + aDesc + " B: " + bDesc;
+        // return "ID: " + id + " A: " + aDesc + " B: " + bDesc;
+        return aSectionID + " " + aSectionDepth + " -> " + bSectionID + " -> " + bSectionDepth;
     }
 }
 
