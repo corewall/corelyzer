@@ -564,7 +564,10 @@ void calc_core_edge_intersection(
     // Edge names based on section appearance in horizontal depth orientation.
     // leftEdge is the top of the physical core, rightEdge is the bottom.
     const float topEdge = t->py;
-    const float botEdge = t->py + (cs->height * INCH_PER_CM * c->dpi_x);
+
+    // sectionHeight is the physical size of the core section on the non-depth axis
+    const float sectionHeight = (cs->orientation == LANDSCAPE ? cs->height : cs->width);
+    const float botEdge = t->py + (sectionHeight * INCH_PER_CM * c->dpi_x);
     const float leftEdge = cs->px + (cs->intervalTop * (INCH_PER_CM * c->dpi_x));
     const float rightEdge = cs->px + (cs->intervalBottom * INCH_PER_CM * c->dpi_x);
 
@@ -630,9 +633,12 @@ static void create_section_tie_segments(TrackScene *ts, Canvas *c) {
             float aEdge = aTrack->py;
             float bEdge = bTrack->py;
             if (ay < by) {
-                aEdge += aCore->height * INCH_PER_CM * c->dpi_x;
+                // sectionHeight is the physical size of the core section on the non-depth axis
+                const float sectionHeight = (aCore->orientation == LANDSCAPE ? aCore->height : aCore->width);
+                aEdge += sectionHeight * INCH_PER_CM * c->dpi_x;
             } else {
-                bEdge += bCore->height * INCH_PER_CM * c->dpi_x;
+                const float sectionHeight = (bCore->orientation == LANDSCAPE ? bCore->height : bCore->width);
+                bEdge += sectionHeight * INCH_PER_CM * c->dpi_x;
             }
             tie->drawData->setPointA(ax, ay);
             tie->drawData->setPointB(bx, by);

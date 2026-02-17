@@ -77,8 +77,13 @@ typedef struct CoreSection_s {
     float vert_line_x;
 
 	char* name;				// section name
-	float width;			// section width  (cm)
+
+    // BEWARE: width and height are based on the image's original orientation!
+    // For a horizontally oriented ("LANDSCAPE") image, width is the size along the depth axis.
+    // For a vertically oriented ("PORTRAIT") image, width is the size along the NON-DEPTH AXIS.
+    float width;			// section width  (cm)
 	float height;			// section height (cm)
+
 	float depth;			// section depth  (cm)
 	float graph_offset;		// offset of graph (pixel)
 
