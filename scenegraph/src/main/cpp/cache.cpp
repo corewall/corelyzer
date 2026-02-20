@@ -200,9 +200,9 @@ void *tex_cache_miss_impl(void *threadarg) {
 #else
     size = squish::GetStorageRequirements(tb->texW,
                                           tb->texH,
-                                          squish::kDxt3);
+                                          squish::kDxt1);
 #endif
-    //    int size = squish::GetStorageRequirements(tb->texW, tb->texH, squish::kDxt3);
+    //    int size = squish::GetStorageRequirements(tb->texW, tb->texH, squish::kDxt1);
     int mem_req = tb->texW * tb->texH * tb->components;
     GLuint replace_id = 0;
 
@@ -264,7 +264,7 @@ void *tex_cache_miss_impl(void *threadarg) {
     printf("Generating Texture ID\n");
 #endif
 
-    // are we just replacing??? if we are using DXT3 then yes
+    // are we just replacing??? if we are using DXT then yes
     if (replace_id == 0)
         glGenTextures(1, &(tb->texId));
     else
@@ -378,7 +378,6 @@ void *tex_cache_miss_impl(void *threadarg) {
 
         cur_tex_mem += mem_req;  // no compression gain
     } else {
-        //        src_fmt = GL_COMPRESSED_RGBA_S3TC_DXT5_EXT; // Squish: DXT3, FastDXT: DXT5
         src_fmt = GL_COMPRESSED_RGBA_S3TC_DXT1_EXT;
         if (replace_id == 0) {
             glCompressedTexImage2D(GL_TEXTURE_2D, 0, src_fmt,

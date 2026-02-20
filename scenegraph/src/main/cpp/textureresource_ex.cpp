@@ -428,26 +428,24 @@ void build_tex_blocks(char *pixels, MultiLevelTextureSetEX *set, bool hasDir, in
 
     char *tex_data = new char[set->blksize * set->blksize * set->components];
 
-    // DXT3 related
-    int dxt3_size = 0;
+    // DXT related
+    int dxt_size = 0;
 
 #ifdef USE_FASTDXT
-    dxt3_size = set->blksize * set->blksize * set->components;
+    dxt_size = set->blksize * set->blksize * set->components;
 #else
-    dxt3_size = squish::GetStorageRequirements(set->blksize,
-                                               set->blksize,
-                                               squish::kDxt3);
+    dxt_size = squish::GetStorageRequirements(set->blksize, set->blksize, squish::kDxt1);
 #endif
 
 #ifdef DEBUG
     printf("blksize: %d, components: %d\n", set->blksize, set->components);
-    printf("dxt_size: %d\n", dxt3_size);
+    printf("dxt_size: %d\n", dxt_size);
 #endif
 
-    char *tex_to_file = new char[dxt3_size];
+    char *tex_to_file = new char[dxt_size];
     char *tex_rgba = new char[set->blksize * set->blksize * 4];
 
-    // end DXT3 related until later when writing to file
+    // end DXT related until later when writing to file
 
     float final_scale = 1.0f / powf(2.0f, exponent);
     float scale_interval = 1.0f;
@@ -598,11 +596,11 @@ void build_tex_blocks(char *pixels, MultiLevelTextureSetEX *set, bool hasDir, in
 
                         fptr = fopen(blockfile_name.c_str(), "wb");
                         if (fptr) {
-                            // if S3TC DXT3 available compress, otherwise
+                            // if S3TC DXT available compress, otherwise
                             // store raw blocks
                             if (!is_s3tc_available()) {
     #ifdef DEBUG
-                                printf("---> [INFO] S3TC DXT3 not available, using raw blocks\n");
+                                printf("---> [INFO] S3TC DXT not available, using raw blocks\n");
     #endif
 
                                 fwrite(tex_data, sizeof(char),
@@ -611,8 +609,8 @@ void build_tex_blocks(char *pixels, MultiLevelTextureSetEX *set, bool hasDir, in
                                 fclose(fptr);
                             } else {
     #ifdef DEBUG
-                                printf("---> [INFO] Compress with S3TC DXT3 with ((1. Squish, 2. FastDXT) %d.\n", library);
-                                // printf("DXT3 Compression block %d, %d of size: %d, %d\n",
+                                printf("---> [INFO] Compress with S3TC DXT1 with ((1. Squish, 2. FastDXT) %d.\n", library);
+                                // printf("DXT1 Compression block %d, %d of size: %d, %d\n",
                                 //    i, j,
                                 //    set->tex[k][id].texW, set->tex[k][id].texH);
     #endif
@@ -639,11 +637,11 @@ void build_tex_blocks(char *pixels, MultiLevelTextureSetEX *set, bool hasDir, in
                                     squish::CompressImage((squish::u8*)tex_rgba,
                                                         set->blksize,
                                                         set->blksize,tex_to_file,
-                                                        squish::kDxt3 |
+                                                        squish::kDxt1 |
                                                         squish::kColourRangeFit);
 
-                                    fwrite(&dxt3_size,  sizeof(int),  1, fptr);
-                                    fwrite(tex_to_file, sizeof(char), dxt3_size, fptr);
+                                    fwrite(&dxt_size,  sizeof(int),  1, fptr);
+                                    fwrite(tex_to_file, sizeof(char), dxt_size, fptr);
                                 }*/
     #ifdef USE_FASTDXT
                                 int outNBytes = CompressDXT((DXT_BYTE *)tex_rgba, (DXT_BYTE *)tex_to_file,
@@ -655,11 +653,11 @@ void build_tex_blocks(char *pixels, MultiLevelTextureSetEX *set, bool hasDir, in
                                 squish::CompressImage((squish::u8 *)tex_rgba,
                                                     set->blksize,
                                                     set->blksize, tex_to_file,
-                                                    squish::kDxt3 |
+                                                    squish::kDxt1 |
                                                         squish::kColourRangeFit);
 
-                                fwrite(&dxt3_size, sizeof(int), 1, fptr);
-                                fwrite(tex_to_file, sizeof(char), dxt3_size, fptr);
+                                fwrite(&dxt_size, sizeof(int), 1, fptr);
+                                fwrite(tex_to_file, sizeof(char), dxt_size, fptr);
     #endif
                                 fclose(fptr);
                             }
