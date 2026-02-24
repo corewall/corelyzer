@@ -43,6 +43,8 @@
 #include "string.h"
 #endif
 
+#include <string.h> // memset
+
 #include <png.h>
 
 void read_png(const char *filename, int *w, int *h, GLenum *format,
