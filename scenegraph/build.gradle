@@ -82,8 +82,8 @@ tasks.register('buildJNIMac') {
 			src.absolutePath,
 			dist.absolutePath,
 			build.absolutePath,
-			'/Library/Java/JavaVirtualMachines/adoptopenjdk-11.jdk/Contents/Home/include',
-			'/Library/Java/JavaVirtualMachines/adoptopenjdk-11.jdk/Contents/Home/include/darwin',
+			'/Library/Java/JavaVirtualMachines/temurin-11.jdk/Contents/Home/include',
+			'/Library/Java/JavaVirtualMachines/temurin-11.jdk/Contents/Home/include/darwin',
 			file('deps/mac/include').absolutePath,
 			file('deps/mac/include/freetype2').absolutePath]
 
@@ -229,8 +229,8 @@ tasks.register('crossBuildJNIWin') {
 			src.absolutePath,
 			file('/opt/mxe/usr/x86_64-w64-mingw32.static/include').absolutePath,
 			file('/opt/mxe/usr/x86_64-w64-mingw32.static/include/freetype2').absolutePath,
-			file('/Library/Java/JavaVirtualMachines/adoptopenjdk-11.jdk/Contents/Home/include').absolutePath,
-			file('/Library/Java/JavaVirtualMachines/adoptopenjdk-11.jdk/Contents/Home/include/darwin').absolutePath,
+			file('/Library/Java/JavaVirtualMachines/temurin-11.jdk/Contents/Home/include').absolutePath,
+			file('/Library/Java/JavaVirtualMachines/temurin-11.jdk/Contents/Home/include/darwin').absolutePath,
 			file('/Users/lcdev/Downloads/libsquish-1.15').absolutePath
 		]
 
