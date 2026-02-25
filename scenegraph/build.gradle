@@ -72,7 +72,7 @@ tasks.register('generateVSCodeBin') {
 tasks.register('buildJNIMac') {
 	dependsOn tasks.copyJNIFiles
 	group = "Custom"
-	description = "Builds Java and macOS JNI binary for scenegraph"
+	description = "Builds x86_64 Java and macOS JNI binary for scenegraph"
 	doLast {
 		def build = new File(project.buildDir, 'cpp')
 		def dist = file('dist')
@@ -154,6 +154,7 @@ def compileMac(src, arch, includes, dir) {
 			arg(value: '-arch')
 			arg(value: arch)
 			arg(value: '-fPIC')
+			arg(value: '-DDEBUG')
 			if (arch != 'ppc') {
 				arg(value: '-DUSE_FASTDXT')
 			}
@@ -162,6 +163,47 @@ def compileMac(src, arch, includes, dir) {
 			arg(value: '-o')
 			arg(value: out)
 			arg(path: src)
+		}
+	}
+}
+
+tasks.register('buildJNIMacArm64') {
+	dependsOn tasks.copyJNIFiles
+	group = "Custom"
+	description = "Builds arm64 Java and macOS JNI binary for scenegraph"
+	doLast {
+		def build = new File(project.buildDir, 'cpp')
+		def dist = file('dist')
+		def src = file('src/main/cpp')
+		def deps = file('deps/mac')
+		def includes = [
+			src.absolutePath,
+			dist.absolutePath,
+			build.absolutePath,
+			'/Library/Java/JavaVirtualMachines/temurin-11-aarch64.jdk/Contents/Home/include',
+			'/Library/Java/JavaVirtualMachines/temurin-11-aarch64.jdk/Contents/Home/include/darwin',
+			file('deps/mac/include').absolutePath,
+			file('deps/mac/include/freetype2').absolutePath]
+
+		// compile
+		mkdir(build)
+		src.eachFileMatch({ it.endsWith('.c') || it.endsWith('.cpp')} ) { file ->
+			compileMac(file, 'arm64', includes, build)
+		}
+
+		// link
+		def libs = file('deps/mac/lib').listFiles().findAll { it.name.endsWith('.a') }
+		def rfile = file('src/main/cpp/mac.r')
+		linkMac('arm64', libs, rfile, build)
+
+		// lipo
+		ant.exec(executable: 'lipo', dir: build, failonerror: true) {
+			arg(value: '-create')
+			arg(value: '-arch')
+			arg(value: 'arm64')
+			arg(value: 'arm64.jnilib')
+			arg(value: '-output')
+			arg(path: new File(dist, 'libscenegraph.jnilib'))
 		}
 	}
 }
