@@ -236,7 +236,7 @@ public class TrackSceneNode implements Comparable<TrackSceneNode> {
 		return this.secVec.elementAt(i).getCoreSectionImage();
 	}
 
-	int getCoreSectionIndex(final CoreSection sec) {
+	public int getCoreSectionIndex(final CoreSection sec) {
 		if (sec == null || this.secVec.isEmpty()) {
 			return -1;
 		}
