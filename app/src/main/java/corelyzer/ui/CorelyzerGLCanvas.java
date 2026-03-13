@@ -1263,6 +1263,10 @@ public class CorelyzerGLCanvas implements GLEventListener, MouseListener, MouseW
 								}
 							}
 							CorelyzerApp.getApp().setMode(CorelyzerApp.APP_NORMAL_MODE);
+							ManageSectionTiesDialog dlg = ManageSectionTiesDialog.getDialog();
+							if (dlg != null && dlg.isVisible()) {
+								dlg.updateTieData();
+							}
 						}
 					}
 					return;
