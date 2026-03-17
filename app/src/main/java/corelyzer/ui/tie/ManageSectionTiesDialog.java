@@ -437,11 +437,6 @@ public class ManageSectionTiesDialog extends JDialog {
         return depth;
     }
 
-    private String[] makeSparseSpliceRow(String site, String hole, String core, String tool, String topSection, String topOffset, String bottomSection, String bottomOffset, String type) {
-        String[] row = { site, hole, core, tool, topSection, topOffset, bottomSection, bottomOffset, type };
-        return row;
-    }
-
     private TrackSceneNode getTieBTrack(final int id) {
         // Get current section's index in TrackSceneNode's list of CoreSections
         final int curTieTrackID = SceneGraph.getSectionTieBTrack(id);
@@ -478,60 +473,121 @@ public class ManageSectionTiesDialog extends JDialog {
         return sectionsBetween;
     }
 
-    // Return one String[] per computed splice interval in Sparse Splice tabular format
-    private Vector<String[]> createSparseSpliceIntervals(Vector<TieData> spliceTies, float startDepth, float endDepth) {
+    // Create SparseSpliceIntervals based on inferred splice tie sequence, merging intervals from
+    // the same core into a single SparseSpliceInterval.
+    private Vector<SparseSpliceInterval> createSparseSpliceIntervals(Vector<TieData> spliceTies, float startDepth, float endDepth) {
         SectionIDParser parser = SectionIDParserFactory.getMatchingParser(spliceTies.get(0).aSectionID);
-        Vector<String[]> dataRows = new Vector<String[]>();
+        Vector<SparseSpliceInterval> intervals = new Vector<SparseSpliceInterval>();
         for (int i = 0; i < spliceTies.size(); i++) {
             TieData td = spliceTies.get(i);
             TieData next_td = (i < spliceTies.size() - 1) ? spliceTies.get(i+1) : null;
 
             if (i == 0) { // first interval: user-provided top offset to start of first tie
-                String sec = td.aSectionID;
-                String[] firstRow = makeSparseSpliceRow(parser.site(sec), parser.hole(sec), parser.core(sec), parser.tool(sec), parser.section(sec),
-                    Float.toString(startDepth), parser.section(sec), DepthFormats.SECTION_DEPTH_FORMAT.format(td.aSectionDepth), "TIE");
-                dataRows.add(firstRow);
+                SparseSpliceInterval interval = new SparseSpliceInterval(td.aSectionID, parser, startDepth, td.aSectionDepth, "TIE");
+                intervals.add(interval);
             }
 
-            String[] row = null;
             if (next_td != null) {
                 String bsec = td.bSectionID; // incomingSec? inSec?
                 if (td.bSectionID.equals(next_td.aSectionID)) {
                     // outgoing tie is in current section, yay!
-                    row = makeSparseSpliceRow(parser.site(bsec), parser.hole(bsec), parser.core(bsec), parser.tool(bsec), parser.section(bsec), 
-                        DepthFormats.SECTION_DEPTH_FORMAT.format(td.bSectionDepth), parser.section(bsec), DepthFormats.SECTION_DEPTH_FORMAT.format(next_td.aSectionDepth), "TIE");
+                    SparseSpliceInterval interval = new SparseSpliceInterval(bsec, parser, td.bSectionDepth, next_td.aSectionDepth, "TIE");
+                    intervals.add(interval);
                 } else {
                     // outgoing tie is in a downhole section, tricky!
                     System.out.println("No outgoing tie in " + bsec + ". Next downhole outgoing tie is in " + next_td.aSectionID + ". Appending intervening sections.");
+                    Vector<SparseSpliceInterval> intervalsBetween = new Vector<SparseSpliceInterval>();
+                    
+                    // add all intervening sections at their full length
                     TrackSceneNode track = getTieBTrack(td.id);
-
-                    // APPEND all intervening sections at their full length
                     Vector<CoreSection> sectionsBetween = getCoreSectionsInRange(track, bsec, next_td.aSectionID);
                     for (int sbIdx = 0; sbIdx < sectionsBetween.size(); sbIdx++) {
-                        CoreSection cs = sectionsBetween.get(sbIdx);
-                        String csName = cs.getName();
-                        String[] betweenRow;
+                        CoreSection curSectionBetween = sectionsBetween.get(sbIdx);
+                        SparseSpliceInterval intBetween = null; 
                         if (sbIdx < sectionsBetween.size() - 1) {
-                            String topOffset = (sbIdx == 0) ? DepthFormats.SECTION_DEPTH_FORMAT.format(td.bSectionDepth) : "0";
-                            betweenRow = makeSparseSpliceRow(parser.site(csName), parser.hole(csName), parser.core(csName), parser.tool(csName), parser.section(csName), 
-                                topOffset, parser.section(csName), "", "APPEND");
+                            float topOffset = (sbIdx == 0) ? td.bSectionDepth : 0.0f;
+                            intBetween = new SparseSpliceInterval(curSectionBetween.getName(), parser, topOffset, SparseSpliceInterval.UNKNOWN_BOTTOM_OFFSET, "APPEND");
                         } else {
-                            // final section in range has an outgoing tie
-                            betweenRow = makeSparseSpliceRow(parser.site(csName), parser.hole(csName), parser.core(csName), parser.tool(csName), parser.section(csName), 
-                                "0", parser.section(csName), DepthFormats.SECTION_DEPTH_FORMAT.format(next_td.aSectionDepth), "TIE");
+                            intBetween = new SparseSpliceInterval(curSectionBetween.getName(), parser, 0.0f, next_td.aSectionDepth, "TIE");
                         }
-                        // System.out.println("APPENDing " + csName);
-                        dataRows.add(betweenRow);
+                        intervalsBetween.add(intBetween);
                     }
+                    // reduce rows in the same section to a single row
+                    Vector<SparseSpliceInterval> mergedIntervals = mergeByCore(intervalsBetween);
+                    intervals.addAll(mergedIntervals);
                 }
             } else { // last tie
-                String bsec = td.bSectionID;
-                row = makeSparseSpliceRow(parser.site(bsec), parser.hole(bsec), parser.core(bsec), parser.tool(bsec), parser.section(bsec), 
-                    DepthFormats.SECTION_DEPTH_FORMAT.format(td.bSectionDepth), parser.section(bsec), Float.toString(endDepth), "");
+                SparseSpliceInterval interval = new SparseSpliceInterval(td.bSectionID, parser, td.bSectionDepth, endDepth, "");
+                intervals.add(interval);
             }
-            dataRows.add(row);
         }
-        return dataRows;
+        return intervals;
+    }
+
+    private Vector<SparseSpliceInterval> mergeByCore(Vector<SparseSpliceInterval> intervals) {
+        Vector<SparseSpliceInterval> result = new Vector<SparseSpliceInterval>();
+        // brg 3/17/2026: Approach below is cleaner and more readable
+        // int idx = 0;
+        // boolean done = false;
+
+        // Pretty sure intervals to merge can be gathered with just a for loop and no while insanity,
+        // then merged and added to result after the loop by using a Vector<Vector<SparseSpliceInterval>>...
+        // while (!done && idx < intervals.size()) {
+        //     SparseSpliceInterval cur = intervals.get(idx);
+        //     Vector<SparseSpliceInterval> commonCoreIntervals = new Vector<SparseSpliceInterval>();
+        //     commonCoreIntervals.add(cur);
+        //     if (idx + 1 == intervals.size()) { // last interval, we're done
+        //         done = true;
+        //     }
+
+        //     for (int next_idx = idx+1; next_idx < intervals.size(); next_idx++) {
+        //         SparseSpliceInterval next = intervals.get(next_idx);
+        //         if (cur.coresEqual(next)) {
+        //             commonCoreIntervals.add(next);
+        //             idx = next_idx + 1;
+        //         } else {
+        //             idx = next_idx;
+        //             break;
+        //         }
+        //     }
+
+        //     if (commonCoreIntervals.size() == 1) {
+        //         result.addAll(commonCoreIntervals);
+        //     } else {
+        //         // merge intervals: top members come from first interval, bottom and spliceType come from last
+        //         SparseSpliceInterval first = commonCoreIntervals.firstElement();
+        //         SparseSpliceInterval last = commonCoreIntervals.lastElement();
+        //         SparseSpliceInterval merged = SparseSpliceInterval.merge(first, last);
+        //         result.add(merged);
+        //     }
+        // }
+
+        // group SparseSpliceIntervals by common core
+        Vector<Vector<SparseSpliceInterval>> intervalGroups = new Vector<Vector<SparseSpliceInterval>>();
+        Vector<SparseSpliceInterval> currentGroup = new Vector<SparseSpliceInterval>();
+        SparseSpliceInterval prev = null;
+        for (int i = 0; i < intervals.size(); i++) {
+            SparseSpliceInterval cur = intervals.get(i);
+            if (prev != null && !cur.coresEqual(prev)) {
+                intervalGroups.add(currentGroup);
+                currentGroup = new Vector<SparseSpliceInterval>();
+            }
+            currentGroup.add(cur);
+            prev = cur;
+        }
+        intervalGroups.add(currentGroup);
+
+        // add all intervals to result, merging any common core sequences
+        for (Vector<SparseSpliceInterval> group : intervalGroups) {
+            if (group.size() > 1) {
+                SparseSpliceInterval merged = SparseSpliceInterval.merge(group.firstElement(), group.lastElement());
+                result.add(merged);
+            } else {
+                result.add(group.firstElement());
+            }
+        }
+
+        return result;
     }
 
     private void doSparseSpliceExport() {
@@ -543,7 +599,7 @@ public class ManageSectionTiesDialog extends JDialog {
             float startDepth = promptForDepth("Enter the splice's starting section depth (cm):");
             float endDepth = promptForDepth("Enter the splice's ending section depth (cm):");
 
-            Vector<String[]> dataRows = createSparseSpliceIntervals(spliceTies, startDepth, endDepth);
+            Vector<SparseSpliceInterval> intervals = createSparseSpliceIntervals(spliceTies, startDepth, endDepth);
 
             String exportFile = FileUtility.selectASingleFile(this, "Export Sparse Splice", "csv", FileUtility.SAVE);
             if (exportFile != null) {
@@ -551,7 +607,7 @@ public class ManageSectionTiesDialog extends JDialog {
                     CSVWriter writer = new CSVWriter(new FileWriter(exportFile));
                     String[] headers = { "Site", "Hole", "Core", "Tool", "Top Section", "Top Offset", "Bottom Section", "Bottom Offset", "Splice Type" };
                     writer.writeNext(headers);
-                    for (String[] row : dataRows) { writer.writeNext(row); }
+                    for (SparseSpliceInterval interval : intervals) { writer.writeNext(interval.toSparseSpliceRow()); }
                     writer.close();
                 } catch (IOException e) {
                     JOptionPane.showMessageDialog(this, "Sparse Splice export failed: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
@@ -688,6 +744,68 @@ class TieTableModel extends AbstractTableModel {
         } else {
             return DepthFormats.TOTAL_DEPTH_FORMAT.format(t.aTotalDepth);
         }
+    }
+}
+
+class SparseSpliceInterval {
+    public String site;
+    public String hole;
+    public String core;
+    public String tool;
+    public String topSection;
+    public float topOffset;
+    public String bottomSection;
+    public float bottomOffset;
+    public String spliceType;
+
+    // Corelyzer can not reliably calculate a section's bottom depth due to presence of extraneous imagery
+    // (color cards, labels etc) at the bottom of core images and/or inaccuracies in core image resolution.
+    // For splice intervals spanning the boundary of two cores, this placeholder will be used for BottomOffset.
+    // The Feldman app will use Section Summary data to replace this placeholder with the correct section bottom
+    // depth when converting a Sparse Splice to a Splice Interval Table (SIT).
+    public static final float UNKNOWN_BOTTOM_OFFSET = -1.0f;
+
+    public SparseSpliceInterval(String site, String hole, String core, String tool, String topSection, float topOffset, String bottomSection, float bottomOffset, String spliceType) {
+        this.site = site;
+        this.hole = hole;
+        this.core = core;
+        this.tool = tool;
+        this.topSection = topSection;
+        this.topOffset = topOffset;
+        this.bottomSection = bottomSection;
+        this.bottomOffset = bottomOffset;
+        this.spliceType = spliceType;
+    }
+
+    public SparseSpliceInterval(String sectionID, SectionIDParser parser, float topOffset, float bottomOffset, String spliceType) {
+        this.site = parser.site(sectionID);
+        this.hole = parser.hole(sectionID);
+        this.core = parser.core(sectionID);
+        this.tool = parser.tool(sectionID);
+        this.topSection = parser.section(sectionID);
+        this.bottomSection = parser.section(sectionID);
+        this.topOffset = topOffset;
+        this.bottomOffset = bottomOffset;
+        this.spliceType = spliceType;
+    }
+
+    public static SparseSpliceInterval merge(SparseSpliceInterval s1, SparseSpliceInterval s2) {
+        return new SparseSpliceInterval(s1.site, s1.hole, s1.core, s1.tool, s1.topSection, s1.topOffset, s2.bottomSection, s2.bottomOffset, s2.spliceType);
+    }
+
+    public boolean coresEqual(SparseSpliceInterval cmp) {
+        return this.site.equals(cmp.site) && this.hole.equals(cmp.hole) && this.core.equals(cmp.core) && this.tool.equals(cmp.tool);
+    }
+
+    public String[] toSparseSpliceRow() {
+        String[] row = {
+            site, hole, core, tool,
+            topSection, DepthFormats.SECTION_DEPTH_FORMAT.format(topOffset),
+            bottomSection,
+            DepthFormats.SECTION_DEPTH_FORMAT.format(bottomOffset),
+            spliceType
+        };
+        return row;
     }
 }
 
