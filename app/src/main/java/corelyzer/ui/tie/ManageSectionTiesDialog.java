@@ -832,8 +832,10 @@ class SectionSpliceTieAggregator {
             Vector<TieData> ogs = new Vector<TieData>();
             Vector<TieData> ics = new Vector<TieData>();
             for (TieData td : ties) {
-                if (td.aSectionID.equals(sec_id)) { ogs.add(td); }
-                if (td.bSectionID.equals(sec_id)) { ics.add(td); }
+                if (td.type == CoreSectionTieType.SPLICE) {
+                    if (td.aSectionID.equals(sec_id)) { ogs.add(td); }
+                    if (td.bSectionID.equals(sec_id)) { ics.add(td); }
+                }
             }
             outgoing.put(sec_id, ogs);
             incoming.put(sec_id, ics);
