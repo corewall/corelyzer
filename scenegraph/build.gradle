@@ -273,7 +273,7 @@ tasks.register('crossBuildJNIWin') {
 			file('/opt/mxe/usr/x86_64-w64-mingw32.static/include/freetype2').absolutePath,
 			file('/Library/Java/JavaVirtualMachines/temurin-11.jdk/Contents/Home/include').absolutePath,
 			file('/Library/Java/JavaVirtualMachines/temurin-11.jdk/Contents/Home/include/darwin').absolutePath,
-			file('/Users/lcdev/Downloads/libsquish-1.15').absolutePath
+			// file('/Users/csdfdev/proj/libsquish-1.15').absolutePath // uncomment and adjust path if using libsquish
 		]
 
 		mkdir(build)
@@ -326,6 +326,7 @@ def linkCrossCompiledWin(dir, path) {
 			arg(value: '-ltiff')
 			arg(value: '-ljpeg')
 			arg(value: '-lz')
+			arg(value: '-lzstd')
 			arg(value: '-lopengl32')
 			arg(value: '-lglu32')
 			arg(value: '-lfreetype')
@@ -335,8 +336,10 @@ def linkCrossCompiledWin(dir, path) {
 			arg(value: '-lharfbuzz')
 			arg(value: '-lbz2')
 			arg(value: '-lsharpyuv')
-			arg(value: '-lbrotlidec')
-			arg(value: '-lbrotlicommon')
+			// arg(value: '-lbrotlidec') // brotli support is built into freetype
+			// arg(value: '-lbrotlicommon') // brotli support is built into freetype
+			// arg(value: '-lsquish') // uncomment if using libsquish
+			// arg(value: '-lgomp') // uncomment if using libsquish
 			arg(value: '-mwindows')
 		}
 	}
