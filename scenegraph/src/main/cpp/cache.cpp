@@ -28,7 +28,10 @@
 
 #define HAVE_STRUCT_TIMESPEC
 #include <pthread.h>
+
+#ifndef USE_FASTDXT
 #include <squish.h>
+#endif
 
 #include <list>
 #include <map>

@@ -141,7 +141,10 @@ void pokeOpjImg(opj_image_t *opjimage) {
 
 #include <math.h>
 #include <setjmp.h>
+
+#ifndef USE_FASTDXT
 #include <squish.h>
+#endif
 
 #include <string>
 #include <vector>
