@@ -22,11 +22,36 @@ public abstract class SectionIDParser {
     }
     public String getFullHoleID(final String secid) {
         Matcher m = pattern.matcher(secid);
-        return m.matches() ? m.group("hole") : null;
+        return m.matches() ? m.group("fullhole") : null;
     }
     public String getName() { return name; }
     public boolean getIncludeSuffix() { return includeSuffix; }
     public void setIncludeSuffix(boolean includeSuffix) { this.includeSuffix = includeSuffix; }
+
+    public String site(final String secid) {
+        Matcher m = pattern.matcher(secid);
+        return m.matches() ? m.group("site") : null;
+    }
+
+    public String hole(final String secid) {
+        Matcher m = pattern.matcher(secid);
+        return m.matches() ? m.group("hole") : null;
+    }
+
+    public String core(final String secid) {
+        Matcher m = pattern.matcher(secid);
+        return m.matches() ? m.group("core") : null;
+    }
+
+    public String tool(final String secid) {
+        Matcher m = pattern.matcher(secid);
+        return m.matches() ? m.group("tool") : null;
+    }
+
+    public String section(final String secid) {
+        Matcher m = pattern.matcher(secid);
+        return m.matches() ? m.group("section") : null;
+    }    
 }
 
 // Unlike the other parsers, if the input section ID has a trailing suffix
@@ -42,18 +67,18 @@ class LacCoreSectionParser extends SectionIDParser {
         final String EXP = "[A-Z0-9]+";
         // 8/16/2021 brg: LAKEYEAR component is now optional
         final String LAKEYEAR = "([A-Z0-9]+?[0-9]{2}-)?"; // Lake: 1+ alphanumeric, Year: exactly 2 numbers
-        final String SITE = "[0-9]+";
-        final String HOLE = "[A-Z]+";
+        final String SITE = "(?<site>[0-9]+)";
+        final String HOLE = "(?<hole>[A-Z]+)";
         final String SITEHOLE = SITE + HOLE;
-        final String CORE = "[0-9]+";
-        final String TOOL = "([A-Z]|BX|HS|MC|MK|RP)";
+        final String CORE = "(?<core>[0-9]+)";
+        final String TOOL = "(?<tool>[A-Z]|BX|HS|MC|MK|RP)";
         final String CORETOOL = CORE + TOOL;
-        final String SECTION = "([0-9]{1,2}|CC)";
+        final String SECTION = "(?<section>[0-9]{1,2}|CC)";
         final String HALF = "(-[AW]|-WR)?"; // optional
-        final String SUFFIX = "(_.+)?"; // optional
+        final String SUFFIX = "([-_].+)?"; // optional
 
         // parentheses are capturing group for full hole/track ID
-        final String laccorePattern = "(?<hole>" + EXP + "-" + LAKEYEAR + SITEHOLE + ")-" + CORETOOL + "-" + SECTION + HALF + SUFFIX;
+        final String laccorePattern = "(?<fullcore>(?<fullhole>" + EXP + "-" + LAKEYEAR + SITEHOLE + ")-" + CORETOOL + ")-" + SECTION + HALF + SUFFIX;
         pattern = Pattern.compile(laccorePattern);
     }
 
@@ -61,14 +86,20 @@ class LacCoreSectionParser extends SectionIDParser {
         Matcher m = pattern.matcher(secid);
         if (!m.matches()) return null;
 
-        String suffix = "";
+        String suffix = ""; // TODO: handle hyphen suffix delimiter
         if (includeSuffix) {
             if (secid.lastIndexOf("_") != -1) {
                 suffix = secid.substring(secid.lastIndexOf("_"));
             }
         }
 
-        return m.group("hole") + suffix;
+        return m.group("fullhole") + suffix;
+    }
+
+    public String getFullCoreID(final String secid) {
+        Matcher m = pattern.matcher(secid);
+        if (!m.matches()) return null;
+        return m.group("fullcore");
     }
 }
 

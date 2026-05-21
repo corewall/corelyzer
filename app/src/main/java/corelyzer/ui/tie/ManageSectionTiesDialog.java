@@ -18,12 +18,19 @@ import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableModel;
 
 import java.util.Comparator;
+import java.util.Arrays;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Vector;
 
-import corelyzer.data.CoreSectionTieType;
+import corelyzer.data.*;
+import corelyzer.data.coregraph.CoreGraph;
 import corelyzer.graphics.SceneGraph;
 import corelyzer.ui.CorelyzerApp;
 import corelyzer.util.FileUtility;
+import corelyzer.util.StringUtility;
+import corelyzer.util.identity.*;
 
 import com.opencsv.CSVWriter;
 import net.miginfocom.swing.MigLayout;
@@ -35,6 +42,7 @@ public class ManageSectionTiesDialog extends JDialog {
     private JButton reverseButton;
     private JButton deleteButton;
     private JButton exportButton;
+    private JButton exportSparseSpliceButton;
     private JButton closeButton;
 
     private static ManageSectionTiesDialog dialogSingleton = null;
@@ -161,6 +169,14 @@ public class ManageSectionTiesDialog extends JDialog {
             }
         });
         buttonPanel.add(exportButton);
+
+        exportSparseSpliceButton = new JButton("Export Sparse Splice CSV...");
+        exportSparseSpliceButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                doSparseSpliceExport();
+            }
+        });
+        buttonPanel.add(exportSparseSpliceButton);
         
         contentPane.add(buttonPanel, "grow, wrap");
         contentPane.add(new JSeparator(), "grow, wrap");
@@ -258,25 +274,8 @@ public class ManageSectionTiesDialog extends JDialog {
                 }
             }
         });
+        tieTable.updateUI();
     }    
-
-    public void gatherTieData(int[] tieIds) {
-        ties.clear();
-        for (int i = 0; i < tieIds.length; i++) {
-            TieData tieData = getTieData(tieIds[i]);
-            ties.add(i, tieData);
-        }
-        // sort by total depth ascending
-        ties.sort(new Comparator<TieData>() {
-            public int compare(TieData td1, TieData td2) {
-                if (td1.aTotalDepth == td2.aTotalDepth) {
-                    return 0;
-                } else {
-                    return td1.aTotalDepth < td2.aTotalDepth ? -1 : 1;
-                }
-            }
-        });
-    }
 
     private void doExport() {
         String exportFile = FileUtility.selectASingleFile(this, "Export Tie Data", "csv", FileUtility.SAVE);
@@ -295,7 +294,331 @@ public class ManageSectionTiesDialog extends JDialog {
             }
         }
     }
+
+    private void showSparseSpliceError(String msg) {
+        JOptionPane.showMessageDialog(this, msg, "Sparse Splice Error", JOptionPane.WARNING_MESSAGE);
+        StringUtility.setClipboard(msg); // copy error text to clipboard for clunky fixage
+    }
+
+    private TieData getSpliceStartTie(Vector<TieData> startTieCandidates) {
+        TieData startTie = null;
+        if (startTieCandidates.size() == 0) { // no candidates
+            showSparseSpliceError("Couldn't find a starting splice section, which must have one outgoing splice tie and no incoming splice ties.");
+        } else if (startTieCandidates.size() == 1) { // one candidate, yay
+            final String msg = "Starting splice from " + startTieCandidates.get(0).aSectionID;
+            startTie = startTieCandidates.get(0);
+            JOptionPane.showMessageDialog(this, msg, "Sparse Splice", JOptionPane.WARNING_MESSAGE);
+        } else if (startTieCandidates.size() > 1) { // multiple candidates, user must choose one
+            String[] startTieOptions = new String[startTieCandidates.size()];
+            for (int i = 0; i < startTieCandidates.size(); i++) {
+                TieData td = startTieCandidates.get(i);
+                startTieOptions[i] = td.aSectionID + " at " + DepthFormats.SECTION_DEPTH_FORMAT.format(td.aSectionDepth) + " cm";
+            }
+            
+            final String msg = "Select the starting tie point for the splice.";
+            String choice = (String) JOptionPane.showInputDialog(this, msg, "Select Start Tie", JOptionPane.QUESTION_MESSAGE, null, startTieOptions, startTieOptions[0]);
+            if (choice != null) {
+                // System.out.println("User selected: " + choice);
+                final int selectedIndex = Arrays.asList(startTieOptions).indexOf(choice);
+                startTie = startTieCandidates.get(selectedIndex);
+            }
+        }
+        return startTie;
+    }
+
+    private Vector<TieData> inferSpliceSequence(TieData startTie, final HashMap<String, Vector<TieData>> outgoingTiesBySection) {
+        Vector<TieData> spliceTies = new Vector<TieData>();
+        spliceTies.add(startTie);
+
+        // follow tie sequence from startTie
+        boolean done = false;
+        while (!done) {
+            TieData cur = spliceTies.lastElement();
+            Vector<TieData> v = outgoingTiesBySection.get(cur.bSectionID);
+
+            for (TieData td : v) { // bail on an intra-section tie
+                if (td.aSectionID.equals(td.bSectionID)) {
+                    showSparseSpliceError("Section " + td.aSectionID + " contains a tie to itself, I can't go for that (no can do!).");
+                    return null;
+                }
+            }
+
+            if (v.size() == 0) {
+                done = true;
+
+                // Current section has no outgoing ties. Search downhole for a section with exactly one
+                // outgoing tie. If one exists, add it to sequence and continue. If none, we're done.
+                // If 2+, report a conflict.
+                System.out.println("No outgoing ties for " + cur.bSectionID + ", looking downhole...");
+
+                // Get current section's index in TrackSceneNode's list of CoreSections
+                final int curTieTrackID = SceneGraph.getSectionTieBTrack(cur.id);
+                TrackSceneNode track = null;
+                for (Session s : CoreGraph.getInstance().getSessions()) {
+                    if (s.getTrackSceneNodeWithTrackId(curTieTrackID) != null) {
+                        track = s.getTrackSceneNodeWithTrackId(curTieTrackID);
+                        break;
+                    }
+                }
+                if (track == null) {
+                    showSparseSpliceError("Error: Couldn't find matching track for scenegraph ID " + curTieTrackID);
+                    return null;                    
+                }
+                
+                CoreSection sec = track.getCoreSection(cur.bSectionID);
+                int secIdx = track.getCoreSectionIndex(sec);
+                if (secIdx == -1) {
+                    showSparseSpliceError("Error: Couldn't find index of section " + cur.bSectionID + " in expected parent track " + track.getName());
+                    return null;
+                }
+
+                // Search downhole sections for outgoing ties
+                for (int deeperSectionIndex = secIdx + 1; deeperSectionIndex < track.getNumCores(); deeperSectionIndex++) {
+                    CoreSection deeperSection = track.getCoreSection(deeperSectionIndex);
+                    System.out.println("      " + deeperSection.getName());
+                    if (outgoingTiesBySection.containsKey(deeperSection.getName())) {
+                        Vector<TieData> deeperSectionTies = outgoingTiesBySection.get(deeperSection.getName());
+                        if (deeperSectionTies.size() == 0) {
+                            System.out.println("No outgoing ties, continuing");
+                            continue;
+                        } else if (deeperSectionTies.size() == 1) { // found a winner, add to splice ties and continue main loop
+                            System.out.println("Exactly one outgoing tie, adding to splice sequence and continuing main loop");
+                            spliceTies.add(deeperSectionTies.get(0));
+                            done = false;
+                            break;
+                        } else if (deeperSectionTies.size() > 1) {
+                            System.out.println("2+ outgoing ties, reporting error and bailing");
+                            final String msg = "Found multiple outgoing ties in downhole section " + deeperSection.getName() + ".\nPlease resolve and try again.";
+                            showSparseSpliceError(msg);
+                            return null;
+                        }
+                    }
+                }
+            } else if (v.size() == 1) {
+                spliceTies.add(v.get(0));
+            } else if (v.size() > 1) {
+                // System.out.println("ERROR: More than one outgoing tie in " + cur.bSectionID);
+                final String msg = "Found multiple outgoing ties in section " + cur.bSectionID + ".\nPlease resolve and try again.";
+                showSparseSpliceError(msg);
+                return null;
+            }
+        }
+        return spliceTies;
+    }
+
+    // Session could contain multiple splices...for now just try to find one.
+    private Vector<TieData> createSparseSplice() {
+        SectionSpliceTieAggregator sstAgg = new SectionSpliceTieAggregator(ties);
+        Vector<TieData> startTieCandidates = sstAgg.getStartTies();
+        TieData startTie = getSpliceStartTie(startTieCandidates);
+        if (startTie == null) { return null; }
+
+        Vector<TieData> spliceTies = inferSpliceSequence(startTie, sstAgg.outgoing);
+        if (spliceTies == null) { return null; }
+
+        System.out.println("Inferred splice tie sequence");
+        for (TieData td : spliceTies) { System.out.println(td); }
+
+        return spliceTies;
+    }
+
+    private float promptForDepth(String msg) {
+        float depth = 0.0f;
+        boolean valid = false;
+        while (!valid) {
+            String depthStr = JOptionPane.showInputDialog(this, msg);
+            try {
+                depth = Float.parseFloat(depthStr);
+                valid = true;
+            } catch (NumberFormatException e) {
+                showSparseSpliceError(depthStr + " is not a number");
+            }
+        }
+        return depth;
+    }
+
+    private TrackSceneNode getTieBTrack(final int id) {
+        // Get current section's index in TrackSceneNode's list of CoreSections
+        final int curTieTrackID = SceneGraph.getSectionTieBTrack(id);
+        TrackSceneNode track = null;
+        for (Session s : CoreGraph.getInstance().getSessions()) {
+            if (s.getTrackSceneNodeWithTrackId(curTieTrackID) != null) {
+                track = s.getTrackSceneNodeWithTrackId(curTieTrackID);
+                break;
+            }
+        }
+        return track;
+    }
+
+    private Vector<CoreSection> getCoreSectionsInRange(TrackSceneNode track, String startSectionID, String endSectionID) {
+        Vector<CoreSection> sectionsBetween = new Vector<CoreSection>();
+        CoreSection startSection = track.getCoreSection(startSectionID);
+        CoreSection endSection = track.getCoreSection(endSectionID);
+        if (startSection == null || endSection == null) { return null; }
+
+        int startIdx = track.getCoreSectionIndex(startSection);
+        int endIdx = track.getCoreSectionIndex(endSection);
+
+        if (startIdx > endIdx) {
+            int temp = endIdx;
+            endIdx = startIdx;
+            startIdx = temp;
+            System.out.println("Swapping startSection and endSection indices, this should not happen!");
+        }
+
+        for (int i = startIdx; i <= endIdx && i < track.getNumCores(); i++) {
+            sectionsBetween.add(track.getCoreSection(i));
+        }
+        
+        return sectionsBetween;
+    }
+
+    // Create SparseSpliceIntervals based on inferred splice tie sequence, merging intervals from
+    // the same core into a single SparseSpliceInterval.
+    private Vector<SparseSpliceInterval> createSparseSpliceIntervals(Vector<TieData> spliceTies, float startDepth, float endDepth) {
+        SectionIDParser parser = SectionIDParserFactory.getMatchingParser(spliceTies.get(0).aSectionID);
+        Vector<SparseSpliceInterval> intervals = new Vector<SparseSpliceInterval>();
+        for (int i = 0; i < spliceTies.size(); i++) {
+            TieData td = spliceTies.get(i);
+            TieData next_td = (i < spliceTies.size() - 1) ? spliceTies.get(i+1) : null;
+
+            if (i == 0) { // first interval: user-provided top offset to start of first tie
+                SparseSpliceInterval interval = new SparseSpliceInterval(td.aSectionID, parser, startDepth, td.aSectionDepth, "TIE");
+                intervals.add(interval);
+            }
+
+            if (next_td != null) {
+                String bsec = td.bSectionID; // incomingSec? inSec?
+                if (td.bSectionID.equals(next_td.aSectionID)) {
+                    // outgoing tie is in current section, yay!
+                    SparseSpliceInterval interval = new SparseSpliceInterval(bsec, parser, td.bSectionDepth, next_td.aSectionDepth, "TIE");
+                    intervals.add(interval);
+                } else {
+                    // outgoing tie is in a downhole section, tricky!
+                    System.out.println("No outgoing tie in " + bsec + ". Next downhole outgoing tie is in " + next_td.aSectionID + ". Appending intervening sections.");
+                    Vector<SparseSpliceInterval> intervalsBetween = new Vector<SparseSpliceInterval>();
+                    
+                    // add all intervening sections at their full length
+                    TrackSceneNode track = getTieBTrack(td.id);
+                    Vector<CoreSection> sectionsBetween = getCoreSectionsInRange(track, bsec, next_td.aSectionID);
+                    for (int sbIdx = 0; sbIdx < sectionsBetween.size(); sbIdx++) {
+                        CoreSection curSectionBetween = sectionsBetween.get(sbIdx);
+                        SparseSpliceInterval intBetween = null; 
+                        if (sbIdx < sectionsBetween.size() - 1) {
+                            float topOffset = (sbIdx == 0) ? td.bSectionDepth : 0.0f;
+                            intBetween = new SparseSpliceInterval(curSectionBetween.getName(), parser, topOffset, SparseSpliceInterval.UNKNOWN_BOTTOM_OFFSET, "APPEND");
+                        } else {
+                            intBetween = new SparseSpliceInterval(curSectionBetween.getName(), parser, 0.0f, next_td.aSectionDepth, "TIE");
+                        }
+                        intervalsBetween.add(intBetween);
+                    }
+                    // reduce rows in the same section to a single row
+                    Vector<SparseSpliceInterval> mergedIntervals = mergeByCore(intervalsBetween);
+                    intervals.addAll(mergedIntervals);
+                }
+            } else { // last tie
+                SparseSpliceInterval interval = new SparseSpliceInterval(td.bSectionID, parser, td.bSectionDepth, endDepth, "");
+                intervals.add(interval);
+            }
+        }
+        return intervals;
+    }
+
+    private Vector<SparseSpliceInterval> mergeByCore(Vector<SparseSpliceInterval> intervals) {
+        Vector<SparseSpliceInterval> result = new Vector<SparseSpliceInterval>();
+        // brg 3/17/2026: Approach below is cleaner and more readable
+        // int idx = 0;
+        // boolean done = false;
+
+        // Pretty sure intervals to merge can be gathered with just a for loop and no while insanity,
+        // then merged and added to result after the loop by using a Vector<Vector<SparseSpliceInterval>>...
+        // while (!done && idx < intervals.size()) {
+        //     SparseSpliceInterval cur = intervals.get(idx);
+        //     Vector<SparseSpliceInterval> commonCoreIntervals = new Vector<SparseSpliceInterval>();
+        //     commonCoreIntervals.add(cur);
+        //     if (idx + 1 == intervals.size()) { // last interval, we're done
+        //         done = true;
+        //     }
+
+        //     for (int next_idx = idx+1; next_idx < intervals.size(); next_idx++) {
+        //         SparseSpliceInterval next = intervals.get(next_idx);
+        //         if (cur.coresEqual(next)) {
+        //             commonCoreIntervals.add(next);
+        //             idx = next_idx + 1;
+        //         } else {
+        //             idx = next_idx;
+        //             break;
+        //         }
+        //     }
+
+        //     if (commonCoreIntervals.size() == 1) {
+        //         result.addAll(commonCoreIntervals);
+        //     } else {
+        //         // merge intervals: top members come from first interval, bottom and spliceType come from last
+        //         SparseSpliceInterval first = commonCoreIntervals.firstElement();
+        //         SparseSpliceInterval last = commonCoreIntervals.lastElement();
+        //         SparseSpliceInterval merged = SparseSpliceInterval.merge(first, last);
+        //         result.add(merged);
+        //     }
+        // }
+
+        // group SparseSpliceIntervals by common core
+        Vector<Vector<SparseSpliceInterval>> intervalGroups = new Vector<Vector<SparseSpliceInterval>>();
+        Vector<SparseSpliceInterval> currentGroup = new Vector<SparseSpliceInterval>();
+        SparseSpliceInterval prev = null;
+        for (int i = 0; i < intervals.size(); i++) {
+            SparseSpliceInterval cur = intervals.get(i);
+            if (prev != null && !cur.coresEqual(prev)) {
+                intervalGroups.add(currentGroup);
+                currentGroup = new Vector<SparseSpliceInterval>();
+            }
+            currentGroup.add(cur);
+            prev = cur;
+        }
+        intervalGroups.add(currentGroup);
+
+        // add all intervals to result, merging any common core sequences
+        for (Vector<SparseSpliceInterval> group : intervalGroups) {
+            if (group.size() > 1) {
+                SparseSpliceInterval merged = SparseSpliceInterval.merge(group.firstElement(), group.lastElement());
+                result.add(merged);
+            } else {
+                result.add(group.firstElement());
+            }
+        }
+
+        return result;
+    }
+
+    private void doSparseSpliceExport() {
+        try {
+            Vector<TieData> spliceTies = createSparseSplice();
+            if (spliceTies == null) { return; }
+
+            // got a confict-free tie sequence, prompt user for start and end depths of first/last sections
+            float startDepth = promptForDepth("Enter the splice's starting section depth (cm):");
+            float endDepth = promptForDepth("Enter the splice's ending section depth (cm):");
+
+            Vector<SparseSpliceInterval> intervals = createSparseSpliceIntervals(spliceTies, startDepth, endDepth);
+
+            String exportFile = FileUtility.selectASingleFile(this, "Export Sparse Splice", "csv", FileUtility.SAVE);
+            if (exportFile != null) {
+                try {
+                    CSVWriter writer = new CSVWriter(new FileWriter(exportFile));
+                    String[] headers = { "Site", "Hole", "Core", "Tool", "Top Section", "Top Offset", "Bottom Section", "Bottom Offset", "Splice Type" };
+                    writer.writeNext(headers);
+                    for (SparseSpliceInterval interval : intervals) { writer.writeNext(interval.toSparseSpliceRow()); }
+                    writer.close();
+                } catch (IOException e) {
+                    JOptionPane.showMessageDialog(this, "Sparse Splice export failed: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Sparse Splice export cancelled.", "Export Cancelled", JOptionPane.INFORMATION_MESSAGE);
+        }
+    }
 }
+
 
 class DepthFormats {
     public static final DecimalFormat SECTION_DEPTH_FORMAT = new DecimalFormat("#.#");
@@ -325,7 +648,8 @@ class TieData {
     }
 
     public String toString() {
-        return "ID: " + id + " A: " + aDesc + " B: " + bDesc;
+        // return "ID: " + id + " A: " + aDesc + " B: " + bDesc;
+        return aSectionID + " @ " + aSectionDepth + " -> " + bSectionID + " @ " + bSectionDepth;
     }
 }
 
@@ -420,5 +744,118 @@ class TieTableModel extends AbstractTableModel {
         } else {
             return DepthFormats.TOTAL_DEPTH_FORMAT.format(t.aTotalDepth);
         }
+    }
+}
+
+class SparseSpliceInterval {
+    public String site;
+    public String hole;
+    public String core;
+    public String tool;
+    public String topSection;
+    public float topOffset;
+    public String bottomSection;
+    public float bottomOffset;
+    public String spliceType;
+
+    // Corelyzer can not reliably calculate a section's bottom depth due to presence of extraneous imagery
+    // (color cards, labels etc) at the bottom of core images and/or inaccuracies in core image resolution.
+    // For splice intervals spanning the boundary of two cores, this placeholder will be used for BottomOffset.
+    // The Feldman app will use Section Summary data to replace this placeholder with the correct section bottom
+    // depth when converting a Sparse Splice to a Splice Interval Table (SIT).
+    public static final float UNKNOWN_BOTTOM_OFFSET = -1.0f;
+
+    public SparseSpliceInterval(String site, String hole, String core, String tool, String topSection, float topOffset, String bottomSection, float bottomOffset, String spliceType) {
+        this.site = site;
+        this.hole = hole;
+        this.core = core;
+        this.tool = tool;
+        this.topSection = topSection;
+        this.topOffset = topOffset;
+        this.bottomSection = bottomSection;
+        this.bottomOffset = bottomOffset;
+        this.spliceType = spliceType;
+    }
+
+    public SparseSpliceInterval(String sectionID, SectionIDParser parser, float topOffset, float bottomOffset, String spliceType) {
+        this.site = parser.site(sectionID);
+        this.hole = parser.hole(sectionID);
+        this.core = parser.core(sectionID);
+        this.tool = parser.tool(sectionID);
+        this.topSection = parser.section(sectionID);
+        this.bottomSection = parser.section(sectionID);
+        this.topOffset = topOffset;
+        this.bottomOffset = bottomOffset;
+        this.spliceType = spliceType;
+    }
+
+    public static SparseSpliceInterval merge(SparseSpliceInterval s1, SparseSpliceInterval s2) {
+        return new SparseSpliceInterval(s1.site, s1.hole, s1.core, s1.tool, s1.topSection, s1.topOffset, s2.bottomSection, s2.bottomOffset, s2.spliceType);
+    }
+
+    public boolean coresEqual(SparseSpliceInterval cmp) {
+        return this.site.equals(cmp.site) && this.hole.equals(cmp.hole) && this.core.equals(cmp.core) && this.tool.equals(cmp.tool);
+    }
+
+    public String[] toSparseSpliceRow() {
+        String[] row = {
+            site, hole, core, tool,
+            topSection, DepthFormats.SECTION_DEPTH_FORMAT.format(topOffset),
+            bottomSection,
+            DepthFormats.SECTION_DEPTH_FORMAT.format(bottomOffset),
+            spliceType
+        };
+        return row;
+    }
+}
+
+class SectionSpliceTieAggregator {
+    public HashMap<String, Vector<TieData>> incoming;
+    public HashMap<String, Vector<TieData>> outgoing;
+    public HashSet<String> sectionIDs;
+
+    public SectionSpliceTieAggregator(ArrayList<TieData> ties) {
+        outgoing = new HashMap<String, Vector<TieData>>();
+        incoming = new HashMap<String, Vector<TieData>>();
+        sectionIDs = new HashSet<String>();
+
+        // find all sections with 1+ ties in either direction
+        for (TieData td : ties) {
+            if (td.type == CoreSectionTieType.SPLICE) {
+                sectionIDs.add(td.aSectionID);
+                sectionIDs.add(td.bSectionID);
+            }
+        }
+
+        // separate into outgoing and incoming ties keyed on section ID
+        for (String sec_id : sectionIDs) {
+            Vector<TieData> ogs = new Vector<TieData>();
+            Vector<TieData> ics = new Vector<TieData>();
+            for (TieData td : ties) {
+                if (td.type == CoreSectionTieType.SPLICE) {
+                    if (td.aSectionID.equals(sec_id)) { ogs.add(td); }
+                    if (td.bSectionID.equals(sec_id)) { ics.add(td); }
+                }
+            }
+            outgoing.put(sec_id, ogs);
+            incoming.put(sec_id, ics);
+        }
+    }
+
+    // return starting splice tie candidates sorted by total depth
+    public Vector<TieData> getStartTies() {
+        // find ties for sections with exactly 1 outgoing and 0 incoming ties
+        Vector<TieData> spliceStartTies = new Vector<TieData>();
+        for (String sec_id : sectionIDs) {
+            if (outgoing.get(sec_id).size() == 1 && incoming.get(sec_id).size() == 0) {
+                spliceStartTies.add(outgoing.get(sec_id).get(0));
+            }
+        }
+        spliceStartTies.sort(new Comparator<TieData>() {
+            public int compare(TieData td1, TieData td2) {
+                return Double.compare(td1.aTotalDepth, td2.aTotalDepth);
+            }
+        });
+        return spliceStartTies;
     }
 }
