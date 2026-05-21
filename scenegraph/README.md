@@ -21,20 +21,21 @@ The generated Scenegraph JAR file and native macOS binary (jnilib) will be found
 
 The Windows Scenegraph DLL can be cross-built with MXE/mingw, or built natively on Windows with Visual Studio.
 
-#### Cross-build on macOS, Linux, or Windows (via Windows Subsystem for Linux)
+#### Cross-build on macOS, Linux, or Windows
+
+A Scenegraph DLL can be built on macOS, Linux, or Windows (through [WSL](https://learn.microsoft.com/en-us/windows/wsl/)) with the [MXE Cross Environment](https://mxe.cc).  
 
 This method is used to create the Scenegraph DLL included in official builds of Corelyzer.
 It produces a single, statically-linked scenegraph DLL that includes all dependencies.
 
+#### Preparing the MXE Cross Environment on Mac
 
-##### Prepare MXE Cross Environment
+The following instructions are based on a M2 Mac running macOS 26 (Tahoe), which has quirks that must be worked around to successfully cross-build scenegraph for Windows.  
 
-A Scenegraph DLL can be built on macOS, Linux, or Windows (through [WSL](https://learn.microsoft.com/en-us/windows/wsl/)) with the [MXE Cross Environment](https://mxe.cc). The following instructions are Mac-specific, but should be adaptable to Linux without too much difficulty.
+1. Clone the `macos-fixes` branch of the `allquixotic` fork of the MXE project:  
+`git clone -b macos-fixes https://github.com/allquixotic/mxe`
 
-
-1. Follow [Step 1 of the Tutorial](https://mxe.cc/#tutorial) to download MXE.
-
-2. Create a `settings.mk` file with the following lines, and save it to the root `mxe` dir.
+2. In the root `mxe` dir, create a `settings.mk` file with the following lines:
 
 ```
 MXE_TARGETS := x86_64-w64-mingw32.static
@@ -55,26 +56,56 @@ Scenegraph build scripts assume MXE is installed in the suggested `/opt/mxe`.
 
 Make sure `/opt/mxe/usr/bin` is at the beginning of your shell's `PATH` before proceeding.
 
-Scenegraph depends on the following libraries: `libpng jpeg tiff pthreads freetype brotli libsquish`
+Scenegraph depends on the following libraries: `libpng jpeg tiff pthreads freetype`. 
 
-Most of these are included with MXE, and can be built with no further effort. In the `mxe` root dir:
-`make libpng jpeg tiff pthreads brotli`
+All are included with MXE, and most can be built with no further effort. In the `mxe` root dir:
+`make libpng jpeg tiff pthreads`
 
-`freetype` is also included with MXE, but requires [Perl-Compatible Regular Expressions](https://www.pcre.org/) to be installed natively on Mac to cross-build. To install PCRE: `brew install pcre`
+`freetype` is also included with MXE, but requires additional effort to cross-build on Mac:  
+- [Perl-Compatible Regular Expressions](https://www.pcre.org/) must be installed. To install PCRE: `brew install pcre`
+
+- The MXE default arguments to `ar` are insufficient for aarch64-apple-darwin. Edit `src/zlib.mk`, adding `ARFLAGS='rcs'` prior to the `./configure` and `install` calls. The relevant portion of the file should now look like this:
+
+```
+[...]
+define $(PKG)_BUILD
+    cd '$(1)' && CHOST='$(TARGET)' CC='$(PREFIX)/bin/$(TARGET)-gcc' AR='$(PREFIX)/bin/$(TARGET)-ar' RANLIB='$(PREFIX)/bin/$(TARGET)-ranlib' ARFLAGS='rcs' ./configure \
+        --prefix='$(PREFIX)/$(TARGET)' \
+        --static
+    $(MAKE) -C '$(1)' -j '$(JOBS)' CC='$(PREFIX)/bin/$(TARGET)-gcc' AR='$(PREFIX)/bin/$(TARGET)-ar' RANLIB='$(PREFIX)/bin/$(TARGET)-ranlib' ARFLAGS='rcs' install
+endef
+[...]
+```
+
+- Create symlinks to Developer Tools `ar`, `g++`, `gcc`, `ld`, `ranlib` and `strip` in `mxe/usr/bin`, so an `ls -l` includes the following:  
+```
+lrwxr-xr-x  1 csdfdev  staff  89 May 15 10:56 aarch64-apple-darwin25.0.0-ar -> /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ar
+lrwxr-xr-x  1 csdfdev  staff  54 May 15 10:57 aarch64-apple-darwin25.0.0-g++ -> /Applications/Xcode.app/Contents/Developer/usr/bin/g++
+lrwxr-xr-x  1 csdfdev  staff  54 May 15 10:57 aarch64-apple-darwin25.0.0-gcc -> /Applications/Xcode.app/Contents/Developer/usr/bin/gcc
+lrwxr-xr-x  1 csdfdev  staff  89 May 15 10:57 aarch64-apple-darwin25.0.0-ld -> /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ld
+lrwxr-xr-x  1 csdfdev  staff  93 May 15 10:57 aarch64-apple-darwin25.0.0-ranlib -> /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ranlib
+lrwxr-xr-x  1 csdfdev  staff  92 May 15 10:57 aarch64-apple-darwin25.0.0-strip -> /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/strip
+```
 
 Now `make freetype` should build successfully.
 
-Finally, build the `libsquish` dependency, which is not included in MXE.
-1. Download `libsquish` source [here](https://sourceforge.net/projects/libsquish/files/).
-2. Download and install [CMake](https://cmake.org/download/), which is used to prepare Makefiles for cross-building.
-3. Run CMake.app. For "Where is the source code", choose the `libsquish` root dir. Choose any dir for "Where to build the binaries".
-4. Click the Configure button. Select the "Specify toolchain file for cross-compiling" option and click Done.
-5. When prompted to specify the toolchain file, enter `/opt/mxe/usr/x86_64-w64-mingw32.static/share/cmake/mxe-conf.cmake`, then click Done.
-6. Click the Generate button.
-7. Cross-build with the prepared Makefile. In the `libsquish` root dir: `make`
-8. You should now see `libsquish.a` in the `libsquish` root dir.
+##### (Optional) Cross-build libsquish Dependency
+By default, Fast DXT is used for S3 texture generation. No further effort is needed for Fast DXT,
+but `libsquish` can be used instead if desired. [Download the libsquish-1.15 source](https://sourceforge.net/projects/libsquish/files/), then:
+
+
+1. Change directory to the root `libsquish-1.15` source dir
+2. `/opt/mxe/usr/bin/x86_64-w64-mingw32.static-cmake .` to generate a `Makefile` in the `libsquish-1.15` dir
+3. `make` to build libsquish and place resulting `libsquish.a` in the `libsquish-1.15` dir
+
+Adjust scenegraph/build.gradle to use libsquish instead of Fast DXT:
+- comment `-DUSE_FASTDXT` arg in crossCompileWin()
+- uncomment `libsquish-1.15` lib arg in crossBuildJNIWin()
+- uncomment `-lsquish` and `-lgomp` args in linkCrossCompiledWin()
 
 ##### Cross-build Scenegraph DLL
+
+At this point, you're ready to cross-build the Scenegraph DLL for Windows.
 
 In `scenegraph/build.gradle`, examine the paths in the `crossBuildJNIWin`, `crossCompileWin`, and `linkCrossCompiledWin` tasks and adjust them to reflect your MXE and Java Development Kit install paths.
 
