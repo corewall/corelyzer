@@ -24,10 +24,8 @@
  *****************************************************************************/
 package corelyzer.ui;
 
-import java.awt.Component;
-import java.awt.Desktop;
+import java.awt.*;
 import java.awt.desktop.*;
-import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.BufferedInputStream;
@@ -681,12 +679,66 @@ public class CorelyzerAppController implements ActionListener, AboutHandler, Qui
 		}
 	}
 
+	// Ensure window is entirely on-screen [Claude-generated]
+	private void ensureOnScreen(Window window) {
+		Rectangle windowBounds = window.getBounds();
+
+		// Find which screen the window is mostly on
+		GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+		GraphicsDevice bestDevice = null;
+		int bestOverlap = 0;
+
+		for (GraphicsDevice device : ge.getScreenDevices()) {
+			Rectangle screenBounds = device.getDefaultConfiguration().getBounds();
+			Rectangle overlap = screenBounds.intersection(windowBounds);
+			int overlapArea = overlap.width * overlap.height;
+			if (overlapArea > bestOverlap) {
+				bestOverlap = overlapArea;
+				bestDevice = device;
+			}
+		}
+
+		// Fall back to default screen if window is entirely off all screens
+		if (bestDevice == null) {
+			bestDevice = ge.getDefaultScreenDevice();
+		}
+
+		// Get usable bounds (excludes taskbar/dock) for the chosen screen
+		GraphicsConfiguration gc = bestDevice.getDefaultConfiguration();
+		Rectangle screenBounds = gc.getBounds();
+		Insets insets = Toolkit.getDefaultToolkit().getScreenInsets(gc);
+		Rectangle usable = new Rectangle(
+			screenBounds.x + insets.left,
+			screenBounds.y + insets.top,
+			screenBounds.width - insets.left - insets.right,
+			screenBounds.height - insets.top - insets.bottom
+		);
+
+		int x = windowBounds.x;
+		int y = windowBounds.y;
+
+		// Adjust if off the right or bottom edge
+		if (x + windowBounds.width > usable.x + usable.width) {
+			x = usable.x + usable.width - windowBounds.width;
+		}
+		if (y + windowBounds.height > usable.y + usable.height) {
+			y = usable.y + usable.height - windowBounds.height;
+		}
+
+		// Adjust if off the left or top edge
+		if (x < usable.x) { x = usable.x; }
+		if (y < usable.y) {	y = usable.y; }
+
+		window.setLocation(x, y);
+	}
+
 	public void doPreferences() {
 		CRPreferencesDialog dlg = new CRPreferencesDialog(view.getMainFrame(), view.preferences);
 
 		dlg.pack();
 		dlg.setSize(450, 750);
 		dlg.positionCentricTo(view.getMainFrame());
+		ensureOnScreen(dlg);
 		dlg.setVisible(true);
 		dlg.dispose();
 	}
