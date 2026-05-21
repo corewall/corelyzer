@@ -336,8 +336,8 @@ def linkCrossCompiledWin(dir, path) {
 			arg(value: '-lharfbuzz')
 			arg(value: '-lbz2')
 			arg(value: '-lsharpyuv')
-			// arg(value: '-lbrotlidec') // brotli support is built into freetype
-			// arg(value: '-lbrotlicommon') // brotli support is built into freetype
+			arg(value: '-lbrotlidec')
+			arg(value: '-lbrotlicommon')
 			// arg(value: '-lsquish') // uncomment if using libsquish
 			// arg(value: '-lgomp') // uncomment if using libsquish
 			arg(value: '-mwindows')
