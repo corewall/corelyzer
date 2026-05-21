@@ -883,10 +883,9 @@ public class CorelyzerApp extends WindowAdapter implements MouseListener, Startu
 
 	public String getCorelyzerVersion()
 	{
-		// String defaultVersion = "2.2.4";
-		// String implVersion = this.getClass().getPackage().getImplementationVersion();
-		// return (implVersion == null ? defaultVersion : implVersion);
-		return "2.2.5 BRADY SPECIAL SPARSE SPLICE ONLY";
+		String defaultVersion = "2.2.4";
+		String implVersion = this.getClass().getPackage().getImplementationVersion();
+		return (implVersion == null ? defaultVersion : implVersion);
 	}
 
 	public void GLWindowsToBack() {
